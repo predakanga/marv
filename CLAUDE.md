@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Mandatory instructions
 
-- Log all prompts to docs/prompts.md, with a summary of the prompt as the header.
+- Log all prompts to docs/prompts.md, including a one-line summary as the header, the date & time of the prompt, and the text of the prompt verbatim.
 - After each task, commit the current working tree to git. Only commit,
   never push.
 
