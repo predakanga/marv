@@ -242,3 +242,54 @@
 > Make ConfigureServices a static method on IPlugin, with an empty default implementation.
 > Don't register the plugins or HandlerGroups themselves in the service provider. Instantiate them with ActivatorUtilities instead. Plugins can be reinstantiated when reconnecting to a server so that there's no chance of stale references.
 > Update architecture.md to note that the core should not call handlers on HandlerGroups; MarvPlugin will do that.
+
+## Implement the full bot from design documents
+
+**Date**: 2026-05-30T13:45:00Z
+
+**Prompt**:
+
+> Before anything else, please read CLAUDE.md and acknowledge the prompt logging and git requirements.
+>
+> I have reviewed and approved the design in docs/architecture.md,
+> docs/platform-abstraction-draft.md, and docs/plugin-api-draft.md.
+> Now implement it.
+>
+> Proceed in this order, verifying that each layer compiles and its
+> tests pass before moving to the next:
+>
+> 1. Solution and project structure (csproj/sln files only, no logic)
+>
+> 2. The platform abstraction layer — the interfaces and types that
+>    define channels, users, messages, metadata/tags, events, and
+>    capabilities. No implementation yet, just contracts.
+>
+> 3. The IRC layer, including the parser, capability manager and interface implementations.
+>    Unit test edge cases identified in docs/research.md. Include references to sources such as `ircdocs/parser-tests`.
+>
+> 4. The plugin host — plugin discovery/loading, the event dispatch
+>    pipeline, and utility classes as designed in ADR 003.
+>
+> 5. The plugin API project — the types plugin authors reference including
+>    the implementation of MarvPlugin.
+>
+> 6. Four reference plugins to validate the API:
+>    a. A simple greeting plugin — to validate basic event handling and message sending
+>    b. A two-plugin pair: one plugin that registers an auth service, and one
+>       that consumes it — to validate the inter-plugin service mechanism
+>    c. A plugin demonstrating use of HandlerGroups to return canned responses
+>
+> 7. The main application - include support for JSON, YAML, XML and TOML configuration.
+>
+> Provide an option (makefile or build steps) to copy all the assemblies and plugins to one directory ready for use.
+>
+> Rules:
+> - Run `dotnet build` after each layer. Fix all errors before
+>   continuing.
+> - Run `dotnet test` after each layer. Fix all failures before
+>   continuing.
+> - Commit your changes to git after each layer.
+> - If you make any architectural decision not covered by the ADRs,
+>   write a new ADR before writing the code that depends on it.
+> - Do not change the plugin API or platform abstraction surface without
+>   flagging it to me first.

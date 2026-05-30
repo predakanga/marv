@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Marv.App/Marv.App.csproj" />
+    <Project Path="src/Marv.Core/Marv.Core.csproj" />
+  </Folder>
+  <Folder Name="/src/plugins/">
+    <Project Path="src/plugins/Marv.Plugins.Auth/Marv.Plugins.Auth.csproj" />
+    <Project Path="src/plugins/Marv.Plugins.AuthConsumer/Marv.Plugins.AuthConsumer.csproj" />
+    <Project Path="src/plugins/Marv.Plugins.CannedResponses/Marv.Plugins.CannedResponses.csproj" />
+    <Project Path="src/plugins/Marv.Plugins.Greet/Marv.Plugins.Greet.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Marv.Core.Tests/Marv.Core.Tests.csproj" />
+    <Project Path="tests/Marv.Plugins.Tests/Marv.Plugins.Tests.csproj" />
+  </Folder>
+</Solution>

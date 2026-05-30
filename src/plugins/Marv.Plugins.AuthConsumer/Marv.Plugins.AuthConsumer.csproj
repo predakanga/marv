@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Marv.Plugins.AuthConsumer</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Marv.Core\Marv.Core.csproj" />
+    <ProjectReference Include="..\Marv.Plugins.Auth\Marv.Plugins.Auth.csproj" />
+  </ItemGroup>
+
+</Project>

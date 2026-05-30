@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Marv.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0-preview.4.25258.110" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.0-preview.4.25258.110" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0-preview.4.25258.110" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.0-preview.4.25258.110" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0-preview.4.25258.110" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.0-preview.4.25258.110" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0-preview.4.25258.110" />
+  </ItemGroup>
+
+</Project>
