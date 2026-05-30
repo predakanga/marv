@@ -68,3 +68,52 @@
 > By "the plugin DI container", do you mean that there's a separate DI container for the main app and the plugins?
 
 > Okay. Please make sure that that requirement is documented for future services.
+
+## Produce design documents for the bot
+
+**Date**: 2026-05-30T09:30:00Z
+
+**Prompt**:
+
+> Before anything else, please read CLAUDE.md and acknowledge the prompt logging and git requirements.
+>
+> Read docs/research.md and produce a design for the bot. Deliverables:
+>
+> 1. docs/architecture.md covering:
+>    - Project/assembly structure and responsibilities
+>    - The layering of components, parsers, etc
+>    - The async/threading model
+>    - How plugins are discovered and loaded at runtime
+>    - How inter-plugin services work: registration, discovery, optional
+>      vs required dependencies, and load order
+>
+> 2. docs/platform-abstraction-draft.md — describe the core concepts that
+>    the bot will model and present to plugins:
+>    - Messages (including metadata/tags)
+>    - Channels and users
+>    - Capabilities (how plugins discover what the current platform
+>      supports — e.g. not all platforms have message editing)
+>    - Events (message received, user joined, etc)
+>
+> 3. docs/plugin-api-draft.md covering:
+>    - What types a plugin author works with day-to-day
+>    - How a plugin registers interest in events
+>    - How a plugin registers a service for other plugins to consume
+>    - How a plugin declares and resolves a dependency on another
+>      plugin's service
+>    - What the bot exposes back to plugins (sending messages, querying
+>      channel/user state, etc)
+>    - A concrete example: what does the simplest possible plugin look
+>      like, and what does a plugin that depends on an auth service look
+>      like?
+>
+> 4. ADRs in docs/adr/:
+>    - 001-platform-abstraction.md — how and why we model the IRC network's
+>      entities
+>    - 002-irc-library-choice.md — which IRC library we use and why
+>      (from the research recommendation)
+>    - 003-plugin-service-registry.md — how inter-plugin services work
+>    - 004-async-model.md — the async/threading model
+>
+> Do not write any C# code yet. I will review these documents and
+> approve them before we proceed to implementation.
