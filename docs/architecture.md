@@ -161,18 +161,22 @@ connection.
 - All comparisons use the server's advertised CASEMAPPING.
 
 State stores are written by the message processor task and read by
-plugin tasks. Thread safety is achieved through an atomic replacement
-model: state objects (`IUser`, `IChannel`) are immutable snapshots.
-When the message processor needs to update state, it creates a new
-snapshot and atomically replaces it in the store (e.g., via
-`ConcurrentDictionary` with atomic value replacement). Only the
-message processor writes, so no write contention exists.
+plugin tasks. `IUser` and `IChannel` objects are mutable — the
+message processor updates properties in place. Only the message
+processor writes, so no write contention exists.
 
-Plugins reading from the store during event handling always get a
-consistent snapshot. If a plugin holds a reference to an `IUser` or
-`IChannel` from a previous event, it has stale data — this is
-expected and correct. The current state is always available via
-`IBot.Channels` and `IBot.Users`.
+Thread safety for concurrent reads is achieved through:
+
+- Atomic individual property reads (reference type fields in .NET)
+- `ConcurrentDictionary` for collection-valued properties, ensuring
+  safe enumeration while the message processor adds/removes entries
+
+Cross-property consistency within a single `IUser` or `IChannel` is
+not guaranteed during a handler — a state change could land between
+two reads. This is rare in practice, and plugins needing strict
+consistency can copy values into locals at handler entry. Plugins
+holding a reference to an `IUser` or `IChannel` see live updates
+to that object's properties.
 
 ### Bot / Message Processor
 
@@ -322,18 +326,19 @@ sequence inside `Marv.Core`.
 
 2. **Discover assemblies**: For each configured plugin path, load the
    assembly into an `AssemblyLoadContext`. Scan for types that inherit
-   from `MarvPlugin`. Also scan for configuration classes tagged with
-   `[PluginConfig]` and handler group classes tagged with
-   `[HandlerGroup]`.
+   from `MarvPlugin` — each assembly must contain exactly one. Also
+   scan for configuration classes tagged with `[PluginConfig]` and
+   handler group classes tagged with `[HandlerGroup]`. Read each
+   plugin's static `PluginName` property for identification in logs,
+   config, and diagnostics.
 
 3. **Build dependency graph**: Inspect each discovered plugin type:
    - Read `[ProvidesService]` attributes for service types the plugin
      provides
    - Read `[DependsOn]` attributes for explicit plugin ordering
-   - Read `[OptionalService]` attributes on constructor parameters
-     for optional service dependencies
-   - Read constructor parameters to identify required service
-     dependencies (non-optional, non-core types)
+   - Read constructor parameters to identify service dependencies
+     (non-core types). Non-nullable parameters are required;
+     nullable parameters with a default of `null` are optional.
    Construct a directed graph of plugin dependencies.
 
 4. **Topological sort**: Sort the graph. If there is a cycle, report
@@ -387,11 +392,12 @@ sequence inside `Marv.Core`.
     and async task for each plugin. Handler discovery uses reflection
     to find methods annotated with event attributes (`[OnEvent]`,
     `[OnCommand]`, `[OnRegex]`, `[OnRawMessage]`, `[OnInterval]`) on
-    both the plugin class and its handler groups. Handler methods do
-    not need to be public — the dispatch is performed from within the
-    `MarvPlugin` base class using reflection. If multiple handlers
-    match the same event, they are called consecutively in an
-    undefined order.
+    both the plugin class and its handler groups. Handler methods on
+    the plugin class do not need to be public — the dispatch is
+    performed from within the `MarvPlugin` base class. Handler
+    methods on handler group classes must be public. If multiple
+    handlers match the same event, they are called consecutively in
+    an undefined order.
 
 15. **Message loop**: Process messages, update state, fan out events
     to plugin channels.
@@ -436,8 +442,8 @@ DI registration.
 **Consuming a service**: A plugin declares a constructor parameter of
 the service type. The plugin loader inspects constructor parameters to
 identify consumed services. Non-nullable parameters are required
-dependencies; parameters marked with `[OptionalService]` (and
-nullable with a default of `null`) are optional.
+dependencies; nullable parameters with a default of `null` are
+optional.
 
 **Explicit ordering**: `[DependsOn(typeof(OtherPlugin))]` forces load
 ordering without implying a service relationship.
@@ -449,6 +455,9 @@ ordering without implying a service relationship.
 [ProvidesService(typeof(IAuthorizationService))]
 public class AuthPlugin : MarvPlugin
 {
+    public static string PluginName => "Auth";
+    public AuthPlugin(IBot bot) : base(bot) { }
+
     public static void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<IAuthorizationService, AccountBasedAuthService>();
@@ -458,16 +467,19 @@ public class AuthPlugin : MarvPlugin
 // Moderation plugin consumes IAuthorizationService (required)
 public class ModerationPlugin : MarvPlugin
 {
-    public ModerationPlugin(IBot bot, IAuthorizationService auth) { ... }
+    public static string PluginName => "Moderation";
+    public ModerationPlugin(IBot bot, IAuthorizationService auth)
+        : base(bot) { ... }
 }
 
 // Greet plugin consumes IAuthorizationService (optional)
 public class GreetPlugin : MarvPlugin
 {
+    public static string PluginName => "Greet";
     public GreetPlugin(
         IBot bot,
         IOptions<GreetPluginConfig> config,
-        [OptionalService] IAuthorizationService? auth = null) { ... }
+        IAuthorizationService? auth = null) : base(bot) { ... }
 }
 ```
 
@@ -476,7 +488,7 @@ The loader sees:
 - `ModerationPlugin` requires `IAuthorizationService` (from
   constructor, non-nullable)
 - `GreetPlugin` optionally uses `IAuthorizationService` (from
-  constructor, `[OptionalService]`)
+  constructor, nullable with default `null`)
 
 Load order: AuthPlugin → ModerationPlugin, GreetPlugin (order between
 Moderation and Greet is unspecified since neither depends on the
@@ -489,7 +501,8 @@ The dependency sorter builds a graph from:
 - `[DependsOn(typeof(OtherPlugin))]` — direct plugin dependency
 - Required constructor parameters — resolved to the plugin with a
   matching `[ProvidesService]` attribute
-- `[OptionalService]` constructor parameters — ordered-if-present
+- Nullable constructor parameters with default `null` —
+  ordered-if-present
 
 The graph is topologically sorted. Plugins with no dependencies load
 first; plugins with dependencies load after their providers.
@@ -549,9 +562,11 @@ public record GreetPluginConfig
 
 public class GreetPlugin : MarvPlugin
 {
+    public static string PluginName => "Greet";
+
     private readonly GreetPluginConfig _config;
 
-    public GreetPlugin(IOptions<GreetPluginConfig> config)
+    public GreetPlugin(IBot bot, IOptions<GreetPluginConfig> config) : base(bot)
     {
         _config = config.Value;
     }

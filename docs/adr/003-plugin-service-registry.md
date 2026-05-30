@@ -48,15 +48,14 @@ assumed to be a plugin-provided service dependency:
 
 - **Required**: Non-nullable parameter → the service must be
   registered by another plugin, or startup fails.
-- **Optional**: Parameter marked with `[OptionalService]`, nullable
-  type, and a default of `null` → the service is used if available
-  but does not block startup.
+- **Optional**: Nullable parameter with a default of `null` → the
+  service is used if available but does not block startup.
 
 Only the providing side needs an attribute. The consuming side is
-inferred from constructor signatures, which is where the dependency
-information naturally lives. This keeps the common case (consuming a
-service) boilerplate-free, while keeping the uncommon case (providing
-a service) explicit and unambiguous.
+inferred entirely from constructor signatures — nullability and
+default values express optionality naturally. This keeps the common
+case (consuming a service) completely boilerplate-free, while keeping
+the uncommon case (providing a service) explicit and unambiguous.
 
 ### Explicit Ordering
 
@@ -102,9 +101,11 @@ implementations — both fragile). The consuming side needs no attribute
 because the dependency information already lives in the constructor
 signature.
 
-The `[OptionalService]` attribute remains because optionality cannot
-be reliably inferred from nullability alone — a plugin author might
-use a nullable parameter for other reasons.
+Optionality is inferred from nullability and default values: a
+nullable parameter with `= null` is optional, everything else is
+required. No Marv-specific attribute is needed on the consuming side.
+If a plugin ever needs "nullable but required," `[DependsOn]` covers
+that edge case.
 
 **Why a single container**: One `IServiceProvider` for core and
 plugins avoids type identity issues and complex cross-container
@@ -114,13 +115,11 @@ whether resolved by core code or another plugin.
 ## Consequences
 
 - Plugin authors use familiar .NET DI patterns for most things.
-- Most plugins (consumers) need zero attributes — just constructor
-  parameters.
+- Most plugins (consumers) need zero Marv-specific attributes — just
+  constructor parameters with standard C# nullability.
 - Plugins providing services need `[ProvidesService]` and a
   `ConfigureServices` method — explicit but only for the uncommon
   case.
-- The `[OptionalService]` attribute is the only Marv-specific
-  attribute needed for service consumption.
 - The `ConfigureServices` method is static and runs before plugin
   instances exist, which means service registration cannot depend on
   runtime state. This is intentional — services should be

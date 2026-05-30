@@ -130,54 +130,33 @@ Users are identified primarily by nick (case-mapped per CASEMAPPING).
 When `account-tag` is negotiated, the `Account` property provides a
 stable identity across nick changes.
 
-### Immutable Snapshots
+### Concurrency Model
 
-`IUser` objects are immutable snapshots. When user state changes
-(nick change, account change, away status, etc.), the message
-processor creates a new snapshot and atomically replaces it in the
-user store. This ensures thread safety without locks — plugins
-reading from `IBot.Users` during event handling always get a
-consistent snapshot.
+`IUser` and `IChannel` objects are mutable — properties are updated
+in place by the message processor when state changes occur (NICK,
+CHGHOST, AWAY, MODE, etc.). Plugins holding a reference to an
+`IUser` or `IChannel` see live updates.
 
-A consequence of this model is that plugins holding a reference to
-an `IUser` from a previous event will have stale data. This is
-intentional — within a single event handler, all properties on the
-`IUser` are consistent. To get the current state, read from
-`IBot.Users`.
+Thread safety guarantees:
 
-Internally, user snapshots are implemented as C# records with
-`init`-only properties. State updates use `with` expressions to
-create new snapshots:
-
-```csharp
-// Internal to Marv.Core — not part of the plugin API
-internal record UserSnapshot(
-    string Nick,
-    string? User,
-    string? Host,
-    string? Account,
-    string? RealName,
-    bool IsAway,
-    string? AwayMessage,
-    bool IsBot
-) : IUser
-{
-    public string Hostmask => $"{Nick}!{User}@{Host}";
-}
-
-// In the message processor, on NICK change:
-var updated = existingUser with { Nick = newNick };
-_userStore.Replace(oldNick, newNick, updated);
-```
+- **Individual property reads are atomic.** Reading a single property
+  (e.g., `user.Nick`) always returns a consistent value — you will
+  never see a partial write.
+- **Cross-property consistency is not guaranteed.** If you read
+  `user.Nick` and then `user.Host` in the same handler, a NICK or
+  CHGHOST change could land between the two reads. In practice this
+  is rare and usually harmless. Plugins that need strict consistency
+  across multiple properties should copy the values they need into
+  locals at the start of their handler.
+- **Collection enumeration is safe.** Backing collections use
+  `ConcurrentDictionary`, which safely handles concurrent reads and
+  writes. Iterating `Channel.Members` while the message processor
+  adds or removes a member will not throw.
 
 The user store uses `ConcurrentDictionary<string, IUser>` with
-case-mapped keys. `Replace` atomically removes the old key and
-inserts the new one. The `IChannel.Members` collection is similarly
-rebuilt with the updated snapshot.
-
-The same immutable snapshot model applies to `IChannel` — channel
-objects are replaced atomically when topic, modes, or membership
-change.
+case-mapped keys. The channel store is similarly structured. On
+disconnection, all state stores are cleared — plugins should treat
+any cached references as stale after `OnDisconnectedAsync`.
 
 ### The Bot's Own Identity
 

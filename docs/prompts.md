@@ -190,3 +190,17 @@
 >   HandlerGroups may handle all events, including lifecycle events.
 > - Remove the references to HasService<T> and GetOptionalService<T>.
 > - I think it's reasonable to inject IBot into plugins by default, unless you can think of a good reason not to?
+
+## Further design refinements
+
+**Date**: 2026-05-30T11:32:00Z
+
+**Prompt**:
+
+> Some more thoughts:
+>
+> - If optional dependencies are already nullable constructor parameters, do we need OptionalService?
+> - Document that assemblies may only contain one MarvPlugin, and it must contain a static property declaring it's name, to be used in log messages, the plugin loading config, etc.
+> - I'm not sure I like the snapshot-on-publish approach - what are the risks involved with allowing the models to be mutable, and is there a way to mitigate those risks?
+> - Note that handler methods inside MarvPlugin don't need to be public, but those in HandlerGroups do.
+> - How will IBot injection into GreetPlugin be accomplished? I expected a constructor parameter that's passed to the base MarvPlugin constructor.

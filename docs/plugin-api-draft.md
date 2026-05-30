@@ -20,7 +20,7 @@ A plugin author's day-to-day involves these types from `Marv.Core`:
 | Event classes (`MessageEvent`, etc.) | Typed event payloads |
 | Attributes (`[OnEvent]`, `[OnCommand]`, etc.) | Declare event interest |
 | `[ProvidesService]` | Declare a service this plugin provides |
-| `[DependsOn]`, `[OptionalService]` | Dependency declarations |
+| `[DependsOn]` | Explicit plugin ordering |
 
 ---
 
@@ -31,8 +31,22 @@ A plugin author's day-to-day involves these types from `Marv.Core`:
 ```csharp
 public abstract class MarvPlugin
 {
-    /// The bot instance, injected automatically by the core.
+    /// Human-readable name for this plugin. Used in log messages,
+    /// configuration, and diagnostics. Each plugin assembly must
+    /// contain exactly one MarvPlugin subclass, and it must define
+    /// this static property. The loader validates its presence at
+    /// discovery time.
+    // public static string PluginName => "MyPlugin";
+
+    /// The bot instance, available to all plugins.
     protected IBot Bot { get; }
+
+    /// Base constructor. Derived plugins must accept IBot and pass
+    /// it to the base via : base(bot).
+    protected MarvPlugin(IBot bot)
+    {
+        Bot = bot;
+    }
 
     /// Called once after the plugin is constructed and all services
     /// are available. Use for one-time initialization.
@@ -51,9 +65,11 @@ public abstract class MarvPlugin
 }
 ```
 
-`IBot` is injected into the base class automatically — plugins do not
-need to accept it as a constructor parameter (though they may still
-inject additional services).
+Each plugin assembly must contain exactly one `MarvPlugin` subclass.
+The `PluginName` static property identifies the plugin in log
+messages, the plugin loading configuration, and diagnostic output.
+`IBot` is passed to the base constructor — plugins accept it as a
+constructor parameter and forward it via `: base(bot)`.
 
 Plugins that need configuration declare a separate configuration
 class tagged with `[PluginConfig(Section = "Name")]`. The plugin
@@ -78,10 +94,12 @@ their configuration via constructor injection of `IOptions<TConfig>`.
 
 Plugins declare event handlers using attributes on methods. The
 method must be an instance method on the plugin class (or a handler
-group class — see below) and return `Task`. Handler methods do not
-need to be public — the dispatch is performed from within the
-`MarvPlugin` base class using reflection, so `protected` and
-`private` methods are accessible.
+group class — see below) and return `Task`. Handler methods on the
+plugin class itself do not need to be public — the dispatch is
+performed from within the `MarvPlugin` base class, so `protected`
+and `private` methods are accessible. Handler methods on handler
+group classes must be `public`, since the dispatch code cannot access
+non-public members of a separate class.
 
 If multiple handler methods on the same plugin (or its handler
 groups) match the same event, they are all called consecutively but
@@ -267,6 +285,10 @@ public interface IAuthorizationService
 [ProvidesService(typeof(IAuthorizationService))]
 public class AuthPlugin : MarvPlugin
 {
+    public static string PluginName => "Auth";
+
+    public AuthPlugin(IBot bot) : base(bot) { }
+
     public static void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<IAuthorizationService, AccountBasedAuthService>();
@@ -315,18 +337,22 @@ fails to load at startup with a clear error.
 
 ### Optional Dependency
 
-Mark the parameter with `[OptionalService]` and make it nullable
-with a default of `null`:
+Make the parameter nullable with a default of `null`. The dependency
+sorter infers optionality from the nullability and default value —
+no attribute needed:
 
 ```csharp
 public class GreetPlugin : MarvPlugin
 {
+    public static string PluginName => "Greet";
+
     private readonly GreetPluginConfig _config;
     private readonly IAuthorizationService? _auth;
 
     public GreetPlugin(
+        IBot bot,
         IOptions<GreetPluginConfig> config,
-        [OptionalService] IAuthorizationService? auth = null)
+        IAuthorizationService? auth = null) : base(bot)
     {
         _config = config.Value;
         _auth = auth;
@@ -442,6 +468,10 @@ A plugin that responds to `!ping` with `pong`:
 ```csharp
 public class PingPlugin : MarvPlugin
 {
+    public static string PluginName => "Ping";
+
+    public PingPlugin(IBot bot) : base(bot) { }
+
     [OnCommand("ping")]
     public async Task HandlePing(CommandContext ctx, CancellationToken ct)
     {
@@ -468,9 +498,11 @@ public record GreetPluginConfig
 
 public class GreetPlugin : MarvPlugin
 {
+    public static string PluginName => "Greet";
+
     private readonly GreetPluginConfig _config;
 
-    public GreetPlugin(IOptions<GreetPluginConfig> config)
+    public GreetPlugin(IBot bot, IOptions<GreetPluginConfig> config) : base(bot)
     {
         _config = config.Value;
     }
@@ -515,6 +547,10 @@ public record AuthPluginConfig
 [ProvidesService(typeof(IAuthorizationService))]
 public class AuthPlugin : MarvPlugin
 {
+    public static string PluginName => "Auth";
+
+    public AuthPlugin(IBot bot) : base(bot) { }
+
     public static void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<IAuthorizationService, AccountBasedAuthService>();
@@ -543,9 +579,11 @@ internal class AccountBasedAuthService : IAuthorizationService
 
 public class ModerationPlugin : MarvPlugin
 {
+    public static string PluginName => "Moderation";
+
     private readonly IAuthorizationService _auth;
 
-    public ModerationPlugin(IAuthorizationService auth)
+    public ModerationPlugin(IBot bot, IAuthorizationService auth) : base(bot)
     {
         _auth = auth;
     }
@@ -584,9 +622,11 @@ A moderation plugin that organizes handlers by concern:
 ```csharp
 public class ModerationPlugin : MarvPlugin
 {
+    public static string PluginName => "Moderation";
+
     private readonly IAuthorizationService _auth;
 
-    public ModerationPlugin(IAuthorizationService auth)
+    public ModerationPlugin(IBot bot, IAuthorizationService auth) : base(bot)
     {
         _auth = auth;
     }

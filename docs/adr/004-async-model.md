@@ -61,11 +61,13 @@ loaded plugins):
   the same (or a different) event.
 
 - **State stores are read-safe from any plugin task.** The message
-  processor updates state before fanning out events. The state stores
-  use concurrent-read-safe data structures (e.g., immutable snapshots
-  or lock-free reads). Since only the message processor writes, there
-  is no write contention. Plugins can safely read `IBot.Channels` and
-  `IBot.Users` from their event handlers.
+  processor updates state before fanning out events. State models are
+  mutable, with individual property reads being atomic and collections
+  using `ConcurrentDictionary` for safe concurrent access. Since only
+  the message processor writes, there is no write contention. Plugins
+  can safely read `IBot.Channels` and `IBot.Users` from their event
+  handlers. Cross-property consistency is not guaranteed — see the
+  rationale section below.
 
 - **`IBot.SendAsync` (and its variants) is thread-safe.** It writes
   to the rate limiter's input channel, which supports concurrent
@@ -115,15 +117,16 @@ The concurrency boundary is between plugins, not within them.
 The message processor updates state (channels, users, modes) before
 fanning out events to plugin channels. Since writes happen on one
 task and reads happen on plugin tasks, the data structures must
-support concurrent reads. Options include:
+support concurrent reads. State models (`IUser`, `IChannel`) are
+mutable objects with individual property reads being atomic
+(reference type fields in .NET). Collection-valued properties use
+`ConcurrentDictionary`, which supports safe concurrent enumeration.
 
-- Immutable snapshots (rebuild on each state change)
-- `ConcurrentDictionary` with atomic value replacement
-- Reader-writer locks (heavyweight, unlikely to be needed)
-
-The first two options provide lock-free reads, which is important
-since every plugin reads state on every event. The exact
-implementation is an internal detail.
+Cross-property consistency is not guaranteed — a state change could
+land between two reads within a handler. This is acceptable because
+the window is small and the practical impact is minimal. Plugins
+needing strict consistency across multiple properties can copy values
+into locals at handler entry.
 
 ### Why System.Threading.Channels
 
@@ -163,8 +166,11 @@ ordering within a plugin without sacrificing inter-plugin concurrency.
   Plugin A and Plugin B both handle `UserJoinedEvent`, either one
   might process it first.
 
-- State store implementations must be concurrent-read-safe. This is
-  an implementation concern inside `Marv.Core`, not a plugin concern.
+- State models are mutable with atomic individual property reads.
+  Cross-property consistency is not guaranteed during a handler, but
+  this is rare in practice. This is an implementation concern inside
+  `Marv.Core`, not a plugin concern — plugins just read properties
+  normally.
 
 - The rate limiter prevents any plugin (or combination of plugins)
   from flooding the server, even if multiple plugins send messages
