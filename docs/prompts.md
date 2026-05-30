@@ -232,3 +232,13 @@
 **Prompt**:
 
 > That looks good, except that the IPluginActivator should make CreateInstance generic, i.e. T CreateInstance<T>(params object[] params);
+
+## ConfigureServices on IPlugin, reinstantiate on reconnect
+
+**Date**: 2026-05-30T12:21:00Z
+
+**Prompt**:
+
+> Make ConfigureServices a static method on IPlugin, with an empty default implementation.
+> Don't register the plugins or HandlerGroups themselves in the service provider. Instantiate them with ActivatorUtilities instead. Plugins can be reinstantiated when reconnecting to a server so that there's no chance of stale references.
+> Update architecture.md to note that the core should not call handlers on HandlerGroups; MarvPlugin will do that.

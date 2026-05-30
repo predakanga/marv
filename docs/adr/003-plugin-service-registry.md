@@ -36,10 +36,11 @@ plugins.
 
 **Provided services** are declared explicitly with a
 `[ProvidesService(typeof(IFoo))]` attribute on the plugin class. The
-plugin also provides a static `ConfigureServices(IServiceCollection)`
-method to perform the actual DI registration. The attribute tells the
-dependency sorter which plugin provides which service; the method does
-the wiring.
+plugin overrides the static `ConfigureServices(IServiceCollection)`
+method defined on `IPlugin` (which has an empty default
+implementation) to perform the actual DI registration. The attribute
+tells the dependency sorter which plugin provides which service; the
+method does the wiring.
 
 **Consumed services** are discovered automatically by inspecting the
 plugin's constructor parameters. Any parameter whose type is not a

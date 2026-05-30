@@ -179,11 +179,13 @@ ordering within a plugin without sacrificing inter-plugin concurrency.
   from flooding the server, even if multiple plugins send messages
   concurrently.
 
-- Reconnection is handled by tearing down all tasks and restarting
-  them. Plugins are notified via `OnDisconnectedAsync` /
-  `OnConnectedAsync`. On disconnection, all state is discarded:
-  pending `SendAndAwaitAsync` calls are cancelled (their
+- Reconnection is handled by tearing down all tasks and
+  reinstantiating all plugins. On disconnection, plugins receive
+  `OnDisconnectedAsync` then `OnUnloadAsync`, and all state is
+  discarded: pending `SendAndAwaitAsync` calls are cancelled (their
   `TaskCompletionSource` is faulted with a disconnection exception),
   outbound message queues are cleared, and channel/user state stores
-  are reset. Plugins should treat `OnDisconnectedAsync` as a signal
-  that any cached state references (`IChannel`, `IUser`) are stale.
+  are reset. Plugin and handler group instances are discarded and
+  fresh instances are created via `ActivatorUtilities`. This
+  eliminates any possibility of stale references surviving a
+  reconnection.

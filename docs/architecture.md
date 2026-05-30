@@ -364,24 +364,26 @@ sequence inside `Marv.Core`.
    `IOptions<TConfig>`.
 
 7. **Plugin service registration**: For each plugin type (in
-   dependency order), if it has a static `ConfigureServices` method,
-   call it with the `IServiceCollection`. Plugins that provide
-   services to other plugins register their implementations here.
-   Plugins that only handle events and use configuration do not need
-   this method at all.
+   dependency order), call its static `ConfigureServices` method
+   (defined on `IPlugin` with an empty default implementation).
+   Plugins that provide services to other plugins register their
+   implementations here. Plugins that only handle events and use
+   configuration do not need to override this method.
 
-8. **Plugin type registration**: Register each plugin type itself as
-   a singleton in the container.
+8. **Build container**: Call `BuildServiceProvider()` to create the
+   single `IServiceProvider`. Note that plugin types and handler
+   group types are **not** registered in the container — they are
+   created via `ActivatorUtilities` (through `IPluginActivator`).
 
-9. **Build container**: Call `BuildServiceProvider()` to create the
-   single `IServiceProvider`.
+9. **Instantiate plugins**: Create each plugin instance via
+   `ActivatorUtilities.CreateInstance`. Constructor parameters
+   (configuration, services, `IBot`, `IPluginActivator`) are
+   resolved from the container. Handler groups are created by
+   `MarvPlugin` via `IPluginActivator` during construction.
 
-10. **Resolve plugins**: Resolve each plugin type from the container.
-    Constructor injection provides configuration, services, and the
-    `IBot` facade.
-
-11. **Initialize plugins**: Call `OnLoadAsync()` on each plugin (and
-    its handler groups' lifecycle methods) in dependency order.
+10. **Initialize plugins**: Call `OnLoadAsync()` on each plugin in
+    dependency order. `MarvPlugin`'s default implementation forwards
+    to handler group lifecycle methods.
 
 #### Runtime
 
@@ -396,12 +398,13 @@ sequence inside `Marv.Core`.
     `plugin.HandleEventAsync(event, ct)` — the core never calls
     handler methods directly.
 
-    For `MarvPlugin` subclasses, handler groups are created via
-    `IPluginActivator` during construction, and `HandleEventAsync`
-    uses reflection to find and call methods annotated with event
-    attributes (`[OnEvent]`, `[OnCommand]`, `[OnRegex]`,
-    `[OnRawMessage]`, `[OnInterval]`) on both the plugin class and
-    its handler groups. Handler methods on the plugin class do not
+    For `MarvPlugin` subclasses, `HandleEventAsync` uses reflection
+    to dispatch to attributed handler methods (`[OnEvent]`,
+    `[OnCommand]`, `[OnRegex]`, `[OnRawMessage]`, `[OnInterval]`)
+    on both the plugin class and its handler groups. The core does
+    not interact with handler groups at all — `MarvPlugin` owns
+    their creation (via `IPluginActivator`), lifecycle forwarding,
+    and event dispatch. Handler methods on the plugin class do not
     need to be public (dispatch is from within the base class);
     handler methods on handler groups must be public. If multiple
     handlers match the same event, they are called consecutively in
@@ -416,10 +419,11 @@ sequence inside `Marv.Core`.
 16. **Reconnection**: On disconnection, all state is discarded:
     pending `SendAndAwaitAsync` calls are cancelled, outbound message
     queues are cleared, and channel/user state stores are reset.
-    Plugins are notified via `OnDisconnectedAsync`. The bot reconnects
-    with exponential backoff, then repeats from step 12. Plugins
-    should treat any cached `IChannel` or `IUser` references as stale
-    after `OnDisconnectedAsync`.
+    Plugins are notified via `OnDisconnectedAsync`, then
+    `OnUnloadAsync`. Plugin and handler group instances are discarded.
+    The bot reconnects with exponential backoff, then reinstantiates
+    all plugins via `ActivatorUtilities` (step 9) and repeats from
+    step 10. This ensures no stale references survive a reconnection.
 
 17. **Shutdown**: Signal all plugin tasks to stop. Call
     `OnDisconnectedAsync()` then `OnUnloadAsync()` on each plugin
@@ -445,10 +449,10 @@ approach is simpler and avoids a class of subtle bugs.
 ### How It Works
 
 **Providing a service**: A plugin declares `[ProvidesService]` on its
-class and registers the implementation in a static
-`ConfigureServices` method. The attribute tells the dependency sorter
-which plugin provides which service type; the method does the actual
-DI registration.
+class and overrides the static `ConfigureServices` method from
+`IPlugin`. The attribute tells the dependency sorter which plugin
+provides which service type; the method does the actual DI
+registration.
 
 **Consuming a service**: A plugin declares a constructor parameter of
 the service type. The plugin loader inspects constructor parameters to

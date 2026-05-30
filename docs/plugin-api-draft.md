@@ -60,6 +60,12 @@ public interface IPlugin
     /// The core calls this method once per event, sequentially — never
     /// concurrently with itself for the same plugin.
     Task HandleEventAsync(MarvEvent evt, CancellationToken ct);
+
+    /// Called during DI container setup to register services this
+    /// plugin provides. Only plugins that provide services to other
+    /// plugins need to override this. Default implementation is a
+    /// no-op.
+    static virtual void ConfigureServices(IServiceCollection services) { }
 }
 ```
 
@@ -302,7 +308,7 @@ public class MyAdminHandlers
     private readonly IBot _bot;
     private readonly IAuthorizationService _auth;
 
-    // Constructor-injected from the DI container, just like plugins
+    // Constructor-injected via IPluginActivator, just like plugins
     public MyAdminHandlers(IBot bot, IAuthorizationService auth)
     {
         _bot = bot;
@@ -332,14 +338,17 @@ Handler groups are:
 
 - Discovered automatically by scanning the plugin's assembly for
   classes with `[HandlerGroup(typeof(MyPlugin))]`
-- Constructed via DI — they can inject any service the plugin can
-- Registered as singletons in the container
-- Their event handlers run on the owning plugin's task, sequentially
-  with the plugin's own handlers (order between handlers from
-  different groups is undefined)
+- Created by `MarvPlugin` via `IPluginActivator` — they are not
+  registered in the DI container. Constructor parameters are resolved
+  from DI by `ActivatorUtilities`.
+- Their event handlers are dispatched by `MarvPlugin`, not by the
+  core — the core only calls `HandleEventAsync` on the plugin
+- Run on the owning plugin's task, sequentially with the plugin's
+  own handlers (order between handlers from different groups is
+  undefined)
 - May define lifecycle methods (`OnLoadAsync`, `OnConnectedAsync`,
-  `OnDisconnectedAsync`, `OnUnloadAsync`) which are called alongside
-  the owning plugin's lifecycle methods
+  `OnDisconnectedAsync`, `OnUnloadAsync`) which are called by
+  `MarvPlugin`'s lifecycle methods
 - Useful for separating concerns without creating multiple plugins
   (which would each get their own task and independent event ordering)
 
@@ -348,8 +357,8 @@ Handler groups are:
 ## Registering a Service
 
 A plugin provides a service for other plugins by declaring
-`[ProvidesService]` on its class and registering the implementation
-in a static `ConfigureServices` method.
+`[ProvidesService]` on its class and overriding the static
+`ConfigureServices` method from `IPlugin`.
 
 ### Example: Auth Service
 
