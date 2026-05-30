@@ -315,13 +315,13 @@ sequence inside `Marv.Core`.
    from `MarvPlugin` or `MarvPlugin<TConfig>`.
 
 3. **Build dependency graph**: Inspect each discovered plugin type:
+   - Read `[ProvidesService]` attributes for service types the plugin
+     provides
    - Read `[DependsOn]` attributes for explicit plugin ordering
    - Read `[OptionalService]` attributes on constructor parameters
      for optional service dependencies
    - Read constructor parameters to identify required service
      dependencies (non-optional, non-core types)
-   - Scan the plugin's `ConfigureServices` method (if present) to
-     identify service types registered into the container
    Construct a directed graph of plugin dependencies.
 
 4. **Topological sort**: Sort the graph. If there is a cycle, report
@@ -396,14 +396,11 @@ approach is simpler and avoids a class of subtle bugs.
 
 ### How It Works
 
-Service relationships are inferred automatically from the code. No
-explicit `[ProvidesService]` or `[ConsumesService]` attributes are
-needed for the common case.
-
-**Providing a service**: A plugin registers a service type in its
-static `ConfigureServices` method. The plugin loader scans this
-method's registrations to identify which service types the plugin
-provides.
+**Providing a service**: A plugin declares `[ProvidesService]` on its
+class and registers the implementation in a static
+`ConfigureServices` method. The attribute tells the dependency sorter
+which plugin provides which service type; the method does the actual
+DI registration.
 
 **Consuming a service**: A plugin declares a constructor parameter of
 the service type. The plugin loader inspects constructor parameters to
@@ -418,6 +415,7 @@ ordering without implying a service relationship.
 
 ```csharp
 // Auth plugin provides IAuthorizationService
+[ProvidesService(typeof(IAuthorizationService))]
 public class AuthPlugin : MarvPlugin<AuthPluginConfig>
 {
     public static void ConfigureServices(IServiceCollection services)
@@ -442,7 +440,7 @@ public class GreetPlugin : MarvPlugin<GreetPluginConfig>
 ```
 
 The loader sees:
-- `AuthPlugin` provides `IAuthorizationService` (from ConfigureServices)
+- `AuthPlugin` provides `IAuthorizationService` (from attribute)
 - `ModerationPlugin` requires `IAuthorizationService` (from
   constructor, non-nullable)
 - `GreetPlugin` optionally uses `IAuthorizationService` (from
@@ -457,8 +455,8 @@ other).
 The dependency sorter builds a graph from:
 
 - `[DependsOn(typeof(OtherPlugin))]` — direct plugin dependency
-- Required constructor parameters — resolved to the plugin whose
-  `ConfigureServices` registers that type
+- Required constructor parameters — resolved to the plugin with a
+  matching `[ProvidesService]` attribute
 - `[OptionalService]` constructor parameters — ordered-if-present
 
 The graph is topologically sorted. Plugins with no dependencies load
@@ -481,8 +479,8 @@ The constructor receives `null` for that parameter.
 At startup (and available via a status command), the bot logs:
 
 - Which plugins are loaded, in what order
-- Which services each plugin provides (inferred from ConfigureServices)
-- Which services each plugin consumes (inferred from constructors)
+- Which services each plugin provides (from `[ProvidesService]`)
+- Which services each plugin consumes (from constructors)
 - Any plugins that were skipped and why
 
 ---

@@ -19,6 +19,7 @@ A plugin author's day-to-day involves these types from `Marv.Core`:
 | `IServerInfo` | Server configuration (ISUPPORT) |
 | Event classes (`MessageEvent`, etc.) | Typed event payloads |
 | Attributes (`[OnEvent]`, `[OnCommand]`, etc.) | Declare event interest |
+| `[ProvidesService]` | Declare a service this plugin provides |
 | `[DependsOn]`, `[OptionalService]` | Dependency declarations |
 
 ---
@@ -232,9 +233,9 @@ Handler groups are:
 
 ## Registering a Service
 
-A plugin provides a service for other plugins by registering it in
-a static `ConfigureServices` method. No special attributes are needed
-— the plugin loader automatically detects which types are registered.
+A plugin provides a service for other plugins by declaring
+`[ProvidesService]` on its class and registering the implementation
+in a static `ConfigureServices` method.
 
 ### Example: Auth Service
 
@@ -250,6 +251,7 @@ public interface IAuthorizationService
 **Plugin class**:
 
 ```csharp
+[ProvidesService(typeof(IAuthorizationService))]
 public class AuthPlugin : MarvPlugin<AuthPluginConfig>
 {
     public static void ConfigureServices(IServiceCollection services)
@@ -259,10 +261,10 @@ public class AuthPlugin : MarvPlugin<AuthPluginConfig>
 }
 ```
 
-That's it. The plugin loader sees `IAuthorizationService` registered
-in `ConfigureServices` and knows that `AuthPlugin` provides it. Other
-plugins that inject `IAuthorizationService` via their constructor are
-automatically sorted to load after `AuthPlugin`.
+The `[ProvidesService]` attribute tells the dependency sorter that
+`AuthPlugin` provides `IAuthorizationService`. Other plugins that
+inject `IAuthorizationService` via their constructor are automatically
+sorted to load after `AuthPlugin`.
 
 ---
 

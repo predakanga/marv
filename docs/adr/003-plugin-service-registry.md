@@ -25,35 +25,38 @@ Three approaches were evaluated (see `docs/research.md` section 4):
 
 ## Decision
 
-**Option 3: Hybrid approach with a single DI container and automatic
-service discovery.**
+**Option 3: Hybrid approach with a single DI container.**
 
 There is one `IServiceCollection` and one `IServiceProvider` for the
 entire application. Core services and plugin-contributed services all
 live in the same container. There is no separate container for
 plugins.
 
-### Automatic Service Discovery
+### Service Discovery
 
-Service relationships are inferred from the code — no explicit
-`[ProvidesService]` or `[ConsumesService]` attributes are required:
+**Provided services** are declared explicitly with a
+`[ProvidesService(typeof(IFoo))]` attribute on the plugin class. The
+plugin also provides a static `ConfigureServices(IServiceCollection)`
+method to perform the actual DI registration. The attribute tells the
+dependency sorter which plugin provides which service; the method does
+the wiring.
 
-**Provided services** are discovered by scanning each plugin's static
-`ConfigureServices(IServiceCollection)` method. The plugin loader
-inspects the registrations to determine which service types a plugin
-contributes to the container. Plugins that don't provide services
-don't need this method.
-
-**Consumed services** are discovered by inspecting the plugin's
-constructor parameters. Any parameter whose type is not a core
-service (not `IBot`, `IOptions<T>`, `ILogger<T>`, etc.) is assumed to
-be a plugin-provided service dependency:
+**Consumed services** are discovered automatically by inspecting the
+plugin's constructor parameters. Any parameter whose type is not a
+core service (not `IBot`, `IOptions<T>`, `ILogger<T>`, etc.) is
+assumed to be a plugin-provided service dependency:
 
 - **Required**: Non-nullable parameter → the service must be
   registered by another plugin, or startup fails.
 - **Optional**: Parameter marked with `[OptionalService]`, nullable
   type, and a default of `null` → the service is used if available
   but does not block startup.
+
+Only the providing side needs an attribute. The consuming side is
+inferred from constructor signatures, which is where the dependency
+information naturally lives. This keeps the common case (consuming a
+service) boilerplate-free, while keeping the uncommon case (providing
+a service) explicit and unambiguous.
 
 ### Explicit Ordering
 
@@ -89,16 +92,14 @@ unfamiliar to .NET developers. It also hides dependencies — consumers
 call `registry.Get<T>()` at arbitrary points rather than declaring
 them in the constructor.
 
-**Why automatic discovery over explicit attributes**: Requiring
-`[ProvidesService]` and `[ConsumesService]` attributes creates
-redundancy — the information already exists in `ConfigureServices`
-registrations and constructor parameters. Inferring it automatically:
-
-- Reduces boilerplate for plugin authors
-- Eliminates the risk of attributes getting out of sync with the
-  actual code
-- Makes the common case (no services, or simple service consumption)
-  require zero ceremony
+**Why `[ProvidesService]` on the provider only**: The providing side
+is the uncommon case — most plugins only consume services or handle
+events. An explicit attribute here is low-cost and avoids the
+alternatives (scanning `ConfigureServices` registrations via a
+throwaway `ServiceCollection`, or scanning assemblies for interface
+implementations — both fragile). The consuming side needs no attribute
+because the dependency information already lives in the constructor
+signature.
 
 The `[OptionalService]` attribute remains because optionality cannot
 be reliably inferred from nullability alone — a plugin author might
@@ -112,8 +113,11 @@ whether resolved by core code or another plugin.
 ## Consequences
 
 - Plugin authors use familiar .NET DI patterns for most things.
-- Most plugins need zero attributes — just constructor parameters and
-  optionally a `ConfigureServices` method.
+- Most plugins (consumers) need zero attributes — just constructor
+  parameters.
+- Plugins providing services need `[ProvidesService]` and a
+  `ConfigureServices` method — explicit but only for the uncommon
+  case.
 - The `[OptionalService]` attribute is the only Marv-specific
   attribute needed for service consumption.
 - The `ConfigureServices` method is static and runs before plugin
@@ -123,7 +127,3 @@ whether resolved by core code or another plugin.
 - The single-container approach means plugin assemblies must not have
   conflicting type definitions. This is enforced by using a shared
   `AssemblyLoadContext`.
-- The automatic discovery of provided services requires inspecting
-  `ConfigureServices` registrations, which may involve reflection or
-  a convention-based approach. The exact mechanism is an
-  implementation detail.

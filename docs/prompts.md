@@ -146,3 +146,13 @@
 > - What does IBot.SendAndAwaitAsync do?
 > - In addition to the OnCommand attribute, I'd like an OnRegex attribute which matches against a regular expression and passes the handler the Match object in it's context.
 > - In the plugin structure, you mention that handlers may be in their own namespace/classes, but the only examples are of handlers in the main plugin class. How would this work?
+
+## Use ProvidesService attribute instead of auto-scanning ConfigureServices
+
+**Date**: 2026-05-30T10:30:00Z
+
+**Prompt**:
+
+> Could you explain how scanning ConfigureServices registrations would work? My idea was just to scan assemblies for implementations of the consumed types, but I can see how that could be flawed.
+
+> let's go with the attribute approach, update the docs
