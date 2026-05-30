@@ -156,3 +156,15 @@
 > Could you explain how scanning ConfigureServices registrations would work? My idea was just to scan assemblies for implementations of the consumed types, but I can see how that could be flawed.
 
 > let's go with the attribute approach, update the docs
+
+## Sanity check all design documentation
+
+**Date**: 2026-05-30T10:44:00Z
+
+**Prompt**:
+
+> Before anything else, please read CLAUDE.md and acknowledge the prompt logging and git requirements
+>
+> I'm getting ready to start development of a C# IRC bot.
+>
+> Could you read the initial docs that I generated with another Claude Code session (all MD files except for prompts.md) and perform a sanity check?
