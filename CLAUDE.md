@@ -81,6 +81,10 @@ structural changes.
 
 ## How to run things
 
+When running in a dev container, there is an IRC server available on localhost.
+This IRC server can be started and stopped with `sudo service ngircd start` and
+`sudo service ngircd stop` respectively.
+
 To simplify building and testing the bot, provide a makefile that builds and
 tests the bot, and copies the bot and all plugins into a single directory for
 the user to run.
