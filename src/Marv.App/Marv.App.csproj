@@ -17,10 +17,10 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.0-preview.4.25258.110" />
     <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="10.0.0-preview.4.25258.110" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0-preview.4.25258.110" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="10.0.0-preview.4.25258.110" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.0-preview.4.25258.110" />
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta5.25306.1" />
+    <PackageReference Include="System.CommandLine" Version="2.0.8" />
     <PackageReference Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
-    <PackageReference Include="Tomlyn.Extensions.Configuration" Version="1.0.6" />
   </ItemGroup>
 
 </Project>
