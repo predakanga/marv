@@ -344,25 +344,42 @@ understands plugin identity and lifecycle.
 ### Recommended Approach: Hybrid
 
 Use Microsoft's `IServiceCollection` / `IServiceProvider` as the underlying
-mechanism, but wrap it in a plugin-aware layer:
+mechanism, but wrap it in a plugin-aware layer. **There is a single DI
+container for the entire application** — core services (configuration,
+logging, IRC client, bot) and plugin-contributed services all live in one
+`IServiceCollection` which builds one `IServiceProvider`. There is no
+separate container for plugins.
 
-1. **Plugin loading phase**: Core determines load order via declared
-   dependencies (attributes on plugin classes, e.g.
-   `[DependsOn(typeof(AuthPlugin))]` or
-   `[ConsumeService(typeof(IAuthService), Optional = true)]`).
+The startup sequence has two distinct phases:
 
-2. **Service registration phase**: Each plugin gets a chance to register
-   services into an `IServiceCollection`. Plugins are called in dependency
-   order.
+1. **Bootstrap phase** (before DI): Read configuration from files,
+   environment variables, and command-line arguments. Determine which
+   plugin assemblies to load. This phase uses no DI — it runs before the
+   container exists. The plugin list comes from core configuration read
+   during bootstrap, so there is no circular dependency.
 
-3. **Container build**: After all plugins have registered, the container is
-   built. Plugins receive their dependencies via constructor injection or
-   a scoped `IServiceProvider`.
+2. **DI phase** (building the single container):
+   a. **Assembly loading**: Load plugin assemblies discovered during
+      bootstrap, discover plugin types.
+   b. **Dependency sort**: Topological sort based on declared dependencies
+      (attributes on plugin classes, e.g.
+      `[DependsOn(typeof(AuthPlugin))]` or
+      `[ConsumeService(typeof(IAuthService), Optional = true)]`).
+   c. **Service registration**: Each plugin gets a chance to register
+      services into the shared `IServiceCollection` via a static or
+      type-level method (e.g. `ConfigureServices(IServiceCollection)`).
+      This does not require constructing the plugin. Core services
+      (configuration, logging, IRC client) are also registered here.
+      Plugins are called in dependency order.
+   d. **Container build**: The single `IServiceProvider` is built.
+   e. **Plugin construction**: Plugin instances are resolved from the
+      container — configuration and services injected via constructor.
 
-4. **Runtime**: Plugins can query for optional services via
+3. **Runtime**: Plugins can query for optional services via
    `IServiceProvider.GetService<T>()` (returns null if not registered).
 
 This gives us:
+- A single, standard .NET DI container for the whole application
 - Familiar .NET DI patterns for most use cases
 - Explicit dependency declarations for load ordering
 - Optional dependencies via nullable injection or runtime resolution

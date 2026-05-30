@@ -50,3 +50,13 @@
 **Prompt**:
 
 > In the conclusion of section 3, you note that it is common for plugins to access configuration from a bot object. I consider this to be an anti-pattern; for Marv, plugins should declare a class modeling their configuration, which will be injected into the plugin when it's constructed.
+
+## Clarify single DI container requirement
+
+**Date**: 2026-05-30T00:00:00Z
+
+**Prompt**:
+
+> By "the plugin DI container", do you mean that there's a separate DI container for the main app and the plugins?
+
+> Okay. Please make sure that that requirement is documented for future services.
