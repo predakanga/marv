@@ -204,3 +204,13 @@
 > - I'm not sure I like the snapshot-on-publish approach - what are the risks involved with allowing the models to be mutable, and is there a way to mitigate those risks?
 > - Note that handler methods inside MarvPlugin don't need to be public, but those in HandlerGroups do.
 > - How will IBot injection into GreetPlugin be accomplished? I expected a constructor parameter that's passed to the base MarvPlugin constructor.
+
+## Mutable models confirmed, enforce PluginName via interface
+
+**Date**: 2026-05-30T11:43:00Z
+
+**Prompt**:
+
+> I'm okay with the mutable model approach, so long as it's clearly documented.
+>
+> Instead of validating PluginName at discovery time, enforce it with an interface. In fact, include all the plugin methods on that interface so that authors can bypass MarvPlugin if they want.

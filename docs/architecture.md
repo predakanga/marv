@@ -61,7 +61,8 @@ Responsibilities:
 - Protocol-level message handling (PING/PONG, CTCP VERSION/PING/TIME)
 - Rate-limited message sending
 - Channel/user/mode state tracking
-- Plugin base classes, attributes, and lifecycle interfaces
+- The `IPlugin` interface and `MarvPlugin` convenience base class
+- Plugin attributes and lifecycle management
 - Event types and the event dispatch system
 - The `IBot` facade interface
 - Plugin discovery, dependency sorting, and lifecycle management
@@ -73,7 +74,8 @@ Responsibilities:
 Each plugin is a separate assembly (class library) that references
 `Marv.Core`. A plugin assembly contains:
 
-- One or more plugin classes inheriting from `MarvPlugin`
+- Exactly one plugin class implementing `IPlugin` (typically via
+  `MarvPlugin`)
 - Optional configuration record/class tagged with
   `[PluginConfig(Section = "Name")]`
 - Optional service interfaces (or these may live in a separate
@@ -95,7 +97,7 @@ reference higher layers.
 ```
 ┌─────────────────────────────────────────┐
 │            Plugin System                │  Plugin loading, lifecycle,
-│   MarvPlugin, attributes, events        │  event dispatch
+│   IPlugin, MarvPlugin, attributes       │  event dispatch
 ├─────────────────────────────────────────┤
 │            Bot / Message Processor      │  IBot — high-level API
 │   Send messages, query state,           │  exposed to plugins.
@@ -325,12 +327,12 @@ sequence inside `Marv.Core`.
    the app), extract the list of plugin assembly paths.
 
 2. **Discover assemblies**: For each configured plugin path, load the
-   assembly into an `AssemblyLoadContext`. Scan for types that inherit
-   from `MarvPlugin` — each assembly must contain exactly one. Also
+   assembly into an `AssemblyLoadContext`. Scan for types that
+   implement `IPlugin` — each assembly must contain exactly one. Also
    scan for configuration classes tagged with `[PluginConfig]` and
    handler group classes tagged with `[HandlerGroup]`. Read each
-   plugin's static `PluginName` property for identification in logs,
-   config, and diagnostics.
+   plugin's `static abstract PluginName` property (from the `IPlugin`
+   interface) for identification in logs, config, and diagnostics.
 
 3. **Build dependency graph**: Inspect each discovered plugin type:
    - Read `[ProvidesService]` attributes for service types the plugin
@@ -392,12 +394,12 @@ sequence inside `Marv.Core`.
     and async task for each plugin. Handler discovery uses reflection
     to find methods annotated with event attributes (`[OnEvent]`,
     `[OnCommand]`, `[OnRegex]`, `[OnRawMessage]`, `[OnInterval]`) on
-    both the plugin class and its handler groups. Handler methods on
-    the plugin class do not need to be public — the dispatch is
-    performed from within the `MarvPlugin` base class. Handler
-    methods on handler group classes must be public. If multiple
-    handlers match the same event, they are called consecutively in
-    an undefined order.
+    both the plugin class and its handler groups. For `MarvPlugin`
+    subclasses, handler methods do not need to be public — the
+    dispatch is performed from within the base class. For direct
+    `IPlugin` implementations and handler group classes, handler
+    methods must be public. If multiple handlers match the same
+    event, they are called consecutively in an undefined order.
 
 15. **Message loop**: Process messages, update state, fan out events
     to plugin channels.

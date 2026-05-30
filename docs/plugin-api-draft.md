@@ -11,7 +11,8 @@ A plugin author's day-to-day involves these types from `Marv.Core`:
 
 | Type | Purpose |
 |---|---|
-| `MarvPlugin` | Base class for all plugins |
+| `IPlugin` | Interface defining the plugin contract |
+| `MarvPlugin` | Convenience base class implementing `IPlugin` |
 | `IBot` | Facade for sending messages and querying state |
 | `IChannel`, `IUser` | Read-only state models |
 | `ICapabilityManager` | Check negotiated capabilities |
@@ -26,50 +27,73 @@ A plugin author's day-to-day involves these types from `Marv.Core`:
 
 ## Plugin Lifecycle
 
-### MarvPlugin Base Classes
+### IPlugin Interface
+
+The `IPlugin` interface defines the full plugin contract. All
+plugins must implement it — either directly or via the `MarvPlugin`
+convenience base class.
 
 ```csharp
-public abstract class MarvPlugin
+public interface IPlugin
 {
     /// Human-readable name for this plugin. Used in log messages,
-    /// configuration, and diagnostics. Each plugin assembly must
-    /// contain exactly one MarvPlugin subclass, and it must define
-    /// this static property. The loader validates its presence at
-    /// discovery time.
-    // public static string PluginName => "MyPlugin";
+    /// configuration, and diagnostics. Enforced at compile time
+    /// via static abstract.
+    static abstract string PluginName { get; }
 
+    /// Called once after the plugin is constructed and all services
+    /// are available. Use for one-time initialization.
+    Task OnLoadAsync(CancellationToken ct);
+
+    /// Called each time the bot establishes an IRC connection.
+    Task OnConnectedAsync(CancellationToken ct);
+
+    /// Called when the IRC connection is lost. The bot may reconnect.
+    /// Any cached IChannel/IUser references are stale after this call.
+    Task OnDisconnectedAsync();
+
+    /// Called once during shutdown, before the DI container is disposed.
+    /// Use for cleanup (unsubscribe, flush, close handles).
+    Task OnUnloadAsync();
+}
+```
+
+### MarvPlugin Base Class
+
+Most plugins should extend `MarvPlugin`, which provides default
+(no-op) lifecycle implementations and `IBot` access via a base
+constructor:
+
+```csharp
+public abstract class MarvPlugin : IPlugin
+{
     /// The bot instance, available to all plugins.
     protected IBot Bot { get; }
 
-    /// Base constructor. Derived plugins must accept IBot and pass
-    /// it to the base via : base(bot).
+    /// Derived plugins accept IBot and forward it via : base(bot).
     protected MarvPlugin(IBot bot)
     {
         Bot = bot;
     }
 
-    /// Called once after the plugin is constructed and all services
-    /// are available. Use for one-time initialization.
     public virtual Task OnLoadAsync(CancellationToken ct) => Task.CompletedTask;
-
-    /// Called each time the bot establishes an IRC connection.
     public virtual Task OnConnectedAsync(CancellationToken ct) => Task.CompletedTask;
-
-    /// Called when the IRC connection is lost. The bot may reconnect.
-    /// Any cached IChannel/IUser references are stale after this call.
     public virtual Task OnDisconnectedAsync() => Task.CompletedTask;
-
-    /// Called once during shutdown, before the DI container is disposed.
-    /// Use for cleanup (unsubscribe, flush, close handles).
     public virtual Task OnUnloadAsync() => Task.CompletedTask;
 }
 ```
 
-Each plugin assembly must contain exactly one `MarvPlugin` subclass.
-The `PluginName` static property identifies the plugin in log
-messages, the plugin loading configuration, and diagnostic output.
-`IBot` is passed to the base constructor — plugins accept it as a
-constructor parameter and forward it via `: base(bot)`.
+Each plugin assembly must contain exactly one `IPlugin`
+implementation. The `PluginName` static property identifies the
+plugin in log messages, the plugin loading configuration, and
+diagnostic output. For `MarvPlugin` subclasses, `IBot` is passed to
+the base constructor via `: base(bot)`.
+
+Plugins that need full control can implement `IPlugin` directly,
+bypassing `MarvPlugin`. In this case, the plugin manages its own
+`IBot` access (typically via constructor injection) and must
+implement all lifecycle methods. Handler methods on direct `IPlugin`
+implementations must be `public` (same rule as handler groups).
 
 Plugins that need configuration declare a separate configuration
 class tagged with `[PluginConfig(Section = "Name")]`. The plugin
@@ -94,12 +118,16 @@ their configuration via constructor injection of `IOptions<TConfig>`.
 
 Plugins declare event handlers using attributes on methods. The
 method must be an instance method on the plugin class (or a handler
-group class — see below) and return `Task`. Handler methods on the
-plugin class itself do not need to be public — the dispatch is
-performed from within the `MarvPlugin` base class, so `protected`
-and `private` methods are accessible. Handler methods on handler
-group classes must be `public`, since the dispatch code cannot access
-non-public members of a separate class.
+group class — see below) and return `Task`.
+
+**Visibility rules:**
+
+- **`MarvPlugin` subclasses**: Handler methods do not need to be
+  public — the dispatch is performed from within the `MarvPlugin`
+  base class, so `protected` and `private` methods are accessible.
+- **Direct `IPlugin` implementations** and **handler group classes**:
+  Handler methods must be `public`, since the dispatch code cannot
+  access non-public members of a separate class.
 
 If multiple handler methods on the same plugin (or its handler
 groups) match the same event, they are all called consecutively but
