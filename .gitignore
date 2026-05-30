@@ -1,0 +1,12 @@
+.claude/*.local.json
+
+## .NET build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+
+## Test results
+TestResults/
+[Cc]overage*/
