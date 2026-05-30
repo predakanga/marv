@@ -43,6 +43,14 @@
 >
 > Do not write any C# code yet. The deliverable is docs/research.md only.
 
+## Question about plugin loading and configuration viability
+
+**Date**: 2026-05-30T00:00:00Z
+
+**Prompt**:
+
+> In the conclusion of section 4, you recommend loading all plugins first and giving them a chance to contribute to the IServiceProvider. Is this viable if the list of plugins to load is stored in the core's configuration object?
+
 ## Plugin configuration should be injected, not accessed via bot object
 
 **Date**: 2026-05-30T00:00:00Z
