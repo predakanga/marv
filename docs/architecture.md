@@ -253,11 +253,12 @@ task, receiving events through its own channel.
 
 3. **Plugin Tasks**: Each plugin has its own dedicated async task and
    `Channel<MarvEvent>`. The task reads events from the channel and
-   invokes the plugin's matching handlers sequentially. This means:
+   calls `plugin.HandleEventAsync(event, ct)` for each one — the
+   core never calls handler methods directly. This means:
    - Each plugin processes events independently and concurrently with
      other plugins
-   - Within a single plugin, handlers still run sequentially — no
-     concurrency within a plugin
+   - Within a single plugin, `HandleEventAsync` is never called
+     concurrently with itself — no concurrency within a plugin
    - A slow plugin does not block other plugins or state tracking
    - Event ordering is preserved within each plugin
 
@@ -271,9 +272,9 @@ task, receiving events through its own channel.
 
 ### Concurrency Rules
 
-- **Plugin event handlers run sequentially within their plugin task.**
-  A plugin's handlers never run concurrently with each other. But
-  different plugins' handlers do run concurrently.
+- **`HandleEventAsync` is called sequentially within each plugin task.**
+  A plugin's event handler is never called concurrently with itself.
+  But different plugins' handlers do run concurrently.
 
 - **State stores are read-safe from any plugin task.** The message
   processor updates state before fanning out events. State stores use
@@ -391,15 +392,23 @@ sequence inside `Marv.Core`.
     its handler groups.
 
 14. **Start plugin tasks**: Create a dedicated `Channel<MarvEvent>`
-    and async task for each plugin. Handler discovery uses reflection
-    to find methods annotated with event attributes (`[OnEvent]`,
-    `[OnCommand]`, `[OnRegex]`, `[OnRawMessage]`, `[OnInterval]`) on
-    both the plugin class and its handler groups. For `MarvPlugin`
-    subclasses, handler methods do not need to be public — the
-    dispatch is performed from within the base class. For direct
-    `IPlugin` implementations and handler group classes, handler
-    methods must be public. If multiple handlers match the same
-    event, they are called consecutively in an undefined order.
+    and async task for each plugin. The task reads events and calls
+    `plugin.HandleEventAsync(event, ct)` — the core never calls
+    handler methods directly.
+
+    For `MarvPlugin` subclasses, handler groups are created via
+    `IPluginActivator` during construction, and `HandleEventAsync`
+    uses reflection to find and call methods annotated with event
+    attributes (`[OnEvent]`, `[OnCommand]`, `[OnRegex]`,
+    `[OnRawMessage]`, `[OnInterval]`) on both the plugin class and
+    its handler groups. Handler methods on the plugin class do not
+    need to be public (dispatch is from within the base class);
+    handler methods on handler groups must be public. If multiple
+    handlers match the same event, they are called consecutively in
+    an undefined order.
+
+    Direct `IPlugin` implementations provide their own
+    `HandleEventAsync` logic.
 
 15. **Message loop**: Process messages, update state, fan out events
     to plugin channels.
@@ -458,7 +467,8 @@ ordering without implying a service relationship.
 public class AuthPlugin : MarvPlugin
 {
     public static string PluginName => "Auth";
-    public AuthPlugin(IBot bot) : base(bot) { }
+    public AuthPlugin(IBot bot, IPluginActivator activator)
+        : base(bot, activator) { }
 
     public static void ConfigureServices(IServiceCollection services)
     {
@@ -470,8 +480,8 @@ public class AuthPlugin : MarvPlugin
 public class ModerationPlugin : MarvPlugin
 {
     public static string PluginName => "Moderation";
-    public ModerationPlugin(IBot bot, IAuthorizationService auth)
-        : base(bot) { ... }
+    public ModerationPlugin(IBot bot, IPluginActivator activator,
+        IAuthorizationService auth) : base(bot, activator) { ... }
 }
 
 // Greet plugin consumes IAuthorizationService (optional)
@@ -479,9 +489,9 @@ public class GreetPlugin : MarvPlugin
 {
     public static string PluginName => "Greet";
     public GreetPlugin(
-        IBot bot,
+        IBot bot, IPluginActivator activator,
         IOptions<GreetPluginConfig> config,
-        IAuthorizationService? auth = null) : base(bot) { ... }
+        IAuthorizationService? auth = null) : base(bot, activator) { ... }
 }
 ```
 
@@ -568,7 +578,8 @@ public class GreetPlugin : MarvPlugin
 
     private readonly GreetPluginConfig _config;
 
-    public GreetPlugin(IBot bot, IOptions<GreetPluginConfig> config) : base(bot)
+    public GreetPlugin(IBot bot, IPluginActivator activator,
+        IOptions<GreetPluginConfig> config) : base(bot, activator)
     {
         _config = config.Value;
     }

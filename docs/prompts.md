@@ -214,3 +214,13 @@
 > I'm okay with the mutable model approach, so long as it's clearly documented.
 >
 > Instead of validating PluginName at discovery time, enforce it with an interface. In fact, include all the plugin methods on that interface so that authors can bypass MarvPlugin if they want.
+
+## Make event dispatch explicit via HandleEventAsync
+
+**Date**: 2026-05-30T11:59:00Z
+
+**Prompt**:
+
+> It's not very clear how handlers are actually called at this point - I think the assumption is that the core directly calls the handler, which feels too magical to me.
+> What I'd like to see is an OnIrcEvent method on IPlugin (feel free to change the name to something more appropriate), with the implementation in MarvPlugin using reflection to discover handlers and dispatch the events accordingly.
+> MarvPlugin will also need to be provided with a way to instantiate classes, to dispatch to HandlerGroup classes. My first thought is a utility class which wraps IServiceProvider and uses ActivatorUtilities.CreateInstance<T>, but I'm open to other possibilities.

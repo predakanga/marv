@@ -55,14 +55,43 @@ public interface IPlugin
     /// Called once during shutdown, before the DI container is disposed.
     /// Use for cleanup (unsubscribe, flush, close handles).
     Task OnUnloadAsync();
+
+    /// Called by the core's per-plugin event loop to deliver an event.
+    /// The core calls this method once per event, sequentially — never
+    /// concurrently with itself for the same plugin.
+    Task HandleEventAsync(MarvEvent evt, CancellationToken ct);
 }
 ```
+
+The core's per-plugin event loop reads from the plugin's
+`Channel<MarvEvent>` and calls `HandleEventAsync` for each event.
+This is the single entry point for all event delivery — the core
+never calls handler methods directly.
+
+### IPluginActivator
+
+`MarvPlugin` needs to create handler group instances at runtime.
+`IPluginActivator` wraps `IServiceProvider` and
+`ActivatorUtilities.CreateInstance` behind a focused interface:
+
+```csharp
+public interface IPluginActivator
+{
+    /// Creates an instance of the given type, injecting constructor
+    /// parameters from the DI container.
+    object CreateInstance(Type type);
+}
+```
+
+This is intentionally limited to instance creation — it is not a
+general service locator. The internal implementation delegates to
+`ActivatorUtilities.CreateInstance(IServiceProvider, Type)`.
 
 ### MarvPlugin Base Class
 
 Most plugins should extend `MarvPlugin`, which provides default
-(no-op) lifecycle implementations and `IBot` access via a base
-constructor:
+(no-op) lifecycle implementations, `IBot` access, and
+reflection-based event dispatch to attributed handler methods:
 
 ```csharp
 public abstract class MarvPlugin : IPlugin
@@ -70,30 +99,55 @@ public abstract class MarvPlugin : IPlugin
     /// The bot instance, available to all plugins.
     protected IBot Bot { get; }
 
-    /// Derived plugins accept IBot and forward it via : base(bot).
-    protected MarvPlugin(IBot bot)
+    /// Derived plugins accept IBot and IPluginActivator, and forward
+    /// both via : base(bot, activator).
+    protected MarvPlugin(IBot bot, IPluginActivator activator)
     {
         Bot = bot;
+        // Discovers [HandlerGroup] types for this plugin in the
+        // assembly, creates instances via activator, and builds
+        // the handler dispatch table from attributed methods on
+        // both this plugin and its handler groups.
     }
 
-    public virtual Task OnLoadAsync(CancellationToken ct) => Task.CompletedTask;
-    public virtual Task OnConnectedAsync(CancellationToken ct) => Task.CompletedTask;
-    public virtual Task OnDisconnectedAsync() => Task.CompletedTask;
-    public virtual Task OnUnloadAsync() => Task.CompletedTask;
+    /// Dispatches the event to matching handler methods discovered
+    /// during construction. Handlers are called consecutively in
+    /// an undefined order.
+    public virtual Task HandleEventAsync(MarvEvent evt, CancellationToken ct)
+    {
+        // Reflection-based dispatch:
+        // 1. Match evt type against [OnEvent] method parameters
+        // 2. Match [OnCommand], [OnRegex] against MessageEvent text
+        // 3. Match [OnRawMessage] against RawMessageEvent commands
+        // 4. Call matching handlers on this plugin and handler groups
+    }
+
+    /// Default lifecycle implementations forward to handler groups.
+    /// Override these in derived classes, but call base to propagate
+    /// lifecycle events to handler groups.
+    public virtual Task OnLoadAsync(CancellationToken ct)
+    {
+        // Calls OnLoadAsync on each handler group (if defined)
+    }
+    public virtual Task OnConnectedAsync(CancellationToken ct) => /* forwards to groups */;
+    public virtual Task OnDisconnectedAsync() => /* forwards to groups */;
+    public virtual Task OnUnloadAsync() => /* forwards to groups */;
 }
 ```
 
 Each plugin assembly must contain exactly one `IPlugin`
 implementation. The `PluginName` static property identifies the
 plugin in log messages, the plugin loading configuration, and
-diagnostic output. For `MarvPlugin` subclasses, `IBot` is passed to
-the base constructor via `: base(bot)`.
+diagnostic output. For `MarvPlugin` subclasses, `IBot` and
+`IPluginActivator` are passed to the base constructor via
+`: base(bot, activator)`.
 
 Plugins that need full control can implement `IPlugin` directly,
 bypassing `MarvPlugin`. In this case, the plugin manages its own
-`IBot` access (typically via constructor injection) and must
-implement all lifecycle methods. Handler methods on direct `IPlugin`
-implementations must be `public` (same rule as handler groups).
+`IBot` access (typically via constructor injection), implements all
+lifecycle methods, and writes its own `HandleEventAsync` dispatch
+logic. Handler methods on direct `IPlugin` implementations must be
+`public` (same rule as handler groups).
 
 Plugins that need configuration declare a separate configuration
 class tagged with `[PluginConfig(Section = "Name")]`. The plugin
@@ -315,7 +369,8 @@ public class AuthPlugin : MarvPlugin
 {
     public static string PluginName => "Auth";
 
-    public AuthPlugin(IBot bot) : base(bot) { }
+    public AuthPlugin(IBot bot, IPluginActivator activator)
+        : base(bot, activator) { }
 
     public static void ConfigureServices(IServiceCollection services)
     {
@@ -379,8 +434,9 @@ public class GreetPlugin : MarvPlugin
 
     public GreetPlugin(
         IBot bot,
+        IPluginActivator activator,
         IOptions<GreetPluginConfig> config,
-        IAuthorizationService? auth = null) : base(bot)
+        IAuthorizationService? auth = null) : base(bot, activator)
     {
         _config = config.Value;
         _auth = auth;
@@ -498,7 +554,8 @@ public class PingPlugin : MarvPlugin
 {
     public static string PluginName => "Ping";
 
-    public PingPlugin(IBot bot) : base(bot) { }
+    public PingPlugin(IBot bot, IPluginActivator activator)
+        : base(bot, activator) { }
 
     [OnCommand("ping")]
     public async Task HandlePing(CommandContext ctx, CancellationToken ct)
@@ -530,7 +587,8 @@ public class GreetPlugin : MarvPlugin
 
     private readonly GreetPluginConfig _config;
 
-    public GreetPlugin(IBot bot, IOptions<GreetPluginConfig> config) : base(bot)
+    public GreetPlugin(IBot bot, IPluginActivator activator,
+        IOptions<GreetPluginConfig> config) : base(bot, activator)
     {
         _config = config.Value;
     }
@@ -577,7 +635,8 @@ public class AuthPlugin : MarvPlugin
 {
     public static string PluginName => "Auth";
 
-    public AuthPlugin(IBot bot) : base(bot) { }
+    public AuthPlugin(IBot bot, IPluginActivator activator)
+        : base(bot, activator) { }
 
     public static void ConfigureServices(IServiceCollection services)
     {
@@ -611,7 +670,8 @@ public class ModerationPlugin : MarvPlugin
 
     private readonly IAuthorizationService _auth;
 
-    public ModerationPlugin(IBot bot, IAuthorizationService auth) : base(bot)
+    public ModerationPlugin(IBot bot, IPluginActivator activator,
+        IAuthorizationService auth) : base(bot, activator)
     {
         _auth = auth;
     }
@@ -654,7 +714,8 @@ public class ModerationPlugin : MarvPlugin
 
     private readonly IAuthorizationService _auth;
 
-    public ModerationPlugin(IBot bot, IAuthorizationService auth) : base(bot)
+    public ModerationPlugin(IBot bot, IPluginActivator activator,
+        IAuthorizationService auth) : base(bot, activator)
     {
         _auth = auth;
     }

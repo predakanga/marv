@@ -39,8 +39,10 @@ loaded plugins):
 
 3. **Plugin tasks** (one per plugin): Each plugin has its own
    `Channel<MarvEvent>` and a dedicated async task. The task reads
-   events from the channel and invokes the plugin's matching handlers
-   (including handlers from the plugin's handler groups) sequentially.
+   events from the channel and calls `plugin.HandleEventAsync(event,
+   ct)` for each one. The core never calls handler methods directly —
+   dispatch is the plugin's responsibility (provided by `MarvPlugin`
+   via reflection, or custom logic for direct `IPlugin` implementations).
 
 4. **Rate limiter**: Accepts outbound messages from any task and
    releases them to the outbound channel at a rate that respects the
@@ -51,10 +53,10 @@ loaded plugins):
 
 ### Concurrency Guarantees
 
-- **Within a plugin, handlers run sequentially.** A plugin's handlers
-  never run concurrently with each other. This means a plugin author
-  does not need to think about thread safety for the plugin's own
-  state.
+- **Within a plugin, `HandleEventAsync` is called sequentially.** The
+  core never calls it concurrently with itself for the same plugin.
+  This means a plugin author does not need to think about thread
+  safety for the plugin's own state.
 
 - **Different plugins run concurrently.** Plugin A's handler for
   an event may be running at the same time as Plugin B's handler for
@@ -107,10 +109,11 @@ functionality. Running them concurrently matches the mental model:
 the greeting plugin and the moderation plugin shouldn't need to wait
 for each other.
 
-**Sequential within a plugin.** Within a single plugin, handlers
-still run sequentially. This preserves the key DX benefit: a plugin
-author doesn't need to think about thread safety for their own state.
-The concurrency boundary is between plugins, not within them.
+**Sequential within a plugin.** Within a single plugin,
+`HandleEventAsync` is called sequentially — never concurrently with
+itself. This preserves the key DX benefit: a plugin author doesn't
+need to think about thread safety for their own state. The
+concurrency boundary is between plugins, not within them.
 
 ### Why state stores are read-safe
 
