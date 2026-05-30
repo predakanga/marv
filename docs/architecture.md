@@ -24,52 +24,62 @@ Marv.sln
 
 ### Marv.App
 
-The CLI host application. Responsibilities:
+The CLI host application. A thin shell that delegates to the core.
+
+Responsibilities:
 
 - Parse command-line arguments (using `System.CommandLine` or raw args)
 - Read configuration from files, environment variables, and CLI args
   (in ascending priority order)
 - Initialize logging (`Microsoft.Extensions.Logging` with console and
   file sinks)
-- Discover and load plugin assemblies
-- Build the DI container
-- Run the bot's main loop
-- Handle graceful shutdown (Ctrl+C / SIGTERM)
+- Call `services.AddMarv(configuration)` to delegate plugin loading,
+  dependency sorting, service registration, and bot setup to the core
+- Run the hosted service and handle graceful shutdown (Ctrl+C /
+  SIGTERM)
+
+The app does **not** perform plugin discovery, DI wiring, or bot
+orchestration itself — that is the core's responsibility. The app
+builds the `IHostBuilder`, registers configuration and logging, calls
+the core's extension method, and runs.
 
 This assembly references `Marv.Core` and the .NET hosting/DI packages.
-It does not reference any plugin assemblies directly — plugins are loaded
-at runtime.
+It does not reference any plugin assemblies directly — plugins are
+loaded at runtime.
 
 ### Marv.Core
 
-The core library. Contains everything a plugin author needs to reference
-at compile time, and everything the host needs to run the bot. This is
-the only assembly that plugin projects reference.
+The core library. Contains everything a plugin author needs to
+reference at compile time, and everything the host needs to run the
+bot. This is the only assembly that plugin projects reference.
 
 Responsibilities:
 
 - IRC message parsing and serialization
 - TCP/TLS connection management
 - IRCv3 capability negotiation and SASL authentication
+- Protocol-level message handling (PING/PONG)
 - Rate-limited message sending
 - Channel/user/mode state tracking
 - Plugin base classes, attributes, and lifecycle interfaces
 - Event types and the event dispatch system
 - The `IBot` facade interface
 - Plugin discovery, dependency sorting, and lifecycle management
-- The `IServiceCollection` integration point for plugin service
-  registration
+- The `IServiceCollection` extension method (`AddMarv`) that wires
+  everything together
 
 ### Plugin Assemblies
 
 Each plugin is a separate assembly (class library) that references
 `Marv.Core`. A plugin assembly contains:
 
-- One or more plugin classes inheriting from `MarvPlugin`
+- One or more plugin classes inheriting from `MarvPlugin` (or
+  `MarvPlugin<TConfig>` for plugins with configuration)
 - Optional configuration record/class
 - Optional service interfaces (or these may live in a separate
   contracts assembly shared between provider and consumer)
 - Optional service implementations
+- Optional handler group classes
 
 Plugin assemblies are built as DLLs and placed in a known directory.
 The host discovers them at startup via the configured plugin paths.
@@ -87,17 +97,16 @@ reference higher layers.
 │            Plugin System                │  Plugin loading, lifecycle,
 │   MarvPlugin, attributes, events        │  event dispatch
 ├─────────────────────────────────────────┤
-│            Bot Facade                   │  IBot — high-level API
-│   Send messages, query state            │  exposed to plugins
+│            Bot / Message Processor      │  IBot — high-level API
+│   Send messages, query state,           │  exposed to plugins.
+│   PING/PONG, CAP, state updates,        │  Protocol handling and
+│   event fan-out to plugin tasks         │  state management.
 ├─────────────────────────────────────────┤
 │            State Tracking               │  Channels, users, modes,
 │   IChannelStore, IUserStore             │  ISUPPORT parameters
 ├─────────────────────────────────────────┤
-│            Capability Engine            │  CAP negotiation, SASL,
-│   ICapabilityManager                    │  capability state
-├─────────────────────────────────────────┤
 │            Connection                   │  TCP/TLS, reconnection,
-│   IIrcConnection                        │  rate limiting, PING/PONG
+│   IIrcConnection                        │  rate limiting
 ├─────────────────────────────────────────┤
 │            Protocol                     │  IrcMessage parsing,
 │   IrcParser, IrcSerializer              │  serialization, tags,
@@ -108,8 +117,12 @@ reference higher layers.
 ### Protocol Layer
 
 - `IrcMessage`: Immutable record representing a parsed IRC message
-  (tags, source, command, parameters). The trailing parameter is folded
-  into the parameter list — there is no separate `trailing` field.
+  (tags, source, command, parameters). Used for both inbound and
+  outbound messages — the structure is identical (tags, command,
+  parameters), with the only difference being that inbound messages
+  have a source prefix and outbound messages do not. Keeping a single
+  type avoids conversion overhead and lets plugins inspect/transform
+  messages uniformly.
 - `IrcParser`: Parses raw bytes/strings into `IrcMessage` instances.
   Handles tag value escaping, multi-space separation, empty trailing
   parameters, and source prefix parsing. Validated against
@@ -122,29 +135,24 @@ reference higher layers.
 ### Connection Layer
 
 - `IIrcConnection`: Abstracts the TCP/TLS connection. Provides a
-  `ChannelReader<IrcMessage>` for inbound messages and accepts outbound
-  messages via a `ChannelWriter<IrcMessage>`.
-- Handles PING/PONG at the protocol level (not exposed to plugins).
+  `ChannelReader<IrcMessage>` for inbound messages and accepts
+  outbound messages via a `ChannelWriter<IrcMessage>`.
 - Implements rate limiting on outbound messages using a token bucket
   algorithm to prevent excess flood disconnections.
 - Handles reconnection with exponential backoff.
 - UTF-8 encoding with graceful handling of invalid sequences.
 
-### Capability Engine
-
-- `ICapabilityManager`: Manages IRCv3 CAP negotiation during
-  registration.
-- Handles multi-line `CAP LS`, capability values, `CAP NEW`/`CAP DEL`
-  notifications (`cap-notify`).
-- SASL authentication (PLAIN mechanism initially; EXTERNAL as a
-  follow-up).
-- Exposes the set of negotiated capabilities so higher layers and
-  plugins can check feature availability.
+The connection layer is a pure transport — it does not interpret
+message content. PING/PONG handling, CAP negotiation, and all other
+protocol-level logic live in the message processor (bot layer) where
+they have access to state and can be tested without a network
+connection.
 
 ### State Tracking
 
 - `IChannelStore`: Maintains the set of channels the bot is in, each
-  with its topic, modes, and member list.
+  with its topic, modes, and member list (including per-user prefixes
+  and join times).
 - `IUserStore`: Maintains known users (nick, user, host, account, away
   status). Updated from NAMES, WHO, JOIN, PART, QUIT, NICK, CHGHOST,
   ACCOUNT, AWAY, SETNAME messages.
@@ -152,19 +160,33 @@ reference higher layers.
   PREFIX from ISUPPORT to correctly handle type A/B/C/D modes.
 - All comparisons use the server's advertised CASEMAPPING.
 
-### Bot Facade
+State stores are written by the message processor task and read by
+plugin tasks. Thread safety is achieved through a
+snapshot-on-publish model: the message processor updates state, then
+fans out events to plugin channels. Plugins read state during event
+handling; the state stores provide read-safe access (via immutable
+snapshots or concurrent-read-safe data structures). Only the message
+processor writes, so no write contention exists.
+
+### Bot / Message Processor
 
 - `IBot`: The primary interface plugins interact with. Provides
   methods for sending messages, querying channel/user state, and
   checking capability availability. See `plugin-api-draft.md` for the
   full surface.
+- The message processor is the central task that reads from the
+  inbound channel and:
+  - Handles PING/PONG (responds immediately, not exposed to plugins)
+  - Drives CAP negotiation and SASL authentication
+  - Updates state tracking (channels, users, modes)
+  - Translates raw `IrcMessage` into typed events
+  - Fans out events to each plugin's individual event channel
 
 ### Plugin System
 
 - Plugin discovery, assembly loading, dependency graph construction,
   topological sorting, and lifecycle management.
-- Event dispatch: routes incoming IRC events to interested plugin
-  handlers.
+- Per-plugin event channels and tasks (see Async/Threading Model).
 - Described in detail below.
 
 ---
@@ -172,61 +194,79 @@ reference higher layers.
 ## Async / Threading Model
 
 Marv uses a small number of long-lived async tasks communicating via
-`System.Threading.Channels`. There is no thread pool dispatch for
-message handling — plugin handlers run on the message processing task
-to avoid concurrency issues with state.
+`System.Threading.Channels`. Each plugin runs on its own dedicated
+task, receiving events through its own channel.
 
 ### Task Structure
 
 ```
-┌──────────────┐     Channel<IrcMessage>     ┌──────────────────┐
-│  Read Loop   │ ──────────────────────────► │  Message         │
-│  (network)   │     (inbound)               │  Processor       │
-└──────────────┘                             │                  │
-                                             │  - State updates │
-                                             │  - Event dispatch│
-                                             │  - Plugin calls  │
-                                             └──────────────────┘
-                                                      │
-                                                      │ (plugins call
-                                                      │  IBot.SendAsync)
-                                                      ▼
-┌──────────────┐     Channel<IrcMessage>     ┌──────────────────┐
-│  Write Loop  │ ◄────────────────────────── │  Rate Limiter    │
-│  (network)   │     (outbound)              │  (token bucket)  │
-└──────────────┘                             └──────────────────┘
+                                             ┌──────────────────┐
+                                          ┌─►│  Plugin A Task   │
+                                          │  │  Channel<Event>  │
+┌──────────────┐   Channel<IrcMessage>   ┌┴───────────────────┐ │
+│  Read Loop   │ ──────────────────────► │  Message           │ │
+│  (network)   │   (inbound)             │  Processor         │ │
+└──────────────┘                         │                    ├─┤
+                                         │  - PING/PONG       │ │
+                                         │  - CAP negotiation │ │  ┌──────────────────┐
+                                         │  - State updates   ├─┼─►│  Plugin B Task   │
+                                         │  - Event fan-out   │ │  │  Channel<Event>  │
+                                         └┬───────────────────┘ │  └──────────────────┘
+                                          │                     │
+                                          └─►  ... more plugins
+
+         (plugins call IBot.SendAsync from any task)
+                          │
+                          ▼
+┌──────────────┐   Channel<IrcMessage>   ┌──────────────────┐
+│  Write Loop  │ ◄────────────────────── │  Rate Limiter    │
+│  (network)   │   (outbound)            │  (token bucket)  │
+└──────────────┘                         └──────────────────┘
 ```
 
 1. **Read Loop**: A dedicated async task reads from the TCP stream,
    parses raw lines into `IrcMessage` instances, and writes them to
    the inbound channel. This task does no processing beyond parsing.
 
-2. **Message Processor**: A dedicated async task reads from the inbound
-   channel. For each message it:
+2. **Message Processor**: A dedicated async task reads from the
+   inbound channel. For each message it:
    - Handles protocol-level concerns (PING/PONG, CAP negotiation)
    - Updates state tracking (channels, users, modes)
    - Translates raw `IrcMessage` into typed events
-   - Dispatches events to interested plugin handlers
+   - Writes the event to each plugin's individual event channel
 
-3. **Rate Limiter**: Accepts outbound messages from any task (plugins
+3. **Plugin Tasks**: Each plugin has its own dedicated async task and
+   `Channel<MarvEvent>`. The task reads events from the channel and
+   invokes the plugin's matching handlers sequentially. This means:
+   - Each plugin processes events independently and concurrently with
+     other plugins
+   - Within a single plugin, handlers still run sequentially — no
+     concurrency within a plugin
+   - A slow plugin does not block other plugins or state tracking
+   - Event ordering is preserved within each plugin
+
+4. **Rate Limiter**: Accepts outbound messages from any task (plugins
    call `IBot.SendAsync` which writes to this component) and drains
    them to the outbound channel at a rate that respects the server's
    flood limits.
 
-4. **Write Loop**: A dedicated async task reads from the outbound
+5. **Write Loop**: A dedicated async task reads from the outbound
    channel and writes serialized messages to the TCP stream.
 
 ### Concurrency Rules
 
-- **Plugin event handlers run on the message processor task.** This
-  means handlers run one at a time, in order, and can safely read bot
-  state without locks. A handler that needs to do slow work (HTTP
-  calls, database queries) should offload to `Task.Run` and use
-  `IBot.SendAsync` to send results back — `SendAsync` is thread-safe.
+- **Plugin event handlers run sequentially within their plugin task.**
+  A plugin's handlers never run concurrently with each other. But
+  different plugins' handlers do run concurrently.
 
-- **`IBot.SendAsync` is the only thread-safe entry point.** All other
-  `IBot` state-query methods are only safe to call from a plugin event
-  handler (i.e., on the message processor task).
+- **State stores are read-safe from any plugin task.** The message
+  processor updates state before fanning out events. State stores use
+  concurrent-read-safe data structures, so plugins can safely query
+  `IBot.Channels` and `IBot.Users` from their event handlers without
+  synchronization.
+
+- **`IBot.SendAsync` (and its variants) is thread-safe.** It can be
+  called from any plugin task, background tasks, timers, etc.
 
 - **`CancellationToken` propagation**: All async methods accept a
   `CancellationToken`. The bot's top-level token is cancelled on
@@ -244,6 +284,13 @@ with matching labels and delivers them as a batch to the caller via a
 var whoReply = await bot.SendAndAwaitAsync(whoMessage, cancellationToken);
 ```
 
+`SendAndAwaitAsync` sends an IRC command and returns the server's
+correlated response messages. It uses the `labeled-response` IRCv3
+capability to tag the outbound message with a unique label, then
+collects all inbound messages bearing that label until the server
+signals completion. This is useful for commands like WHO, WHOIS, and
+LIST where the response spans multiple messages.
+
 If `labeled-response` is not negotiated, the bot falls back to
 sequential command queuing with timeout-based correlation.
 
@@ -254,23 +301,27 @@ sequential command queuing with timeout-based correlation.
 ### Startup Sequence
 
 Plugin loading happens during application startup, before the IRC
-connection is established. The sequence has two phases as described in
-the research document.
+connection is established. The app calls
+`services.AddMarv(configuration)`, which triggers the following
+sequence inside `Marv.Core`.
 
 #### Phase 1: Bootstrap (No DI)
 
-1. **Read configuration**: The host reads the configuration file
-   (e.g., `marv.toml` or `marv.json`), overlays environment variables
-   (`MARV_*`), and overlays command-line arguments. This produces a
-   raw configuration object containing (among other things) the list
-   of plugin assembly paths.
+1. **Read plugin paths**: From the configuration (already parsed by
+   the app), extract the list of plugin assembly paths.
 
 2. **Discover assemblies**: For each configured plugin path, load the
    assembly into an `AssemblyLoadContext`. Scan for types that inherit
-   from `MarvPlugin`.
+   from `MarvPlugin` or `MarvPlugin<TConfig>`.
 
-3. **Build dependency graph**: Read `[DependsOn]` and
-   `[ConsumesService]` attributes from each discovered plugin type.
+3. **Build dependency graph**: Inspect each discovered plugin type:
+   - Read `[DependsOn]` attributes for explicit plugin ordering
+   - Read `[OptionalService]` attributes on constructor parameters
+     for optional service dependencies
+   - Read constructor parameters to identify required service
+     dependencies (non-optional, non-core types)
+   - Scan the plugin's `ConfigureServices` method (if present) to
+     identify service types registered into the container
    Construct a directed graph of plugin dependencies.
 
 4. **Topological sort**: Sort the graph. If there is a cycle, report
@@ -281,40 +332,51 @@ the research document.
 
 #### Phase 2: DI Container Build
 
-5. **Core service registration**: Register core services into a fresh
+5. **Core service registration**: Register core services into the
    `IServiceCollection`: logging, configuration, `IIrcConnection`,
    `ICapabilityManager`, `IChannelStore`, `IUserStore`, `IBot`.
 
-6. **Plugin service registration**: For each plugin type (in
-   dependency order), call its static `ConfigureServices` method,
-   passing the `IServiceCollection`. Plugins register their service
-   implementations and configuration bindings here. This method is
-   static — no plugin instance exists yet.
+6. **Plugin configuration registration**: For each plugin type that
+   extends `MarvPlugin<TConfig>`, automatically register
+   `IOptions<TConfig>` bound to the `Plugins:{PluginName}`
+   configuration section. No boilerplate needed in the plugin.
 
-7. **Plugin type registration**: Register each plugin type itself as
+7. **Plugin service registration**: For each plugin type (in
+   dependency order), if it has a static `ConfigureServices` method,
+   call it with the `IServiceCollection`. Plugins that provide
+   services to other plugins register their implementations here.
+   Plugins that only handle events and use configuration do not need
+   this method at all.
+
+8. **Plugin type registration**: Register each plugin type itself as
    a singleton in the container.
 
-8. **Build container**: Call `BuildServiceProvider()` to create the
+9. **Build container**: Call `BuildServiceProvider()` to create the
    single `IServiceProvider`.
 
-9. **Resolve plugins**: Resolve each plugin type from the container.
-   Constructor injection provides configuration, services, and the
-   `IBot` facade.
+10. **Resolve plugins**: Resolve each plugin type from the container.
+    Constructor injection provides configuration, services, and the
+    `IBot` facade.
 
-10. **Initialize plugins**: Call `OnLoadAsync()` on each plugin in
+11. **Initialize plugins**: Call `OnLoadAsync()` on each plugin in
     dependency order.
 
 #### Runtime
 
-11. **Connect**: Establish the IRC connection, negotiate capabilities,
+12. **Connect**: Establish the IRC connection, negotiate capabilities,
     authenticate, join channels.
 
-12. **Notify plugins**: Call `OnConnectedAsync()` on each plugin.
+13. **Notify plugins**: Call `OnConnectedAsync()` on each plugin.
 
-13. **Message loop**: Process messages until shutdown.
+14. **Start plugin tasks**: Create a dedicated `Channel<MarvEvent>`
+    and async task for each plugin.
 
-14. **Shutdown**: Call `OnDisconnectedAsync()` then `OnUnloadAsync()` on
-    each plugin in reverse dependency order. Dispose the DI container.
+15. **Message loop**: Process messages, update state, fan out events
+    to plugin channels.
+
+16. **Shutdown**: Signal all plugin tasks to stop. Call
+    `OnDisconnectedAsync()` then `OnUnloadAsync()` on each plugin in
+    reverse dependency order. Dispose the DI container.
 
 ### Assembly Load Context
 
@@ -332,77 +394,72 @@ approach is simpler and avoids a class of subtle bugs.
 
 ## Inter-Plugin Services
 
-### Registration
+### How It Works
 
-A plugin provides a service by:
+Service relationships are inferred automatically from the code. No
+explicit `[ProvidesService]` or `[ConsumesService]` attributes are
+needed for the common case.
 
-1. Defining an interface (e.g., `IAuthorizationService`). This
-   interface can live in:
-   - The plugin's own assembly (if consumers are expected to reference
-     it)
-   - A separate contracts assembly (if the interface should be
-     decoupled from the implementation)
-   - `Marv.Core` itself (for services that are fundamental enough to
-     be part of the core API)
+**Providing a service**: A plugin registers a service type in its
+static `ConfigureServices` method. The plugin loader scans this
+method's registrations to identify which service types the plugin
+provides.
 
-2. Implementing the interface in the plugin assembly.
+**Consuming a service**: A plugin declares a constructor parameter of
+the service type. The plugin loader inspects constructor parameters to
+identify consumed services. Non-nullable parameters are required
+dependencies; parameters marked with `[OptionalService]` (and
+nullable with a default of `null`) are optional.
 
-3. Registering the implementation in `ConfigureServices`:
-   ```csharp
-   public static void ConfigureServices(IServiceCollection services)
-   {
-       services.AddSingleton<IAuthorizationService, AuthorizationService>();
-   }
-   ```
+**Explicit ordering**: `[DependsOn(typeof(OtherPlugin))]` forces load
+ordering without implying a service relationship.
 
-4. Declaring the provided service via attribute on the plugin class:
-   ```csharp
-   [ProvidesService(typeof(IAuthorizationService))]
-   public class AuthPlugin : MarvPlugin { ... }
-   ```
-
-The `[ProvidesService]` attribute serves two purposes: it enables the
-dependency sorter to know which plugin provides which service, and it
-enables diagnostic tooling to report the service → plugin mapping.
-
-### Discovery and Consumption
-
-A plugin consumes a service by:
-
-1. Declaring the dependency via constructor injection:
-   ```csharp
-   public class GreetPlugin : MarvPlugin
-   {
-       public GreetPlugin(IAuthorizationService auth) { ... }
-   }
-   ```
-
-2. Declaring the dependency via attribute for the dependency sorter:
-   ```csharp
-   [ConsumesService(typeof(IAuthorizationService))]
-   public class GreetPlugin : MarvPlugin { ... }
-   ```
-
-For **optional** dependencies:
+### Example
 
 ```csharp
-[ConsumesService(typeof(IAuthorizationService), Required = false)]
-public class GreetPlugin : MarvPlugin
+// Auth plugin provides IAuthorizationService
+public class AuthPlugin : MarvPlugin<AuthPluginConfig>
 {
-    public GreetPlugin(IAuthorizationService? auth = null) { ... }
+    public static void ConfigureServices(IServiceCollection services)
+    {
+        services.AddSingleton<IAuthorizationService, AccountBasedAuthService>();
+    }
+}
+
+// Moderation plugin consumes IAuthorizationService (required)
+public class ModerationPlugin : MarvPlugin
+{
+    public ModerationPlugin(IBot bot, IAuthorizationService auth) { ... }
+}
+
+// Greet plugin consumes IAuthorizationService (optional)
+public class GreetPlugin : MarvPlugin<GreetPluginConfig>
+{
+    public GreetPlugin(
+        IBot bot,
+        [OptionalService] IAuthorizationService? auth = null) { ... }
 }
 ```
 
-When the service is not registered, the constructor receives `null`
-and the plugin operates with reduced functionality.
+The loader sees:
+- `AuthPlugin` provides `IAuthorizationService` (from ConfigureServices)
+- `ModerationPlugin` requires `IAuthorizationService` (from
+  constructor, non-nullable)
+- `GreetPlugin` optionally uses `IAuthorizationService` (from
+  constructor, `[OptionalService]`)
 
-### Load Order
+Load order: AuthPlugin → ModerationPlugin, GreetPlugin (order between
+Moderation and Greet is unspecified since neither depends on the
+other).
+
+### Load Order Details
 
 The dependency sorter builds a graph from:
 
 - `[DependsOn(typeof(OtherPlugin))]` — direct plugin dependency
-- `[ConsumesService(typeof(IFoo))]` — resolved to the plugin with
-  `[ProvidesService(typeof(IFoo))]`
+- Required constructor parameters — resolved to the plugin whose
+  `ConfigureServices` registers that type
+- `[OptionalService]` constructor parameters — ordered-if-present
 
 The graph is topologically sorted. Plugins with no dependencies load
 first; plugins with dependencies load after their providers.
@@ -424,8 +481,8 @@ The constructor receives `null` for that parameter.
 At startup (and available via a status command), the bot logs:
 
 - Which plugins are loaded, in what order
-- Which services each plugin provides
-- Which services each plugin consumes (and whether optional)
+- Which services each plugin provides (inferred from ConfigureServices)
+- Which services each plugin consumes (inferred from constructors)
 - Any plugins that were skipped and why
 
 ---
@@ -444,7 +501,8 @@ This uses the standard `Microsoft.Extensions.Configuration` stack.
 
 ### Plugin Configuration
 
-Each plugin declares a configuration class (a record or POCO):
+Plugins that need configuration extend `MarvPlugin<TConfig>` instead
+of `MarvPlugin`:
 
 ```csharp
 public record GreetPluginConfig
@@ -452,22 +510,22 @@ public record GreetPluginConfig
     public string GreetMessage { get; init; } = "Hello, {nick}!";
     public bool GreetOnJoin { get; init; } = true;
 }
-```
 
-During `ConfigureServices`, the plugin binds its configuration
-section:
-
-```csharp
-public static void ConfigureServices(IServiceCollection services)
+public class GreetPlugin : MarvPlugin<GreetPluginConfig>
 {
-    services.AddOptions<GreetPluginConfig>()
-        .BindConfiguration("Plugins:Greet");
+    // Config is available via this.Config (provided by the base class)
 }
 ```
 
-The plugin receives `IOptions<GreetPluginConfig>` via constructor
-injection. Configuration is validated at startup before the bot
-connects.
+The plugin loader automatically registers `IOptions<TConfig>` bound
+to the `Plugins:{PluginName}` configuration section. The
+`MarvPlugin<TConfig>` base class exposes a `Config` property so the
+plugin can access its typed configuration without any DI boilerplate.
+
+There is no need for a `ConfigureServices` method just for
+configuration — this is handled automatically. Only plugins that
+register services for other plugins to consume need
+`ConfigureServices`.
 
 ---
 
@@ -475,9 +533,9 @@ connects.
 
 - **Parse errors**: Malformed messages from the server are logged and
   skipped — they never crash the message processor.
-- **Plugin handler exceptions**: Caught by the event dispatcher,
-  logged with the plugin name and event type, and do not affect other
-  plugins or the message loop.
+- **Plugin handler exceptions**: Caught by the plugin's event loop
+  task, logged with the plugin name and event type, and do not affect
+  other plugins or the message loop.
 - **Connection loss**: The connection layer signals disconnection. The
   bot notifies plugins via `OnDisconnectedAsync`, then begins
   reconnection with exponential backoff.

@@ -11,20 +11,21 @@ A plugin author's day-to-day involves these types from `Marv.Core`:
 
 | Type | Purpose |
 |---|---|
-| `MarvPlugin` | Base class all plugins inherit from |
+| `MarvPlugin` | Base class for plugins without configuration |
+| `MarvPlugin<TConfig>` | Base class for plugins with typed configuration |
 | `IBot` | Facade for sending messages and querying state |
-| `IChannel`, `IUser`, `IChannelMember` | Read-only state models |
+| `IChannel`, `IUser` | Read-only state models |
 | `ICapabilityManager` | Check negotiated capabilities |
 | `IServerInfo` | Server configuration (ISUPPORT) |
-| Event classes (`ChannelMessageEvent`, etc.) | Typed event payloads |
+| Event classes (`MessageEvent`, etc.) | Typed event payloads |
 | Attributes (`[OnEvent]`, `[OnCommand]`, etc.) | Declare event interest |
-| `[ProvidesService]`, `[ConsumesService]`, `[DependsOn]` | Service/dependency declarations |
+| `[DependsOn]`, `[OptionalService]` | Dependency declarations |
 
 ---
 
 ## Plugin Lifecycle
 
-### MarvPlugin Base Class
+### MarvPlugin Base Classes
 
 ```csharp
 public abstract class MarvPlugin
@@ -43,7 +44,20 @@ public abstract class MarvPlugin
     /// Use for cleanup (unsubscribe, flush, close handles).
     public virtual Task OnUnloadAsync() => Task.CompletedTask;
 }
+
+public abstract class MarvPlugin<TConfig> : MarvPlugin
+    where TConfig : class, new()
+{
+    /// Typed configuration, automatically bound to the
+    /// Plugins:{PluginName} configuration section.
+    protected TConfig Config { get; }
+}
 ```
+
+Plugins that need configuration extend `MarvPlugin<TConfig>`. The
+plugin loader automatically registers `IOptions<TConfig>` bound to
+the `Plugins:{PluginName}` configuration section — no
+`ConfigureServices` boilerplate needed.
 
 ### Lifecycle Order
 
@@ -60,8 +74,8 @@ public abstract class MarvPlugin
 ## Registering Interest in Events
 
 Plugins declare event handlers using attributes on methods. The
-method must be an instance method on the plugin class and return
-`Task`.
+method must be an instance method on the plugin class (or a handler
+group class — see below) and return `Task`.
 
 ### `[OnEvent]` — Subscribe to any typed event
 
@@ -97,12 +111,40 @@ CommandContext
 ├── ArgString: string               (remaining text, unparsed)
 ├── Channel: IChannel?              (null for private messages)
 ├── Sender: IUser
+├── IsDirect: bool
 ├── ReplyAsync(string): Task        (responds in-context)
 └── RawMessage: IrcMessage
 ```
 
 The command prefix (e.g., `!` or `.`) is configured per-bot, not
 per-plugin.
+
+### `[OnRegex]` — Match messages against a regular expression
+
+```csharp
+[OnRegex(@"https?://\S+")]
+public async Task HandleUrl(RegexMatchContext ctx, CancellationToken ct)
+{
+    var url = ctx.Match.Value;
+    await ctx.ReplyAsync($"I see a URL: {url}");
+}
+```
+
+`RegexMatchContext` extends the message event with the regex match:
+
+```
+RegexMatchContext
+├── Match: Match                    (System.Text.RegularExpressions.Match)
+├── Channel: IChannel?
+├── Sender: IUser
+├── IsDirect: bool
+├── ReplyAsync(string): Task
+└── RawMessage: IrcMessage
+```
+
+The regex is matched against the full message text. If there are
+multiple matches, the handler is called once with the first match.
+Named capture groups are accessible via `ctx.Match.Groups["name"]`.
 
 ### `[OnRawMessage]` — Subscribe to raw IRC commands
 
@@ -126,29 +168,81 @@ public async Task CheckSomething(CancellationToken ct)
 }
 ```
 
-Interval handlers are not tied to any message — they run on the
-message processor task during idle periods.
+Interval handlers run on the plugin's own task.
+
+---
+
+## Handler Groups
+
+For plugins with many handlers, related handlers can be organized
+into separate classes using `[HandlerGroup]`. A handler group is a
+class whose methods are treated as if they were methods on the plugin
+itself.
+
+```csharp
+public class MyPlugin : MarvPlugin
+{
+    // Plugin-level lifecycle, minimal handler code here
+}
+
+[HandlerGroup(typeof(MyPlugin))]
+public class MyAdminHandlers
+{
+    private readonly IBot _bot;
+    private readonly IAuthorizationService _auth;
+
+    // Constructor-injected from the DI container, just like plugins
+    public MyAdminHandlers(IBot bot, IAuthorizationService auth)
+    {
+        _bot = bot;
+        _auth = auth;
+    }
+
+    [OnCommand("kick")]
+    public async Task HandleKick(CommandContext ctx, CancellationToken ct)
+    {
+        if (!await _auth.IsAuthorizedAsync(ctx.Sender, "mod.kick", ct))
+        {
+            await ctx.ReplyAsync("Permission denied.");
+            return;
+        }
+        // ... perform the kick
+    }
+
+    [OnCommand("ban")]
+    public async Task HandleBan(CommandContext ctx, CancellationToken ct)
+    {
+        // ...
+    }
+}
+```
+
+Handler groups are:
+
+- Discovered automatically by scanning the plugin's assembly for
+  classes with `[HandlerGroup(typeof(MyPlugin))]`
+- Constructed via DI — they can inject any service the plugin can
+- Registered as singletons in the container
+- Their event handlers run on the owning plugin's task, sequentially
+  with the plugin's own handlers
+- Useful for separating concerns without creating multiple plugins
+  (which would each get their own task and independent event ordering)
 
 ---
 
 ## Registering a Service
 
-A plugin provides a service for other plugins by:
-
-1. Defining the service interface
-2. Implementing it
-3. Registering it during `ConfigureServices`
-4. Declaring it via `[ProvidesService]`
+A plugin provides a service for other plugins by registering it in
+a static `ConfigureServices` method. No special attributes are needed
+— the plugin loader automatically detects which types are registered.
 
 ### Example: Auth Service
 
 **Interface** (in the plugin assembly or a separate contracts assembly):
 
 ```csharp
-/// Determines whether a user is authorized to perform an action.
 public interface IAuthorizationService
 {
-    /// Returns true if the user is authorized for the given permission.
     Task<bool> IsAuthorizedAsync(IUser user, string permission, CancellationToken ct);
 }
 ```
@@ -156,40 +250,19 @@ public interface IAuthorizationService
 **Plugin class**:
 
 ```csharp
-[ProvidesService(typeof(IAuthorizationService))]
-public class AuthPlugin : MarvPlugin
+public class AuthPlugin : MarvPlugin<AuthPluginConfig>
 {
-    private readonly IOptions<AuthPluginConfig> _config;
-    private readonly IBot _bot;
-    private readonly AuthorizationService _authService;
-
-    public AuthPlugin(IBot bot, IOptions<AuthPluginConfig> config)
-    {
-        _bot = bot;
-        _config = config;
-        _authService = new AuthorizationService(config);
-    }
-
     public static void ConfigureServices(IServiceCollection services)
     {
-        services.AddSingleton<IAuthorizationService>(sp =>
-        {
-            var plugin = sp.GetRequiredService<AuthPlugin>();
-            return plugin._authService;
-        });
-
-        services.AddOptions<AuthPluginConfig>()
-            .BindConfiguration("Plugins:Auth");
+        services.AddSingleton<IAuthorizationService, AccountBasedAuthService>();
     }
 }
 ```
 
-**Configuration** (`marv.toml`):
-
-```toml
-[Plugins.Auth]
-AdminAccounts = ["admin1", "admin2"]
-```
+That's it. The plugin loader sees `IAuthorizationService` registered
+in `ConfigureServices` and knows that `AuthPlugin` provides it. Other
+plugins that inject `IAuthorizationService` via their constructor are
+automatically sorted to load after `AuthPlugin`.
 
 ---
 
@@ -197,8 +270,9 @@ AdminAccounts = ["admin1", "admin2"]
 
 ### Required Dependency
 
+Simply inject the service via the constructor:
+
 ```csharp
-[ConsumesService(typeof(IAuthorizationService))]
 public class ModerationPlugin : MarvPlugin
 {
     private readonly IAuthorizationService _auth;
@@ -226,13 +300,17 @@ fails to load at startup with a clear error.
 
 ### Optional Dependency
 
+Mark the parameter with `[OptionalService]` and make it nullable
+with a default of `null`:
+
 ```csharp
-[ConsumesService(typeof(IAuthorizationService), Required = false)]
-public class GreetPlugin : MarvPlugin
+public class GreetPlugin : MarvPlugin<GreetPluginConfig>
 {
     private readonly IAuthorizationService? _auth;
 
-    public GreetPlugin(IBot bot, IAuthorizationService? auth = null)
+    public GreetPlugin(
+        IBot bot,
+        [OptionalService] IAuthorizationService? auth = null)
     {
         _auth = auth;
     }
@@ -240,32 +318,29 @@ public class GreetPlugin : MarvPlugin
     [OnEvent]
     public async Task HandleJoin(UserJoinedEvent e, CancellationToken ct)
     {
-        // If auth is available, only greet authorized users.
         if (_auth is not null &&
             !await _auth.IsAuthorizedAsync(e.User, "greet.receive", ct))
         {
             return;
         }
 
-        await e.Channel.SendMessageAsync($"Welcome, {e.User.Nick}!");
+        var message = Config.GreetMessage.Replace("{nick}", e.User.Nick);
+        await e.Channel.SendMessageAsync(message);
     }
 }
 ```
 
 ### Direct Plugin Dependency
 
-For cases where a plugin depends on another plugin directly (not just
-a service interface):
+For cases where a plugin depends on another plugin directly (for load
+ordering, not service consumption):
 
 ```csharp
 [DependsOn(typeof(AuthPlugin))]
 public class AdminPlugin : MarvPlugin { ... }
 ```
 
-This ensures `AuthPlugin` loads before `AdminPlugin` but does not
-imply any service consumption. Prefer `[ConsumesService]` over
-`[DependsOn]` when the dependency is on a service interface — it
-provides better decoupling.
+This ensures `AuthPlugin` loads before `AdminPlugin`.
 
 ---
 
@@ -289,10 +364,9 @@ public interface IBot
     Task JoinAsync(string channel, string? key, CancellationToken ct);
     Task PartAsync(string channel, string? reason, CancellationToken ct);
 
-    // --- State Queries (call only from event handlers) ---
-    IChannel? GetChannel(string name);
-    IReadOnlyCollection<IChannel> Channels { get; }
-    IUser? GetUser(string nick);
+    // --- State ---
+    IReadOnlyDictionary<string, IChannel> Channels { get; }
+    IReadOnlyDictionary<string, IUser> Users { get; }
 
     // --- Server Info ---
     IServerInfo ServerInfo { get; }
@@ -304,21 +378,35 @@ public interface IBot
 }
 ```
 
-**Thread safety**: `SendMessageAsync`, `SendNoticeAsync`,
-`SendActionAsync`, and `SendRawAsync` are thread-safe — they can be
-called from any context (background tasks, timers, etc.). The state
-query methods (`GetChannel`, `GetUser`, `Channels`) are only safe to
-call from event handlers running on the message processor task.
+**`Channels`**: Dictionary keyed by case-mapped channel name. Use the
+indexer for O(1) lookup by name (e.g., `bot.Channels["#general"]`).
+
+**`Users`**: Dictionary keyed by case-mapped nick. Contains all users
+the bot is aware of (through shared channels or direct interaction).
+
+**`SendAndAwaitAsync`**: Sends an IRC command and waits for the
+server's correlated response. Uses the `labeled-response` IRCv3
+capability to tag the outbound message with a unique label, then
+collects all inbound messages bearing that label until the server
+signals completion. Useful for commands like WHO, WHOIS, and LIST
+where the response spans multiple messages. Falls back to
+timeout-based correlation if `labeled-response` is not negotiated.
+
+**Thread safety**: All `Send*Async` methods, `JoinAsync`, `PartAsync`,
+and `SendAndAwaitAsync` are thread-safe — they can be called from any
+context (plugin tasks, background tasks, timers). The `Channels` and
+`Users` dictionaries are read-safe from any plugin task (they use
+concurrent-read-safe data structures updated only by the message
+processor).
 
 ### Convenience Methods on Event Objects
 
-Event objects provide contextual shortcuts so plugins don't need to
-thread `IBot` through everything:
+Event objects provide contextual shortcuts:
 
 ```csharp
-// On ChannelMessageEvent:
-await e.ReplyAsync("response");           // sends to the channel
-await e.ReplyToSenderAsync("response");   // sends a private message
+// On MessageEvent:
+await e.ReplyAsync("response");           // sends to channel or DM, matching context
+await e.Channel.SendMessageAsync("msg");  // only for channel messages
 
 // On UserJoinedEvent:
 await e.Channel.SendMessageAsync("Welcome!");
@@ -335,7 +423,6 @@ These delegate to `IBot` internally.
 A plugin that responds to `!ping` with `pong`:
 
 ```csharp
-/// A minimal plugin that responds to the !ping command.
 public class PingPlugin : MarvPlugin
 {
     [OnCommand("ping")]
@@ -346,9 +433,9 @@ public class PingPlugin : MarvPlugin
 }
 ```
 
-That's it. No configuration, no services, no lifecycle hooks. The
-plugin is discovered by assembly scanning, loaded into the DI
-container, and its `[OnCommand]` handler is automatically registered.
+No configuration, no services, no lifecycle hooks, no
+`ConfigureServices`. Discovered by assembly scanning and wired up
+automatically.
 
 ### Plugin with Configuration
 
@@ -361,32 +448,22 @@ public record GreetPluginConfig
     public bool GreetOnJoin { get; init; } = true;
 }
 
-public class GreetPlugin : MarvPlugin
+public class GreetPlugin : MarvPlugin<GreetPluginConfig>
 {
-    private readonly IOptions<GreetPluginConfig> _config;
-
-    public GreetPlugin(IOptions<GreetPluginConfig> config)
-    {
-        _config = config;
-    }
-
-    public static void ConfigureServices(IServiceCollection services)
-    {
-        services.AddOptions<GreetPluginConfig>()
-            .BindConfiguration("Plugins:Greet");
-    }
-
     [OnEvent]
     public async Task HandleJoin(UserJoinedEvent e, CancellationToken ct)
     {
-        if (!_config.Value.GreetOnJoin)
+        if (!Config.GreetOnJoin)
             return;
 
-        var message = _config.Value.GreetMessage.Replace("{nick}", e.User.Nick);
+        var message = Config.GreetMessage.Replace("{nick}", e.User.Nick);
         await e.Channel.SendMessageAsync(message);
     }
 }
 ```
+
+Configuration is automatically bound to `Plugins:Greet` in the
+config file. No `ConfigureServices` needed.
 
 ### Plugin That Provides and Consumes a Service
 
@@ -408,34 +485,19 @@ public record AuthPluginConfig
     public List<string> AdminAccounts { get; init; } = [];
 }
 
-[ProvidesService(typeof(IAuthorizationService))]
-public class AuthPlugin : MarvPlugin
+public class AuthPlugin : MarvPlugin<AuthPluginConfig>
 {
-    private readonly AuthPluginConfig _config;
-
-    public AuthPlugin(IOptions<AuthPluginConfig> config)
-    {
-        _config = config.Value;
-    }
-
     public static void ConfigureServices(IServiceCollection services)
     {
-        services.AddOptions<AuthPluginConfig>()
-            .BindConfiguration("Plugins:Auth");
-
-        services.AddSingleton<IAuthorizationService>(sp =>
-        {
-            var config = sp.GetRequiredService<IOptions<AuthPluginConfig>>();
-            return new AccountBasedAuthService(config.Value);
-        });
+        services.AddSingleton<IAuthorizationService, AccountBasedAuthService>();
     }
 }
 
 internal class AccountBasedAuthService : IAuthorizationService
 {
-    private readonly AuthPluginConfig _config;
+    private readonly IOptions<AuthPluginConfig> _config;
 
-    public AccountBasedAuthService(AuthPluginConfig config)
+    public AccountBasedAuthService(IOptions<AuthPluginConfig> config)
     {
         _config = config;
     }
@@ -444,14 +506,13 @@ internal class AccountBasedAuthService : IAuthorizationService
         IUser user, string permission, CancellationToken ct)
     {
         var isAdmin = user.Account is not null &&
-            _config.AdminAccounts.Contains(user.Account);
+            _config.Value.AdminAccounts.Contains(user.Account);
         return Task.FromResult(isAdmin);
     }
 }
 
-// --- Moderation Plugin (consumes auth) ---
+// --- Moderation Plugin (consumes auth, required) ---
 
-[ConsumesService(typeof(IAuthorizationService))]
 public class ModerationPlugin : MarvPlugin
 {
     private readonly IBot _bot;
@@ -490,6 +551,48 @@ public class ModerationPlugin : MarvPlugin
 }
 ```
 
+### Plugin with Handler Groups
+
+A moderation plugin that organizes handlers by concern:
+
+```csharp
+public class ModerationPlugin : MarvPlugin<ModerationConfig>
+{
+    private readonly IAuthorizationService _auth;
+
+    public ModerationPlugin(IAuthorizationService auth)
+    {
+        _auth = auth;
+    }
+}
+
+[HandlerGroup(typeof(ModerationPlugin))]
+public class KickBanHandlers
+{
+    private readonly IBot _bot;
+    private readonly IAuthorizationService _auth;
+
+    public KickBanHandlers(IBot bot, IAuthorizationService auth)
+    {
+        _bot = bot;
+        _auth = auth;
+    }
+
+    [OnCommand("kick")]
+    public async Task HandleKick(CommandContext ctx, CancellationToken ct) { ... }
+
+    [OnCommand("ban")]
+    public async Task HandleBan(CommandContext ctx, CancellationToken ct) { ... }
+}
+
+[HandlerGroup(typeof(ModerationPlugin))]
+public class FloodProtectionHandlers
+{
+    [OnEvent]
+    public async Task HandleMessage(MessageEvent e, CancellationToken ct) { ... }
+}
+```
+
 ---
 
 ## Plugin Project Structure
@@ -500,13 +603,13 @@ A typical plugin project on disk:
 Marv.Plugins.MyPlugin/
 ├── Marv.Plugins.MyPlugin.csproj   (references Marv.Core)
 ├── MyPlugin.cs                    (plugin class)
-├── MyPluginConfig.cs              (configuration record)
+├── MyPluginConfig.cs              (configuration record, if needed)
 ├── Services/
-│   ├── IMyService.cs              (service interface)
+│   ├── IMyService.cs              (service interface, if providing)
 │   └── MyService.cs               (service implementation)
 └── Handlers/
-    └── ...                        (if handlers are complex enough
-                                    to warrant separate files)
+    ├── AdminHandlers.cs           (handler group)
+    └── UserHandlers.cs            (handler group)
 ```
 
 The `.csproj` references `Marv.Core` and nothing else from the Marv
@@ -531,6 +634,6 @@ public async Task PingPlugin_responds_with_pong()
 }
 ```
 
-`Marv.Core` provides test fakes (`CommandContextFake`,
-`ChannelFake`, `UserFake`, `BotFake`) so plugin authors can unit test
-handlers without mocking infrastructure.
+`Marv.Core` provides test fakes (`CommandContextFake`, `ChannelFake`,
+`UserFake`, `BotFake`) so plugin authors can unit test handlers
+without mocking infrastructure.

@@ -11,8 +11,8 @@ forcing them to work with raw protocol strings.
 
 ### Raw Message: `IrcMessage`
 
-The lowest-level representation. An immutable record produced by the
-parser:
+The lowest-level representation. An immutable record used for both
+inbound and outbound messages:
 
 ```
 IrcMessage
@@ -33,7 +33,10 @@ IrcMessage
 - `Tags` values are already unescaped. The parser handles `\:`, `\s`,
   `\\`, `\r`, `\n`, and invalid escape sequences per the IRCv3 spec.
 - `Source` is parsed into its components. Server-originated messages
-  may have a source with only a hostname (no nick/user).
+  may have a source with only a hostname (no nick/user). For outbound
+  messages, `Source` is null.
+- The same type is used for both directions. The structure is
+  identical; only the presence of `Source` differs.
 
 ### Message Metadata
 
@@ -73,25 +76,20 @@ IChannel
 ├── TopicSetBy: string?                     (nick or mask)
 ├── TopicSetAt: DateTimeOffset?
 ├── Modes: IReadOnlyDictionary<char, string?> (mode → parameter)
-├── Members: IReadOnlyCollection<IChannelMember>
+├── Members: IReadOnlyCollection<IUser>
+├── GetPrefixes(string nick): IReadOnlySet<char>   ('@', '+', etc.)
+├── GetJoinTime(string nick): DateTimeOffset?
 ├── HasMember(string nick): bool
-├── GetMember(string nick): IChannelMember?
+├── IsOp(string nick): bool                (shorthand: has '@' prefix)
+├── IsVoiced(string nick): bool             (shorthand: has '+' prefix)
 └── CreatedAt: DateTimeOffset?
 ```
 
-### `IChannelMember`
-
-A user's presence within a specific channel:
-
-```
-IChannelMember
-├── User: IUser
-├── Prefixes: IReadOnlySet<char>   ('@', '+', '%', etc.)
-├── HasPrefix(char prefix): bool
-├── IsOp: bool                     (shorthand for '@')
-├── IsVoiced: bool                 (shorthand for '+')
-└── JoinedAt: DateTimeOffset?      (if server-time available)
-```
+Per-user channel state (prefixes and join time) is stored on the
+channel itself rather than in a separate `IChannelMember` relation.
+These are the only two per-user-per-channel properties, and a
+dedicated join type would add API surface without meaningful benefit.
+Plugins query prefix/join state through the `IChannel` methods.
 
 ### Channel Comparisons
 
@@ -99,9 +97,9 @@ Channel names are compared using the server's advertised `CASEMAPPING`
 (from ISUPPORT). The `IChannel` and related types use this
 automatically — plugins do not need to handle case mapping themselves.
 
-All channel collections (`IChannelStore`) are keyed using
-case-mapped comparison so that `#Channel` and `#channel` resolve to
-the same entry under ASCII case mapping.
+All channel collections are keyed using case-mapped comparison so that
+`#Channel` and `#channel` resolve to the same entry under ASCII case
+mapping.
 
 ---
 
@@ -241,14 +239,20 @@ carries the relevant context and the raw `IrcMessage` for advanced use.
 
 #### Message Events
 
+Message events use a unified type with an `IsDirect` flag rather than
+separate channel/private variants. This halves the event type count
+and means a handler that doesn't care about the distinction (which is
+common) needs only one subscription.
+
 | Event | Key Properties |
 |---|---|
-| `ChannelMessageEvent` | `Channel`, `Sender`, `Text`, `ReplyTo?` |
-| `PrivateMessageEvent` | `Sender`, `Text`, `ReplyTo?` |
-| `ChannelNoticeEvent` | `Channel`, `Sender`, `Text` |
-| `PrivateNoticeEvent` | `Sender`, `Text` |
-| `ChannelActionEvent` | `Channel`, `Sender`, `Text` (CTCP ACTION) |
-| `PrivateActionEvent` | `Sender`, `Text` |
+| `MessageEvent` | `Channel?`, `Sender`, `Text`, `IsDirect`, `ReplyTo?` |
+| `NoticeEvent` | `Channel?`, `Sender`, `Text`, `IsDirect` |
+| `ActionEvent` | `Channel?`, `Sender`, `Text`, `IsDirect` |
+
+When `IsDirect` is true, `Channel` is null (the message was sent
+directly to the bot). When `IsDirect` is false, `Channel` identifies
+the channel the message was sent to.
 
 #### Channel Events
 
@@ -289,32 +293,40 @@ All events inherit from `MarvEvent` and share:
 MarvEvent
 ├── Timestamp: DateTimeOffset   (from server-time tag, or local clock)
 ├── RawMessage: IrcMessage      (the underlying protocol message)
-└── MessageId: string?          (from msgid tag)
+├── MessageId: string?          (from msgid tag)
+└── BatchId: string?            (from batch tag, null if not batched)
 ```
 
-### Batch Events
+### Batched Messages
 
-When the server sends a `BATCH` group, the contained messages are
-collected and delivered as a `BatchEvent` after the batch closes:
+When the server sends a `BATCH` group, individual messages within the
+batch are delivered as normal typed events — each carries a `BatchId`
+property linking it to the batch. Plugins that don't care about
+batching simply ignore `BatchId` and process events normally.
 
-```
-BatchEvent
-├── Type: string         (e.g., "netsplit", "netjoin", "chathistory")
-├── Parameters: IReadOnlyList<string>
-├── Messages: IReadOnlyList<IrcMessage>
-└── InnerEvents: IReadOnlyList<MarvEvent>
-```
+Plugins that need batch-aware processing (e.g., collecting all
+netsplit QUITs atomically) can subscribe to the batch start/end
+signals and collect events by `BatchId`:
 
-Individual messages within a batch are not dispatched as separate
-events — they are only available within the `BatchEvent`. This
-prevents plugins from seeing partial state during a netsplit/netjoin.
+| Event | Key Properties |
+|---|---|
+| `BatchStartEvent` | `BatchId`, `Type`, `Parameters` |
+| `BatchEndEvent` | `BatchId` |
+
+This approach avoids forcing all plugin authors to handle both
+individual and batched event delivery. The default path (ignore
+batching) works without any special handling.
 
 ### Event Ordering
 
-Events are dispatched sequentially on the message processor task:
+Events are dispatched per-plugin (each plugin has its own channel and
+task — see `architecture.md`). The ordering guarantees are:
 
-1. `RawMessageEvent` fires first (all raw subscribers)
-2. State tracking updates (channel/user stores)
-3. The typed event fires (e.g., `UserJoinedEvent`)
-
-Within each step, plugin handlers are called in plugin load order.
+1. State tracking updates happen before events are fanned out
+2. `RawMessageEvent` is dispatched before the corresponding typed
+   event
+3. Within a single plugin, events arrive in the order the server
+   sent them
+4. Across plugins, events are delivered concurrently — there is no
+   ordering guarantee between different plugins' handling of the same
+   event

@@ -25,33 +25,50 @@ Three approaches were evaluated (see `docs/research.md` section 4):
 
 ## Decision
 
-**Option 3: Hybrid approach with a single DI container.**
+**Option 3: Hybrid approach with a single DI container and automatic
+service discovery.**
 
 There is one `IServiceCollection` and one `IServiceProvider` for the
 entire application. Core services and plugin-contributed services all
 live in the same container. There is no separate container for
 plugins.
 
-Plugins declare their service relationships via attributes:
+### Automatic Service Discovery
 
-- `[ProvidesService(typeof(IFoo))]` on the plugin class
-- `[ConsumesService(typeof(IFoo), Required = true/false)]` on the
-  plugin class
-- `[DependsOn(typeof(OtherPlugin))]` for direct plugin dependencies
+Service relationships are inferred from the code — no explicit
+`[ProvidesService]` or `[ConsumesService]` attributes are required:
 
-These attributes feed a metadata layer that:
+**Provided services** are discovered by scanning each plugin's static
+`ConfigureServices(IServiceCollection)` method. The plugin loader
+inspects the registrations to determine which service types a plugin
+contributes to the container. Plugins that don't provide services
+don't need this method.
 
-1. Builds a dependency graph before the container is constructed
-2. Topologically sorts plugins to determine load order
-3. Detects cycles and missing required dependencies at startup
-4. Provides diagnostic information (which plugin provides which
-   service)
+**Consumed services** are discovered by inspecting the plugin's
+constructor parameters. Any parameter whose type is not a core
+service (not `IBot`, `IOptions<T>`, `ILogger<T>`, etc.) is assumed to
+be a plugin-provided service dependency:
 
-The actual service registration and resolution uses standard
-`IServiceCollection` / `IServiceProvider` patterns. Plugins register
-services in a static `ConfigureServices(IServiceCollection)` method
-called in dependency order. Plugins receive dependencies via
-constructor injection.
+- **Required**: Non-nullable parameter → the service must be
+  registered by another plugin, or startup fails.
+- **Optional**: Parameter marked with `[OptionalService]`, nullable
+  type, and a default of `null` → the service is used if available
+  but does not block startup.
+
+### Explicit Ordering
+
+`[DependsOn(typeof(OtherPlugin))]` forces one plugin to load after
+another without implying any service relationship. This is a
+secondary mechanism for cases where the service graph alone doesn't
+capture the needed ordering.
+
+### Automatic Configuration
+
+Plugins extending `MarvPlugin<TConfig>` have their configuration type
+automatically registered as `IOptions<TConfig>` bound to
+`Plugins:{PluginName}`. No `ConfigureServices` boilerplate is needed
+for the common case of a plugin that only has configuration and event
+handlers.
 
 ## Rationale
 
@@ -72,45 +89,41 @@ unfamiliar to .NET developers. It also hides dependencies — consumers
 call `registry.Get<T>()` at arbitrary points rather than declaring
 them in the constructor.
 
-**Why hybrid works**: The attributes provide the metadata needed for
-ordering and diagnostics. The actual DI uses standard .NET patterns
-that C# developers already know. Constructor injection keeps
-dependencies explicit and testable.
+**Why automatic discovery over explicit attributes**: Requiring
+`[ProvidesService]` and `[ConsumesService]` attributes creates
+redundancy — the information already exists in `ConfigureServices`
+registrations and constructor parameters. Inferring it automatically:
+
+- Reduces boilerplate for plugin authors
+- Eliminates the risk of attributes getting out of sync with the
+  actual code
+- Makes the common case (no services, or simple service consumption)
+  require zero ceremony
+
+The `[OptionalService]` attribute remains because optionality cannot
+be reliably inferred from nullability alone — a plugin author might
+use a nullable parameter for other reasons.
 
 **Why a single container**: One `IServiceProvider` for core and
 plugins avoids type identity issues and complex cross-container
 resolution. A plugin's `IAuthorizationService` is the same type
 whether resolved by core code or another plugin.
 
-### Optional Dependencies
-
-For optional service dependencies, the consuming plugin declares the
-constructor parameter as nullable with a default of `null`:
-
-```csharp
-public GreetPlugin(IAuthorizationService? auth = null) { ... }
-```
-
-Combined with `[ConsumesService(typeof(IAuthorizationService),
-Required = false)]`, the dependency sorter treats this as an ordering
-hint (if the provider is present, load it first) without requiring it
-to be present.
-
-Microsoft DI resolves unregistered services as `null` when the
-parameter has a default value, which makes this pattern work naturally.
-
 ## Consequences
 
 - Plugin authors use familiar .NET DI patterns for most things.
-- The attribute-based metadata layer is Marv-specific and must be
-  documented clearly.
+- Most plugins need zero attributes — just constructor parameters and
+  optionally a `ConfigureServices` method.
+- The `[OptionalService]` attribute is the only Marv-specific
+  attribute needed for service consumption.
 - The `ConfigureServices` method is static and runs before plugin
   instances exist, which means service registration cannot depend on
-  runtime state. This is intentional — services should be deterministic
-  based on configuration.
-- Adding new dependency relationship types (e.g., "load after but
-  don't consume") requires adding new attributes, not changing the DI
-  mechanism.
+  runtime state. This is intentional — services should be
+  deterministic based on configuration.
 - The single-container approach means plugin assemblies must not have
   conflicting type definitions. This is enforced by using a shared
   `AssemblyLoadContext`.
+- The automatic discovery of provided services requires inspecting
+  `ConfigureServices` registrations, which may involve reflection or
+  a convention-based approach. The exact mechanism is an
+  implementation detail.

@@ -115,5 +115,34 @@
 >    - 003-plugin-service-registry.md — how inter-plugin services work
 >    - 004-async-model.md — the async/threading model
 >
-> Do not write any C# code yet. I will review these documents and
+>> Do not write any C# code yet. I will review these documents and
 > approve them before we proceed to implementation.
+
+## Review feedback on design documents
+
+**Date**: 2026-05-30T10:00:00Z
+
+**Prompt**:
+
+> Some questions and notes regarding the architecture document:
+>
+> - Should Marv.App be the one building the DI container? Plugin loading belongs in the core, which seems like a conflict.
+> - Is a single IrcMessage class for both inbound and outbound messages suitable?
+> - Handling PING/PONG at the connection layer seems like it breaks layering, why not handle it in the core?
+> - I'd prefer to have each plugin run simultaneously - i.e. they should each have their own task and channel to receive IrcMessages. Is this feasible while still allowing direct access to the channel/user stores?
+> - The ProvidesService and ConsumesService attributes aren't great DX - can we gather this info automatically?
+> - Requiring plugins to register their own config classes isn't great DX either - I anticipate that most plugins will not register services, but will have configs. Can we automate this, potentially through the abstract plugin base class?
+>
+> Some questions and notes regarding the platform-abstraction-draft:
+>
+> - Do we need the IChannelMember relation? There are really only two properties (Prefixes, JoinedAt) - all others can be derived from them. Might make more sense to store them in the IChannel itself
+> - Can we combine the Channel*Event and Private*Events into a common class with a flag like IsDirect?
+> - I'm not sure whether we really want to handle BatchEvent - this forces plugin authors to handle events both by themselves and as batched. Is there a simple way to let authors choose to un-batch them?
+>
+> Some questions and notes regarding plugin-api-draft.md:
+>
+> - What is the purpose of having both IBot.GetChannel and IBot.Channels? If there's not a good reason, I prefer just having IBot.Channels.
+> - Why is there no IBot.Users, only IBot.GetUser? For consistency there should be IBot.Users. If there's not a good reason, we should also get rid of IBot.GetUser.
+> - What does IBot.SendAndAwaitAsync do?
+> - In addition to the OnCommand attribute, I'd like an OnRegex attribute which matches against a regular expression and passes the handler the Match object in it's context.
+> - In the plugin structure, you mention that handlers may be in their own namespace/classes, but the only examples are of handlers in the main plugin class. How would this work?

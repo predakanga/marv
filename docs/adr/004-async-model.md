@@ -18,12 +18,13 @@ and tasks, and what concurrency guarantees plugins receive.
 
 ## Decision
 
-**Single-threaded message processing with dedicated I/O tasks,
-connected by `System.Threading.Channels`.**
+**Per-plugin tasks with a central message processor, connected by
+`System.Threading.Channels`.**
 
 ### Architecture
 
-Four long-lived async tasks:
+The system uses N+4 long-lived async tasks (where N is the number of
+loaded plugins):
 
 1. **Read loop**: Reads raw lines from the TCP stream, parses them
    into `IrcMessage`, and writes them to an inbound
@@ -34,108 +35,141 @@ Four long-lived async tasks:
    - Handles protocol-level concerns (PING/PONG, CAP negotiation)
    - Updates state tracking (channels, users, modes)
    - Translates raw messages into typed events
-   - Dispatches events to plugin handlers, sequentially
+   - Fans out each event to every plugin's individual event channel
 
-3. **Rate limiter**: Accepts outbound messages from any task and
+3. **Plugin tasks** (one per plugin): Each plugin has its own
+   `Channel<MarvEvent>` and a dedicated async task. The task reads
+   events from the channel and invokes the plugin's matching handlers
+   (including handlers from the plugin's handler groups) sequentially.
+
+4. **Rate limiter**: Accepts outbound messages from any task and
    releases them to the outbound channel at a rate that respects the
    server's flood limits (token bucket algorithm).
 
-4. **Write loop**: Reads from the outbound channel and writes
+5. **Write loop**: Reads from the outbound channel and writes
    serialized messages to the TCP stream.
 
 ### Concurrency Guarantees
 
-- **Plugin event handlers run sequentially on the message processor
-  task.** Two handlers never run concurrently. A handler can safely
-  read `IBot` state (channels, users) without synchronization.
+- **Within a plugin, handlers run sequentially.** A plugin's handlers
+  never run concurrently with each other. This means a plugin author
+  does not need to think about thread safety for the plugin's own
+  state.
 
-- **`IBot.SendAsync` (and its variants) is the only thread-safe entry
-  point.** It writes to the rate limiter's input channel, which is
-  safe for concurrent writers.
+- **Different plugins run concurrently.** Plugin A's handler for
+  an event may be running at the same time as Plugin B's handler for
+  the same (or a different) event.
 
-- **State query methods on `IBot`** (`GetChannel`, `GetUser`,
-  `Channels`) are only safe from event handlers. Calling them from a
-  `Task.Run` background task is a race condition.
+- **State stores are read-safe from any plugin task.** The message
+  processor updates state before fanning out events. The state stores
+  use concurrent-read-safe data structures (e.g., immutable snapshots
+  or lock-free reads). Since only the message processor writes, there
+  is no write contention. Plugins can safely read `IBot.Channels` and
+  `IBot.Users` from their event handlers.
+
+- **`IBot.SendAsync` (and its variants) is thread-safe.** It writes
+  to the rate limiter's input channel, which supports concurrent
+  writers.
+
+- **`CancellationToken` propagation**: All async methods accept a
+  `CancellationToken`. The bot's top-level token is cancelled on
+  shutdown, which drains the channels and allows tasks to exit cleanly.
 
 ### Plugin Background Work
 
 A plugin that needs to do slow work (HTTP requests, database queries)
-should:
+can:
 
 1. Start the work with `Task.Run` or an async call
 2. When the work completes, use `IBot.SendAsync` to send any resulting
    messages
-3. Not access `IBot` state queries from the background task
+3. Safely read `IBot.Channels` and `IBot.Users` (these are read-safe)
 
-If a plugin needs to update its own state based on background work,
-it should use its own synchronization (e.g., a `Channel<T>` that the
-event handler drains, or a `ConcurrentDictionary` for simple lookups).
+If a plugin needs to update its own internal state from background
+work, it should use its own synchronization (e.g., a `Channel<T>`
+that the event handler drains, or `lock`/`ConcurrentDictionary` for
+simple cases).
 
 ## Rationale
 
-### Why single-threaded message processing
+### Why per-plugin tasks instead of a single dispatcher
 
-**Simplicity for plugin authors.** If plugin handlers could run
-concurrently, every plugin would need to handle its own
-synchronization. This is the #1 source of bugs in concurrent systems
-and is antithetical to the DX design goal.
+**Plugin isolation.** With a single message processor calling all
+plugin handlers sequentially, a slow plugin blocks every other plugin
+and stalls state tracking. Per-plugin tasks isolate plugins from each
+other — a slow handler in Plugin A only delays Plugin A's subsequent
+events.
 
-**Sequential event ordering.** IRC events have a natural ordering
-(join before message, message before part). Running handlers
-concurrently could deliver events out of order.
+**Natural concurrency.** Plugins are independent units of
+functionality. Running them concurrently matches the mental model:
+the greeting plugin and the moderation plugin shouldn't need to wait
+for each other.
 
-**State consistency.** The bot's channel/user state is updated between
-handler calls. Sequential processing means a handler always sees
-consistent, up-to-date state.
+**Sequential within a plugin.** Within a single plugin, handlers
+still run sequentially. This preserves the key DX benefit: a plugin
+author doesn't need to think about thread safety for their own state.
+The concurrency boundary is between plugins, not within them.
 
-**Acceptable performance.** IRC is a low-throughput protocol (a busy
-channel might produce a few messages per second). The message
-processor will never be the bottleneck. If a plugin handler blocks
-for too long, that is the plugin's bug — it should offload slow work.
+### Why state stores are read-safe
+
+The message processor updates state (channels, users, modes) before
+fanning out events to plugin channels. Since writes happen on one
+task and reads happen on plugin tasks, the data structures must
+support concurrent reads. Options include:
+
+- Immutable snapshots (rebuild on each state change)
+- `ConcurrentDictionary` with atomic value replacement
+- Reader-writer locks (heavyweight, unlikely to be needed)
+
+The first two options provide lock-free reads, which is important
+since every plugin reads state on every event. The exact
+implementation is an internal detail.
 
 ### Why System.Threading.Channels
 
 - **Bounded memory**: Channels can be bounded, providing natural
-  backpressure.
+  backpressure if a plugin falls behind.
 - **Async-native**: `ReadAsync` / `WriteAsync` integrate with
   `async/await` and `CancellationToken`.
-- **High performance**: Lock-free for single-producer/single-consumer
-  channels, minimal allocation.
+- **High performance**: Minimal allocation, lock-free for
+  single-producer/single-consumer channels.
 - **Standard .NET**: No third-party dependency, familiar API.
+- **Fan-out friendly**: The message processor writes to N plugin
+  channels — `Channel<T>` handles this efficiently.
 
 ### Why not Rx (System.Reactive)
 
 Rx provides powerful composition operators (merge, buffer, throttle)
 but adds a dependency and a learning curve. The message flow in Marv
-is simple: one inbound stream, processed sequentially, with outbound
-messages queued. Channels are sufficient and more predictable.
+is simple: one inbound stream, state update, fan-out to N plugin
+channels. Channels are sufficient and more predictable.
 
-### Why not a thread pool / Task.Run per message
+### Why not a thread pool / Task.Run per event
 
-Dispatching each message to the thread pool would enable concurrent
-handler execution but would:
-
-- Require every plugin to be thread-safe
-- Make event ordering non-deterministic
-- Complicate state tracking (need locks or concurrent collections
-  throughout)
-- Add no meaningful throughput improvement for IRC workloads
+Dispatching each event to the thread pool would mean a plugin's
+handlers could run concurrently with each other, requiring every
+plugin to be thread-safe. Per-plugin channels preserve sequential
+ordering within a plugin without sacrificing inter-plugin concurrency.
 
 ## Consequences
 
-- A misbehaving plugin handler that blocks the message processor task
-  will block all other plugins and stall state tracking. Mitigation:
-  document that handlers must not block, and log warnings if a handler
-  takes longer than a configurable threshold.
+- A misbehaving plugin handler that blocks its task will only affect
+  that plugin, not others. However, it will miss subsequent events
+  (they queue up in its channel). Mitigation: log warnings if a
+  handler takes longer than a configurable threshold; bounded channels
+  with drop-oldest policy as a safety valve.
 
-- Plugins that need concurrent processing must manage it themselves
-  (via `Task.Run`, `Channel<T>`, etc.). The framework provides
-  `IBot.SendAsync` as the thread-safe re-entry point.
+- Plugins must not assume ordering relative to other plugins. If
+  Plugin A and Plugin B both handle `UserJoinedEvent`, either one
+  might process it first.
+
+- State store implementations must be concurrent-read-safe. This is
+  an implementation concern inside `Marv.Core`, not a plugin concern.
 
 - The rate limiter prevents any plugin (or combination of plugins)
   from flooding the server, even if multiple plugins send messages
   concurrently.
 
-- Reconnection is handled by tearing down all four tasks and
-  restarting them. Plugins are notified via `OnDisconnectedAsync` /
+- Reconnection is handled by tearing down all tasks and restarting
+  them. Plugins are notified via `OnDisconnectedAsync` /
   `OnConnectedAsync`.
