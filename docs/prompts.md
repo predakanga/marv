@@ -42,3 +42,11 @@
 >    List them — we will use this to inform our test suite.
 >
 > Do not write any C# code yet. The deliverable is docs/research.md only.
+
+## Plugin configuration should be injected, not accessed via bot object
+
+**Date**: 2026-05-30T00:00:00Z
+
+**Prompt**:
+
+> In the conclusion of section 3, you note that it is common for plugins to access configuration from a bot object. I consider this to be an anti-pattern; for Marv, plugins should declare a class modeling their configuration, which will be injected into the plugin when it's constructed.

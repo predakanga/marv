@@ -261,16 +261,25 @@ patterns.
    handler responds to. This is clearly the right pattern.
 
 2. **Bot object as service facade**: Plugins receive a `bot` object that
-   provides sending capabilities, state access, and configuration. This
-   keeps plugins decoupled from protocol details.
+   provides sending capabilities and state access. This keeps plugins
+   decoupled from protocol details.
 
-3. **Trigger/context object**: The matched message, parsed into a
+3. **Configuration via bot object (anti-pattern)**: All studied frameworks
+   have plugins access configuration through the bot object (e.g.
+   `bot.config`, `self.config` from a base class). This couples plugins
+   to the framework's configuration plumbing and makes configuration
+   requirements implicit. **For Marv, we will not follow this pattern.**
+   Instead, plugins will declare a typed configuration class, which will
+   be injected via constructor — making configuration requirements
+   explicit, validated at startup, and testable without a bot instance.
+
+4. **Trigger/context object**: The matched message, parsed into a
    convenient form with sender info, channel, match groups, etc.
 
-4. **Lifecycle hooks**: setup/teardown at plugin level, tied to bot
+5. **Lifecycle hooks**: setup/teardown at plugin level, tied to bot
    lifecycle rather than individual messages.
 
-5. **Missing pattern**: None of the frameworks studied have typed
+6. **Missing pattern**: None of the frameworks studied have typed
    inter-plugin service contracts. They all use shared mutable state
    (dicts, databases) or assume co-residency. This is Marv's opportunity
    to do better.
