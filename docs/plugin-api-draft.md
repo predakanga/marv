@@ -36,11 +36,6 @@ convenience base class.
 ```csharp
 public interface IPlugin
 {
-    /// Human-readable name for this plugin. Used in log messages,
-    /// configuration, and diagnostics. Enforced at compile time
-    /// via static abstract.
-    static abstract string PluginName { get; }
-
     /// Called once after the plugin is constructed and all services
     /// are available. Use for one-time initialization.
     Task OnLoadAsync(CancellationToken ct);
@@ -143,9 +138,11 @@ public abstract class MarvPlugin : IPlugin
 ```
 
 Each plugin assembly must contain exactly one `IPlugin`
-implementation. The `PluginName` static property identifies the
-plugin in log messages, the plugin loading configuration, and
-diagnostic output. For `MarvPlugin` subclasses, `IBot` and
+implementation. The plugin name is derived by stripping the "Plugin"
+suffix from the class name (e.g. `GreetPlugin` → `"Greet"`), or
+overridden with `[PluginName("CustomName")]`. The name is used in
+log messages, the plugin loading configuration, and diagnostic
+output. For `MarvPlugin` subclasses, `IBot` and
 `IPluginActivator` are passed to the base constructor via
 `: base(bot, activator)`.
 
@@ -377,7 +374,7 @@ public interface IAuthorizationService
 [ProvidesService(typeof(IAuthorizationService))]
 public class AuthPlugin : MarvPlugin
 {
-    public static string PluginName => "Auth";
+
 
     public AuthPlugin(IBot bot, IPluginActivator activator)
         : base(bot, activator) { }
@@ -437,7 +434,7 @@ no attribute needed:
 ```csharp
 public class GreetPlugin : MarvPlugin
 {
-    public static string PluginName => "Greet";
+
 
     private readonly GreetPluginConfig _config;
     private readonly IAuthorizationService? _auth;
@@ -562,7 +559,7 @@ A plugin that responds to `!ping` with `pong`:
 ```csharp
 public class PingPlugin : MarvPlugin
 {
-    public static string PluginName => "Ping";
+
 
     public PingPlugin(IBot bot, IPluginActivator activator)
         : base(bot, activator) { }
@@ -593,7 +590,7 @@ public record GreetPluginConfig
 
 public class GreetPlugin : MarvPlugin
 {
-    public static string PluginName => "Greet";
+
 
     private readonly GreetPluginConfig _config;
 
@@ -643,7 +640,7 @@ public record AuthPluginConfig
 [ProvidesService(typeof(IAuthorizationService))]
 public class AuthPlugin : MarvPlugin
 {
-    public static string PluginName => "Auth";
+
 
     public AuthPlugin(IBot bot, IPluginActivator activator)
         : base(bot, activator) { }
@@ -676,7 +673,7 @@ internal class AccountBasedAuthService : IAuthorizationService
 
 public class ModerationPlugin : MarvPlugin
 {
-    public static string PluginName => "Moderation";
+
 
     private readonly IAuthorizationService _auth;
 
@@ -720,7 +717,7 @@ A moderation plugin that organizes handlers by concern:
 ```csharp
 public class ModerationPlugin : MarvPlugin
 {
-    public static string PluginName => "Moderation";
+
 
     private readonly IAuthorizationService _auth;
 

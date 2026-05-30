@@ -9,7 +9,7 @@ internal sealed class PluginDescriptor
     /// <summary>The plugin implementation type.</summary>
     public required Type PluginType { get; init; }
 
-    /// <summary>The human-readable plugin name from the static PluginName property.</summary>
+    /// <summary>The human-readable plugin name, from [PluginName] or derived from the class name.</summary>
     public required string Name { get; init; }
 
     /// <summary>Service types this plugin provides (from [ProvidesService] attributes).</summary>

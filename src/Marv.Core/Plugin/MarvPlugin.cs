@@ -13,9 +13,6 @@ namespace Marv.Core.Plugin;
 /// </summary>
 public abstract class MarvPlugin : IPlugin
 {
-    /// <inheritdoc />
-    public abstract string PluginName { get; }
-
     /// <summary>The bot instance, available to all plugins.</summary>
     protected IBot Bot { get; }
 

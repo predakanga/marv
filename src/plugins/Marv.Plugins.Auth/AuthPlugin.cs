@@ -12,9 +12,6 @@ namespace Marv.Plugins.Auth;
 [ProvidesService(typeof(IAuthorizationService))]
 public class AuthPlugin : MarvPlugin
 {
-    /// <inheritdoc />
-    public override string PluginName => "Auth";
-
     /// <summary>
     /// Creates a new <see cref="AuthPlugin"/>.
     /// </summary>

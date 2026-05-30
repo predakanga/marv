@@ -332,8 +332,10 @@ sequence inside `Marv.Core`.
    implement `IPlugin` — each assembly must contain exactly one. Also
    scan for configuration classes tagged with `[PluginConfig]` and
    handler group classes tagged with `[HandlerGroup]`. Read each
-   plugin's `static abstract PluginName` property (from the `IPlugin`
-   interface) for identification in logs, config, and diagnostics.
+   plugin's name for identification in logs, config, and diagnostics.
+   The name is derived by stripping the "Plugin" suffix from the class
+   name (e.g. `GreetPlugin` → `"Greet"`), or overridden with
+   `[PluginName("CustomName")]`.
 
 3. **Build dependency graph**: Inspect each discovered plugin type:
    - Read `[ProvidesService]` attributes for service types the plugin
@@ -470,7 +472,6 @@ ordering without implying a service relationship.
 [ProvidesService(typeof(IAuthorizationService))]
 public class AuthPlugin : MarvPlugin
 {
-    public static string PluginName => "Auth";
     public AuthPlugin(IBot bot, IPluginActivator activator)
         : base(bot, activator) { }
 
@@ -483,7 +484,6 @@ public class AuthPlugin : MarvPlugin
 // Moderation plugin consumes IAuthorizationService (required)
 public class ModerationPlugin : MarvPlugin
 {
-    public static string PluginName => "Moderation";
     public ModerationPlugin(IBot bot, IPluginActivator activator,
         IAuthorizationService auth) : base(bot, activator) { ... }
 }
@@ -491,7 +491,6 @@ public class ModerationPlugin : MarvPlugin
 // Greet plugin consumes IAuthorizationService (optional)
 public class GreetPlugin : MarvPlugin
 {
-    public static string PluginName => "Greet";
     public GreetPlugin(
         IBot bot, IPluginActivator activator,
         IOptions<GreetPluginConfig> config,
@@ -578,8 +577,6 @@ public record GreetPluginConfig
 
 public class GreetPlugin : MarvPlugin
 {
-    public static string PluginName => "Greet";
-
     private readonly GreetPluginConfig _config;
 
     public GreetPlugin(IBot bot, IPluginActivator activator,

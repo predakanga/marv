@@ -11,9 +11,6 @@ namespace Marv.Plugins.Greet;
 /// </summary>
 public class GreetPlugin : MarvPlugin
 {
-    /// <inheritdoc />
-    public override string PluginName => "Greet";
-
     private readonly GreetPluginConfig _config;
 
     /// <summary>

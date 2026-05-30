@@ -67,12 +67,11 @@ internal static class PluginDiscovery
 
         var pluginType = pluginTypes[0];
 
-        // PluginName is an instance property — we can't read it without instantiation,
-        // so derive a name from the type name at discovery time. The actual value is
-        // available after the plugin is constructed.
-        var name = pluginType.Name.EndsWith("Plugin", StringComparison.Ordinal)
-            ? pluginType.Name[..^6]
-            : pluginType.Name;
+        var nameAttr = pluginType.GetCustomAttribute<PluginNameAttribute>();
+        var name = nameAttr?.Name
+            ?? (pluginType.Name.EndsWith("Plugin", StringComparison.Ordinal)
+                ? pluginType.Name[..^6]
+                : pluginType.Name);
 
         // Read [ProvidesService] attributes
         var providedServices = pluginType.GetCustomAttributes<ProvidesServiceAttribute>()

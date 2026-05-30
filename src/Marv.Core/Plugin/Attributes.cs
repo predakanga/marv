@@ -23,6 +23,17 @@ public sealed class DependsOnAttribute(Type pluginType) : Attribute
 }
 
 /// <summary>
+/// Overrides the default plugin name (derived by stripping the "Plugin" suffix from the class name).
+/// Applied to the plugin class itself.
+/// </summary>
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+public sealed class PluginNameAttribute(string name) : Attribute
+{
+    /// <summary>The human-readable plugin name.</summary>
+    public string Name { get; } = name;
+}
+
+/// <summary>
 /// Tags a configuration class for automatic registration as IOptions&lt;T&gt;
 /// bound to the Plugins:{Section} configuration section.
 /// </summary>

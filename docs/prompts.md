@@ -303,3 +303,11 @@
 > Regarding your change to the design of PluginName, C# definitely does support static abstract properties. See @static_abstract_property.cs for an example of this. Please stick with the original design.
 
 > it looks like the feature is only available in preview versions of C#. Make PluginName a regular instance property in all cases, forget about the static approach.
+
+## Replace PluginName property with convention and attribute
+
+**Date**: 2026-05-30T15:15:00Z
+
+**Prompt**:
+
+> On second thought, making PluginName an instance property doesn't work either - the bot needs to be able to choose which plugins to load based on the config. Let's adopt your approach (deriving the name from the plugin class, stripping Plugin off the end), but also provide a PluginName attribute which can be applied to the plugin class.

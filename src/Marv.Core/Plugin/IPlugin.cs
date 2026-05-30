@@ -10,12 +10,6 @@ namespace Marv.Core.Plugin;
 public interface IPlugin
 {
     /// <summary>
-    /// Human-readable name for this plugin. Used in log messages, configuration,
-    /// and diagnostics.
-    /// </summary>
-    string PluginName { get; }
-
-    /// <summary>
     /// Called once after the plugin is constructed and all services are available.
     /// Use for one-time initialization.
     /// </summary>

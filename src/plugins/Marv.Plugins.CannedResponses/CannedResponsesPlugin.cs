@@ -9,9 +9,6 @@ namespace Marv.Plugins.CannedResponses;
 /// </summary>
 public class CannedResponsesPlugin : MarvPlugin
 {
-    /// <inheritdoc />
-    public override string PluginName => "CannedResponses";
-
     /// <summary>
     /// Creates a new <see cref="CannedResponsesPlugin"/>.
     /// </summary>

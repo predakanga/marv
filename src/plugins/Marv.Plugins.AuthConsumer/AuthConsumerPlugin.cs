@@ -10,9 +10,6 @@ namespace Marv.Plugins.AuthConsumer;
 /// </summary>
 public class AuthConsumerPlugin : MarvPlugin
 {
-    /// <inheritdoc />
-    public override string PluginName => "AuthConsumer";
-
     private readonly IAuthorizationService? _auth;
 
     /// <summary>
