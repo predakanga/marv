@@ -224,3 +224,11 @@
 > It's not very clear how handlers are actually called at this point - I think the assumption is that the core directly calls the handler, which feels too magical to me.
 > What I'd like to see is an OnIrcEvent method on IPlugin (feel free to change the name to something more appropriate), with the implementation in MarvPlugin using reflection to discover handlers and dispatch the events accordingly.
 > MarvPlugin will also need to be provided with a way to instantiate classes, to dispatch to HandlerGroup classes. My first thought is a utility class which wraps IServiceProvider and uses ActivatorUtilities.CreateInstance<T>, but I'm open to other possibilities.
+
+## Make IPluginActivator.CreateInstance generic
+
+**Date**: 2026-05-30T12:06:00Z
+
+**Prompt**:
+
+> That looks good, except that the IPluginActivator should make CreateInstance generic, i.e. T CreateInstance<T>(params object[] params);

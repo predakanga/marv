@@ -77,15 +77,16 @@ never calls handler methods directly.
 ```csharp
 public interface IPluginActivator
 {
-    /// Creates an instance of the given type, injecting constructor
-    /// parameters from the DI container.
-    object CreateInstance(Type type);
+    /// Creates an instance of T, injecting constructor parameters
+    /// from the DI container. Additional parameters can be passed
+    /// to satisfy constructor arguments not registered in DI.
+    T CreateInstance<T>(params object[] parameters);
 }
 ```
 
 This is intentionally limited to instance creation — it is not a
 general service locator. The internal implementation delegates to
-`ActivatorUtilities.CreateInstance(IServiceProvider, Type)`.
+`ActivatorUtilities.CreateInstance<T>(IServiceProvider, params object[])`.
 
 ### MarvPlugin Base Class
 
