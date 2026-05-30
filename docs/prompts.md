@@ -293,3 +293,13 @@
 >   write a new ADR before writing the code that depends on it.
 > - Do not change the plugin API or platform abstraction surface without
 >   flagging it to me first.
+
+## Keep PluginName as instance property
+
+**Date**: 2026-05-30T15:00:00Z
+
+**Prompt**:
+
+> Regarding your change to the design of PluginName, C# definitely does support static abstract properties. See @static_abstract_property.cs for an example of this. Please stick with the original design.
+
+> it looks like the feature is only available in preview versions of C#. Make PluginName a regular instance property in all cases, forget about the static approach.
