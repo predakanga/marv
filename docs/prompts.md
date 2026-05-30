@@ -168,3 +168,25 @@
 > I'm getting ready to start development of a C# IRC bot.
 >
 > Could you read the initial docs that I generated with another Claude Code session (all MD files except for prompts.md) and perform a sanity check?
+
+## Responses to design documentation sanity check
+
+**Date**: 2026-05-30T11:07:00Z
+
+**Prompt**:
+
+> Responses to the sanity check:
+>
+> - Remove the dangling references to ConsumeService
+> - Regarding the IUser mutation model, can you sketch out what atomic property replacement would look like?
+> - Regarding IChannel.SendMessageAsync, change the eaxmples to use bot.SendMessageAsync instead.
+> - Regarding CTCP events, implement CTCP VERSION, PING and TIME in the core, but also provide a generic CtcpEvent to allow plugins to implement arbritrary commands. Note that the internal implementations of CTCP commands must not expose host information, only bot version, etc.
+> - Regarding plugin configuration, instead of selecting the plugin config class through MarvPlugin<TConfig>, scan the assembly for classes tagged with a [PluginConfig(Section = "Something")] attribute and register that accordingly.
+> - The configuration file format should default to JSON, but there should also be a CLI argument to specify the config path; if this is provided, the extension of the config path should determine the file format.
+> - For command-line handling, use System.CommandLine 2.x
+> - Regarding reconnection behaviour, the default stance should be for state to be discarded - SendAndAwaitAsync calls should be cancelled, message queues cleared, and stale objects discarded.
+> - Handler discovery rules: Handler methods don't need to be public. The dispatching should be done from within MarvPlugin so that protected methods are accessible. This does raise the question of how MarvPlugin can construct the HandlerGroup handlers, though.
+>   If multiple handlers have the same OnEvent, they will be called consecutively but in an undefined order.
+>   HandlerGroups may handle all events, including lifecycle events.
+> - Remove the references to HasService<T> and GetOptionalService<T>.
+> - I think it's reasonable to inject IBot into plugins by default, unless you can think of a good reason not to?

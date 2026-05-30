@@ -362,9 +362,9 @@ The startup sequence has two distinct phases:
    a. **Assembly loading**: Load plugin assemblies discovered during
       bootstrap, discover plugin types.
    b. **Dependency sort**: Topological sort based on declared dependencies
-      (attributes on plugin classes, e.g.
-      `[DependsOn(typeof(AuthPlugin))]` or
-      `[ConsumeService(typeof(IAuthService), Optional = true)]`).
+      (`[DependsOn(typeof(AuthPlugin))]` attributes on plugin classes)
+      and constructor parameter inspection (non-core types are inferred
+      as service dependencies; `[OptionalService]` marks optional ones).
    c. **Service registration**: Each plugin gets a chance to register
       services into the shared `IServiceCollection` via a static or
       type-level method (e.g. `ConfigureServices(IServiceCollection)`).
@@ -394,9 +394,9 @@ Optional dependencies are ordered-if-present but don't block.
 
 **Graceful degradation**: Plugins should declare whether a service
 dependency is required or optional. Required = fail to load if not met.
-Optional = load but potentially with reduced functionality. The plugin
-base class can provide helpers like `HasService<T>()` and
-`GetOptionalService<T>()`.
+Optional = load but potentially with reduced functionality. Optional
+dependencies are expressed as nullable constructor parameters marked
+with `[OptionalService]`.
 
 ---
 

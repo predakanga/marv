@@ -172,4 +172,9 @@ ordering within a plugin without sacrificing inter-plugin concurrency.
 
 - Reconnection is handled by tearing down all tasks and restarting
   them. Plugins are notified via `OnDisconnectedAsync` /
-  `OnConnectedAsync`.
+  `OnConnectedAsync`. On disconnection, all state is discarded:
+  pending `SendAndAwaitAsync` calls are cancelled (their
+  `TaskCompletionSource` is faulted with a disconnection exception),
+  outbound message queues are cleared, and channel/user state stores
+  are reset. Plugins should treat `OnDisconnectedAsync` as a signal
+  that any cached state references (`IChannel`, `IUser`) are stale.

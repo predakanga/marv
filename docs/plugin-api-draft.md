@@ -11,12 +11,12 @@ A plugin author's day-to-day involves these types from `Marv.Core`:
 
 | Type | Purpose |
 |---|---|
-| `MarvPlugin` | Base class for plugins without configuration |
-| `MarvPlugin<TConfig>` | Base class for plugins with typed configuration |
+| `MarvPlugin` | Base class for all plugins |
 | `IBot` | Facade for sending messages and querying state |
 | `IChannel`, `IUser` | Read-only state models |
 | `ICapabilityManager` | Check negotiated capabilities |
 | `IServerInfo` | Server configuration (ISUPPORT) |
+| `[PluginConfig]` | Attribute for configuration classes |
 | Event classes (`MessageEvent`, etc.) | Typed event payloads |
 | Attributes (`[OnEvent]`, `[OnCommand]`, etc.) | Declare event interest |
 | `[ProvidesService]` | Declare a service this plugin provides |
@@ -31,6 +31,9 @@ A plugin author's day-to-day involves these types from `Marv.Core`:
 ```csharp
 public abstract class MarvPlugin
 {
+    /// The bot instance, injected automatically by the core.
+    protected IBot Bot { get; }
+
     /// Called once after the plugin is constructed and all services
     /// are available. Use for one-time initialization.
     public virtual Task OnLoadAsync(CancellationToken ct) => Task.CompletedTask;
@@ -39,26 +42,25 @@ public abstract class MarvPlugin
     public virtual Task OnConnectedAsync(CancellationToken ct) => Task.CompletedTask;
 
     /// Called when the IRC connection is lost. The bot may reconnect.
+    /// Any cached IChannel/IUser references are stale after this call.
     public virtual Task OnDisconnectedAsync() => Task.CompletedTask;
 
     /// Called once during shutdown, before the DI container is disposed.
     /// Use for cleanup (unsubscribe, flush, close handles).
     public virtual Task OnUnloadAsync() => Task.CompletedTask;
 }
-
-public abstract class MarvPlugin<TConfig> : MarvPlugin
-    where TConfig : class, new()
-{
-    /// Typed configuration, automatically bound to the
-    /// Plugins:{PluginName} configuration section.
-    protected TConfig Config { get; }
-}
 ```
 
-Plugins that need configuration extend `MarvPlugin<TConfig>`. The
-plugin loader automatically registers `IOptions<TConfig>` bound to
-the `Plugins:{PluginName}` configuration section — no
-`ConfigureServices` boilerplate needed.
+`IBot` is injected into the base class automatically — plugins do not
+need to accept it as a constructor parameter (though they may still
+inject additional services).
+
+Plugins that need configuration declare a separate configuration
+class tagged with `[PluginConfig(Section = "Name")]`. The plugin
+loader discovers these during assembly scanning and registers
+`IOptions<TConfig>` bound to the `Plugins:{Section}` configuration
+section — no `ConfigureServices` boilerplate needed. Plugins access
+their configuration via constructor injection of `IOptions<TConfig>`.
 
 ### Lifecycle Order
 
@@ -76,7 +78,14 @@ the `Plugins:{PluginName}` configuration section — no
 
 Plugins declare event handlers using attributes on methods. The
 method must be an instance method on the plugin class (or a handler
-group class — see below) and return `Task`.
+group class — see below) and return `Task`. Handler methods do not
+need to be public — the dispatch is performed from within the
+`MarvPlugin` base class using reflection, so `protected` and
+`private` methods are accessible.
+
+If multiple handler methods on the same plugin (or its handler
+groups) match the same event, they are all called consecutively but
+in an undefined order.
 
 ### `[OnEvent]` — Subscribe to any typed event
 
@@ -225,7 +234,11 @@ Handler groups are:
 - Constructed via DI — they can inject any service the plugin can
 - Registered as singletons in the container
 - Their event handlers run on the owning plugin's task, sequentially
-  with the plugin's own handlers
+  with the plugin's own handlers (order between handlers from
+  different groups is undefined)
+- May define lifecycle methods (`OnLoadAsync`, `OnConnectedAsync`,
+  `OnDisconnectedAsync`, `OnUnloadAsync`) which are called alongside
+  the owning plugin's lifecycle methods
 - Useful for separating concerns without creating multiple plugins
   (which would each get their own task and independent event ordering)
 
@@ -252,7 +265,7 @@ public interface IAuthorizationService
 
 ```csharp
 [ProvidesService(typeof(IAuthorizationService))]
-public class AuthPlugin : MarvPlugin<AuthPluginConfig>
+public class AuthPlugin : MarvPlugin
 {
     public static void ConfigureServices(IServiceCollection services)
     {
@@ -306,14 +319,16 @@ Mark the parameter with `[OptionalService]` and make it nullable
 with a default of `null`:
 
 ```csharp
-public class GreetPlugin : MarvPlugin<GreetPluginConfig>
+public class GreetPlugin : MarvPlugin
 {
+    private readonly GreetPluginConfig _config;
     private readonly IAuthorizationService? _auth;
 
     public GreetPlugin(
-        IBot bot,
+        IOptions<GreetPluginConfig> config,
         [OptionalService] IAuthorizationService? auth = null)
     {
+        _config = config.Value;
         _auth = auth;
     }
 
@@ -326,8 +341,8 @@ public class GreetPlugin : MarvPlugin<GreetPluginConfig>
             return;
         }
 
-        var message = Config.GreetMessage.Replace("{nick}", e.User.Nick);
-        await e.Channel.SendMessageAsync(message);
+        var message = _config.GreetMessage.Replace("{nick}", e.User.Nick);
+        await Bot.SendMessageAsync(e.Channel.Name, message, ct);
     }
 }
 ```
@@ -407,14 +422,14 @@ Event objects provide contextual shortcuts:
 
 ```csharp
 // On MessageEvent:
-await e.ReplyAsync("response");           // sends to channel or DM, matching context
-await e.Channel.SendMessageAsync("msg");  // only for channel messages
+await e.ReplyAsync("response");    // sends to channel or DM, matching context
 
 // On UserJoinedEvent:
-await e.Channel.SendMessageAsync("Welcome!");
+await Bot.SendMessageAsync(e.Channel.Name, "Welcome!", ct);
 ```
 
-These delegate to `IBot` internally.
+`ReplyAsync` delegates to `IBot` internally, choosing the correct
+target (channel or sender nick) based on context.
 
 ---
 
@@ -444,28 +459,37 @@ automatically.
 A greeting plugin with configurable messages:
 
 ```csharp
+[PluginConfig(Section = "Greet")]
 public record GreetPluginConfig
 {
     public string GreetMessage { get; init; } = "Welcome, {nick}!";
     public bool GreetOnJoin { get; init; } = true;
 }
 
-public class GreetPlugin : MarvPlugin<GreetPluginConfig>
+public class GreetPlugin : MarvPlugin
 {
+    private readonly GreetPluginConfig _config;
+
+    public GreetPlugin(IOptions<GreetPluginConfig> config)
+    {
+        _config = config.Value;
+    }
+
     [OnEvent]
     public async Task HandleJoin(UserJoinedEvent e, CancellationToken ct)
     {
-        if (!Config.GreetOnJoin)
+        if (!_config.GreetOnJoin)
             return;
 
-        var message = Config.GreetMessage.Replace("{nick}", e.User.Nick);
-        await e.Channel.SendMessageAsync(message);
+        var message = _config.GreetMessage.Replace("{nick}", e.User.Nick);
+        await Bot.SendMessageAsync(e.Channel.Name, message, ct);
     }
 }
 ```
 
 Configuration is automatically bound to `Plugins:Greet` in the
-config file. No `ConfigureServices` needed.
+config file (from the `[PluginConfig]` attribute's `Section`). No
+`ConfigureServices` needed.
 
 ### Plugin That Provides and Consumes a Service
 
@@ -482,12 +506,14 @@ public interface IAuthorizationService
 
 // --- Auth Plugin ---
 
+[PluginConfig(Section = "Auth")]
 public record AuthPluginConfig
 {
     public List<string> AdminAccounts { get; init; } = [];
 }
 
-public class AuthPlugin : MarvPlugin<AuthPluginConfig>
+[ProvidesService(typeof(IAuthorizationService))]
+public class AuthPlugin : MarvPlugin
 {
     public static void ConfigureServices(IServiceCollection services)
     {
@@ -517,12 +543,10 @@ internal class AccountBasedAuthService : IAuthorizationService
 
 public class ModerationPlugin : MarvPlugin
 {
-    private readonly IBot _bot;
     private readonly IAuthorizationService _auth;
 
-    public ModerationPlugin(IBot bot, IAuthorizationService auth)
+    public ModerationPlugin(IAuthorizationService auth)
     {
-        _bot = bot;
         _auth = auth;
     }
 
@@ -546,7 +570,7 @@ public class ModerationPlugin : MarvPlugin
             ? string.Join(' ', ctx.Args.Skip(1))
             : "Kicked by moderator";
 
-        await _bot.SendRawAsync(
+        await Bot.SendRawAsync(
             new IrcMessage("KICK", [ctx.Channel!.Name, targetNick, reason]),
             ct);
     }
@@ -558,7 +582,7 @@ public class ModerationPlugin : MarvPlugin
 A moderation plugin that organizes handlers by concern:
 
 ```csharp
-public class ModerationPlugin : MarvPlugin<ModerationConfig>
+public class ModerationPlugin : MarvPlugin
 {
     private readonly IAuthorizationService _auth;
 
@@ -585,6 +609,9 @@ public class KickBanHandlers
 
     [OnCommand("ban")]
     public async Task HandleBan(CommandContext ctx, CancellationToken ct) { ... }
+
+    // Handler groups can also have lifecycle methods
+    public Task OnConnectedAsync(CancellationToken ct) => Task.CompletedTask;
 }
 
 [HandlerGroup(typeof(ModerationPlugin))]

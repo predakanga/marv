@@ -67,11 +67,12 @@ capture the needed ordering.
 
 ### Automatic Configuration
 
-Plugins extending `MarvPlugin<TConfig>` have their configuration type
-automatically registered as `IOptions<TConfig>` bound to
-`Plugins:{PluginName}`. No `ConfigureServices` boilerplate is needed
-for the common case of a plugin that only has configuration and event
-handlers.
+Configuration classes tagged with `[PluginConfig(Section = "Name")]`
+are discovered during assembly scanning and automatically registered
+as `IOptions<TConfig>` bound to `Plugins:{Section}`. No
+`ConfigureServices` boilerplate is needed for the common case of a
+plugin that only has configuration and event handlers. Plugins access
+their configuration via constructor injection of `IOptions<TConfig>`.
 
 ## Rationale
 
