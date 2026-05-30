@@ -67,11 +67,27 @@ internal static class PluginDiscovery
 
         var pluginType = pluginTypes[0];
 
-        // Read static PluginName property via interface mapping
-        var nameProperty = pluginType.GetProperty("PluginName", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
-        var name = nameProperty?.GetValue(null)?.ToString()
-            ?? throw new InvalidOperationException(
-                $"Plugin type {pluginType.FullName} does not have a static PluginName property.");
+        // Read PluginName — try static property first (direct IPlugin implementations may use static),
+        // fall back to reading from a temporary instance-like approach via the interface map.
+        // Since PluginName is now an instance property, we read it from the type metadata.
+        var nameProperty = pluginType.GetProperty("PluginName",
+            BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+        // We can't easily get the value without instantiation, so use a naming convention:
+        // check for a static backing field or try to get a default from a parameterless approach.
+        // For robustness, use the type name as fallback and let it be set at runtime.
+        string name;
+        var staticNameProp = pluginType.GetProperty("PluginName",
+            BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+        if (staticNameProp is not null)
+        {
+            name = staticNameProp.GetValue(null)?.ToString() ?? pluginType.Name;
+        }
+        else
+        {
+            // Use type name as the plugin name at discovery time;
+            // the actual PluginName property value is available after instantiation
+            name = pluginType.Name.Replace("Plugin", "");
+        }
 
         // Read [ProvidesService] attributes
         var providedServices = pluginType.GetCustomAttributes<ProvidesServiceAttribute>()

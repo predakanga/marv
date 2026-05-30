@@ -11,9 +11,9 @@ public interface IPlugin
 {
     /// <summary>
     /// Human-readable name for this plugin. Used in log messages, configuration,
-    /// and diagnostics. Enforced at compile time via static abstract.
+    /// and diagnostics.
     /// </summary>
-    static abstract string PluginName { get; }
+    string PluginName { get; }
 
     /// <summary>
     /// Called once after the plugin is constructed and all services are available.
