@@ -15,8 +15,8 @@ TestResults/
 [Cc]overage*/
 
 ## Local test configs
-marv-test.json
 marv.json
+marv.test.json
 
 ## OS files
 .DS_Store
