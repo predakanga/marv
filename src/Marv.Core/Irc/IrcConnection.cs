@@ -14,9 +14,7 @@ namespace Marv.Core.Irc;
 internal sealed class IrcConnection : IAsyncDisposable
 {
     private readonly ILogger _logger;
-    private readonly bool _rateLimitEnabled;
-    private readonly int _burstLimit;
-    private readonly double _refillRatePerSecond;
+    private readonly TokenBucketRateLimiter _rateLimiter;
     private TcpClient? _tcpClient;
     private Stream? _stream;
     private CancellationTokenSource? _connectionCts;
@@ -25,11 +23,6 @@ internal sealed class IrcConnection : IAsyncDisposable
 
     private Channel<IrcMessage>? _inboundChannel;
     private Channel<IrcMessage>? _outboundChannel;
-
-    // Token bucket state
-    private double _tokens;
-    private DateTimeOffset _lastRefill = DateTimeOffset.UtcNow;
-    private readonly object _rateLock = new();
 
     /// <summary>
     /// Creates a new IRC connection with the specified rate limiting settings.
@@ -41,10 +34,7 @@ internal sealed class IrcConnection : IAsyncDisposable
     public IrcConnection(ILogger logger, bool rateLimitEnabled = true, int burstLimit = 5, double refillRatePerSecond = 0.5)
     {
         _logger = logger;
-        _rateLimitEnabled = rateLimitEnabled;
-        _burstLimit = burstLimit;
-        _refillRatePerSecond = refillRatePerSecond;
-        _tokens = burstLimit;
+        _rateLimiter = new TokenBucketRateLimiter(rateLimitEnabled, burstLimit, refillRatePerSecond);
     }
 
     /// <summary>Reader for inbound parsed IRC messages from the server.</summary>
@@ -92,8 +82,7 @@ internal sealed class IrcConnection : IAsyncDisposable
             FullMode = BoundedChannelFullMode.Wait
         });
 
-        _tokens = _burstLimit;
-        _lastRefill = DateTimeOffset.UtcNow;
+        _rateLimiter.Reset();
 
         var loopCt = _connectionCts.Token;
         _readTask = Task.Run(() => ReadLoopAsync(loopCt), loopCt);
@@ -208,7 +197,7 @@ internal sealed class IrcConnection : IAsyncDisposable
         {
             await foreach (var message in reader.ReadAllAsync(ct))
             {
-                await WaitForTokenAsync(ct);
+                await _rateLimiter.WaitAsync(ct);
 
                 var line = IrcSerializer.Serialize(message);
                 _logger.LogTrace(">> {Line}", line);
@@ -229,36 +218,6 @@ internal sealed class IrcConnection : IAsyncDisposable
         catch (Exception ex)
         {
             _logger.LogError(ex, "Write loop terminated unexpectedly");
-        }
-    }
-
-    /// <summary>
-    /// Token bucket rate limiter. Waits until a token is available before allowing a send.
-    /// When rate limiting is disabled, returns immediately.
-    /// </summary>
-    private async Task WaitForTokenAsync(CancellationToken ct)
-    {
-        if (!_rateLimitEnabled) return;
-
-        while (true)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            lock (_rateLock)
-            {
-                var now = DateTimeOffset.UtcNow;
-                var elapsed = (now - _lastRefill).TotalSeconds;
-                _tokens = Math.Min(_burstLimit, _tokens + elapsed * _refillRatePerSecond);
-                _lastRefill = now;
-
-                if (_tokens >= 1.0)
-                {
-                    _tokens -= 1.0;
-                    return;
-                }
-            }
-
-            await Task.Delay(100, ct);
         }
     }
 

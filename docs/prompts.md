@@ -505,3 +505,11 @@
 
 > I'd like to make the rate limiter configurable - it should be possible to change the rate or to completely disable it.
 > The timeout for Nickserv authentication should also be configurable.
+
+## Add unit tests for the rate limiter
+
+**Date**: 2026-05-31T13:30:00Z
+
+**Prompt**:
+
+> Make sure that there are unit tests for the rate limiter
