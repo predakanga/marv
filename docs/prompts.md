@@ -406,27 +406,4 @@
 
 **Prompt**:
 
-> Research how IRC bots and libraries provide APIs for IRC formatting codes (bold, italic, underline, color, etc.) to plugin/extension authors. I need concrete examples from real projects.
->
-> Specifically, look at:
-> 1. The raw IRC formatting control codes (mIRC codes) - what characters are used for bold, italic, underline, strikethrough, monospace, color, hex color, reverse, reset
-> 2. How popular IRC bot frameworks expose these to developers - look at projects like:
->    - Sopel (Python IRC bot)
->    - Limnoria/Supybot (Python)
->    - Irssi (Perl scripting)
->    - KiwiIRC or similar JS/TS IRC libraries
->    - Any C#/.NET IRC libraries (IrcDotNet, ChatSharp, etc.)
->    - Cinch (Ruby)
->    - goirc or similar Go libraries
-> 3. Common API patterns: do they use string builder/fluent APIs, static helper methods, string interpolation, or tagged template approaches?
-> 4. How do they handle mIRC color codes (the numbered color palette, and the newer hex color extension)?
->
-> Search the web for documentation and source code examples. Provide specific code snippets where possible showing the API surface each project exposes.
->
-> Deliver a thorough summary covering:
-> - The raw control codes table
-> - Survey of approaches from at least 4-5 different projects with code examples
-> - Pros and cons of each approach
-> - Which patterns work best for a C# plugin API
->
-> Keep it factual and detailed - this will be written to a research document.
+> I want to provide a simple way for plugin authors to use IRC formatting codes. Do some research and provide me a summary on the methods used by other bots to do this. Deliver the output in docs/formatting-research.md.
