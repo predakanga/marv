@@ -25,7 +25,7 @@ internal sealed class IrcBot : IBot
 
     private IrcUser _self;
     private string _currentNick;
-    private IrcConfiguration _config = new();
+    private MarvConfiguration _config = new();
 
     // CAP negotiation state
     private TaskCompletionSource<bool>? _registrationTcs;
@@ -201,7 +201,7 @@ internal sealed class IrcBot : IBot
     /// Connects to the IRC server, performs registration (CAP, NICK, USER),
     /// and runs the message processor until disconnected or cancelled.
     /// </summary>
-    public async Task RunAsync(IrcConnection connection, IrcConfiguration config,
+    public async Task RunAsync(IrcConnection connection, MarvConfiguration config,
         IReadOnlyList<ChannelWriter<MarvEvent>> eventWriters, CancellationToken ct)
     {
         _connection = connection;

@@ -1,9 +1,13 @@
+using Microsoft.Extensions.Logging;
+
 namespace Marv.Core;
 
 /// <summary>
-/// IRC connection configuration. Bound from the "Irc" section of the configuration file.
+/// Root configuration model for the Marv bot.
+/// Bound from the configuration file, environment variables, and CLI arguments.
+/// All properties are at the top level — there is no nesting.
 /// </summary>
-public record IrcConfiguration
+public record MarvConfiguration
 {
     /// <summary>The IRC server hostname.</summary>
     public string Server { get; init; } = "localhost";
@@ -37,4 +41,22 @@ public record IrcConfiguration
 
     /// <summary>The command prefix for plugin commands.</summary>
     public string CommandPrefix { get; init; } = "!";
+
+    /// <summary>
+    /// Directories to scan for plugin assemblies.
+    /// Defaults to a single "plugins" directory relative to the working directory.
+    /// </summary>
+    public List<string> PluginDirectories { get; init; } = ["plugins"];
+
+    /// <summary>
+    /// Plugin names to load. Only plugins whose name matches an entry in this list
+    /// will be activated. If empty, no plugins are loaded.
+    /// </summary>
+    public List<string> Plugins { get; init; } = [];
+
+    /// <summary>
+    /// Override for the default log level. When set, the effective log level is the
+    /// more restrictive of this value and the level configured in appsettings.json.
+    /// </summary>
+    public LogLevel? LogLevel { get; init; }
 }

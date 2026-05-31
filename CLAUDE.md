@@ -74,6 +74,13 @@ as DCC be supported.
 - One class per file, filename matches class name
 - XML doc comments on all public API members
 
+## Configuration
+
+All configuration lives in `MarvConfiguration` in `Marv.Core`. The config
+is flat (no nested sections for IRC vs other concerns). Any change to
+`MarvConfiguration` must be reflected in the CLI options in `Program.cs`,
+and vice versa.
+
 ## Architecture decisions
 
 Stored in `/docs/adr/`. Read relevant ADRs before making any

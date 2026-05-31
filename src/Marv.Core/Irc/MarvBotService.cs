@@ -17,7 +17,7 @@ internal sealed class MarvBotService : BackgroundService
     private readonly IrcBot _bot;
     private readonly PluginManager _pluginManager;
     private readonly IReadOnlyList<PluginDescriptor> _descriptors;
-    private readonly IrcConfiguration _config;
+    private readonly MarvConfiguration _config;
     private readonly ILoggerFactory _loggerFactory;
 
     // Reconnection backoff
@@ -29,7 +29,7 @@ internal sealed class MarvBotService : BackgroundService
         IrcBot bot,
         PluginManager pluginManager,
         IReadOnlyList<PluginDescriptor> descriptors,
-        IOptions<IrcConfiguration> config,
+        IOptions<MarvConfiguration> config,
         ILoggerFactory loggerFactory)
     {
         _logger = logger;

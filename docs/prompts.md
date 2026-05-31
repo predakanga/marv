@@ -319,3 +319,17 @@
 **Prompt**:
 
 > Now let's implement the IRC connection and main loop
+
+## Flatten config, add LogLevel override, add CLI options
+
+**Date**: 2026-05-31T01:00:00Z
+
+**Prompt**:
+
+> Let's start with some simple changes - first up, I'd like to change the layout of the config. I've provided an example of how I want it to look in @marv.yaml. I've used snake casing for the keys because that's what feels natural to me, but this is not a requirement for the actual implementation.
+> Inline these into MarvConfiguration and move that into the Marv.Core package.
+>
+> Next, I want to add logging configuration to the config file - I know that logging can be configured through appsettings.json, but I'd like an additional LogLevel override in the Marv config file.
+> When provided, the default log level should be set to the higher of the Marv LogLevel and the appsettings.json LogLevel.
+>
+> Next, let's look at the CLI itself - at the minute it only exposes one option, `--config`. I'd like it to expose options for each of the members of the core's configuration, but not for plugins. Also, make a note in CLAUDE.md that any changes to the configuration must be reflected in the command line.

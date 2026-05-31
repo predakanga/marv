@@ -40,10 +40,12 @@ public sealed class PluginManager
         IServiceCollection services,
         IConfiguration configuration,
         IReadOnlyList<string> pluginPaths,
+        IReadOnlyList<string> requestedPlugins,
         ILogger? bootstrapLogger = null)
     {
         var loadContext = AssemblyLoadContext.Default;
         var descriptors = new List<PluginDescriptor>();
+        var requestedSet = new HashSet<string>(requestedPlugins, StringComparer.OrdinalIgnoreCase);
 
         foreach (var path in pluginPaths)
         {
@@ -60,6 +62,13 @@ public sealed class PluginManager
                 var descriptor = PluginDiscovery.DiscoverPlugin(assembly);
                 if (descriptor is not null)
                 {
+                    if (requestedSet.Count > 0 && !requestedSet.Contains(descriptor.Name))
+                    {
+                        bootstrapLogger?.LogDebug("Skipping plugin {Name} (not in requested list)",
+                            descriptor.Name);
+                        continue;
+                    }
+
                     descriptors.Add(descriptor);
                     bootstrapLogger?.LogInformation("Discovered plugin: {Name} from {Assembly}",
                         descriptor.Name, assembly.GetName().Name);
@@ -80,7 +89,7 @@ public sealed class PluginManager
         {
             foreach (var (configType, section) in descriptor.Configurations)
             {
-                var configSection = configuration.GetSection($"Plugins:{section}");
+                var configSection = configuration.GetSection($"PluginConfigs:{section}");
                 var method = typeof(OptionsConfigurationServiceCollectionExtensions)
                     .GetMethod("Configure", [typeof(IServiceCollection), typeof(IConfiguration)])!
                     .MakeGenericMethod(configType);
