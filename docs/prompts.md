@@ -333,3 +333,13 @@
 > When provided, the default log level should be set to the higher of the Marv LogLevel and the appsettings.json LogLevel.
 >
 > Next, let's look at the CLI itself - at the minute it only exposes one option, `--config`. I'd like it to expose options for each of the members of the core's configuration, but not for plugins. Also, make a note in CLAUDE.md that any changes to the configuration must be reflected in the command line.
+
+## Auto-generate CLI options from MarvConfiguration
+
+**Date**: 2026-05-31T01:30:00Z
+
+**Prompt**:
+
+> There's a lot of duplication around the CLI configuration overrides. Let's auto-generate that by scanning MarvConfiguration. You can use reflection, a source generator, or any other approach you deem appropriate.
+
+> It looks like the methods you're looking for are in System.CommandLine 3. Update that dependency to the latest preview version.
