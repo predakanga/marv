@@ -45,10 +45,7 @@ rootCommand.SetAction(async (result, ct) =>
     var marvLogLevel = builder.Configuration.GetValue<LogLevel?>("LogLevel");
     if (marvLogLevel.HasValue)
     {
-        var defaultLogLevel = builder.Configuration.GetValue<LogLevel?>("Logging:LogLevel:Default")
-                              ?? LogLevel.Information;
-        var effectiveLevel = (LogLevel)Math.Max((int)marvLogLevel.Value, (int)defaultLogLevel);
-        builder.Logging.SetMinimumLevel(effectiveLevel);
+        builder.Logging.SetMinimumLevel(marvLogLevel.Value);
     }
 
     var host = builder.Build();

@@ -383,3 +383,11 @@
 **Prompt**:
 
 > Slight tweak - the "Instantiated plugin" messages should be debug, not informational
+
+## Fix --log-level not allowing lower levels like Trace
+
+**Date**: 2026-05-31T03:40:00Z
+
+**Prompt**:
+
+> When I run the bot with --log-level Trace, I don't see the expected protocol trace

@@ -69,8 +69,8 @@ public record MarvConfiguration
     public List<string> Plugins { get; init; } = [];
 
     /// <summary>
-    /// Override for the default log level. When set, the effective log level is the
-    /// more restrictive of this value and the level configured in appsettings.json.
+    /// Override for the minimum log level. When set, replaces the default log level
+    /// from appsettings.json.
     /// </summary>
     [Description("Override for the default log level.")]
     public LogLevel? LogLevel { get; init; }
