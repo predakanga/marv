@@ -391,3 +391,11 @@
 **Prompt**:
 
 > When I run the bot with --log-level Trace, I don't see the expected protocol trace
+
+## Fix NickServ IDENTIFY sent with empty password
+
+**Date**: 2026-05-31T03:45:00Z
+
+**Prompt**:
+
+> NickServ identify is being sent even when a password isn't provided

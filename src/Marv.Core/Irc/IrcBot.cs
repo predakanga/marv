@@ -473,7 +473,7 @@ internal sealed class IrcBot : IBot
 
                 // Start SASL if negotiated and credentials are configured
                 if (_capabilityManager.IsNegotiated(Platform.Capabilities.Sasl)
-                    && _config.SaslUser is not null && _config.SaslPassword is not null
+                    && !string.IsNullOrEmpty(_config.SaslUser) && !string.IsNullOrEmpty(_config.SaslPassword)
                     && !_saslInProgress)
                 {
                     _saslInProgress = true;
@@ -594,7 +594,7 @@ internal sealed class IrcBot : IBot
     private async Task HandleEndOfMotd(IrcMessage message, CancellationToken ct)
     {
         // NickServ authentication if configured and SASL wasn't used
-        if (_config.NickServPassword is not null && !_capabilityManager.IsNegotiated(Platform.Capabilities.Sasl))
+        if (!string.IsNullOrEmpty(_config.NickServPassword) && !_capabilityManager.IsNegotiated(Platform.Capabilities.Sasl))
         {
             _logger.LogInformation("Authenticating to NickServ");
             await SendMessageAsync("NickServ", $"IDENTIFY {_config.NickServPassword}", ct);
