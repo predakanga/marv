@@ -612,6 +612,9 @@ internal sealed class IrcBot : IBot
     {
         if (message.Parameters.Count < 2 || message.Source?.Nick is null) return;
 
+        // Ignore our own messages echoed back via echo-message
+        if (_users.Comparer.Equals(message.Source.Nick, _currentNick)) return;
+
         var target = message.Parameters[0];
         var text = message.Parameters[1];
         var sender = GetOrCreateUser(message.Source);
@@ -704,6 +707,9 @@ internal sealed class IrcBot : IBot
 
         // During registration, notices may come from the server (no nick)
         if (message.Source?.Nick is null) return;
+
+        // Ignore our own notices echoed back via echo-message
+        if (_users.Comparer.Equals(message.Source.Nick, _currentNick)) return;
 
         var target = message.Parameters[0];
         var text = message.Parameters[1];

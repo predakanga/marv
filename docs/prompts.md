@@ -435,3 +435,11 @@
 **Prompt**:
 
 > Make sure that OnCommand and OnRegex match against the formatting-stripped text
+
+## Prevent bot from triggering itself with echo-message
+
+**Date**: 2026-05-31T05:00:00Z
+
+**Prompt**:
+
+> I haven't checked the code, but I'm worried the bot may end up triggering itself when the echo-message capability is enabled. Make sure that doesn't happen
