@@ -367,3 +367,11 @@
 **Prompt**:
 
 > Rename Marv.App to Marv
+
+## Adjust logging levels for plugin discovery and wire protocol
+
+**Date**: 2026-05-31T03:30:00Z
+
+**Prompt**:
+
+> Lets adjust the logging - information about plugin/service discovery should move to the debug level, while the actual load messages can stay informational. Add logging of the actual wire protocol (incoming and outgoing) at the trace level.

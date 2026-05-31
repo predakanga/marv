@@ -70,7 +70,7 @@ public sealed class PluginManager
                     }
 
                     descriptors.Add(descriptor);
-                    bootstrapLogger?.LogInformation("Discovered plugin: {Name} from {Assembly}",
+                    bootstrapLogger?.LogDebug("Discovered plugin: {Name} from {Assembly}",
                         descriptor.Name, assembly.GetName().Name);
                 }
             }
@@ -299,11 +299,11 @@ public sealed class PluginManager
         {
             _logger.LogInformation("Plugin '{Name}' loaded", descriptor.Name);
             foreach (var svc in descriptor.ProvidedServices)
-                _logger.LogInformation("  Provides: {Service}", svc.FullName);
+                _logger.LogDebug("  Plugin '{Name}' provides: {Service}", descriptor.Name, svc.FullName);
             foreach (var svc in descriptor.RequiredServices)
-                _logger.LogInformation("  Requires: {Service}", svc.FullName);
+                _logger.LogDebug("  Plugin '{Name}' requires: {Service}", descriptor.Name, svc.FullName);
             foreach (var svc in descriptor.OptionalServices)
-                _logger.LogInformation("  Optional: {Service}", svc.FullName);
+                _logger.LogDebug("  Plugin '{Name}' optional: {Service}", descriptor.Name, svc.FullName);
         }
     }
 }
