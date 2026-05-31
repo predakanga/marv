@@ -359,3 +359,11 @@
 **Prompt**:
 
 > Let's improve the build output - configure the main app to use PublishSingleFile, and update the references on plugins to use <Private>false</Private>. Then, update the makefile so that the plugins are published to a common plugin directory, instead of their own subdirectories.
+
+## Rename Marv.App to Marv
+
+**Date**: 2026-05-31T03:00:00Z
+
+**Prompt**:
+
+> Rename Marv.App to Marv

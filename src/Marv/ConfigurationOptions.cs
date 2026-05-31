@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using Marv.Core;
 
-namespace Marv.App;
+namespace Marv;
 
 /// <summary>
 /// Auto-generates System.CommandLine <see cref="Option"/> instances from

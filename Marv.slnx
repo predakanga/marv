@@ -1,6 +1,6 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/Marv.App/Marv.App.csproj" />
+    <Project Path="src/Marv/Marv.csproj" />
     <Project Path="src/Marv.Core/Marv.Core.csproj" />
   </Folder>
   <Folder Name="/src/plugins/">

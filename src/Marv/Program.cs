@@ -1,5 +1,5 @@
 using System.CommandLine;
-using Marv.App;
+using Marv;
 using Marv.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;

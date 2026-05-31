@@ -14,14 +14,14 @@ test:
 
 publish: build
 	@mkdir -p $(OUTPUT_DIR) $(PLUGIN_DIR)
-	dotnet publish src/Marv.App/Marv.App.csproj -c $(CONFIGURATION) -o $(OUTPUT_DIR)
+	dotnet publish src/Marv/Marv.csproj -c $(CONFIGURATION) -o $(OUTPUT_DIR)
 	@for plugin in src/plugins/*/; do \
 		name=$$(basename $$plugin); \
 		cp $$plugin/bin/$(CONFIGURATION)/net10.0/$$name.dll $(PLUGIN_DIR)/; \
 	done
 	@echo ""
 	@echo "Build complete. Output in $(OUTPUT_DIR)/"
-	@echo "Run with: $(OUTPUT_DIR)/Marv.App"
+	@echo "Run with: $(OUTPUT_DIR)/Marv"
 
 clean:
 	dotnet clean -c $(CONFIGURATION)
