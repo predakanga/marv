@@ -375,3 +375,11 @@
 **Prompt**:
 
 > Lets adjust the logging - information about plugin/service discovery should move to the debug level, while the actual load messages can stay informational. Add logging of the actual wire protocol (incoming and outgoing) at the trace level.
+
+## Move "Instantiated plugin" log to debug
+
+**Date**: 2026-05-31T03:35:00Z
+
+**Prompt**:
+
+> Slight tweak - the "Instantiated plugin" messages should be debug, not informational

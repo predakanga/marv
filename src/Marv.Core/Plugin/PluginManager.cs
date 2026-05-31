@@ -134,7 +134,7 @@ public sealed class PluginManager
                     _serviceProvider, descriptor.PluginType);
 
                 _instances.Add(new PluginInstance(descriptor, plugin));
-                _logger.LogInformation("Instantiated plugin: {Name}", descriptor.Name);
+                _logger.LogDebug("Instantiated plugin: {Name}", descriptor.Name);
             }
             catch (Exception ex)
             {
