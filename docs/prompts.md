@@ -415,3 +415,15 @@
 **Prompt**:
 
 > In order to evaluate that research properly, I think it's worth considering an example message - this is typical of the plugins that will be used with this bot: "\x0310,01[\x037 Community \x0310] :: [\x033 Network: \x037NBC \x0310] :: [ \x033Runtime:\x037 25 minutes \x0310] :: [\x033 Rating:\x037 \x02TV-PG\x02\x0310 ] :: [\x0314 https://thetvdb.com/series/community \x0310]\017"
+
+## Implement IRC formatting API in Marv.Core.Formatting
+
+**Date**: 2026-05-31T04:30:00Z
+
+**Prompt**:
+
+> Okay, let's implement the proposed approach. These should live in a Util package to make it clear that they're not coupled tightly to the core.
+
+> I didn't expect that that would create a whole new assembly - what's the standard practice for utility classes like this?
+
+> yeah, do that
