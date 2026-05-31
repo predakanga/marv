@@ -1,5 +1,4 @@
 using System.CommandLine;
-using Marv.App;
 using Marv.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 var configOption = new Option<string?>("--config", "-c")
 {
-    Description = "Path to the configuration file. Format is determined by extension (.json, .yaml/.yml, .xml, .toml)."
+    Description = "Path to the configuration file. Format is determined by extension (.json, .yaml/.yml, .xml)."
 };
 
 var rootCommand = new RootCommand("Marv IRC Bot")
@@ -39,27 +38,13 @@ rootCommand.SetAction(async (result, ct) =>
     // Read plugin paths from configuration
     var pluginPaths = builder.Configuration.GetSection("Plugins").Get<List<string>>() ?? [];
 
-    // Register Marv core services
+    // Register Marv core services (includes IrcBot, MarvBotService, plugins)
     builder.Services.AddMarv(builder.Configuration, pluginPaths);
 
     // Configure logging
     builder.Logging.AddConsole();
 
     var host = builder.Build();
-
-    var logger = host.Services.GetRequiredService<ILogger<Program>>();
-    logger.LogInformation("Marv IRC Bot starting...");
-
-    var config = builder.Configuration.Get<MarvConfiguration>() ?? new MarvConfiguration();
-    logger.LogInformation("Server: {Server}:{Port} (TLS: {UseTls})",
-        config.Irc.Server, config.Irc.Port, config.Irc.UseTls);
-    logger.LogInformation("Nick: {Nick}", config.Irc.Nick);
-    logger.LogInformation("Plugins: {Count} configured", pluginPaths.Count);
-
-    // TODO: Connect to IRC server and run the main loop
-    logger.LogInformation("Configuration loaded successfully. Bot is ready to connect.");
-    logger.LogInformation("(Connection implementation pending — this is the application shell)");
-
     await host.RunAsync(ct);
 });
 
@@ -68,7 +53,7 @@ await parseResult.InvokeAsync();
 
 /// <summary>
 /// Adds a configuration file source based on the file extension.
-/// Supports .json, .yaml/.yml, .xml, and .toml formats.
+/// Supports .json, .yaml/.yml, and .xml formats.
 /// </summary>
 static void AddConfigFile(IConfigurationBuilder config, string path, bool required)
 {

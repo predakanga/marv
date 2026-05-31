@@ -19,7 +19,10 @@ public sealed class PluginManager
     private IReadOnlyList<PluginDescriptor> _descriptors = [];
     private List<PluginInstance> _instances = [];
 
-    internal PluginManager(ILogger<PluginManager> logger, IServiceProvider serviceProvider)
+    /// <summary>
+    /// Creates a new <see cref="PluginManager"/>.
+    /// </summary>
+    public PluginManager(ILogger<PluginManager> logger, IServiceProvider serviceProvider)
     {
         _logger = logger;
         _serviceProvider = serviceProvider;

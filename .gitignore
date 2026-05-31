@@ -13,3 +13,6 @@ build/
 ## Test results
 TestResults/
 [Cc]overage*/
+
+## Local test configs
+marv-test.json

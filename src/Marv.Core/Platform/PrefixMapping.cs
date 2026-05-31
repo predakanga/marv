@@ -36,6 +36,9 @@ public sealed class PrefixMapping
     /// <summary>Returns whether the given character is a known prefix.</summary>
     public bool IsPrefix(char c) => _prefixToMode.ContainsKey(c);
 
+    /// <summary>Returns whether the given character is a known mode.</summary>
+    public bool HasMode(char c) => _modeToPrefix.ContainsKey(c);
+
     /// <summary>
     /// Parses the PREFIX ISUPPORT value (e.g. "(ov)@+").
     /// </summary>

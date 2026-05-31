@@ -311,3 +311,11 @@
 **Prompt**:
 
 > On second thought, making PluginName an instance property doesn't work either - the bot needs to be able to choose which plugins to load based on the config. Let's adopt your approach (deriving the name from the plugin class, stripping Plugin off the end), but also provide a PluginName attribute which can be applied to the plugin class.
+
+## Implement IRC connection and main loop
+
+**Date**: 2026-05-31T00:30:00Z
+
+**Prompt**:
+
+> Now let's implement the IRC connection and main loop

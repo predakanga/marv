@@ -25,6 +25,9 @@ public static class MarvServiceExtensions
         IConfiguration configuration,
         IReadOnlyList<string>? pluginPaths = null)
     {
+        // Bind IRC configuration
+        services.Configure<IrcConfiguration>(configuration.GetSection("Irc"));
+
         // Register core services
         var serverInfo = new ServerInfo();
         var capabilityManager = new CapabilityManager();
@@ -35,6 +38,11 @@ public static class MarvServiceExtensions
         services.AddSingleton(capabilityManager);
         services.AddSingleton<IPluginActivator, PluginActivator>();
         services.AddSingleton<PluginManager>();
+
+        // Register the bot and hosted service
+        services.AddSingleton<IrcBot>();
+        services.AddSingleton<IBot>(sp => sp.GetRequiredService<IrcBot>());
+        services.AddHostedService<MarvBotService>();
 
         // Discover plugins and register their services/configurations
         IReadOnlyList<PluginDescriptor> sortedPlugins = [];
