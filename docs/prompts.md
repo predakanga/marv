@@ -443,3 +443,11 @@
 **Prompt**:
 
 > I haven't checked the code, but I'm worried the bot may end up triggering itself when the echo-message capability is enabled. Make sure that doesn't happen
+
+## Change plugin config key back to Plugins: and update example config
+
+**Date**: 2026-05-31T05:15:00Z
+
+**Prompt**:
+
+> I've changed my mind about the config key for plugins - change it back to Plugins:{PluginName}, instead of PluginConfigs:{PluginName}. Also, make sure that the example config matches the current schema.

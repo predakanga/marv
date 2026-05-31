@@ -1,22 +1,21 @@
 {
-  "Irc": {
-    "Server": "irc.libera.chat",
-    "Port": 6697,
-    "UseTls": true,
-    "Nick": "Marv",
-    "User": "marv",
-    "RealName": "Marv IRC Bot",
-    "SaslUser": null,
-    "SaslPassword": null,
-    "NickServPassword": null,
-    "Channels": ["#marv-test"],
-    "CommandPrefix": "!"
-  },
+  "Server": "irc.libera.chat",
+  "Port": 6697,
+  "UseTls": true,
+  "Nick": "Marv",
+  "User": "marv",
+  "RealName": "Marv IRC Bot",
+  "SaslUser": null,
+  "SaslPassword": null,
+  "NickServPassword": null,
+  "Channels": ["#marv-test"],
+  "CommandPrefix": "!",
+  "PluginDirectories": ["plugins"],
   "Plugins": [
-    "plugins/Marv.Plugins.Greet/Marv.Plugins.Greet.dll",
-    "plugins/Marv.Plugins.Auth/Marv.Plugins.Auth.dll",
-    "plugins/Marv.Plugins.AuthConsumer/Marv.Plugins.AuthConsumer.dll",
-    "plugins/Marv.Plugins.CannedResponses/Marv.Plugins.CannedResponses.dll"
+    "Greet",
+    "Auth",
+    "AuthConsumer",
+    "CannedResponses"
   ],
   "Plugins:Greet": {
     "GreetMessage": "Welcome, {nick}!",

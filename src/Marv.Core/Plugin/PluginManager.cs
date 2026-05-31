@@ -89,7 +89,7 @@ public sealed class PluginManager
         {
             foreach (var (configType, section) in descriptor.Configurations)
             {
-                var configSection = configuration.GetSection($"PluginConfigs:{section}");
+                var configSection = configuration.GetSection($"Plugins:{section}");
                 var method = typeof(OptionsConfigurationServiceCollectionExtensions)
                     .GetMethod("Configure", [typeof(IServiceCollection), typeof(IConfiguration)])!
                     .MakeGenericMethod(configType);
