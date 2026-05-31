@@ -548,3 +548,43 @@
 > In doing this, don't make any changes on Github itself; if there is any setup require on Github, report them to me at the end and I'll do them myself.
 > For CI, linting and analysis should run on every commit and on PRs, but keep security in mind. Anything that could potentially run user code (i.e. the Makefile) should be avoided.
 > The project will not be published to NuGet; only publish releases and docker images to Github.
+
+## Use non-preview .NET base images in Dockerfile
+
+**Date**: 2026-05-31T22:30:00Z
+
+**Prompt**:
+
+> The Dockerfile is using a preview tag - change this to the latest non-preview version
+
+## Pin Dockerfile to specific .NET image versions
+
+**Date**: 2026-05-31T22:35:00Z
+
+**Prompt**:
+
+> I prefer that the Dockerfile is pinned to a specific image - 10.0.8 instead of 10.0
+
+## Remove marv.test.json from git history
+
+**Date**: 2026-05-31T22:40:00Z
+
+**Prompt**:
+
+> marv.test.json wasn't meant to be included in git - can you remove it from the git history?
+
+## Add MIT license
+
+**Date**: 2026-05-31T22:45:00Z
+
+**Prompt**:
+
+> Add an MIT license
+
+## Log missing prompts
+
+**Date**: 2026-05-31T22:50:00Z
+
+**Prompt**:
+
+> You haven't included the last few prompts in docs/prompts.md
