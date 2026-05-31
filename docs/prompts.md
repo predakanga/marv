@@ -351,3 +351,11 @@
 **Prompt**:
 
 > With that change, we can remove the line from CLAUDE.md about keeping MarvConfiguration and Program.cs in sync.
+
+## Improve build output: single-file app and flat plugin directory
+
+**Date**: 2026-05-31T02:00:00Z
+
+**Prompt**:
+
+> Let's improve the build output - configure the main app to use PublishSingleFile, and update the references on plugins to use <Private>false</Private>. Then, update the makefile so that the plugins are published to a common plugin directory, instead of their own subdirectories.

@@ -12,16 +12,16 @@ build:
 test:
 	dotnet test -c $(CONFIGURATION) --no-build
 
-publish: build
+publish:
 	@mkdir -p $(OUTPUT_DIR) $(PLUGIN_DIR)
-	dotnet publish src/Marv.App/Marv.App.csproj -c $(CONFIGURATION) --no-build -o $(OUTPUT_DIR)
+	dotnet publish src/Marv.App/Marv.App.csproj -c $(CONFIGURATION) -o $(OUTPUT_DIR)
 	@for plugin in src/plugins/*/; do \
 		name=$$(basename $$plugin); \
-		dotnet publish $$plugin$$name.csproj -c $(CONFIGURATION) --no-build -o $(PLUGIN_DIR)/$$name; \
+		cp $$plugin/bin/$(CONFIGURATION)/net10.0/$$name.dll $(PLUGIN_DIR)/; \
 	done
 	@echo ""
 	@echo "Build complete. Output in $(OUTPUT_DIR)/"
-	@echo "Run with: dotnet $(OUTPUT_DIR)/Marv.App.dll"
+	@echo "Run with: $(OUTPUT_DIR)/Marv.App"
 
 clean:
 	dotnet clean -c $(CONFIGURATION)

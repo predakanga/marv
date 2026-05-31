@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Marv.Core\Marv.Core.csproj" />
-    <ProjectReference Include="..\Marv.Plugins.Auth\Marv.Plugins.Auth.csproj" />
+    <ProjectReference Include="..\..\Marv.Core\Marv.Core.csproj" Private="false" />
+    <ProjectReference Include="..\Marv.Plugins.Auth\Marv.Plugins.Auth.csproj" Private="false" />
   </ItemGroup>
 
 </Project>
