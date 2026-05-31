@@ -488,3 +488,11 @@
 > I noticed that the OnInterval handlers are only triggered when an event arrives - is there any reason not to use a background task to service those handlers instead?
 >
 > (Follow-up) I think it should use OnLoadAsync instead - could run while the bot isn't yet connected
+
+## Add unit tests for interval timer behavior
+
+**Date**: 2026-05-31T12:55:00Z
+
+**Prompt**:
+
+> can you also add a unit test for the interval timer behavior
