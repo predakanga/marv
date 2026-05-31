@@ -73,6 +73,7 @@ as DCC be supported.
 - Nullable reference types enabled everywhere
 - One class per file, filename matches class name
 - XML doc comments on all public API members
+- The main solution is stored in Marv.slnx
 
 ## Configuration
 
