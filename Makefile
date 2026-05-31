@@ -12,7 +12,7 @@ build:
 test:
 	dotnet test -c $(CONFIGURATION) --no-build
 
-publish:
+publish: build
 	@mkdir -p $(OUTPUT_DIR) $(PLUGIN_DIR)
 	dotnet publish src/Marv.App/Marv.App.csproj -c $(CONFIGURATION) -o $(OUTPUT_DIR)
 	@for plugin in src/plugins/*/; do \
