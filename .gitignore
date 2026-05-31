@@ -16,3 +16,12 @@ TestResults/
 
 ## Local test configs
 marv-test.json
+marv.json
+
+## OS files
+.DS_Store
+
+## IDE files
+.idea/
+.vscode/
+*.swp

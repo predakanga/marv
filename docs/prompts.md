@@ -530,3 +530,21 @@
 **Prompt**:
 
 > Did you make sure that when a plugin fails to load, any plugins that depend on it are skipped? Also, make sure that there are tests to handle all the cases affected by the previous prompt.
+
+## Prepare project for GitHub publication
+
+**Date**: 2026-05-31T22:00:00Z
+
+**Prompt**:
+
+> Prepare the project to be published on Github.
+>
+> This should include at least the following tasks:
+> - Create and test a Dockerfile for the project
+> - Set up CI for the project, including linting, static analysis and security analysis
+> - Create a runbook for creating new releases
+> - Create a README.md fitting standard conventions for a command-line app
+>
+> In doing this, don't make any changes on Github itself; if there is any setup require on Github, report them to me at the end and I'll do them myself.
+> For CI, linting and analysis should run on every commit and on PRs, but keep security in mind. Anything that could potentially run user code (i.e. the Makefile) should be avoided.
+> The project will not be published to NuGet; only publish releases and docker images to Github.

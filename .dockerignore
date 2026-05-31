@@ -1,0 +1,14 @@
+**/.git
+**/.gitignore
+**/.vs
+**/.vscode
+**/.idea
+**/.claude
+**/bin
+**/obj
+**/build
+**/TestResults
+**/*.user
+**/TODO.md
+**/.DS_Store
+**/Marv.sln.DotSettings.user
