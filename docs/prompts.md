@@ -522,3 +522,11 @@
 
 > Next up, I want to make sure that any errors occurring in plugins are surfaced properly and don't crash the bot.
 > In fact, let's add Sentry suppport to the bot and also report plugin errors through that. The Sentry integration should only report errors, ignore the tracing features.
+
+## Skip dependent plugins on failure and add resilience tests
+
+**Date**: 2026-05-31T14:30:00Z
+
+**Prompt**:
+
+> Did you make sure that when a plugin fails to load, any plugins that depend on it are skipped? Also, make sure that there are tests to handle all the cases affected by the previous prompt.
