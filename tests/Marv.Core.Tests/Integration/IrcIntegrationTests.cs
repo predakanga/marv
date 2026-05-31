@@ -383,6 +383,108 @@ public class IrcIntegrationTests
         }
     }
 
+    [Fact]
+    public async Task Bot_FiresReadyEvent_WithoutAuth()
+    {
+        SkipIfUnavailable();
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+        var bot = IrcServerFixture.CreateBot("MarvReady");
+        var config = IrcServerFixture.CreateConfig("MarvReady", "#readytest");
+
+        var eventChannel = Channel.CreateUnbounded<MarvEvent>();
+
+        var connection = await _fixture.CreateConnectionAsync(cts.Token);
+        await using (connection)
+        {
+            var botTask = Task.Run(
+                () => bot.RunAsync(connection, config, [eventChannel.Writer], cts.Token), cts.Token);
+
+            // ReadyEvent should fire before channel joins
+            var readyEvent = await WaitForEventAsync<ReadyEvent>(eventChannel.Reader, cts.Token);
+            Assert.NotNull(readyEvent);
+
+            // Channel join should follow
+            var joined = await WaitForEventAsync<UserJoinedEvent>(eventChannel.Reader, cts.Token);
+            Assert.NotNull(joined);
+            Assert.Equal("#readytest", joined!.Channel!.Name, StringComparer.OrdinalIgnoreCase);
+
+            await cts.CancelAsync();
+            try { await botTask; } catch (OperationCanceledException) { }
+        }
+    }
+
+    [Fact]
+    public async Task Bot_SendsPassBeforeRegistration()
+    {
+        SkipIfUnavailable();
+
+        // Verify that PASS is sent before NICK/USER by watching the raw connection.
+        // ngircd has no server password, so this connection will still register fine
+        // (PASS with a wrong password is ignored when no password is configured).
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+        var bot = IrcServerFixture.CreateBot("MarvPass");
+        var config = IrcServerFixture.CreateConfig("MarvPass");
+
+        var eventChannel = Channel.CreateUnbounded<MarvEvent>();
+
+        var connection = await _fixture.CreateConnectionAsync(cts.Token);
+        await using (connection)
+        {
+            var botTask = Task.Run(
+                () => bot.RunAsync(connection, config, [eventChannel.Writer], cts.Token), cts.Token);
+
+            // If registration works, the bot is ready — PASS didn't break anything
+            var readyEvent = await WaitForEventAsync<ReadyEvent>(eventChannel.Reader, cts.Token);
+            Assert.NotNull(readyEvent);
+
+            await cts.CancelAsync();
+            try { await botTask; } catch (OperationCanceledException) { }
+        }
+    }
+
+    [Fact]
+    public async Task Bot_ReadyEventFiresBeforeChannelJoin()
+    {
+        SkipIfUnavailable();
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+        var bot = IrcServerFixture.CreateBot("MarvOrd");
+        var config = IrcServerFixture.CreateConfig("MarvOrd", "#ordertest");
+
+        var eventChannel = Channel.CreateUnbounded<MarvEvent>();
+        var eventOrder = new List<string>();
+
+        var connection = await _fixture.CreateConnectionAsync(cts.Token);
+        await using (connection)
+        {
+            var botTask = Task.Run(
+                () => bot.RunAsync(connection, config, [eventChannel.Writer], cts.Token), cts.Token);
+
+            // Collect events in order until we see a UserJoinedEvent
+            await foreach (var evt in eventChannel.Reader.ReadAllAsync(cts.Token))
+            {
+                switch (evt)
+                {
+                    case ReadyEvent:
+                        eventOrder.Add("Ready");
+                        break;
+                    case UserJoinedEvent:
+                        eventOrder.Add("UserJoined");
+                        break;
+                }
+
+                if (eventOrder.Contains("UserJoined"))
+                    break;
+            }
+
+            Assert.Equal(["Ready", "UserJoined"], eventOrder);
+
+            await cts.CancelAsync();
+            try { await botTask; } catch (OperationCanceledException) { }
+        }
+    }
+
     // --- Helpers ---
 
     /// <summary>

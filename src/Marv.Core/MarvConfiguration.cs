@@ -22,6 +22,10 @@ public record MarvConfiguration
     [Description("Use TLS for the connection.")]
     public bool UseTls { get; init; }
 
+    /// <summary>Server password sent via the PASS command during registration.</summary>
+    [Description("Server password (PASS command).")]
+    public string? ServerPassword { get; init; }
+
     /// <summary>The bot's nickname.</summary>
     [Description("Bot nickname.")]
     public string Nick { get; init; } = "Marv";
@@ -45,6 +49,14 @@ public record MarvConfiguration
     /// <summary>NickServ password for legacy authentication.</summary>
     [Description("NickServ password for legacy authentication.")]
     public string? NickServPassword { get; init; }
+
+    /// <summary>Oper username for IRC operator authentication.</summary>
+    [Description("Oper username for IRC operator authentication.")]
+    public string? OperName { get; init; }
+
+    /// <summary>Oper password for IRC operator authentication.</summary>
+    [Description("Oper password for IRC operator authentication.")]
+    public string? OperPassword { get; init; }
 
     /// <summary>Channels to join on connect.</summary>
     [Description("Channels to join on connect.")]

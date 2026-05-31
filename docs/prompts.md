@@ -461,3 +461,20 @@
 > All of our tests so far are quite isolated. It's important to test the bot against a real IRC server, so please add some tests that use an IRC server running on localhost.
 >
 > The IRC server won't be available in all environments so these tests shouldn't run by default, but note in CLAUDE.md that you should start the IRC server, run tests, then stop the server again for your own testing. Also update the Makefile to do that when running tests.
+
+## Implement server authentication (PASS, NickServ, OPER) and ReadyEvent
+
+**Date**: 2026-05-31T12:00:00Z
+
+**Prompt**:
+
+> Our next challenge is fleshing out the bot's authentication to the server. There are three aspects that need improvement:
+> - IRC server password (i.e. PASS command)
+> - NickServ authentication (research the top services and decide whether we need different implementations and a NickservType config)
+> - Oper authentication
+>
+> It may be worth adding an event to alert plugins when all required authentication has been completed, but that would be our first synthetic event so it needs careful thought.
+>
+> (Follow-up) Go ahead and implement them, but I have a quick note - it's important to block channel joins until all the auth is completed, but the AuthenticationCompleteEvent name probably isn't right; there should be a single event that plugins can wait on whether or not the bot is configured to authenticate. The timeout is unfortunate, but necessary.
+>
+> (Follow-up) I think it's probably better to wait for the 900 numeric than wait for a notice

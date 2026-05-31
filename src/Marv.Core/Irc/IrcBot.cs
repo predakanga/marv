@@ -32,6 +32,11 @@ internal sealed class IrcBot : IBot
     private readonly HashSet<string> _pendingCaps = new(StringComparer.OrdinalIgnoreCase);
     private bool _saslInProgress;
 
+    // Post-registration auth state
+    private TaskCompletionSource<bool>? _readyTcs;
+    private bool _nickServPending;
+    private bool _operPending;
+
     // Labeled response correlation
     private int _labelCounter;
     private readonly ConcurrentDictionary<string, TaskCompletionSource<IReadOnlyList<IrcMessage>>> _pendingLabels = new();
@@ -217,6 +222,15 @@ internal sealed class IrcBot : IBot
         _channels.Clear();
 
         _registrationTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _readyTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _nickServPending = false;
+        _operPending = false;
+
+        // Send server password before anything else
+        if (!string.IsNullOrEmpty(config.ServerPassword))
+        {
+            await SendRawAsync(new IrcMessage("PASS", [config.ServerPassword]), ct);
+        }
 
         // Begin CAP negotiation and registration
         await SendRawAsync(new IrcMessage("CAP", ["LS", "302"]), ct);
@@ -243,6 +257,11 @@ internal sealed class IrcBot : IBot
         }
         _pendingLabels.Clear();
         _labelBuffers.Clear();
+
+        _readyTcs?.TrySetCanceled();
+        _readyTcs = null;
+        _nickServPending = false;
+        _operPending = false;
 
         _eventWriters = [];
         _connection = null;
@@ -405,6 +424,15 @@ internal sealed class IrcBot : IBot
                 HandleCreationTime(message);
                 break;
 
+            // OPER numerics
+            case "381": // RPL_YOUREOPER
+                HandleOperSuccess(message);
+                break;
+            case "464": // ERR_PASSWDMISMATCH
+            case "491": // ERR_NOOPERHOST
+                HandleOperFailed(message);
+                break;
+
             // Nick errors
             case "431": // ERR_NONICKNAMEGIVEN
             case "432": // ERR_ERRONEUSNICKNAME
@@ -540,6 +568,14 @@ internal sealed class IrcBot : IBot
         {
             _logger.LogInformation("SASL authentication successful: {Account}", message.Parameters[1]);
         }
+
+        // 900 is also sent by some servers after NickServ identification
+        if (_nickServPending)
+        {
+            _logger.LogInformation("NickServ identification confirmed via 900 numeric");
+            _nickServPending = false;
+            CheckAuthComplete();
+        }
     }
 
     private async Task HandleSaslComplete(IrcMessage message, CancellationToken ct)
@@ -555,6 +591,21 @@ internal sealed class IrcBot : IBot
         _logger.LogWarning("SASL authentication failed: {Numeric} {Message}",
             message.Command, message.Parameters.LastOrDefault() ?? "");
         await SendRawAsync(new IrcMessage("CAP", ["END"]), ct);
+    }
+
+    private void HandleOperSuccess(IrcMessage message)
+    {
+        _logger.LogInformation("IRC operator authentication successful");
+        _operPending = false;
+        CheckAuthComplete();
+    }
+
+    private void HandleOperFailed(IrcMessage message)
+    {
+        _logger.LogWarning("IRC operator authentication failed: {Numeric} {Message}",
+            message.Command, message.Parameters.LastOrDefault() ?? "");
+        _operPending = false;
+        CheckAuthComplete();
     }
 
     private async Task HandleWelcome(IrcMessage message, CancellationToken ct)
@@ -596,15 +647,90 @@ internal sealed class IrcBot : IBot
         // NickServ authentication if configured and SASL wasn't used
         if (!string.IsNullOrEmpty(_config.NickServPassword) && !_capabilityManager.IsNegotiated(Platform.Capabilities.Sasl))
         {
+            _nickServPending = true;
             _logger.LogInformation("Authenticating to NickServ");
             await SendMessageAsync("NickServ", $"IDENTIFY {_config.NickServPassword}", ct);
         }
+
+        // OPER authentication if configured
+        if (!string.IsNullOrEmpty(_config.OperName) && !string.IsNullOrEmpty(_config.OperPassword))
+        {
+            _operPending = true;
+            _logger.LogInformation("Authenticating as IRC operator: {OperName}", _config.OperName);
+            await SendRawAsync(new IrcMessage("OPER", [_config.OperName, _config.OperPassword]), ct);
+        }
+
+        if (_nickServPending || _operPending)
+        {
+            // Wait for auth to complete (or timeout) in the background,
+            // then fire ReadyEvent and join channels
+            _ = CompleteAuthSequenceAsync(ct);
+        }
+        else
+        {
+            await FireReadyAndJoinAsync(message, ct);
+        }
+    }
+
+    /// <summary>
+    /// Timeout (in seconds) for post-registration authentication to complete.
+    /// </summary>
+    private const int AuthTimeoutSeconds = 15;
+
+    /// <summary>
+    /// Waits for all pending auth steps to complete, then fires ReadyEvent and
+    /// joins channels. If auth doesn't complete within the timeout, proceeds anyway.
+    /// </summary>
+    private async Task CompleteAuthSequenceAsync(CancellationToken ct)
+    {
+        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        timeoutCts.CancelAfter(TimeSpan.FromSeconds(AuthTimeoutSeconds));
+
+        try
+        {
+            await _readyTcs!.Task.WaitAsync(timeoutCts.Token);
+        }
+        catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+        {
+            _logger.LogWarning("Post-registration authentication timed out after {Seconds}s — proceeding", AuthTimeoutSeconds);
+        }
+
+        var syntheticMessage = new IrcMessage(null, null, "READY", []);
+        await FireReadyAndJoinAsync(syntheticMessage, ct);
+    }
+
+    /// <summary>
+    /// Fires the <see cref="ReadyEvent"/> and joins all configured channels.
+    /// </summary>
+    private async Task FireReadyAndJoinAsync(IrcMessage message, CancellationToken ct)
+    {
+        _readyTcs?.TrySetResult(true);
+
+        _logger.LogInformation("Bot is ready");
+        var readyEvent = new ReadyEvent
+        {
+            Timestamp = DateTimeOffset.UtcNow,
+            RawMessage = message
+        };
+        await FanOutEventAsync(readyEvent, ct);
 
         // Join configured channels
         foreach (var channel in _config.Channels)
         {
             _logger.LogInformation("Joining channel: {Channel}", channel);
             await JoinAsync(channel, null, ct);
+        }
+    }
+
+    /// <summary>
+    /// Called when a pending auth step completes. If all steps are done,
+    /// signals the ready TCS.
+    /// </summary>
+    private void CheckAuthComplete()
+    {
+        if (!_nickServPending && !_operPending)
+        {
+            _readyTcs?.TrySetResult(true);
         }
     }
 
@@ -701,6 +827,18 @@ internal sealed class IrcBot : IBot
         }
     }
 
+    // Phrases that indicate successful NickServ identification, covering
+    // Atheme ("You are now identified"), Anope ("Password accepted"),
+    // and other common services packages.
+    private static readonly string[] NickServSuccessPhrases =
+    [
+        "you are now identified",
+        "password accepted",
+        "you are now recognized",
+        "you are now logged in",
+        "you are already identified"
+    ];
+
     private async Task HandleNotice(IrcMessage message, CancellationToken ct)
     {
         if (message.Parameters.Count < 2) return;
@@ -714,6 +852,23 @@ internal sealed class IrcBot : IBot
         var target = message.Parameters[0];
         var text = message.Parameters[1];
         var sender = GetOrCreateUser(message.Source);
+
+        // Detect NickServ identification response
+        if (_nickServPending
+            && message.Source.Nick.Equals("NickServ", StringComparison.OrdinalIgnoreCase))
+        {
+            foreach (var phrase in NickServSuccessPhrases)
+            {
+                if (text.Contains(phrase, StringComparison.OrdinalIgnoreCase))
+                {
+                    _logger.LogInformation("NickServ identification successful");
+                    _nickServPending = false;
+                    CheckAuthComplete();
+                    break;
+                }
+            }
+        }
+
         var isChannel = IsChannelName(target);
         var channel = isChannel ? GetChannel(target) : null;
 
@@ -1436,5 +1591,17 @@ internal sealed class IrcBot : IBot
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         cts.CancelAfter(TimeSpan.FromSeconds(30));
         await _registrationTcs.Task.WaitAsync(cts.Token);
+    }
+
+    /// <summary>
+    /// Waits for the bot to be fully ready (registration + all post-registration
+    /// auth complete). Times out after 60 seconds.
+    /// </summary>
+    public async Task WaitForReadyAsync(CancellationToken ct)
+    {
+        if (_readyTcs is null) return;
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        cts.CancelAfter(TimeSpan.FromSeconds(60));
+        await _readyTcs.Task.WaitAsync(cts.Token);
     }
 }
