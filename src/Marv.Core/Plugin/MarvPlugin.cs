@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Marv.Core.Events;
+using Marv.Core.Formatting;
 using Marv.Core.Platform;
 using Marv.Core.Protocol;
 
@@ -163,7 +164,7 @@ public abstract class MarvPlugin : IPlugin
         if (_commandHandlers.Count == 0)
             return;
 
-        var text = msgEvt.Text;
+        var text = IrcFormat.Strip(msgEvt.Text);
 
         // The command prefix is '!' by default
         // TODO: Make configurable per-bot
@@ -201,9 +202,10 @@ public abstract class MarvPlugin : IPlugin
 
     private async Task DispatchRegexHandlers(MessageEvent msgEvt, CancellationToken ct)
     {
+        var strippedText = IrcFormat.Strip(msgEvt.Text);
         foreach (var handler in _regexHandlers)
         {
-            var match = handler.Pattern.Match(msgEvt.Text);
+            var match = handler.Pattern.Match(strippedText);
             if (match.Success)
             {
                 var ctx = new RegexMatchContext

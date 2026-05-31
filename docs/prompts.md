@@ -427,3 +427,11 @@
 > I didn't expect that that would create a whole new assembly - what's the standard practice for utility classes like this?
 
 > yeah, do that
+
+## Strip formatting from text before OnCommand and OnRegex matching
+
+**Date**: 2026-05-31T04:45:00Z
+
+**Prompt**:
+
+> Make sure that OnCommand and OnRegex match against the formatting-stripped text
