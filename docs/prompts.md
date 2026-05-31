@@ -407,3 +407,11 @@
 **Prompt**:
 
 > I want to provide a simple way for plugin authors to use IRC formatting codes. Do some research and provide me a summary on the methods used by other bots to do this. Deliver the output in docs/formatting-research.md.
+
+## Evaluate formatting research against a real-world example
+
+**Date**: 2026-05-31T04:15:00Z
+
+**Prompt**:
+
+> In order to evaluate that research properly, I think it's worth considering an example message - this is typical of the plugins that will be used with this bot: "\x0310,01[\x037 Community \x0310] :: [\x033 Network: \x037NBC \x0310] :: [ \x033Runtime:\x037 25 minutes \x0310] :: [\x033 Rating:\x037 \x02TV-PG\x02\x0310 ] :: [\x0314 https://thetvdb.com/series/community \x0310]\017"
