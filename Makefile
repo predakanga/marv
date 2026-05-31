@@ -2,7 +2,7 @@ OUTPUT_DIR := build/output
 PLUGIN_DIR := $(OUTPUT_DIR)/plugins
 CONFIGURATION := Release
 
-.PHONY: all build test publish clean
+.PHONY: all build test test-integration publish clean
 
 all: build test
 
@@ -10,7 +10,12 @@ build:
 	dotnet build -c $(CONFIGURATION)
 
 test:
-	dotnet test -c $(CONFIGURATION) --no-build
+	dotnet test -c $(CONFIGURATION) --no-build --filter "Category!=Integration"
+
+test-integration:
+	sudo service ngircd start
+	dotnet test -c $(CONFIGURATION) --no-build --filter "Category=Integration" || (sudo service ngircd stop; exit 1)
+	sudo service ngircd stop
 
 publish: build
 	@mkdir -p $(OUTPUT_DIR) $(PLUGIN_DIR)

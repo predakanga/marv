@@ -451,3 +451,13 @@
 **Prompt**:
 
 > I've changed my mind about the config key for plugins - change it back to Plugins:{PluginName}, instead of PluginConfigs:{PluginName}. Also, make sure that the example config matches the current schema.
+
+## Add integration tests against real IRC server
+
+**Date**: 2026-05-31T09:15:00Z
+
+**Prompt**:
+
+> All of our tests so far are quite isolated. It's important to test the bot against a real IRC server, so please add some tests that use an IRC server running on localhost.
+>
+> The IRC server won't be available in all environments so these tests shouldn't run by default, but note in CLAUDE.md that you should start the IRC server, run tests, then stop the server again for your own testing. Also update the Makefile to do that when running tests.
