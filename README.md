@@ -29,10 +29,9 @@ cp marv.example.json marv.json
 ### With Docker
 
 ```bash
-docker run --rm -v ./marv.json:/app/marv.json ghcr.io/OWNER/marv:latest
+docker run --rm -v ./marv.json:/app/marv.json ghcr.io/predakanga/marv:latest
 ```
 
-Replace `OWNER/marv` with the actual repository path.
 
 ### From source
 

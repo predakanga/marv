@@ -61,11 +61,12 @@ Once the workflow completes:
 ### 6. Verify the Docker image
 
 ```bash
-docker pull ghcr.io/OWNER/marv:0.1.0
-docker run --rm ghcr.io/OWNER/marv:0.1.0 --help
+docker pull ghcr.io/predakanga/marv:0.1.0
+docker run --rm ghcr.io/predakanga/marv:0.1.0 --help
 ```
 
-Replace `OWNER/marv` with the actual repository path and `0.1.0` with the release version.
+
+Replace `0.1.0` with the release version.
 
 ## Rolling back a release
 
