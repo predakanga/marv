@@ -343,3 +343,11 @@
 > There's a lot of duplication around the CLI configuration overrides. Let's auto-generate that by scanning MarvConfiguration. You can use reflection, a source generator, or any other approach you deem appropriate.
 
 > It looks like the methods you're looking for are in System.CommandLine 3. Update that dependency to the latest preview version.
+
+## Remove manual CLI sync note from CLAUDE.md
+
+**Date**: 2026-05-31T01:45:00Z
+
+**Prompt**:
+
+> With that change, we can remove the line from CLAUDE.md about keeping MarvConfiguration and Program.cs in sync.

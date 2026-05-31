@@ -77,9 +77,9 @@ as DCC be supported.
 ## Configuration
 
 All configuration lives in `MarvConfiguration` in `Marv.Core`. The config
-is flat (no nested sections for IRC vs other concerns). Any change to
-`MarvConfiguration` must be reflected in the CLI options in `Program.cs`,
-and vice versa.
+is flat (no nested sections for IRC vs other concerns). CLI options are
+auto-generated from `MarvConfiguration` properties via reflection in
+`ConfigurationOptions.cs`.
 
 ## Architecture decisions
 
