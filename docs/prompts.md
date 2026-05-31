@@ -478,3 +478,13 @@
 > (Follow-up) Go ahead and implement them, but I have a quick note - it's important to block channel joins until all the auth is completed, but the AuthenticationCompleteEvent name probably isn't right; there should be a single event that plugins can wait on whether or not the bot is configured to authenticate. The timeout is unfortunate, but necessary.
 >
 > (Follow-up) I think it's probably better to wait for the 900 numeric than wait for a notice
+
+## Move OnInterval handlers to a background timer task
+
+**Date**: 2026-05-31T12:30:00Z
+
+**Prompt**:
+
+> I noticed that the OnInterval handlers are only triggered when an event arrives - is there any reason not to use a background task to service those handlers instead?
+>
+> (Follow-up) I think it should use OnLoadAsync instead - could run while the bot isn't yet connected

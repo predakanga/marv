@@ -23,6 +23,8 @@ public abstract class MarvPlugin : IPlugin
     private readonly List<RegexRegistration> _regexHandlers = [];
     private readonly List<RawMessageRegistration> _rawMessageHandlers = [];
     private readonly List<IntervalRegistration> _intervalHandlers = [];
+    private CancellationTokenSource? _intervalCts;
+    private Task? _intervalTask;
 
     /// <summary>
     /// Derived plugins accept <see cref="IBot"/> and <see cref="IPluginActivator"/>,
@@ -145,18 +147,6 @@ public abstract class MarvPlugin : IPlugin
             await DispatchCommandHandlers(msgEvt, ct);
             await DispatchRegexHandlers(msgEvt, ct);
         }
-
-        // Dispatch [OnInterval] handlers
-        var now = DateTimeOffset.UtcNow;
-        for (var i = 0; i < _intervalHandlers.Count; i++)
-        {
-            var handler = _intervalHandlers[i];
-            if (now - handler.LastRun >= handler.Interval)
-            {
-                _intervalHandlers[i] = handler with { LastRun = now };
-                await InvokeHandler(handler.Target, handler.Method, ct);
-            }
-        }
     }
 
     private async Task DispatchCommandHandlers(MessageEvent msgEvt, CancellationToken ct)
@@ -272,6 +262,8 @@ public abstract class MarvPlugin : IPlugin
                 if (result is Task task) await task;
             }
         }
+
+        StartIntervalTimers();
     }
 
     /// <inheritdoc />
@@ -288,6 +280,7 @@ public abstract class MarvPlugin : IPlugin
                 if (result is Task task) await task;
             }
         }
+
     }
 
     /// <inheritdoc />
@@ -306,9 +299,86 @@ public abstract class MarvPlugin : IPlugin
         }
     }
 
+    /// <summary>
+    /// Starts a background task that fires [OnInterval] handlers on schedule,
+    /// independent of the event stream.
+    /// </summary>
+    private void StartIntervalTimers()
+    {
+        if (_intervalHandlers.Count == 0) return;
+
+        // Reset last-run timestamps so intervals start fresh each connection
+        for (var i = 0; i < _intervalHandlers.Count; i++)
+            _intervalHandlers[i] = _intervalHandlers[i] with { LastRun = DateTimeOffset.UtcNow };
+
+        _intervalCts = new CancellationTokenSource();
+        var ct = _intervalCts.Token;
+        _intervalTask = Task.Run(() => RunIntervalLoopAsync(ct), ct);
+    }
+
+    /// <summary>
+    /// Stops the background interval timer task and waits for it to complete.
+    /// </summary>
+    private async Task StopIntervalTimersAsync()
+    {
+        if (_intervalCts is null) return;
+
+        await _intervalCts.CancelAsync();
+        if (_intervalTask is not null)
+        {
+            try { await _intervalTask; }
+            catch (OperationCanceledException) { }
+        }
+
+        _intervalCts.Dispose();
+        _intervalCts = null;
+        _intervalTask = null;
+    }
+
+    /// <summary>
+    /// Background loop that sleeps until the next interval handler is due,
+    /// then invokes all due handlers.
+    /// </summary>
+    private async Task RunIntervalLoopAsync(CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested)
+        {
+            var now = DateTimeOffset.UtcNow;
+            var nextDue = TimeSpan.MaxValue;
+
+            for (var i = 0; i < _intervalHandlers.Count; i++)
+            {
+                var handler = _intervalHandlers[i];
+                var elapsed = now - handler.LastRun;
+
+                if (elapsed >= handler.Interval)
+                {
+                    _intervalHandlers[i] = handler with { LastRun = now };
+                    await InvokeHandler(handler.Target, handler.Method, ct);
+                }
+                else
+                {
+                    var remaining = handler.Interval - elapsed;
+                    if (remaining < nextDue)
+                        nextDue = remaining;
+                }
+            }
+
+            // Recalculate next due time after invoking handlers (they may have taken time)
+            if (nextDue == TimeSpan.MaxValue)
+            {
+                nextDue = _intervalHandlers.Min(h => h.Interval);
+            }
+
+            await Task.Delay(nextDue, ct);
+        }
+    }
+
     /// <inheritdoc />
     public virtual async Task OnUnloadAsync()
     {
+        await StopIntervalTimersAsync();
+
         foreach (var group in _handlerGroups)
         {
             var method = group.GetType().GetMethod("OnUnloadAsync",
