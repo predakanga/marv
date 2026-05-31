@@ -487,7 +487,7 @@ internal sealed class IrcBot : IBot
                     else
                     {
                         await SendRawAsync(new IrcMessage("CAP", ["END"]), ct);
-        
+
                     }
                 }
                 break;
@@ -510,7 +510,7 @@ internal sealed class IrcBot : IBot
                 else
                 {
                     await SendRawAsync(new IrcMessage("CAP", ["END"]), ct);
-    
+
                 }
                 break;
 
@@ -785,22 +785,22 @@ internal sealed class IrcBot : IBot
         switch (command)
         {
             case "ACTION":
-            {
-                var isChannel = IsChannelName(target);
-                var channel = isChannel ? GetChannel(target) : null;
-                var evt = new ActionEvent
                 {
-                    Timestamp = GetTimestamp(message),
-                    RawMessage = message,
-                    MessageId = message.Tags.GetValueOrDefault("msgid"),
-                    BatchId = message.Tags.GetValueOrDefault("batch"),
-                    Channel = channel,
-                    Sender = sender,
-                    Text = args ?? ""
-                };
-                await FanOutEventAsync(evt, ct);
-                break;
-            }
+                    var isChannel = IsChannelName(target);
+                    var channel = isChannel ? GetChannel(target) : null;
+                    var evt = new ActionEvent
+                    {
+                        Timestamp = GetTimestamp(message),
+                        RawMessage = message,
+                        MessageId = message.Tags.GetValueOrDefault("msgid"),
+                        BatchId = message.Tags.GetValueOrDefault("batch"),
+                        Channel = channel,
+                        Sender = sender,
+                        Text = args ?? ""
+                    };
+                    await FanOutEventAsync(evt, ct);
+                    break;
+                }
             case "VERSION":
                 await SendRawAsync(new IrcMessage("NOTICE", [sender.Nick,
                     "\x01VERSION Marv IRC Bot 0.1.0\x01"]), ct);
@@ -814,21 +814,21 @@ internal sealed class IrcBot : IBot
                     $"\x01TIME {DateTimeOffset.UtcNow:R}\x01"]), ct);
                 break;
             default:
-            {
-                var evt = new CtcpEvent
                 {
-                    Timestamp = GetTimestamp(message),
-                    RawMessage = message,
-                    MessageId = message.Tags.GetValueOrDefault("msgid"),
-                    BatchId = message.Tags.GetValueOrDefault("batch"),
-                    Sender = sender,
-                    Command = command,
-                    Args = args,
-                    IsDirect = !IsChannelName(target)
-                };
-                await FanOutEventAsync(evt, ct);
-                break;
-            }
+                    var evt = new CtcpEvent
+                    {
+                        Timestamp = GetTimestamp(message),
+                        RawMessage = message,
+                        MessageId = message.Tags.GetValueOrDefault("msgid"),
+                        BatchId = message.Tags.GetValueOrDefault("batch"),
+                        Sender = sender,
+                        Command = command,
+                        Args = args,
+                        IsDirect = !IsChannelName(target)
+                    };
+                    await FanOutEventAsync(evt, ct);
+                    break;
+                }
         }
     }
 
