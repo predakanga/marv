@@ -513,3 +513,12 @@
 **Prompt**:
 
 > Make sure that there are unit tests for the rate limiter
+
+## Add Sentry support and plugin error resilience
+
+**Date**: 2026-05-31T14:00:00Z
+
+**Prompt**:
+
+> Next up, I want to make sure that any errors occurring in plugins are surfaced properly and don't crash the bot.
+> In fact, let's add Sentry suppport to the bot and also report plugin errors through that. The Sentry integration should only report errors, ignore the tracing features.

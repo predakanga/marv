@@ -1,5 +1,7 @@
 using Marv.Core.Platform;
 using Marv.Core.Plugin;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Xunit;
 
@@ -18,7 +20,8 @@ public class IntervalTimerTests
     {
         public int InvocationCount;
 
-        public IntervalTestPlugin(IBot bot, IPluginActivator activator) : base(bot, activator) { }
+        public IntervalTestPlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory)
+            : base(bot, activator, loggerFactory) { }
 
         [OnInterval(Seconds = 0.1)]
         public void Tick()
@@ -31,7 +34,7 @@ public class IntervalTimerTests
     {
         var bot = Substitute.For<IBot>();
         var activator = Substitute.For<IPluginActivator>();
-        return new IntervalTestPlugin(bot, activator);
+        return new IntervalTestPlugin(bot, activator, NullLoggerFactory.Instance);
     }
 
     [Fact]
@@ -96,7 +99,8 @@ public class IntervalTimerTests
     /// </summary>
     private sealed class NoIntervalPlugin : MarvPlugin
     {
-        public NoIntervalPlugin(IBot bot, IPluginActivator activator) : base(bot, activator) { }
+        public NoIntervalPlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory)
+            : base(bot, activator, loggerFactory) { }
     }
 
     [Fact]
@@ -104,7 +108,7 @@ public class IntervalTimerTests
     {
         var bot = Substitute.For<IBot>();
         var activator = Substitute.For<IPluginActivator>();
-        var plugin = new NoIntervalPlugin(bot, activator);
+        var plugin = new NoIntervalPlugin(bot, activator, NullLoggerFactory.Instance);
 
         // Should not throw or start any background task
         await plugin.OnLoadAsync(CancellationToken.None);

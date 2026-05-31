@@ -1,6 +1,7 @@
 using Marv.Core.Events;
 using Marv.Core.Platform;
 using Marv.Core.Plugin;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Marv.Plugins.Greet;
@@ -16,8 +17,9 @@ public class GreetPlugin : MarvPlugin
     /// <summary>
     /// Creates a new <see cref="GreetPlugin"/> with the specified bot, activator, and configuration.
     /// </summary>
-    public GreetPlugin(IBot bot, IPluginActivator activator, IOptions<GreetPluginConfig> config)
-        : base(bot, activator)
+    public GreetPlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory,
+        IOptions<GreetPluginConfig> config)
+        : base(bot, activator, loggerFactory)
     {
         _config = config.Value;
     }

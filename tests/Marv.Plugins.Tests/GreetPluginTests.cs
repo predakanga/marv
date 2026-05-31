@@ -1,5 +1,6 @@
 using Xunit;
 using NSubstitute;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Marv.Core.Events;
 using Marv.Core.Platform;
@@ -26,7 +27,7 @@ public class GreetPluginTests
         var activator = Substitute.For<IPluginActivator>();
         var options = Options.Create(config ?? new GreetPluginConfig());
 
-        var plugin = new GreetPlugin(bot, activator, options);
+        var plugin = new GreetPlugin(bot, activator, NullLoggerFactory.Instance, options);
         return (plugin, bot);
     }
 

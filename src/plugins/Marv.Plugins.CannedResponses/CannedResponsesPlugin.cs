@@ -1,5 +1,6 @@
 using Marv.Core.Platform;
 using Marv.Core.Plugin;
+using Microsoft.Extensions.Logging;
 
 namespace Marv.Plugins.CannedResponses;
 
@@ -12,6 +13,6 @@ public class CannedResponsesPlugin : MarvPlugin
     /// <summary>
     /// Creates a new <see cref="CannedResponsesPlugin"/>.
     /// </summary>
-    public CannedResponsesPlugin(IBot bot, IPluginActivator activator)
-        : base(bot, activator) { }
+    public CannedResponsesPlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory)
+        : base(bot, activator, loggerFactory) { }
 }

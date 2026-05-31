@@ -1,5 +1,6 @@
 using Marv.Core.Platform;
 using Marv.Core.Plugin;
+using Microsoft.Extensions.Logging;
 using Marv.Plugins.Auth;
 
 namespace Marv.Plugins.AuthConsumer;
@@ -20,8 +21,9 @@ public class AuthConsumerPlugin : MarvPlugin
     public AuthConsumerPlugin(
         IBot bot,
         IPluginActivator activator,
+        ILoggerFactory loggerFactory,
         IAuthorizationService? auth = null)
-        : base(bot, activator)
+        : base(bot, activator, loggerFactory)
     {
         _auth = auth;
     }

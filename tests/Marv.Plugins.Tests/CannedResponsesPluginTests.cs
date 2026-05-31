@@ -5,6 +5,7 @@ using Marv.Core.Platform;
 using Marv.Core.Plugin;
 using Marv.Core.Protocol;
 using Marv.Plugins.CannedResponses;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Marv.Plugins.Tests;
 
@@ -29,7 +30,7 @@ public class CannedResponsesPluginTests
         activator.CreateInstance<FunHandlers>(Arg.Any<object[]>())
             .Returns(ci => new FunHandlers(bot));
 
-        return (new CannedResponsesPlugin(bot, activator), bot);
+        return (new CannedResponsesPlugin(bot, activator, NullLoggerFactory.Instance), bot);
     }
 
     [Fact]

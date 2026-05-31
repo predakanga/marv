@@ -4,6 +4,7 @@ using Marv.Core.Events;
 using Marv.Core.Formatting;
 using Marv.Core.Platform;
 using Marv.Core.Protocol;
+using Microsoft.Extensions.Logging;
 
 namespace Marv.Core.Plugin;
 
@@ -17,6 +18,9 @@ public abstract class MarvPlugin : IPlugin
     /// <summary>The bot instance, available to all plugins.</summary>
     protected IBot Bot { get; }
 
+    /// <summary>Logger scoped to the concrete plugin type.</summary>
+    protected ILogger Logger { get; }
+
     private readonly List<object> _handlerGroups = [];
     private readonly List<HandlerRegistration> _eventHandlers = [];
     private readonly List<CommandRegistration> _commandHandlers = [];
@@ -27,12 +31,14 @@ public abstract class MarvPlugin : IPlugin
     private Task? _intervalTask;
 
     /// <summary>
-    /// Derived plugins accept <see cref="IBot"/> and <see cref="IPluginActivator"/>,
-    /// and forward both via <c>: base(bot, activator)</c>.
+    /// Derived plugins accept <see cref="IBot"/>, <see cref="IPluginActivator"/>,
+    /// and <see cref="ILoggerFactory"/>, and forward all three via
+    /// <c>: base(bot, activator, loggerFactory)</c>.
     /// </summary>
-    protected MarvPlugin(IBot bot, IPluginActivator activator)
+    protected MarvPlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory)
     {
         Bot = bot;
+        Logger = loggerFactory.CreateLogger(GetType());
         DiscoverHandlers(this, GetType());
         DiscoverHandlerGroups(activator);
     }
@@ -128,7 +134,7 @@ public abstract class MarvPlugin : IPlugin
         foreach (var handler in _eventHandlers)
         {
             if (handler.EventType.IsInstanceOfType(evt))
-                await InvokeHandler(handler.Target, handler.Method, evt, ct);
+                await InvokeHandlerSafe(handler.Target, handler.Method, evt, ct);
         }
 
         // Dispatch [OnRawMessage] handlers for RawMessageEvent
@@ -137,7 +143,7 @@ public abstract class MarvPlugin : IPlugin
             foreach (var handler in _rawMessageHandlers)
             {
                 if (handler.Command == rawEvt.RawMessage.Command)
-                    await InvokeHandler(handler.Target, handler.Method, rawEvt.RawMessage, ct);
+                    await InvokeHandlerSafe(handler.Target, handler.Method, rawEvt.RawMessage, ct);
             }
         }
 
@@ -185,7 +191,7 @@ public abstract class MarvPlugin : IPlugin
                     Bot = Bot
                 };
 
-                await InvokeHandler(handler.Target, handler.Method, ctx, ct);
+                await InvokeHandlerSafe(handler.Target, handler.Method, ctx, ct);
             }
         }
     }
@@ -207,8 +213,29 @@ public abstract class MarvPlugin : IPlugin
                     Bot = Bot
                 };
 
-                await InvokeHandler(handler.Target, handler.Method, ctx, ct);
+                await InvokeHandlerSafe(handler.Target, handler.Method, ctx, ct);
             }
+        }
+    }
+
+    /// <summary>
+    /// Invokes a handler method, catching and logging any exceptions so that
+    /// subsequent handlers continue to run.
+    /// </summary>
+    private async Task InvokeHandlerSafe(object target, MethodInfo method, object arg, CancellationToken ct)
+    {
+        try
+        {
+            await InvokeHandler(target, method, arg, ct);
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Handler {Type}.{Method} threw an exception",
+                target.GetType().Name, method.Name);
         }
     }
 
@@ -354,7 +381,19 @@ public abstract class MarvPlugin : IPlugin
                 if (elapsed >= handler.Interval)
                 {
                     _intervalHandlers[i] = handler with { LastRun = now };
-                    await InvokeHandler(handler.Target, handler.Method, ct);
+                    try
+                    {
+                        await InvokeHandler(handler.Target, handler.Method, ct);
+                    }
+                    catch (OperationCanceledException) when (ct.IsCancellationRequested)
+                    {
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError(ex, "Interval handler {Type}.{Method} threw an exception",
+                            handler.Target.GetType().Name, handler.Method.Name);
+                    }
                 }
                 else
                 {

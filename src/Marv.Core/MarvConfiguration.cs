@@ -109,6 +109,12 @@ public record MarvConfiguration
     public int AuthTimeoutSeconds { get; init; } = 15;
 
     /// <summary>
+    /// Sentry DSN for error reporting. When empty or null, Sentry is disabled.
+    /// </summary>
+    [Description("Sentry DSN for error reporting (empty = disabled).")]
+    public string? SentryDsn { get; init; }
+
+    /// <summary>
     /// Override for the minimum log level. When set, replaces the default log level
     /// from appsettings.json.
     /// </summary>

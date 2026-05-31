@@ -6,6 +6,7 @@ using Marv.Core.Plugin;
 using Marv.Core.Protocol;
 using Marv.Plugins.Auth;
 using Marv.Plugins.AuthConsumer;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Marv.Plugins.Tests;
 
@@ -21,7 +22,7 @@ public class AuthConsumerPluginTests
     {
         var bot = Substitute.For<IBot>();
         var activator = Substitute.For<IPluginActivator>();
-        return (new AuthConsumerPlugin(bot, activator, auth), bot);
+        return (new AuthConsumerPlugin(bot, activator, NullLoggerFactory.Instance, auth), bot);
     }
 
     [Fact]

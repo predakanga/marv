@@ -77,7 +77,6 @@ public sealed class PluginManager
             catch (Exception ex)
             {
                 bootstrapLogger?.LogError(ex, "Failed to load plugin assembly: {Path}", fullPath);
-                throw;
             }
         }
 
@@ -139,7 +138,6 @@ public sealed class PluginManager
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to instantiate plugin: {Name}", descriptor.Name);
-                throw;
             }
         }
     }
@@ -159,7 +157,6 @@ public sealed class PluginManager
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Plugin {Name} failed during OnLoadAsync", instance.Descriptor.Name);
-                throw;
             }
         }
     }

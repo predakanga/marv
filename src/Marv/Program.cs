@@ -4,6 +4,7 @@ using Marv.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Sentry.Extensions.Logging;
 
 var configOption = new Option<string?>("--config", "-c")
 {
@@ -41,6 +42,18 @@ rootCommand.SetAction(async (result, ct) =>
 
     // Configure logging with LogLevel override
     builder.Logging.AddConsole();
+
+    var sentryDsn = builder.Configuration.GetValue<string?>("SentryDsn");
+    if (!string.IsNullOrEmpty(sentryDsn))
+    {
+        builder.Logging.AddSentry(o =>
+        {
+            o.Dsn = sentryDsn;
+            o.MinimumEventLevel = LogLevel.Error;
+            o.MinimumBreadcrumbLevel = LogLevel.Warning;
+            o.TracesSampleRate = 0;
+        });
+    }
 
     var marvLogLevel = builder.Configuration.GetValue<LogLevel?>("LogLevel");
     if (marvLogLevel.HasValue)
