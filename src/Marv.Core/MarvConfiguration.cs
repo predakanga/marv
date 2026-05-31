@@ -81,6 +81,34 @@ public record MarvConfiguration
     public List<string> Plugins { get; init; } = [];
 
     /// <summary>
+    /// Whether outbound message rate limiting is enabled.
+    /// When false, messages are sent as fast as possible.
+    /// </summary>
+    [Description("Enable outbound message rate limiting.")]
+    public bool RateLimitEnabled { get; init; } = true;
+
+    /// <summary>
+    /// Maximum number of messages that can be sent in a burst before
+    /// rate limiting kicks in.
+    /// </summary>
+    [Description("Rate limiter burst size (max messages before throttling).")]
+    public int RateLimitBurst { get; init; } = 5;
+
+    /// <summary>
+    /// Number of send tokens replenished per second. For example, 0.5 means
+    /// one token is added every 2 seconds.
+    /// </summary>
+    [Description("Rate limiter refill rate (tokens per second).")]
+    public double RateLimitRefillRate { get; init; } = 0.5;
+
+    /// <summary>
+    /// Timeout in seconds for post-registration authentication (NickServ, OPER)
+    /// to complete before proceeding anyway. Set to 0 to wait indefinitely.
+    /// </summary>
+    [Description("Timeout (seconds) for NickServ/OPER auth; 0 = no timeout.")]
+    public int AuthTimeoutSeconds { get; init; } = 15;
+
+    /// <summary>
     /// Override for the minimum log level. When set, replaces the default log level
     /// from appsettings.json.
     /// </summary>

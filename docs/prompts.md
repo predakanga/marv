@@ -496,3 +496,12 @@
 **Prompt**:
 
 > can you also add a unit test for the interval timer behavior
+
+## Make rate limiter and auth timeout configurable
+
+**Date**: 2026-05-31T13:00:00Z
+
+**Prompt**:
+
+> I'd like to make the rate limiter configurable - it should be possible to change the rate or to completely disable it.
+> The timeout for Nickserv authentication should also be configurable.

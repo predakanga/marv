@@ -93,6 +93,11 @@ internal static class ConfigurationOptions
                 var opt = new Option<int?>(cliName) { Description = description };
                 entries.Add(new ScalarEntry<int?>(opt, prop.Name));
             }
+            else if (underlying == typeof(double))
+            {
+                var opt = new Option<double?>(cliName) { Description = description };
+                entries.Add(new ScalarEntry<double?>(opt, prop.Name));
+            }
             else if (underlying == typeof(string))
             {
                 var opt = new Option<string?>(cliName) { Description = description };

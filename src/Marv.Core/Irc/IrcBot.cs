@@ -673,26 +673,31 @@ internal sealed class IrcBot : IBot
     }
 
     /// <summary>
-    /// Timeout (in seconds) for post-registration authentication to complete.
-    /// </summary>
-    private const int AuthTimeoutSeconds = 15;
-
-    /// <summary>
     /// Waits for all pending auth steps to complete, then fires ReadyEvent and
-    /// joins channels. If auth doesn't complete within the timeout, proceeds anyway.
+    /// joins channels. If auth doesn't complete within the configured timeout, proceeds anyway.
+    /// A timeout of 0 means wait indefinitely.
     /// </summary>
     private async Task CompleteAuthSequenceAsync(CancellationToken ct)
     {
-        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        timeoutCts.CancelAfter(TimeSpan.FromSeconds(AuthTimeoutSeconds));
+        var timeoutSeconds = _config.AuthTimeoutSeconds;
 
-        try
+        if (timeoutSeconds > 0)
         {
-            await _readyTcs!.Task.WaitAsync(timeoutCts.Token);
+            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            timeoutCts.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
+
+            try
+            {
+                await _readyTcs!.Task.WaitAsync(timeoutCts.Token);
+            }
+            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+            {
+                _logger.LogWarning("Post-registration authentication timed out after {Seconds}s — proceeding", timeoutSeconds);
+            }
         }
-        catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+        else
         {
-            _logger.LogWarning("Post-registration authentication timed out after {Seconds}s — proceeding", AuthTimeoutSeconds);
+            await _readyTcs!.Task.WaitAsync(ct);
         }
 
         var syntheticMessage = new IrcMessage(null, null, "READY", []);

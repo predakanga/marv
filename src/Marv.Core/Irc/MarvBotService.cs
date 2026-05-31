@@ -54,7 +54,11 @@ internal sealed class MarvBotService : BackgroundService
                 _pluginManager.LogDiagnostics();
 
                 // Phase 2: Connect to IRC
-                var connection = new IrcConnection(_loggerFactory.CreateLogger<IrcConnection>());
+                var connection = new IrcConnection(
+                    _loggerFactory.CreateLogger<IrcConnection>(),
+                    _config.RateLimitEnabled,
+                    _config.RateLimitBurst,
+                    _config.RateLimitRefillRate);
                 await using (connection)
                 {
                     await connection.ConnectAsync(
