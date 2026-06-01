@@ -612,3 +612,11 @@
 **Prompt**:
 
 > Make sure we set the Assembly version when creating releases, and that all the places where we report the version (CLI, CTCP VERSION, etc) pull the information from there
+
+## Add integration tests to CI
+
+**Date**: 2026-06-01T00:15:00Z
+
+**Prompt**:
+
+> Can we update the GitHub actions to run the integration tests? Can we launch an IRC server in a sidecar container or similar?
