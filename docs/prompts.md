@@ -652,3 +652,11 @@
 **Prompt**:
 
 > Okay, we'll leave it as-is. Don't forget to log these prompts.
+
+## Use Docker for IRC server in local dev workflow
+
+**Date**: 2026-06-01T01:15:00Z
+
+**Prompt**:
+
+> Lets normalize our integration tests - we use a docker container for the IRC server in CI, we can do the same in our regular workflow.

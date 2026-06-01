@@ -4,6 +4,10 @@ An IRC bot built on .NET 10 with a plugin-based architecture and IRCv3 support.
 
 Marv connects to a single IRC network and provides extensible functionality through plugins. It supports SASL authentication, IRCv3 capability negotiation, and IRC operator commands out of the box.
 
+## AI Disclaimer
+
+This project was created to experiment with AI-based development; it was designed and coded almost entirely with Anthropic Opus 4.6 via Claude Code, and the prompts logged in [docs/prompts.md](/docs/prompts.md).
+
 ## Features
 
 - IRCv3 capability negotiation (SASL, multi-prefix, message-tags, and more)
@@ -18,7 +22,7 @@ Marv connects to a single IRC network and provides extensible functionality thro
 
 ### From a release binary
 
-Download the latest release for your platform from the [Releases](../../releases) page, extract it, and run:
+Download the latest release for your platform from the [Releases](/releases) page, extract it, and run:
 
 ```bash
 cp marv.example.json marv.json
@@ -95,7 +99,7 @@ Plugins are configured under `Plugins:<Name>` in the config file:
 ### Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- A dev container is provided with an ngircd IRC server for integration tests
+- [Docker](https://docs.docker.com/get-docker/) (for integration tests)
 
 ### Build and test
 
@@ -106,10 +110,17 @@ make test        # Run unit tests
 
 ### Integration tests
 
-Inside the dev container:
+Integration tests run against an ngircd IRC server in a Docker container:
 
 ```bash
-make test-integration   # Starts ngircd, runs integration tests, stops ngircd
+make test-integration   # Starts IRC server, runs tests, stops server
+```
+
+You can also manage the IRC server independently:
+
+```bash
+make ircd-start    # Start the IRC server container
+make ircd-stop     # Stop the IRC server container
 ```
 
 ### Project structure

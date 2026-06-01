@@ -12,10 +12,7 @@
   "features": {
     "ghcr.io/devcontainers/features/node:2": {},
     "ghcr.io/devcontainers/features/dotnet:2": {},
-    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {},
-    "ghcr.io/devcontainers-extra/features/apt-packages:1": {
-      "packages": "ngircd"
-    }
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {}
   },
   "mounts": [
     "source=claude-code-config-${devcontainerId},target=/home/vscode/.claude,type=volume"

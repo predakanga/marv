@@ -1,8 +1,10 @@
 OUTPUT_DIR := build/output
 PLUGIN_DIR := $(OUTPUT_DIR)/plugins
 CONFIGURATION := Release
+IRCD_CONTAINER := marv-ircd
+IRCD_IMAGE := linuxserver/ngircd
 
-.PHONY: all build test test-integration publish clean
+.PHONY: all build test test-integration ircd-start ircd-stop publish clean
 
 all: build test
 
@@ -12,10 +14,18 @@ build:
 test:
 	dotnet test -c $(CONFIGURATION) --no-build --filter "Category!=Integration"
 
-test-integration:
-	sudo service ngircd start
-	dotnet test -c $(CONFIGURATION) --no-build --filter "Category=Integration" || (sudo service ngircd stop; exit 1)
-	sudo service ngircd stop
+test-integration: ircd-start
+	dotnet test -c $(CONFIGURATION) --no-build --filter "Category=Integration"; \
+	status=$$?; $(MAKE) ircd-stop; exit $$status
+
+ircd-start:
+	@docker start $(IRCD_CONTAINER) 2>/dev/null || \
+		docker run -d --name $(IRCD_CONTAINER) -p 6667:6667 $(IRCD_IMAGE)
+	@echo "Waiting for IRC server..."
+	@for i in $$(seq 1 30); do nc -z localhost 6667 2>/dev/null && break; sleep 1; done
+
+ircd-stop:
+	@docker stop $(IRCD_CONTAINER) 2>/dev/null || true
 
 publish: build
 	@mkdir -p $(OUTPUT_DIR) $(PLUGIN_DIR)
