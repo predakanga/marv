@@ -668,3 +668,11 @@
 **Prompt**:
 
 > Okay, last step - create a changelog file for the future, and tag this as release v0.1.0. Don't push it, I'll take care of that.
+
+## Fix release workflow artifact download failure
+
+**Date**: 2026-06-01T12:40:00Z
+
+**Prompt**:
+
+> The release action failed on the final step (github-release). I'd like you to investigate what happened; if required, I can provide a read-scoped API key for the repo, but I need to know the best practice re providing you credentials like that.
