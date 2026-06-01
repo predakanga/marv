@@ -22,6 +22,21 @@ public record MarvConfiguration
     [Description("Use TLS for the connection.")]
     public bool UseTls { get; init; }
 
+    /// <summary>
+    /// When true, disables all TLS certificate validation. Useful for servers
+    /// with self-signed or expired certificates. Use with caution.
+    /// </summary>
+    [Description("Skip TLS certificate validation (insecure).")]
+    public bool TlsSkipCertificateValidation { get; init; }
+
+    /// <summary>
+    /// Path to a PEM-encoded CA certificate file to trust in addition to the
+    /// system trust store. Use this to connect to servers with certificates
+    /// signed by a private CA.
+    /// </summary>
+    [Description("Path to a PEM CA certificate file for custom trust.")]
+    public string? TlsCaCertFile { get; init; }
+
     /// <summary>Server password sent via the PASS command during registration.</summary>
     [Description("Server password (PASS command).")]
     public string? ServerPassword { get; init; }

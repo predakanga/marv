@@ -62,7 +62,8 @@ internal sealed class MarvBotService : BackgroundService
                 await using (connection)
                 {
                     await connection.ConnectAsync(
-                        _config.Server, _config.Port, _config.UseTls, stoppingToken);
+                        _config.Server, _config.Port, _config.UseTls, stoppingToken,
+                        _config.TlsSkipCertificateValidation, _config.TlsCaCertFile);
 
                     // Phase 3: Notify plugins and start event dispatchers
                     await _pluginManager.NotifyConnectedAsync(stoppingToken);

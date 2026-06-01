@@ -620,3 +620,11 @@
 **Prompt**:
 
 > Can we update the GitHub actions to run the integration tests? Can we launch an IRC server in a sidecar container or similar?
+
+## Add TLS certificate skip and custom CA support
+
+**Date**: 2026-06-01T00:30:00Z
+
+**Prompt**:
+
+> Next, I'd like to add support for connecting to servers over TLS when the server's certificate is invalid

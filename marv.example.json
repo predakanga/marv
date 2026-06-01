@@ -2,6 +2,8 @@
   "Server": "irc.libera.chat",
   "Port": 6697,
   "UseTls": true,
+  "TlsSkipCertificateValidation": false,
+  "TlsCaCertFile": null,
   "Nick": "Marv",
   "User": "marv",
   "RealName": "Marv IRC Bot",

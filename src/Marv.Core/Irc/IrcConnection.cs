@@ -1,5 +1,6 @@
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Channels;
 using Marv.Core.Protocol;
@@ -52,7 +53,15 @@ internal sealed class IrcConnection : IAsyncDisposable
     /// Establishes a TCP (optionally TLS) connection to the IRC server and starts
     /// the read/write loop tasks.
     /// </summary>
-    public async Task ConnectAsync(string host, int port, bool useTls, CancellationToken ct)
+    /// <param name="host">Server hostname.</param>
+    /// <param name="port">Server port.</param>
+    /// <param name="useTls">Whether to upgrade the connection to TLS.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <param name="skipCertValidation">When true, accepts any server certificate.</param>
+    /// <param name="caCertFile">Optional PEM CA certificate file for custom trust.</param>
+    public async Task ConnectAsync(
+        string host, int port, bool useTls, CancellationToken ct,
+        bool skipCertValidation = false, string? caCertFile = null)
     {
         _tcpClient = new TcpClient();
         await _tcpClient.ConnectAsync(host, port, ct);
@@ -61,8 +70,35 @@ internal sealed class IrcConnection : IAsyncDisposable
 
         if (useTls)
         {
+            var sslOptions = new SslClientAuthenticationOptions
+            {
+                TargetHost = host,
+            };
+
+            if (skipCertValidation)
+            {
+                _logger.LogWarning("TLS certificate validation is disabled — connection is not verified");
+                sslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
+            }
+            else if (caCertFile is not null)
+            {
+                var customCa = X509CertificateLoader.LoadCertificateFromFile(caCertFile);
+                sslOptions.RemoteCertificateValidationCallback = (_, cert, chain, errors) =>
+                {
+                    if (errors == SslPolicyErrors.None)
+                        return true;
+
+                    if (cert is null || chain is null)
+                        return false;
+
+                    chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+                    chain.ChainPolicy.CustomTrustStore.Add(customCa);
+                    return chain.Build(new X509Certificate2(cert));
+                };
+            }
+
             var sslStream = new SslStream(stream, leaveInnerStreamOpen: false);
-            await sslStream.AuthenticateAsClientAsync(host);
+            await sslStream.AuthenticateAsClientAsync(sslOptions, ct);
             stream = sslStream;
         }
 
