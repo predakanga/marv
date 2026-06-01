@@ -660,3 +660,11 @@
 **Prompt**:
 
 > Lets normalize our integration tests - we use a docker container for the IRC server in CI, we can do the same in our regular workflow.
+
+## Create changelog and tag v0.1.0
+
+**Date**: 2026-06-01T01:30:00Z
+
+**Prompt**:
+
+> Okay, last step - create a changelog file for the future, and tag this as release v0.1.0. Don't push it, I'll take care of that.
