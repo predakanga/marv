@@ -636,3 +636,19 @@
 **Prompt**:
 
 > Can we write a test for the TLS options?
+
+## Discussion: self-signed cert generation in tests
+
+**Date**: 2026-06-01T01:00:00Z
+
+**Prompt**:
+
+> Should we be generating the self-signed cert on every test run? I'm torn - it's inefficient to generate each time, but there are also issues with pre-generating one and storing it as a fixture; at they very least we've got expiry issues and potential security ramifications to consider
+
+## Keep runtime cert generation, log prompts
+
+**Date**: 2026-06-01T01:05:00Z
+
+**Prompt**:
+
+> Okay, we'll leave it as-is. Don't forget to log these prompts.
