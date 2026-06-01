@@ -1,4 +1,5 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0.300 AS build
+ARG VERSION=0.1.0
 WORKDIR /src
 
 # Restore dependencies first for layer caching
@@ -15,9 +16,9 @@ RUN dotnet restore
 
 # Copy source and build
 COPY . .
-RUN dotnet publish src/Marv/Marv.csproj -c Release -o /app && \
+RUN dotnet publish src/Marv/Marv.csproj -c Release -o /app -p:Version="$VERSION" && \
     for plugin in src/plugins/*/; do \
-        dotnet build "$plugin" -c Release; \
+        dotnet build "$plugin" -c Release -p:Version="$VERSION"; \
     done
 
 # Copy plugin DLLs into the plugins directory

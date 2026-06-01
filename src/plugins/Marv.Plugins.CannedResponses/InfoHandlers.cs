@@ -1,3 +1,4 @@
+using Marv.Core;
 using Marv.Core.Platform;
 using Marv.Core.Plugin;
 
@@ -25,7 +26,7 @@ public class InfoHandlers
     [OnCommand("version")]
     public async Task HandleVersion(CommandContext ctx, CancellationToken ct)
     {
-        await ctx.ReplyAsync("Marv IRC Bot v0.1.0", ct);
+        await ctx.ReplyAsync($"Marv IRC Bot v{MarvVersion.Current}", ct);
     }
 
     /// <summary>Responds with help text.</summary>
@@ -39,6 +40,6 @@ public class InfoHandlers
     [OnCommand("source")]
     public async Task HandleSource(CommandContext ctx, CancellationToken ct)
     {
-        await ctx.ReplyAsync("Source code: https://github.com/example/marv", ct);
+        await ctx.ReplyAsync("Source code: https://github.com/predakanga/marv", ct);
     }
 }

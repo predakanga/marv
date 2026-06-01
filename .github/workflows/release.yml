@@ -32,9 +32,18 @@ jobs:
       - name: Test
         run: dotnet test -c Release --no-build --filter "Category!=Integration"
 
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
   publish-binaries:
     runs-on: ubuntu-latest
-    needs: build-and-test
+    needs: [build-and-test, version]
     strategy:
       matrix:
         include:
@@ -58,9 +67,10 @@ jobs:
 
       - name: Publish
         run: |
-          dotnet publish src/Marv/Marv.csproj -c Release -r ${{ matrix.rid }} -o publish/${{ matrix.artifact }}
+          VERSION=${{ needs.version.outputs.version }}
+          dotnet publish src/Marv/Marv.csproj -c Release -r ${{ matrix.rid }} -o publish/${{ matrix.artifact }} -p:Version="$VERSION"
           for plugin in src/plugins/*/; do
-            dotnet build "$plugin" -c Release -r ${{ matrix.rid }}
+            dotnet build "$plugin" -c Release -r ${{ matrix.rid }} -p:Version="$VERSION"
             name=$(basename "$plugin")
             mkdir -p publish/${{ matrix.artifact }}/plugins
             cp "$plugin/bin/Release/net10.0/${{ matrix.rid }}/$name.dll" publish/${{ matrix.artifact }}/plugins/ 2>/dev/null || \
@@ -80,13 +90,9 @@ jobs:
 
   docker:
     runs-on: ubuntu-latest
-    needs: build-and-test
+    needs: [build-and-test, version]
     steps:
       - uses: actions/checkout@v4
-
-      - name: Extract version from tag
-        id: version
-        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -104,8 +110,10 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
+          build-args: |
+            VERSION=${{ needs.version.outputs.version }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.version.outputs.version }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
   github-release:

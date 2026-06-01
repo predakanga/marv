@@ -588,3 +588,27 @@
 **Prompt**:
 
 > You haven't included the last few prompts in docs/prompts.md
+
+## Update OWNER/marv references
+
+**Date**: 2026-05-31T23:00:00Z
+
+**Prompt**:
+
+> Update all OWNER/marv references with predakanga/marv
+
+## Fix formatting to pass linting
+
+**Date**: 2026-05-31T23:10:00Z
+
+**Prompt**:
+
+> Ensure all code passes the linting step
+
+## Centralize version from assembly metadata
+
+**Date**: 2026-06-01T00:00:00Z
+
+**Prompt**:
+
+> Make sure we set the Assembly version when creating releases, and that all the places where we report the version (CLI, CTCP VERSION, etc) pull the information from there

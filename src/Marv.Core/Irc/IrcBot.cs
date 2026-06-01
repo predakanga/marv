@@ -803,7 +803,7 @@ internal sealed class IrcBot : IBot
                 }
             case "VERSION":
                 await SendRawAsync(new IrcMessage("NOTICE", [sender.Nick,
-                    "\x01VERSION Marv IRC Bot 0.1.0\x01"]), ct);
+                    $"\x01VERSION Marv IRC Bot {MarvVersion.Current}\x01"]), ct);
                 break;
             case "PING":
                 await SendRawAsync(new IrcMessage("NOTICE", [sender.Nick,
