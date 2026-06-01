@@ -628,3 +628,11 @@
 **Prompt**:
 
 > Next, I'd like to add support for connecting to servers over TLS when the server's certificate is invalid
+
+## Add tests for TLS options
+
+**Date**: 2026-06-01T00:45:00Z
+
+**Prompt**:
+
+> Can we write a test for the TLS options?
