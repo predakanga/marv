@@ -676,3 +676,12 @@
 **Prompt**:
 
 > The release action failed on the final step (github-release). I'd like you to investigate what happened; if required, I can provide a read-scoped API key for the repo, but I need to know the best practice re providing you credentials like that.
+
+## Gate release workflow on CI passing
+
+**Date**: 2026-06-01T12:50:00Z
+
+**Prompt**:
+
+> It looks like the Release action doesn't run the linter, static analysis, etc. Is it possible to make the Release action wait on the CI action to make sure all that happens?
+> Additionally, a lot of time in the docker build step is spent restoring and rebuilding Marv when we've already built the artifacts. Can we set the Dockerfile up to use those artifacts if they're available, otherwise build as normal? Perhaps more importantly, is this a reasonable practice?
