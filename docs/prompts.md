@@ -742,3 +742,11 @@
 
 > I think we should also add a config option to specify extra modes the bot should set on itself. This should happen after the bot has completed all authentication in case some modes require extra permissions, but before the ready signal is sent.
 > The config option should take the form of a standard mode string (i.e. "+x"), it's up to you whether we send it verbatim or try to merge it into another MODE message.
+
+## Add UserModes and Oper fields to example config
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> You should add that to @marv.example.json too
