@@ -715,3 +715,13 @@
 > In case it helps, TlsCaCertFile is the option that was being overwritten
 
 > The config file I was using was @marv.test.json, not marv.debug.json
+
+## Add bot mode auto-set and MOTD to ServerInfo
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> I'd like to implement two quick changes:
+> - The bot should automatically set the bot mode on itself if it's provided by the server. Ideally this should happen before giving the ready signal.
+> - The bot should provide the server's MOTD in ServerInfo.

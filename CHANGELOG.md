@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Bot automatically sets bot user mode (e.g. `+B`) when the server supports
+  the IRCv3 `bot` capability and advertises the `BOT` ISUPPORT token
+- Server MOTD is now available via `IServerInfo.Motd` after connection
+
 ### Fixed
 
 - Boolean CLI options (e.g. `--use-tls`, `--rate-limit-enabled`) no longer

@@ -82,6 +82,45 @@ public class ServerInfoTests
     }
 
     [Fact]
+    public void Motd_NullBeforeAnyMotdReceived()
+    {
+        var info = new ServerInfo();
+        Assert.Null(info.Motd);
+    }
+
+    [Fact]
+    public void Motd_CollectsLines()
+    {
+        var info = new ServerInfo();
+        info.BeginMotd();
+        info.AppendMotdLine("- Welcome to TestNet!");
+        info.AppendMotdLine("- Please read the rules.");
+        Assert.NotNull(info.Motd);
+        Assert.Equal(2, info.Motd.Count);
+        Assert.Equal("- Welcome to TestNet!", info.Motd[0]);
+        Assert.Equal("- Please read the rules.", info.Motd[1]);
+    }
+
+    [Fact]
+    public void Motd_EmptyWhenNoLinesReceived()
+    {
+        var info = new ServerInfo();
+        info.BeginMotd();
+        Assert.NotNull(info.Motd);
+        Assert.Empty(info.Motd);
+    }
+
+    [Fact]
+    public void Reset_ClearsMotd()
+    {
+        var info = new ServerInfo();
+        info.BeginMotd();
+        info.AppendMotdLine("- test");
+        info.Reset();
+        Assert.Null(info.Motd);
+    }
+
+    [Fact]
     public void Reset_ClearsAllState()
     {
         var info = new ServerInfo();

@@ -37,6 +37,12 @@ public interface IServerInfo
     /// <summary>The channel type prefixes supported by this server (e.g. '#', '&amp;').</summary>
     IReadOnlySet<char> ChannelTypes { get; }
 
+    /// <summary>
+    /// The server's Message of the Day, or null if the server sent no MOTD.
+    /// Each entry is one line of the MOTD text.
+    /// </summary>
+    IReadOnlyList<string>? Motd { get; }
+
     /// <summary>Returns whether the server advertises the specified ISUPPORT token.</summary>
     bool Supports(string token);
 

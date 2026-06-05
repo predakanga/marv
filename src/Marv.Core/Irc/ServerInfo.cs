@@ -21,6 +21,7 @@ public sealed class ServerInfo : IServerInfo
     private int? _maxTopicLength;
     private int _maxMessageLength = 510; // 512 minus CR-LF
     private volatile HashSet<char> _channelTypes = ['#', '&'];
+    private List<string>? _motdLines;
 
     /// <inheritdoc />
     public string? NetworkName => _networkName;
@@ -48,6 +49,9 @@ public sealed class ServerInfo : IServerInfo
 
     /// <inheritdoc />
     public IReadOnlySet<char> ChannelTypes => _channelTypes;
+
+    /// <inheritdoc />
+    public IReadOnlyList<string>? Motd => _motdLines;
 
     /// <inheritdoc />
     public bool Supports(string token) => _tokens.ContainsKey(token);
@@ -109,6 +113,16 @@ public sealed class ServerInfo : IServerInfo
         }
     }
 
+    /// <summary>
+    /// Begins collecting MOTD lines. Called when RPL_MOTDSTART (375) is received.
+    /// </summary>
+    internal void BeginMotd() => _motdLines = [];
+
+    /// <summary>
+    /// Appends a single MOTD line. Called when RPL_MOTD (372) is received.
+    /// </summary>
+    internal void AppendMotdLine(string line) => _motdLines?.Add(line);
+
     /// <summary>Resets all state, typically on disconnection.</summary>
     internal void Reset()
     {
@@ -122,5 +136,6 @@ public sealed class ServerInfo : IServerInfo
         _maxTopicLength = null;
         _maxMessageLength = 510;
         _channelTypes = ['#', '&'];
+        _motdLines = null;
     }
 }

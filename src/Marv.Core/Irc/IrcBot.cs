@@ -340,6 +340,14 @@ internal sealed class IrcBot : IBot
             case "005": // RPL_ISUPPORT
                 HandleISupport(message);
                 break;
+            case "375": // RPL_MOTDSTART
+                _serverInfo.BeginMotd();
+                break;
+            case "372": // RPL_MOTD
+                _serverInfo.AppendMotdLine(message.Parameters.Count > 1
+                    ? message.Parameters[1]
+                    : "");
+                break;
             case "376": // RPL_ENDOFMOTD
             case "422": // ERR_NOMOTD
                 await HandleEndOfMotd(message, ct);
@@ -710,6 +718,18 @@ internal sealed class IrcBot : IBot
     private async Task FireReadyAndJoinAsync(IrcMessage message, CancellationToken ct)
     {
         _readyTcs?.TrySetResult(true);
+
+        // Set bot user mode if the server supports the bot capability.
+        // The mode character comes from the ISUPPORT BOT token (e.g. BOT=B).
+        if (_capabilityManager.IsNegotiated(Platform.Capabilities.BotMode))
+        {
+            var botModeChar = _serverInfo.GetValue("BOT");
+            if (!string.IsNullOrEmpty(botModeChar))
+            {
+                _logger.LogDebug("Setting bot mode +{Mode}", botModeChar);
+                await SendRawAsync(new IrcMessage("MODE", [_currentNick, $"+{botModeChar}"]), ct);
+            }
+        }
 
         _logger.LogInformation("Bot is ready");
         var readyEvent = new ReadyEvent
