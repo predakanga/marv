@@ -750,3 +750,12 @@
 **Prompt**:
 
 > You should add that to @marv.example.json too
+
+## Collate downstream suggestions into change specs
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> I've been experimenting with the plugin API in a separate project and have collected some feedback which I've placed in @docs/downstream_suggestions/.
+> I'd like you to read these and collate them into a set of actionable change specs in docs/change_specs/. Include any further analysis and take into consideration our unreleased changes.
