@@ -792,3 +792,12 @@
 **Prompt**:
 
 > Okay, now implement CS-002
+
+## Audit and update preview NuGet dependencies
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> I've just noticed that a number of our nuget dependencies target preview versions, which I want to avoid where possible.
+> Audit our csproj files and wherever possible update preview versions to the latest non-preview within that major version.

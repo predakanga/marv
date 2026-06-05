@@ -22,6 +22,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (e.g. `"+ix"`), applied before the ready signal
 - Server MOTD is now available via `IServerInfo.Motd` after connection
 
+### Changed
+
+- Updated Microsoft.Extensions.* packages from 10.0.0-preview.4 to 10.0.8 (stable)
+- Updated Microsoft.NET.Test.Sdk from 17.14.0 to 18.6.0
+- Updated xunit.runner.visualstudio from 3.1.0 to 3.1.5
+
 ### Fixed
 
 - Boolean CLI options (e.g. `--use-tls`, `--rate-limit-enabled`) no longer
