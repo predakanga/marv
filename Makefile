@@ -19,8 +19,8 @@ test-integration: ircd-start
 	status=$$?; $(MAKE) ircd-stop; exit $$status
 
 ircd-start:
-	@docker start $(IRCD_CONTAINER) 2>/dev/null || \
-		docker run -d --name $(IRCD_CONTAINER) -p 6667:6667 $(IRCD_IMAGE)
+	@docker rm -f $(IRCD_CONTAINER) 2>/dev/null || true
+	@docker run -d --name $(IRCD_CONTAINER) -p 6667:6667 $(IRCD_IMAGE)
 	@echo "Waiting for IRC server..."
 	@for i in $$(seq 1 30); do nc -z localhost 6667 2>/dev/null && break; sleep 1; done
 
