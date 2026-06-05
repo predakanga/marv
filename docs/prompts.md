@@ -776,3 +776,11 @@
 
 > Regarding the CS-001 decisions, I'd like to expose the prefix on IBot and allow multi-character prefixes, and the prefixes should be case-sensitive.
 > Additionally, I'd like the handler attributes to allow overriding the default prefix, i.e. `[OnCommand("foo", Prefix = ".")]`.
+
+## Implement CS-001: Command Prefix Configuration
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> Okay, go ahead and implement CS-001 and then mark it as completed.

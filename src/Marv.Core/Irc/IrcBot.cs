@@ -118,6 +118,9 @@ internal sealed class IrcBot : IBot
     public ICapabilityManager Capabilities => _capabilityManager;
 
     /// <inheritdoc />
+    public string CommandPrefix => _config.CommandPrefix;
+
+    /// <inheritdoc />
     public async Task SendMessageAsync(string target, string text, CancellationToken ct)
     {
         await SendRawAsync(new IrcMessage("PRIVMSG", [target, text]), ct);

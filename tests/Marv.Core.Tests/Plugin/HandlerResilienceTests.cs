@@ -102,6 +102,7 @@ public class HandlerResilienceTests
     public async Task ThrowingCommandHandler_DoesNotSkipSubsequentHandlers()
     {
         var bot = Substitute.For<IBot>();
+        bot.CommandPrefix.Returns("!");
         var activator = Substitute.For<IPluginActivator>();
         var plugin = new TwoCommandPlugin(bot, activator, NullLoggerFactory.Instance);
 

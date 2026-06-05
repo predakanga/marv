@@ -20,6 +20,7 @@ public class CannedResponsesPluginTests
     private static (CannedResponsesPlugin Plugin, IBot Bot) CreatePlugin()
     {
         var bot = Substitute.For<IBot>();
+        bot.CommandPrefix.Returns("!");
 
         // The activator must be able to create handler group instances
         var activator = Substitute.For<IPluginActivator>();

@@ -73,6 +73,12 @@ public sealed class OnCommandAttribute(string command) : Attribute
 {
     /// <summary>The command name to match (without the prefix).</summary>
     public string Command { get; } = command;
+
+    /// <summary>
+    /// Overrides the bot-wide command prefix for this handler.
+    /// When null, the bot's configured <see cref="IBot.CommandPrefix"/> is used.
+    /// </summary>
+    public string? Prefix { get; init; }
 }
 
 /// <summary>

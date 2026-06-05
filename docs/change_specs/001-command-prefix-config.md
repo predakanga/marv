@@ -1,9 +1,10 @@
-# CS-001: Command Prefix Configuration
+# CS-001: Command Prefix Configuration — COMPLETED
 
 **Source:** `downstream_suggestions/improvements.md` §4
 **Scope:** Marv.Core
 **Complexity:** Small
 **Breaking changes:** None
+**Status:** Completed
 
 ---
 

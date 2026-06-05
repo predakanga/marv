@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 using Marv.Core.Events;
 using Marv.Core.Formatting;
 using Marv.Core.Platform;
-using Marv.Core.Protocol;
 using Microsoft.Extensions.Logging;
 
 namespace Marv.Core.Plugin;
@@ -97,7 +96,8 @@ public abstract class MarvPlugin : IPlugin
             foreach (var cmdAttr in method.GetCustomAttributes<OnCommandAttribute>())
             {
                 _commandHandlers.Add(new CommandRegistration(
-                    target, method, cmdAttr.Command.ToLowerInvariant()));
+                    target, method, cmdAttr.Command.ToLowerInvariant(),
+                    cmdAttr.Prefix ?? Bot.CommandPrefix));
             }
 
             // [OnRegex] handlers
@@ -162,37 +162,42 @@ public abstract class MarvPlugin : IPlugin
 
         var text = IrcFormat.Strip(msgEvt.Text);
 
-        // The command prefix is '!' by default
-        // TODO: Make configurable per-bot
-        if (text.Length < 2 || text[0] != '!')
-            return;
-
-        var spaceIndex = text.IndexOf(' ', 1);
-        var command = spaceIndex < 0
-            ? text[1..].ToLowerInvariant()
-            : text[1..spaceIndex].ToLowerInvariant();
-        var argString = spaceIndex < 0 ? "" : text[(spaceIndex + 1)..].TrimStart();
-        var args = string.IsNullOrEmpty(argString)
-            ? Array.Empty<string>()
-            : argString.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
         foreach (var handler in _commandHandlers)
         {
-            if (handler.Command == command)
-            {
-                var ctx = new CommandContext
-                {
-                    Command = command,
-                    Args = args,
-                    ArgString = argString,
-                    Channel = msgEvt.Channel,
-                    Sender = msgEvt.Sender,
-                    RawMessage = msgEvt.RawMessage,
-                    Bot = Bot
-                };
+            var prefix = handler.Prefix;
 
-                await InvokeHandlerSafe(handler.Target, handler.Method, ctx, ct);
-            }
+            if (text.Length < prefix.Length + 1
+                || !text.StartsWith(prefix, StringComparison.Ordinal))
+                continue;
+
+            var afterPrefix = text.AsSpan(prefix.Length);
+            var spaceIndex = afterPrefix.IndexOf(' ');
+            var command = spaceIndex < 0
+                ? afterPrefix.ToString().ToLowerInvariant()
+                : afterPrefix[..spaceIndex].ToString().ToLowerInvariant();
+
+            if (command != handler.Command)
+                continue;
+
+            var argString = spaceIndex < 0
+                ? ""
+                : afterPrefix[(spaceIndex + 1)..].ToString().TrimStart();
+            var args = string.IsNullOrEmpty(argString)
+                ? Array.Empty<string>()
+                : argString.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            var ctx = new CommandContext
+            {
+                Command = command,
+                Args = args,
+                ArgString = argString,
+                Channel = msgEvt.Channel,
+                Sender = msgEvt.Sender,
+                RawMessage = msgEvt.RawMessage,
+                Bot = Bot
+            };
+
+            await InvokeHandlerSafe(handler.Target, handler.Method, ctx, ct);
         }
     }
 
@@ -432,7 +437,7 @@ public abstract class MarvPlugin : IPlugin
     }
 
     private sealed record HandlerRegistration(object Target, MethodInfo Method, Type EventType);
-    private sealed record CommandRegistration(object Target, MethodInfo Method, string Command);
+    private sealed record CommandRegistration(object Target, MethodInfo Method, string Command, string Prefix);
     private sealed record RegexRegistration(object Target, MethodInfo Method, Regex Pattern);
     private sealed record RawMessageRegistration(object Target, MethodInfo Method, string Command);
     private sealed record IntervalRegistration(object Target, MethodInfo Method, TimeSpan Interval, DateTimeOffset LastRun);

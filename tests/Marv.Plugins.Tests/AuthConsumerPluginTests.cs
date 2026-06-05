@@ -21,6 +21,7 @@ public class AuthConsumerPluginTests
     private static (AuthConsumerPlugin Plugin, IBot Bot) CreatePlugin(IAuthorizationService? auth = null)
     {
         var bot = Substitute.For<IBot>();
+        bot.CommandPrefix.Returns("!");
         var activator = Substitute.For<IPluginActivator>();
         return (new AuthConsumerPlugin(bot, activator, NullLoggerFactory.Instance, auth), bot);
     }

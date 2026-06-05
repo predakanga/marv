@@ -20,6 +20,7 @@ public class GreetPluginTests
     private static (GreetPlugin Plugin, IBot Bot) CreatePlugin(GreetPluginConfig? config = null)
     {
         var bot = Substitute.For<IBot>();
+        bot.CommandPrefix.Returns("!");
         var selfUser = Substitute.For<IUser>();
         selfUser.Nick.Returns("Marv");
         bot.Self.Returns(selfUser);

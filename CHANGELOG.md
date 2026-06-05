@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Command prefix is now configurable via `CommandPrefix` in bot configuration
+  (previously hardcoded to `!`), with support for multi-character prefixes
+- `IBot.CommandPrefix` property exposes the configured prefix to plugins
+- `[OnCommand]` attribute gains a `Prefix` property to override the bot-wide
+  prefix on a per-handler basis (e.g. `[OnCommand("invite", Prefix = ".")]`)
 - Bot automatically sets bot user mode (e.g. `+B`) when the server advertises
   the `BOT` ISUPPORT token
 - `UserModes` config option to set additional user modes after authentication

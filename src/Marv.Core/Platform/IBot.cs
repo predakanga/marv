@@ -12,6 +12,9 @@ public interface IBot
     /// <summary>The bot's own user identity.</summary>
     IUser Self { get; }
 
+    /// <summary>The configured command prefix (e.g. "!").</summary>
+    string CommandPrefix { get; }
+
     /// <summary>Sends a PRIVMSG to the specified target (channel or nick).</summary>
     Task SendMessageAsync(string target, string text, CancellationToken ct);
 
