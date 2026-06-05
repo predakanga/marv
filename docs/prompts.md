@@ -733,3 +733,12 @@
 **Prompt**:
 
 > I don't think Capabilities.BotMode is a real capability - according to the spec (https://ircv3.net/specs/extensions/bot-mode), bot mode is detected solely by ISUPPORT. This means that the bot mode change you just added is never being triggered.
+
+## Add UserModes config option for extra user modes
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> I think we should also add a config option to specify extra modes the bot should set on itself. This should happen after the bot has completed all authentication in case some modes require extra permissions, but before the ready signal is sent.
+> The config option should take the form of a standard mode string (i.e. "+x"), it's up to you whether we send it verbatim or try to merge it into another MODE message.

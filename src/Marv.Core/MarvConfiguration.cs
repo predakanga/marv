@@ -88,6 +88,15 @@ public record MarvConfiguration
     public string? OperPassword { get => _operPassword; init => _operPassword = NullIfEmpty(value); }
     private readonly string? _operPassword;
 
+    /// <summary>
+    /// Additional user modes to set on the bot after authentication completes,
+    /// specified as a standard mode string (e.g. "+ix"). Sent before the ready
+    /// signal so plugins see the bot with its final mode state.
+    /// </summary>
+    [Description("User modes to set after auth (e.g. \"+ix\").")]
+    public string? UserModes { get => _userModes; init => _userModes = NullIfEmpty(value); }
+    private readonly string? _userModes;
+
     /// <summary>Channels to join on connect.</summary>
     [Description("Channels to join on connect.")]
     public List<string> Channels { get; init; } = [];

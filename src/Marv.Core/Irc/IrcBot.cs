@@ -727,6 +727,13 @@ internal sealed class IrcBot : IBot
             await SendRawAsync(new IrcMessage("MODE", [_currentNick, $"+{botModeChar}"]), ct);
         }
 
+        // Apply any extra user modes from config (e.g. "+ix").
+        if (!string.IsNullOrEmpty(_config.UserModes))
+        {
+            _logger.LogDebug("Setting configured user modes: {Modes}", _config.UserModes);
+            await SendRawAsync(new IrcMessage("MODE", [_currentNick, _config.UserModes]), ct);
+        }
+
         _logger.LogInformation("Bot is ready");
         var readyEvent = new ReadyEvent
         {

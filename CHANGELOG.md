@@ -9,8 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Bot automatically sets bot user mode (e.g. `+B`) when the server supports
-  the IRCv3 `bot` capability and advertises the `BOT` ISUPPORT token
+- Bot automatically sets bot user mode (e.g. `+B`) when the server advertises
+  the `BOT` ISUPPORT token
+- `UserModes` config option to set additional user modes after authentication
+  (e.g. `"+ix"`), applied before the ready signal
 - Server MOTD is now available via `IServerInfo.Motd` after connection
 
 ### Fixed
