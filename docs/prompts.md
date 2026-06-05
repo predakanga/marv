@@ -759,3 +759,20 @@
 
 > I've been experimenting with the plugin API in a separate project and have collected some feedback which I've placed in @docs/downstream_suggestions/.
 > I'd like you to read these and collate them into a set of actionable change specs in docs/change_specs/. Include any further analysis and take into consideration our unreleased changes.
+
+## Rename change specs to implementation order
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> Rename the change specs in line with your recommended implementation order
+
+## CS-001 decisions: prefix on IBot, per-handler override
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> Regarding the CS-001 decisions, I'd like to expose the prefix on IBot and allow multi-character prefixes, and the prefixes should be case-sensitive.
+> Additionally, I'd like the handler attributes to allow overriding the default prefix, i.e. `[OnCommand("foo", Prefix = ".")]`.

@@ -14,71 +14,155 @@ unused. Command parsing in `MarvPlugin.DispatchCommandHandlers` (line 167) is
 hardcoded to `'!'` with a TODO comment. Downstream projects that want a
 different prefix (e.g. `.`) must use `[OnRegex]` workarounds.
 
+## Decisions
+
+- Expose `CommandPrefix` as a property on `IBot`.
+- Support multi-character prefixes (e.g. `"!!"`, `"marv:"`).
+- Prefix matching is case-sensitive (ordinal comparison).
+- `[OnCommand]` gains a `Prefix` property to override the bot-wide default
+  on a per-handler basis.
+
 ## Changes
 
-### 1. Wire up the existing config property
+### 1. Add `CommandPrefix` to `IBot`
 
-In `MarvPlugin`, inject or access `MarvConfiguration.CommandPrefix` and use it
-in `DispatchCommandHandlers` instead of the hardcoded `'!'`.
-
-**`MarvPlugin.cs` — DispatchCommandHandlers:**
-
-Replace:
 ```csharp
-if (text.Length < 2 || text[0] != '!')
-    return;
+/// <summary>The configured command prefix (e.g. "!").</summary>
+string CommandPrefix { get; }
 ```
 
-With:
+The `MarvBot` implementation returns the value from
+`MarvConfiguration.CommandPrefix`.
+
+### 2. Add `Prefix` property to `OnCommandAttribute`
+
 ```csharp
-var prefix = Bot.Configuration.CommandPrefix;
-if (text.Length < prefix.Length + 1 || !text.StartsWith(prefix, StringComparison.Ordinal))
-    return;
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+public sealed class OnCommandAttribute(string command) : Attribute
+{
+    /// <summary>The command name to match (without the prefix).</summary>
+    public string Command { get; } = command;
+
+    /// <summary>
+    /// Overrides the bot-wide command prefix for this handler.
+    /// When null, the bot's configured <see cref="IBot.CommandPrefix"/> is used.
+    /// </summary>
+    public string? Prefix { get; init; }
+}
 ```
 
-And adjust the command/arg extraction slice indices accordingly (replace `1`
-with `prefix.Length`).
+Usage:
 
-### 2. Expose CommandPrefix on IBot or via DI
+```csharp
+// Uses the bot-wide prefix (default "!")
+[OnCommand("ban")]
+public async Task HandleBan(CommandContext ctx, CancellationToken ct) { ... }
 
-`MarvPlugin` currently accesses `Bot` (an `IBot`), which does not expose the
-configuration. Options:
+// Uses "." regardless of bot-wide prefix
+[OnCommand("invite", Prefix = ".")]
+public async Task HandleInvite(CommandContext ctx, CancellationToken ct) { ... }
+```
 
-- **Option A:** Add `CommandPrefix` property to `IBot`. Minimal surface; this
-  is the only config property plugins need at runtime.
-- **Option B:** Add `IOptions<MarvConfiguration>` as a constructor parameter
-  to `MarvPlugin`. Heavier; exposes all config to all plugins.
-- **Option C:** Inject `IOptions<MarvConfiguration>` in `MarvPlugin`
-  internally via `IPluginActivator` during construction. No API change for
-  plugin authors but adds hidden coupling.
+### 3. Store resolved prefix in `CommandRegistration`
 
-**Recommendation:** Option A — add `string CommandPrefix { get; }` to `IBot`.
-It's the most discoverable and keeps the plugin API clean. Plugin authors who
-want to parse commands differently (multi-prefix, etc.) can read this property.
+Copy the effective prefix into the registration record at discovery time.
+The per-handler `Prefix` property takes precedence; fall back to
+`Bot.CommandPrefix` if null.
 
-### 3. Support multi-character prefixes
+Since handler discovery happens in the `MarvPlugin` constructor (before
+connection), the bot-wide prefix is available from config at construction
+time.
 
-The current implementation uses a single `char` comparison. Switching to
-`string.StartsWith` (as shown above) naturally supports multi-character
-prefixes like `!!` or `marv:`. No additional design work needed.
+```csharp
+private sealed record CommandRegistration(
+    object Target, MethodInfo Method, string Command, string Prefix);
+```
 
-### 4. Multiple prefixes (deferred)
+During discovery:
 
-The downstream suggestion mentions supporting multiple prefixes. This can be
-deferred — it's a nice-to-have that adds complexity (array config, iteration
-in dispatch). If needed later, `CommandPrefix` could become `CommandPrefixes`
-(string array) with a minor API evolution.
+```csharp
+foreach (var cmdAttr in method.GetCustomAttributes<OnCommandAttribute>())
+{
+    _commandHandlers.Add(new CommandRegistration(
+        target,
+        method,
+        cmdAttr.Command.ToLowerInvariant(),
+        cmdAttr.Prefix ?? Bot.CommandPrefix));
+}
+```
+
+### 4. Update `DispatchCommandHandlers`
+
+Replace the current hardcoded prefix check with per-handler prefix matching.
+Since different handlers may have different prefixes, the prefix check moves
+inside the handler loop:
+
+```csharp
+private async Task DispatchCommandHandlers(MessageEvent msgEvt, CancellationToken ct)
+{
+    if (_commandHandlers.Count == 0)
+        return;
+
+    var text = IrcFormat.Strip(msgEvt.Text);
+
+    foreach (var handler in _commandHandlers)
+    {
+        var prefix = handler.Prefix;
+
+        if (text.Length < prefix.Length + 1
+            || !text.StartsWith(prefix, StringComparison.Ordinal))
+            continue;
+
+        var afterPrefix = text.AsSpan(prefix.Length);
+        var spaceIndex = afterPrefix.IndexOf(' ');
+        var command = spaceIndex < 0
+            ? afterPrefix.ToString().ToLowerInvariant()
+            : afterPrefix[..spaceIndex].ToString().ToLowerInvariant();
+
+        if (command != handler.Command)
+            continue;
+
+        var argString = spaceIndex < 0
+            ? ""
+            : afterPrefix[(spaceIndex + 1)..].ToString().TrimStart();
+        var args = string.IsNullOrEmpty(argString)
+            ? Array.Empty<string>()
+            : argString.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        var ctx = new CommandContext
+        {
+            Command = command,
+            Args = args,
+            ArgString = argString,
+            Channel = msgEvt.Channel,
+            Sender = msgEvt.Sender,
+            RawMessage = msgEvt.RawMessage,
+            Bot = Bot
+        };
+
+        await InvokeHandlerSafe(handler.Target, handler.Method, ctx, ct);
+    }
+}
+```
+
+**Performance note:** The current implementation does prefix matching and
+command extraction once, then iterates handlers matching only on command name.
+The new version does prefix matching per handler. This is fine for IRC
+volumes, but if the handler count grows large, an optimization would be to
+group handlers by prefix and only parse once per distinct prefix. This is
+not worth doing upfront.
+
+### 5. Remove the TODO comment
+
+Delete the `// TODO: Make configurable per-bot` comment at line 166.
 
 ## Impact
 
 - **Plugin API:** Adds `CommandPrefix` to `IBot` (additive, non-breaking).
+  Adds `Prefix` property to `OnCommandAttribute` (additive, non-breaking —
+  default `null` preserves current behavior).
 - **Configuration:** Existing `CommandPrefix` property becomes functional.
   Default `"!"` preserves backward compatibility.
-- **Tests:** Add test for custom prefix dispatch. Update any tests that
-  depend on the hardcoded `'!'`.
-
-## Open questions
-
-1. Should the prefix be case-sensitive? Recommendation: yes (ordinal
-   comparison), since IRC commands are conventionally case-sensitive after
-   the prefix.
+- **Tests:** Add tests for: default prefix dispatch, custom bot-wide prefix,
+  per-handler prefix override, multi-character prefix, prefix case
+  sensitivity.
