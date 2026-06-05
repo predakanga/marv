@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Boolean CLI options (e.g. `--use-tls`, `--rate-limit-enabled`) no longer
   override config file values when not explicitly provided on the command line
+- Nullable string config properties (e.g. `TlsCaCertFile`, `SaslUser`) no
+  longer become empty strings when set to `null` in JSON config files
 
 ## [0.1.0] - 2026-06-01
 

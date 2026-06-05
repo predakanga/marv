@@ -10,6 +10,14 @@ namespace Marv.Core;
 /// </summary>
 public record MarvConfiguration
 {
+    /// <summary>
+    /// Normalizes empty strings to null. .NET's JSON configuration provider converts
+    /// explicit JSON <c>null</c> values to empty strings; this ensures nullable string
+    /// properties treat both representations as "not set".
+    /// </summary>
+    private static string? NullIfEmpty(string? value) =>
+        string.IsNullOrEmpty(value) ? null : value;
+
     /// <summary>The IRC server hostname.</summary>
     [Description("IRC server hostname.")]
     public string Server { get; init; } = "localhost";
@@ -35,11 +43,13 @@ public record MarvConfiguration
     /// signed by a private CA.
     /// </summary>
     [Description("Path to a PEM CA certificate file for custom trust.")]
-    public string? TlsCaCertFile { get; init; }
+    public string? TlsCaCertFile { get => _tlsCaCertFile; init => _tlsCaCertFile = NullIfEmpty(value); }
+    private readonly string? _tlsCaCertFile;
 
     /// <summary>Server password sent via the PASS command during registration.</summary>
     [Description("Server password (PASS command).")]
-    public string? ServerPassword { get; init; }
+    public string? ServerPassword { get => _serverPassword; init => _serverPassword = NullIfEmpty(value); }
+    private readonly string? _serverPassword;
 
     /// <summary>The bot's nickname.</summary>
     [Description("Bot nickname.")]
@@ -55,23 +65,28 @@ public record MarvConfiguration
 
     /// <summary>SASL username for authentication.</summary>
     [Description("SASL username for authentication.")]
-    public string? SaslUser { get; init; }
+    public string? SaslUser { get => _saslUser; init => _saslUser = NullIfEmpty(value); }
+    private readonly string? _saslUser;
 
     /// <summary>SASL password for authentication.</summary>
     [Description("SASL password for authentication.")]
-    public string? SaslPassword { get; init; }
+    public string? SaslPassword { get => _saslPassword; init => _saslPassword = NullIfEmpty(value); }
+    private readonly string? _saslPassword;
 
     /// <summary>NickServ password for legacy authentication.</summary>
     [Description("NickServ password for legacy authentication.")]
-    public string? NickServPassword { get; init; }
+    public string? NickServPassword { get => _nickServPassword; init => _nickServPassword = NullIfEmpty(value); }
+    private readonly string? _nickServPassword;
 
     /// <summary>Oper username for IRC operator authentication.</summary>
     [Description("Oper username for IRC operator authentication.")]
-    public string? OperName { get; init; }
+    public string? OperName { get => _operName; init => _operName = NullIfEmpty(value); }
+    private readonly string? _operName;
 
     /// <summary>Oper password for IRC operator authentication.</summary>
     [Description("Oper password for IRC operator authentication.")]
-    public string? OperPassword { get; init; }
+    public string? OperPassword { get => _operPassword; init => _operPassword = NullIfEmpty(value); }
+    private readonly string? _operPassword;
 
     /// <summary>Channels to join on connect.</summary>
     [Description("Channels to join on connect.")]
@@ -127,7 +142,8 @@ public record MarvConfiguration
     /// Sentry DSN for error reporting. When empty or null, Sentry is disabled.
     /// </summary>
     [Description("Sentry DSN for error reporting (empty = disabled).")]
-    public string? SentryDsn { get; init; }
+    public string? SentryDsn { get => _sentryDsn; init => _sentryDsn = NullIfEmpty(value); }
+    private readonly string? _sentryDsn;
 
     /// <summary>
     /// Override for the minimum log level. When set, replaces the default log level

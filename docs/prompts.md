@@ -703,3 +703,15 @@
 **Prompt**:
 
 > Could you add that to the changelog as well, and note in CLAUDE.md that all changes should add an entry to the changelog?
+
+## Fix nullable string properties becoming empty strings from JSON null
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> It looks like unset string params on the CLI are setting the corresponding MarvConfiguration value to "" as well
+
+> In case it helps, TlsCaCertFile is the option that was being overwritten
+
+> The config file I was using was @marv.test.json, not marv.debug.json
