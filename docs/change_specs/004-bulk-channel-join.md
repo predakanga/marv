@@ -4,6 +4,7 @@
 **Scope:** Marv.Core
 **Complexity:** Small-Medium
 **Breaking changes:** None (additive API)
+**Status:** Completed
 
 ---
 

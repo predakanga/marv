@@ -825,3 +825,11 @@
 **Prompt**:
 
 > You should also mark CS-004 as completed (see the existing pattern in CS-001 through CS-003 and @docs/change_spesc/README.md. Add an instruction to CLAUDE.md to make sure this is always done.
+
+## Add missing Status line to CS-004 metadata block
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> You missed one thing - you should also add a Status: Completed line to the change spec header.

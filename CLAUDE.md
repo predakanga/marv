@@ -10,9 +10,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Add a changelog entry to `CHANGELOG.md` under the `[Unreleased]` section
   for every user-visible change, following
   [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conventions.
-- When completing a change spec (CS-nnn), mark it done: append
-  " — COMPLETED" to the spec's `#` heading and set its Status to
-  `**Done**` in `docs/change_specs/README.md`.
+- When completing a change spec (CS-nnn), mark it done in three places:
+  append " — COMPLETED" to the spec's `#` heading, add a
+  `**Status:** Completed` line to the spec's metadata block, and set
+  its Status to `**Done**` in `docs/change_specs/README.md`.
 
 # IRC Bot — Claude Code Instructions
 
