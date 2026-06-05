@@ -23,8 +23,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `UserModes` config option to set additional user modes after authentication
   (e.g. `"+ix"`), applied before the ready signal
 - Server MOTD is now available via `IServerInfo.Motd` after connection
+- `IBot.JoinMultipleAsync` sends a single comma-separated `JOIN` command per
+  RFC 2812, with automatic batching to stay within the 512-byte line limit
 
 ### Changed
+
+- Initial channel join on connect now uses bulk `JOIN` instead of individual
+  commands per channel, reducing startup traffic and rate-limit pressure
 
 - Updated Microsoft.Extensions.* packages from 10.0.0-preview.4 to 10.0.8 (stable)
 - Updated Microsoft.NET.Test.Sdk from 17.14.0 to 18.6.0

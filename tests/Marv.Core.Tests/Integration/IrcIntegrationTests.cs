@@ -485,6 +485,81 @@ public class IrcIntegrationTests
         }
     }
 
+    [Fact]
+    public async Task Bot_JoinsMultipleConfiguredChannels()
+    {
+        SkipIfUnavailable();
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+        var bot = IrcServerFixture.CreateBot("MarvBulk");
+        var config = IrcServerFixture.CreateConfig("MarvBulk", "#bulktest1", "#bulktest2", "#bulktest3");
+
+        var eventChannel = Channel.CreateUnbounded<MarvEvent>();
+
+        var connection = await _fixture.CreateConnectionAsync(cts.Token);
+        await using (connection)
+        {
+            var botTask = Task.Run(
+                () => bot.RunAsync(connection, config, [eventChannel.Writer], cts.Token), cts.Token);
+
+            await bot.WaitForRegistrationAsync(cts.Token);
+
+            // Collect all three UserJoinedEvents (one per channel)
+            var joinedChannels = new List<string>();
+            for (var i = 0; i < 3; i++)
+            {
+                var joined = await WaitForEventAsync<UserJoinedEvent>(eventChannel.Reader, cts.Token);
+                Assert.NotNull(joined);
+                joinedChannels.Add(joined!.Channel!.Name);
+            }
+
+            Assert.Contains("#bulktest1", joinedChannels, StringComparer.OrdinalIgnoreCase);
+            Assert.Contains("#bulktest2", joinedChannels, StringComparer.OrdinalIgnoreCase);
+            Assert.Contains("#bulktest3", joinedChannels, StringComparer.OrdinalIgnoreCase);
+            Assert.Equal(3, bot.Channels.Count);
+
+            await cts.CancelAsync();
+            try { await botTask; } catch (OperationCanceledException) { }
+        }
+    }
+
+    [Fact]
+    public async Task Bot_JoinMultipleAsync_JoinsChannelsAtRuntime()
+    {
+        SkipIfUnavailable();
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+        var bot = IrcServerFixture.CreateBot("MarvRtJn");
+        var config = IrcServerFixture.CreateConfig("MarvRtJn");
+
+        var eventChannel = Channel.CreateUnbounded<MarvEvent>();
+
+        var connection = await _fixture.CreateConnectionAsync(cts.Token);
+        await using (connection)
+        {
+            var botTask = Task.Run(
+                () => bot.RunAsync(connection, config, [eventChannel.Writer], cts.Token), cts.Token);
+
+            await bot.WaitForReadyAsync(cts.Token);
+
+            // Use JoinMultipleAsync to join channels after the bot is ready
+            await bot.JoinMultipleAsync(["#rtjoin1", "#rtjoin2"], cts.Token);
+
+            var joined1 = await WaitForEventAsync<UserJoinedEvent>(eventChannel.Reader, cts.Token);
+            var joined2 = await WaitForEventAsync<UserJoinedEvent>(eventChannel.Reader, cts.Token);
+
+            Assert.NotNull(joined1);
+            Assert.NotNull(joined2);
+
+            var names = new[] { joined1!.Channel!.Name, joined2!.Channel!.Name };
+            Assert.Contains("#rtjoin1", names, StringComparer.OrdinalIgnoreCase);
+            Assert.Contains("#rtjoin2", names, StringComparer.OrdinalIgnoreCase);
+
+            await cts.CancelAsync();
+            try { await botTask; } catch (OperationCanceledException) { }
+        }
+    }
+
     // --- Helpers ---
 
     /// <summary>

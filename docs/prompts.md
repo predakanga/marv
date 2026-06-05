@@ -809,3 +809,11 @@
 **Prompt**:
 
 > Back to the change specs, go ahead with CS-003.
+
+## Implement CS-004: Bulk Channel Join
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> Please implement CS-004 (@docs/change_specs/004-bulk-channel-join.md).

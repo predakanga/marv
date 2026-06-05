@@ -30,6 +30,15 @@ public interface IBot
     /// <summary>Joins a channel, optionally with a key.</summary>
     Task JoinAsync(string channel, string? key, CancellationToken ct);
 
+    /// <summary>
+    /// Joins multiple channels in a single IRC JOIN command.
+    /// Channel names are comma-separated per RFC 2812. Automatically
+    /// batches into multiple commands if the channel list exceeds the
+    /// 512-byte IRC line length limit. Channels with keys should use
+    /// <see cref="JoinAsync"/> individually.
+    /// </summary>
+    Task JoinMultipleAsync(IReadOnlyList<string> channels, CancellationToken ct);
+
     /// <summary>Parts (leaves) a channel, optionally with a reason.</summary>
     Task PartAsync(string channel, string? reason, CancellationToken ct);
 
