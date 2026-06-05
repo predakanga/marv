@@ -7,6 +7,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Log all prompts to docs/prompts.md, including a one-line summary as the header, the date & time of the prompt, and the text of the prompt verbatim.
 - After each task, commit the current working tree to git. Only commit,
   never push.
+- Add a changelog entry to `CHANGELOG.md` under the `[Unreleased]` section
+  for every user-visible change, following
+  [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conventions.
 
 # IRC Bot — Claude Code Instructions
 

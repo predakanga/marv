@@ -695,3 +695,11 @@
 > There's a bug with command-line options and MarvConfiguration - when no CLI arguments are provided, the boolean options are set to false in the configuration regardless of what the config file has set.
 
 > but first you should add tests to catch this bug and equivalents for other types
+
+## Add changelog entry and changelog requirement to CLAUDE.md
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> Could you add that to the changelog as well, and note in CLAUDE.md that all changes should add an entry to the changelog?
