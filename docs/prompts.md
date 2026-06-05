@@ -833,3 +833,17 @@
 **Prompt**:
 
 > You missed one thing - you should also add a Status: Completed line to the change spec header.
+
+## Update CS-005 design: pass IBot to evaluators, keep FilterResult
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> Regarding CS-005, I think I prefer providing the IBot to the filter instead of adding FilterResult; that way the filters can do anything they need to (i.e. kicking or disconnecting the user). What are the pros & cons of doing it that way instead?
+
+> What would be the difference between returning FilterResult.Allowed/Denied vs just returning true/false?
+
+> Okay, I don't mind having FilterResult for future extensibility. Go with that approach, but make sure to explain the reasoning.
+
+> I didn't mean for you to start implementing. I wanted you to just update the change spec.

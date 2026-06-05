@@ -104,15 +104,20 @@ public interface IFilteringAttribute
 /// <summary>
 /// Evaluates whether a handler should be invoked, based on the associated
 /// <see cref="IFilteringAttribute"/> and the invocation context.
+/// Receives the <see cref="IBot"/> instance so that evaluators can take
+/// action (send replies, kick users, etc.) when denying a handler.
 /// </summary>
 public interface IFilterEvaluator
 {
     /// <summary>
-    /// Returns true if the handler should proceed, false to skip it.
+    /// Returns a <see cref="FilterResult"/> indicating whether the handler
+    /// should proceed. The evaluator may use <paramref name="bot"/> to
+    /// send denial messages or take other IRC actions directly.
     /// </summary>
     ValueTask<FilterResult> EvaluateAsync(
         IFilteringAttribute attribute,
         HandlerInvocation invocation,
+        IBot bot,
         CancellationToken ct);
 }
 ```
@@ -120,22 +125,19 @@ public interface IFilterEvaluator
 ### FilterResult struct
 
 ```csharp
-/// <summary>Result of a filter evaluation.</summary>
+/// <summary>
+/// Result of a filter evaluation. Currently carries only an allow/deny
+/// flag, but exists as a struct rather than a plain bool to allow future
+/// extension (e.g. logging reasons, short-circuit flags) without breaking
+/// existing evaluator signatures.
+/// </summary>
 public readonly struct FilterResult
 {
     /// <summary>Whether the handler is allowed to proceed.</summary>
     public bool IsAllowed { get; init; }
 
-    /// <summary>
-    /// Optional denial message. If set and the context supports replies,
-    /// the framework sends this as a reply before skipping the handler.
-    /// </summary>
-    public string? DenialMessage { get; init; }
-
     public static FilterResult Allowed => new() { IsAllowed = true };
-
-    public static FilterResult Denied(string? message = null) =>
-        new() { IsAllowed = false, DenialMessage = message };
+    public static FilterResult Denied => new() { IsAllowed = false };
 }
 ```
 
@@ -152,13 +154,15 @@ public abstract class FilterEvaluator<TAttribute> : IFilterEvaluator
     ValueTask<FilterResult> IFilterEvaluator.EvaluateAsync(
         IFilteringAttribute attribute,
         HandlerInvocation invocation,
+        IBot bot,
         CancellationToken ct)
-        => EvaluateAsync((TAttribute)attribute, invocation, ct);
+        => EvaluateAsync((TAttribute)attribute, invocation, bot, ct);
 
     /// <summary>Evaluate the filter with the typed attribute.</summary>
     protected abstract ValueTask<FilterResult> EvaluateAsync(
         TAttribute attribute,
         HandlerInvocation invocation,
+        IBot bot,
         CancellationToken ct);
 }
 ```
@@ -177,7 +181,8 @@ registration record (or a parallel `Dictionary<MethodInfo, IReadOnlyList<Attribu
 /// <summary>
 /// Called before each handler invocation. Return false to skip the handler.
 /// The default implementation evaluates any <see cref="IFilteringAttribute"/>
-/// attributes on the handler method.
+/// attributes on the handler method. Evaluators receive the <see cref="IBot"/>
+/// instance so they can send replies or take IRC actions when denying.
 /// </summary>
 protected virtual async ValueTask<bool> FilterHandlerAsync(
     HandlerInvocation invocation, CancellationToken ct)
@@ -185,13 +190,9 @@ protected virtual async ValueTask<bool> FilterHandlerAsync(
     foreach (var attr in invocation.Attributes.OfType<IFilteringAttribute>())
     {
         var evaluator = ResolveEvaluator(attr.EvaluatorType);
-        var result = await evaluator.EvaluateAsync(attr, invocation, ct);
+        var result = await evaluator.EvaluateAsync(attr, invocation, Bot, ct);
         if (!result.IsAllowed)
-        {
-            if (result.DenialMessage is not null)
-                await SendDenialReply(invocation, result.DenialMessage, ct);
             return false;
-        }
     }
     return true;
 }
@@ -242,26 +243,6 @@ then cache them for the plugin's lifetime in a
 `Dictionary<Type, IFilterEvaluator>`. This gives evaluators DI-injected
 dependencies while avoiding per-invocation allocation.
 
-### 5. Denial reply helper
-
-A private `SendDenialReply` method that inspects the context type:
-
-```csharp
-private async Task SendDenialReply(
-    HandlerInvocation invocation, string message, CancellationToken ct)
-{
-    switch (invocation.Context)
-    {
-        case CommandContext ctx:
-            await ctx.ReplyAsync(message, ct);
-            break;
-        case RegexMatchContext ctx:
-            await ctx.ReplyAsync(message, ct);
-            break;
-    }
-}
-```
-
 ## Usage examples
 
 ### Simple tier — self-evaluating attributes
@@ -276,22 +257,26 @@ public sealed class RequireLevelAttribute(int level)
     public Type EvaluatorType => typeof(RequireLevelEvaluator);
 }
 
-// Evaluator — resolved from DI
+// Evaluator — resolved from DI, receives IBot for sending replies
 public class RequireLevelEvaluator(IUserLevelService svc)
     : FilterEvaluator<RequireLevelAttribute>
 {
     protected override async ValueTask<FilterResult> EvaluateAsync(
         RequireLevelAttribute attr, HandlerInvocation invocation,
-        CancellationToken ct)
+        IBot bot, CancellationToken ct)
     {
         var sender = (invocation.Context as CommandContext)?.Sender;
         if (sender is null)
             return FilterResult.Allowed;
 
         var level = await svc.GetUserLevelAsync(sender, ct);
-        return level >= attr.Level
-            ? FilterResult.Allowed
-            : FilterResult.Denied($"Requires level {attr.Level}.");
+        if (level >= attr.Level)
+            return FilterResult.Allowed;
+
+        // Evaluator handles its own denial response via IBot
+        if (invocation.Context is CommandContext ctx)
+            await ctx.ReplyAsync($"Requires level {attr.Level}.", ct);
+        return FilterResult.Denied;
     }
 }
 
@@ -356,6 +341,32 @@ public abstract class MyProjectPlugin : MarvPlugin
 
 ## Design decisions
 
+### Why pass IBot to evaluators?
+
+Evaluators need to take action when denying a handler — sending a denial
+notice, kicking a user, or even disconnecting. Without `IBot`, the
+framework would need to anticipate every possible denial action and
+expose it through `FilterResult` (e.g. `DenialMessage`, `KickReason`).
+That pushes IRC-specific logic into a struct that should be a simple
+signal. Passing `IBot` lets evaluators handle denial responses themselves
+using the same API handlers use, while `FilterResult` stays a clean
+allowed/denied flag.
+
+This does mean filter ordering matters more when filters have side
+effects (a filter that kicks before a later filter would have allowed).
+This is an acceptable tradeoff — filter evaluation order follows
+attribute declaration order on the method, which is predictable.
+
+### Why FilterResult instead of bool?
+
+`FilterResult` currently contains only `IsAllowed`, making it
+functionally equivalent to a `bool`. It exists as a struct to allow
+future extension (e.g. a `Reason` field for structured logging, or a
+`StopEvaluation` flag to short-circuit remaining filters) without
+breaking existing evaluator signatures. If a richer result type is
+needed later, existing evaluators continue to compile unchanged. A
+`bool` return would require touching every evaluator to migrate.
+
 ### Why not a middleware pipeline?
 
 Overengineered for the typical IRC bot use case. One or two cross-cutting
@@ -392,18 +403,19 @@ should not allow a handler to run unguarded.
 | `IFilteringAttribute` interface | 8 |
 | `IFilterEvaluator` interface | 8 |
 | `FilterEvaluator<T>` base class | 15 |
-| `FilterResult` struct | 15 |
-| `FilterHandlerAsync` default impl | 15 |
+| `FilterResult` struct | 10 |
+| `FilterHandlerAsync` default impl | 12 |
 | `InvokeHandlerSafe` changes | 10 |
 | Evaluator cache + resolution | 15 |
 | Attribute pre-caching | 10 |
-| `SendDenialReply` helper | 12 |
-| **Total** | **~136** |
+| **Total** | **~116** |
 
 ## Impact
 
 - **Plugin API:** Adds one virtual method to `MarvPlugin`, six new types in
-  `Marv.Core.Plugin`. All additive, no breaking changes.
+  `Marv.Core.Plugin` (`HandlerType`, `HandlerInvocation`, `FilterResult`,
+  `IFilteringAttribute`, `IFilterEvaluator`, `FilterEvaluator<T>`).
+  All additive, no breaking changes.
 - **Existing plugins:** Unaffected. `FilterHandlerAsync` defaults to
   evaluating `IFilteringAttribute`; plugins with no such attributes see
   zero behavior change.
