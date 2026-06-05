@@ -817,3 +817,11 @@
 **Prompt**:
 
 > Please implement CS-004 (@docs/change_specs/004-bulk-channel-join.md).
+
+## Mark CS-004 as completed and add CLAUDE.md instruction
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> You should also mark CS-004 as completed (see the existing pattern in CS-001 through CS-003 and @docs/change_spesc/README.md. Add an instruction to CLAUDE.md to make sure this is always done.
