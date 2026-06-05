@@ -685,3 +685,13 @@
 
 > It looks like the Release action doesn't run the linter, static analysis, etc. Is it possible to make the Release action wait on the CI action to make sure all that happens?
 > Additionally, a lot of time in the docker build step is spent restoring and rebuilding Marv when we've already built the artifacts. Can we set the Dockerfile up to use those artifacts if they're available, otherwise build as normal? Perhaps more importantly, is this a reasonable practice?
+
+## Fix bool CLI options overriding config file values
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> There's a bug with command-line options and MarvConfiguration - when no CLI arguments are provided, the boolean options are set to false in the configuration regardless of what the config file has set.
+
+> but first you should add tests to catch this bug and equivalents for other types

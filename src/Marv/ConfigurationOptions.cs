@@ -34,12 +34,14 @@ internal static class ConfigurationOptions
         }
     }
 
-    private sealed record BoolEntry(Option<bool> TypedOption, string ConfigKey) : Entry(TypedOption)
+    private sealed record BoolEntry(Option<bool?> TypedOption, string ConfigKey) : Entry(TypedOption)
     {
         public override void Apply(ParseResult result, Dictionary<string, string?> overrides)
         {
             if (result.GetResult(TypedOption) is null) return;
-            overrides[ConfigKey] = result.GetValue(TypedOption).ToString();
+            var value = result.GetValue(TypedOption);
+            if (value is not null)
+                overrides[ConfigKey] = value.Value.ToString();
         }
     }
 
@@ -85,7 +87,7 @@ internal static class ConfigurationOptions
 
             if (propType == typeof(bool))
             {
-                var opt = new Option<bool>(cliName) { Description = description };
+                var opt = new Option<bool?>(cliName) { Description = description };
                 entries.Add(new BoolEntry(opt, prop.Name));
             }
             else if (underlying == typeof(int))
