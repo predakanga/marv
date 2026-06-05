@@ -37,6 +37,9 @@ public static class MarvServiceExtensions
         services.AddSingleton<IPluginActivator, PluginActivator>();
         services.AddSingleton<PluginManager>();
 
+        // Register IHttpClientFactory so plugins can inject it without adding the package themselves
+        services.AddHttpClient();
+
         // Register the bot and hosted service
         services.AddSingleton<IrcBot>();
         services.AddSingleton<IBot>(sp => sp.GetRequiredService<IrcBot>());

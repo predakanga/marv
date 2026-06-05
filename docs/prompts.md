@@ -784,3 +784,11 @@
 **Prompt**:
 
 > Okay, go ahead and implement CS-001 and then mark it as completed.
+
+## Implement CS-002: IHttpClientFactory Registration
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> Okay, now implement CS-002

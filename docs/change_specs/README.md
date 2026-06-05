@@ -11,7 +11,7 @@ Specs are numbered in recommended implementation order.
 | # | Spec | Scope | Complexity | Dependencies | Status |
 |---|---|---|---|---|---|
 | 1 | [Command Prefix Configuration](001-command-prefix-config.md) | Core | Small | None | **Done** |
-| 2 | [IHttpClientFactory Registration](002-httpclient-registration.md) | Host | Trivial | None | |
+| 2 | [IHttpClientFactory Registration](002-httpclient-registration.md) | Host | Trivial | None | **Done** |
 | 3 | [Handler Dispatch Filters](003-handler-dispatch-filters.md) | Core | Small | None | |
 | 4 | [Bulk Channel Join](004-bulk-channel-join.md) | Core | Small-Medium | None | |
 | 5 | [Handler Filter Pipeline](005-handler-filter-pipeline.md) | Core | Medium | #3 | |

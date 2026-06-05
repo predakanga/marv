@@ -1,9 +1,10 @@
-# CS-002: IHttpClientFactory Registration
+# CS-002: IHttpClientFactory Registration — COMPLETED
 
 **Source:** `downstream_suggestions/improvements.md` §3
-**Scope:** Marv (host application)
+**Scope:** Marv.Core (via AddMarv service registration)
 **Complexity:** Trivial
 **Breaking changes:** None
+**Status:** Completed
 
 ---
 
