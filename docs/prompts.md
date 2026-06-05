@@ -801,3 +801,11 @@
 
 > I've just noticed that a number of our nuget dependencies target preview versions, which I want to avoid where possible.
 > Audit our csproj files and wherever possible update preview versions to the latest non-preview within that major version.
+
+## Implement CS-003: Handler Dispatch Filters
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> Back to the change specs, go ahead with CS-003.

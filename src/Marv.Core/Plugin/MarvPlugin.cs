@@ -95,16 +95,22 @@ public abstract class MarvPlugin : IPlugin
             // [OnCommand] handlers
             foreach (var cmdAttr in method.GetCustomAttributes<OnCommandAttribute>())
             {
+                WarnOnConflictingFilters(cmdAttr.ChannelOnly, cmdAttr.DirectOnly, cmdAttr.Channel,
+                    target.GetType().Name, method.Name, "OnCommand");
                 _commandHandlers.Add(new CommandRegistration(
                     target, method, cmdAttr.Command.ToLowerInvariant(),
-                    cmdAttr.Prefix ?? Bot.CommandPrefix));
+                    cmdAttr.Prefix ?? Bot.CommandPrefix,
+                    cmdAttr.ChannelOnly, cmdAttr.DirectOnly, cmdAttr.Channel));
             }
 
             // [OnRegex] handlers
             foreach (var regexAttr in method.GetCustomAttributes<OnRegexAttribute>())
             {
+                WarnOnConflictingFilters(regexAttr.ChannelOnly, regexAttr.DirectOnly, regexAttr.Channel,
+                    target.GetType().Name, method.Name, "OnRegex");
                 _regexHandlers.Add(new RegexRegistration(
-                    target, method, new Regex(regexAttr.Pattern, RegexOptions.Compiled)));
+                    target, method, new Regex(regexAttr.Pattern, RegexOptions.Compiled),
+                    regexAttr.ChannelOnly, regexAttr.DirectOnly, regexAttr.Channel));
             }
 
             // [OnRawMessage] handlers
@@ -125,6 +131,18 @@ public abstract class MarvPlugin : IPlugin
                     target, method, interval, DateTimeOffset.MinValue));
             }
         }
+    }
+
+    private void WarnOnConflictingFilters(
+        bool channelOnly, bool directOnly, string? channel,
+        string typeName, string methodName, string attributeName)
+    {
+        if (channelOnly && directOnly)
+            Logger.LogWarning("[{Attribute}] on {Type}.{Method} has both ChannelOnly and DirectOnly set — handler will never fire",
+                attributeName, typeName, methodName);
+        if (directOnly && channel is not null)
+            Logger.LogWarning("[{Attribute}] on {Type}.{Method} has both DirectOnly and Channel set — these are contradictory",
+                attributeName, typeName, methodName);
     }
 
     /// <inheritdoc />
@@ -179,6 +197,14 @@ public abstract class MarvPlugin : IPlugin
             if (command != handler.Command)
                 continue;
 
+            if (handler.ChannelOnly && msgEvt.Channel is null)
+                continue;
+            if (handler.DirectOnly && msgEvt.Channel is not null)
+                continue;
+            if (handler.Channel is not null
+                && !string.Equals(msgEvt.Channel?.Name, handler.Channel, StringComparison.OrdinalIgnoreCase))
+                continue;
+
             var argString = spaceIndex < 0
                 ? ""
                 : afterPrefix[(spaceIndex + 1)..].ToString().TrimStart();
@@ -206,6 +232,14 @@ public abstract class MarvPlugin : IPlugin
         var strippedText = IrcFormat.Strip(msgEvt.Text);
         foreach (var handler in _regexHandlers)
         {
+            if (handler.ChannelOnly && msgEvt.Channel is null)
+                continue;
+            if (handler.DirectOnly && msgEvt.Channel is not null)
+                continue;
+            if (handler.Channel is not null
+                && !string.Equals(msgEvt.Channel?.Name, handler.Channel, StringComparison.OrdinalIgnoreCase))
+                continue;
+
             var match = handler.Pattern.Match(strippedText);
             if (match.Success)
             {
@@ -437,8 +471,13 @@ public abstract class MarvPlugin : IPlugin
     }
 
     private sealed record HandlerRegistration(object Target, MethodInfo Method, Type EventType);
-    private sealed record CommandRegistration(object Target, MethodInfo Method, string Command, string Prefix);
-    private sealed record RegexRegistration(object Target, MethodInfo Method, Regex Pattern);
+    private sealed record CommandRegistration(
+        object Target, MethodInfo Method, string Command, string Prefix,
+        bool ChannelOnly, bool DirectOnly, string? Channel);
+
+    private sealed record RegexRegistration(
+        object Target, MethodInfo Method, Regex Pattern,
+        bool ChannelOnly, bool DirectOnly, string? Channel);
     private sealed record RawMessageRegistration(object Target, MethodInfo Method, string Command);
     private sealed record IntervalRegistration(object Target, MethodInfo Method, TimeSpan Interval, DateTimeOffset LastRun);
 }

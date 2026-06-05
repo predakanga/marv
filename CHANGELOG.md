@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   prefix on a per-handler basis (e.g. `[OnCommand("invite", Prefix = ".")]`)
 - `IHttpClientFactory` is now registered by default, so plugins can inject it
   without adding the `Microsoft.Extensions.Http` package themselves
+- `[OnCommand]` and `[OnRegex]` attributes gain `ChannelOnly`, `DirectOnly`,
+  and `Channel` filter properties for declarative message context filtering
 - Bot automatically sets bot user mode (e.g. `+B`) when the server advertises
   the `BOT` ISUPPORT token
 - `UserModes` config option to set additional user modes after authentication

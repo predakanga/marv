@@ -79,6 +79,18 @@ public sealed class OnCommandAttribute(string command) : Attribute
     /// When null, the bot's configured <see cref="IBot.CommandPrefix"/> is used.
     /// </summary>
     public string? Prefix { get; init; }
+
+    /// <summary>If true, handler only fires for channel messages (skips DMs).</summary>
+    public bool ChannelOnly { get; init; }
+
+    /// <summary>If true, handler only fires for direct/private messages (skips channels).</summary>
+    public bool DirectOnly { get; init; }
+
+    /// <summary>
+    /// If set, handler only fires when the message is in this channel.
+    /// Compared case-insensitively.
+    /// </summary>
+    public string? Channel { get; init; }
 }
 
 /// <summary>
@@ -90,6 +102,18 @@ public sealed class OnRegexAttribute(string pattern) : Attribute
 {
     /// <summary>The regular expression pattern to match against message text.</summary>
     public string Pattern { get; } = pattern;
+
+    /// <summary>If true, handler only fires for channel messages (skips DMs).</summary>
+    public bool ChannelOnly { get; init; }
+
+    /// <summary>If true, handler only fires for direct/private messages (skips channels).</summary>
+    public bool DirectOnly { get; init; }
+
+    /// <summary>
+    /// If set, handler only fires when the message is in this channel.
+    /// Compared case-insensitively.
+    /// </summary>
+    public string? Channel { get; init; }
 }
 
 /// <summary>
