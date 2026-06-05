@@ -1,4 +1,4 @@
-# CS-006: Plugin API Documentation
+# CS-007: Plugin API Documentation
 
 **Source:** `downstream_suggestions/ai_enablers.md` §1, §2, §5, §7, §8
 **Scope:** Documentation
@@ -32,7 +32,7 @@ Structure:
 2. **MarvPlugin constructor signature** — exact, current
 3. **Handler attributes table** — attribute → expected method signature →
    when it fires → available properties (including the new filter properties
-   from CS-002)
+   from CS-003)
 4. **CommandContext / RegexMatchContext fields** — table of all properties
 5. **IBot method reference** — table: method → signature → what it does
 6. **Event type catalog** — table: event type → properties → when it fires
@@ -44,7 +44,7 @@ Structure:
 10. **Handler groups** — when to use, constructor injection via
     `IPluginActivator`
 11. **Testing patterns** — how to create contexts, mock `IBot` with
-    NSubstitute (or Marv.Testing builders if CS-007 is implemented)
+    NSubstitute (or Marv.Testing builders if CS-006 is implemented)
 12. **Available services catalog** — what's in the DI container by default
     vs. what plugins register
 
@@ -80,7 +80,7 @@ Include as part of `PLUGIN_API.md` §12. Three tiers:
 **Always available (registered by Marv host):**
 - `IBot`, `IPluginActivator`, `ILoggerFactory`, `IOptions<T>`,
   `IHostApplicationLifetime`
-- `IHttpClientFactory` (after CS-004)
+- `IHttpClientFactory` (after CS-002)
 
 **Available if registered by a plugin:**
 - `IAuthorizationService` (from `Marv.Plugins.Auth`)

@@ -1,4 +1,4 @@
-# CS-002: Handler Dispatch Filters
+# CS-003: Handler Dispatch Filters
 
 **Source:** `downstream_suggestions/improvements.md` §1
 **Scope:** Marv.Core

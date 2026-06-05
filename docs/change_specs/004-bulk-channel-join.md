@@ -1,4 +1,4 @@
-# CS-005: Bulk Channel Join
+# CS-004: Bulk Channel Join
 
 **Source:** `downstream_suggestions/improvements.md` §5
 **Scope:** Marv.Core

@@ -3,7 +3,7 @@
 **Source:** `downstream_suggestions/ai_enablers.md` §3
 **Scope:** Example plugins
 **Complexity:** Medium
-**Depends on:** CS-002 (handler filters), CS-003 (filter pipeline)
+**Depends on:** CS-003 (handler filters), CS-005 (filter pipeline)
 **Breaking changes:** None (new plugin)
 
 ---
@@ -29,8 +29,8 @@ must read source code, which is expensive and error-prone.
 | `Bot.SendNoticeAsync` | No |
 | `Bot.SendAndAwaitAsync` | No |
 | Multiple `[OnCommand]` on one method | No |
-| Handler dispatch filters (CS-002) | No (doesn't exist yet) |
-| `IFilteringAttribute` usage (CS-003) | No (doesn't exist yet) |
+| Handler dispatch filters (CS-003) | No (doesn't exist yet) |
+| `IFilteringAttribute` usage (CS-005) | No (doesn't exist yet) |
 | Testing with NSubstitute / Marv.Testing | Not in examples |
 
 ## Changes
@@ -51,8 +51,8 @@ A moderation-themed plugin that demonstrates the gaps. Structure:
 - `[OnEvent]` for `UserKickedEvent` — audit log
 - `[OnInterval(Minutes = 5)]` — periodic cleanup of expired bans
 - `[DependsOn(typeof(AuthPlugin))]` — depends on auth plugin
-- Uses handler dispatch filters from CS-002 (`ChannelOnly = true`)
-- Uses `IFilteringAttribute` from CS-003 for authorization (if implemented)
+- Uses handler dispatch filters from CS-003 (`ChannelOnly = true`)
+- Uses `IFilteringAttribute` from CS-005 for authorization (if implemented)
   or inline auth checks as fallback
 
 **ModerationAdminCommands.cs** — handler group:
@@ -68,7 +68,7 @@ A moderation-themed plugin that demonstrates the gaps. Structure:
 
 **ModerationPluginTests.cs** — test file:
 - Demonstrates NSubstitute test pattern (or Marv.Testing builders if
-  CS-007 is available)
+  CS-006 is available)
 - Tests for command handling, event handling, channel filtering
 - Tests for authorization (filter attribute or inline check)
 
@@ -77,7 +77,7 @@ A moderation-themed plugin that demonstrates the gaps. Structure:
 Ensure the moderation plugin is:
 - Listed in the solution file (`Marv.slnx`)
 - Included in the Makefile's build/copy targets
-- Referenced in `PLUGIN_API.md` (CS-006) as the go-to example
+- Referenced in `PLUGIN_API.md` (CS-007) as the go-to example
 
 ## Design notes
 

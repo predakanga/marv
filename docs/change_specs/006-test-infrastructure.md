@@ -1,4 +1,4 @@
-# CS-007: Test Infrastructure
+# CS-006: Test Infrastructure
 
 **Source:** `downstream_suggestions/ai_enablers.md` §4
 **Scope:** New package (`Marv.Testing`)

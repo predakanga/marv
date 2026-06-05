@@ -1,10 +1,10 @@
-# CS-003: Handler Filter Pipeline
+# CS-005: Handler Filter Pipeline
 
 **Source:** `downstream_suggestions/authorization.md` (full analysis)
 **Scope:** Marv.Core.Plugin
 **Complexity:** Medium
 **Breaking changes:** None (additive virtual method + new interfaces)
-**Depends on:** CS-002 (handler dispatch filters provide the attribute-level
+**Depends on:** CS-003 (handler dispatch filters provide the attribute-level
 context this builds on)
 
 ---

@@ -1,4 +1,4 @@
-# CS-004: IHttpClientFactory Registration
+# CS-002: IHttpClientFactory Registration
 
 **Source:** `downstream_suggestions/improvements.md` §3
 **Scope:** Marv (host application)
