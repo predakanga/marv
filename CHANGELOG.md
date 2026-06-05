@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Server MOTD is now available via `IServerInfo.Motd` after connection
 - `IBot.JoinMultipleAsync` sends a single comma-separated `JOIN` command per
   RFC 2812, with automatic batching to stay within the 512-byte line limit
+- Handler filter pipeline: plugins can intercept handler invocations via
+  `FilterHandlerAsync` override or declarative `IFilteringAttribute` +
+  `IFilterEvaluator` pairs for cross-cutting concerns like authorization,
+  rate limiting, and auditing
 
 ### Changed
 

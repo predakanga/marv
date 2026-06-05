@@ -26,6 +26,9 @@ public abstract class MarvPlugin : IPlugin
     private readonly List<RegexRegistration> _regexHandlers = [];
     private readonly List<RawMessageRegistration> _rawMessageHandlers = [];
     private readonly List<IntervalRegistration> _intervalHandlers = [];
+    private readonly Dictionary<MethodInfo, IReadOnlyList<Attribute>> _attributeCache = [];
+    private readonly Dictionary<Type, IFilterEvaluator> _evaluatorCache = [];
+    private IPluginActivator _activator = null!;
     private CancellationTokenSource? _intervalCts;
     private Task? _intervalTask;
 
@@ -37,6 +40,7 @@ public abstract class MarvPlugin : IPlugin
     protected MarvPlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory)
     {
         Bot = bot;
+        _activator = activator;
         Logger = loggerFactory.CreateLogger(GetType());
         DiscoverHandlers(this, GetType());
         DiscoverHandlerGroups(activator);
@@ -81,6 +85,14 @@ public abstract class MarvPlugin : IPlugin
 
         foreach (var method in type.GetMethods(bindingFlags))
         {
+            // Pre-cache custom attributes for filter evaluation
+            if (!_attributeCache.ContainsKey(method))
+            {
+                var attrs = method.GetCustomAttributes(inherit: true).Cast<Attribute>().ToArray();
+                if (attrs.Length > 0)
+                    _attributeCache[method] = attrs;
+            }
+
             // [OnEvent] handlers
             if (method.GetCustomAttribute<OnEventAttribute>() is not null)
             {
@@ -152,7 +164,7 @@ public abstract class MarvPlugin : IPlugin
         foreach (var handler in _eventHandlers)
         {
             if (handler.EventType.IsInstanceOfType(evt))
-                await InvokeHandlerSafe(handler.Target, handler.Method, evt, ct);
+                await InvokeHandlerSafe(handler.Target, handler.Method, evt, HandlerType.Event, ct);
         }
 
         // Dispatch [OnRawMessage] handlers for RawMessageEvent
@@ -161,7 +173,7 @@ public abstract class MarvPlugin : IPlugin
             foreach (var handler in _rawMessageHandlers)
             {
                 if (handler.Command == rawEvt.RawMessage.Command)
-                    await InvokeHandlerSafe(handler.Target, handler.Method, rawEvt.RawMessage, ct);
+                    await InvokeHandlerSafe(handler.Target, handler.Method, rawEvt.RawMessage, HandlerType.RawMessage, ct);
             }
         }
 
@@ -223,7 +235,7 @@ public abstract class MarvPlugin : IPlugin
                 Bot = Bot
             };
 
-            await InvokeHandlerSafe(handler.Target, handler.Method, ctx, ct);
+            await InvokeHandlerSafe(handler.Target, handler.Method, ctx, HandlerType.Command, ct);
         }
     }
 
@@ -252,20 +264,84 @@ public abstract class MarvPlugin : IPlugin
                     Bot = Bot
                 };
 
-                await InvokeHandlerSafe(handler.Target, handler.Method, ctx, ct);
+                await InvokeHandlerSafe(handler.Target, handler.Method, ctx, HandlerType.Regex, ct);
             }
         }
     }
 
     /// <summary>
-    /// Invokes a handler method, catching and logging any exceptions so that
-    /// subsequent handlers continue to run.
+    /// Called before each handler invocation. Return false to skip the handler.
+    /// The default implementation evaluates any <see cref="IFilteringAttribute"/>
+    /// attributes on the handler method. Evaluators receive the <see cref="IBot"/>
+    /// instance so they can send replies or take IRC actions when denying.
     /// </summary>
-    private async Task InvokeHandlerSafe(object target, MethodInfo method, object arg, CancellationToken ct)
+    protected virtual async ValueTask<bool> FilterHandlerAsync(
+        HandlerInvocation invocation, CancellationToken ct)
+    {
+        foreach (var attr in invocation.Attributes.OfType<IFilteringAttribute>())
+        {
+            var evaluator = ResolveEvaluator(attr.EvaluatorType);
+            var result = await evaluator.EvaluateAsync(attr, invocation, Bot, ct);
+            if (!result.IsAllowed)
+                return false;
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// Resolves a filter evaluator by type, caching instances for the plugin's lifetime.
+    /// </summary>
+    private IFilterEvaluator ResolveEvaluator(Type evaluatorType)
+    {
+        if (_evaluatorCache.TryGetValue(evaluatorType, out var cached))
+            return cached;
+
+        var createMethod = typeof(IPluginActivator)
+            .GetMethod(nameof(IPluginActivator.CreateInstance))!
+            .MakeGenericMethod(evaluatorType);
+
+        var evaluator = (IFilterEvaluator)createMethod.Invoke(_activator, [Array.Empty<object>()])!;
+        _evaluatorCache[evaluatorType] = evaluator;
+        return evaluator;
+    }
+
+    /// <summary>
+    /// Returns the pre-cached custom attributes for a handler method.
+    /// </summary>
+    private IReadOnlyList<Attribute> GetCachedAttributes(MethodInfo method)
+    {
+        return _attributeCache.TryGetValue(method, out var attrs)
+            ? attrs
+            : Array.Empty<Attribute>();
+    }
+
+    /// <summary>
+    /// Invokes a handler method with filtering, catching and logging any exceptions
+    /// so that subsequent handlers continue to run. If <see cref="FilterHandlerAsync"/>
+    /// throws, the handler is skipped (fail-closed).
+    /// </summary>
+    private async Task InvokeHandlerSafe(
+        object target, MethodInfo method, object? arg,
+        HandlerType type, CancellationToken ct)
     {
         try
         {
-            await InvokeHandler(target, method, arg, ct);
+            var invocation = new HandlerInvocation
+            {
+                Method = method,
+                Target = target,
+                Type = type,
+                Context = arg,
+                Attributes = GetCachedAttributes(method)
+            };
+
+            if (!await FilterHandlerAsync(invocation, ct))
+                return;
+
+            if (arg is not null)
+                await InvokeHandler(target, method, arg, ct);
+            else
+                await InvokeHandler(target, method, ct);
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
@@ -420,19 +496,7 @@ public abstract class MarvPlugin : IPlugin
                 if (elapsed >= handler.Interval)
                 {
                     _intervalHandlers[i] = handler with { LastRun = now };
-                    try
-                    {
-                        await InvokeHandler(handler.Target, handler.Method, ct);
-                    }
-                    catch (OperationCanceledException) when (ct.IsCancellationRequested)
-                    {
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.LogError(ex, "Interval handler {Type}.{Method} threw an exception",
-                            handler.Target.GetType().Name, handler.Method.Name);
-                    }
+                    await InvokeHandlerSafe(handler.Target, handler.Method, null, HandlerType.Interval, ct);
                 }
                 else
                 {

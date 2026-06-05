@@ -847,3 +847,11 @@
 > Okay, I don't mind having FilterResult for future extensibility. Go with that approach, but make sure to explain the reasoning.
 
 > I didn't mean for you to start implementing. I wanted you to just update the change spec.
+
+## Implement CS-005: Handler Filter Pipeline
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> Okay, now that that's updated and committed, you can continue with the implementation.
