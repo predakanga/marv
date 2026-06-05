@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/Marv/Marv.csproj" />
     <Project Path="src/Marv.Core/Marv.Core.csproj" />
+    <Project Path="src/Marv.Testing/Marv.Testing.csproj" />
   </Folder>
   <Folder Name="/src/plugins/">
     <Project Path="src/plugins/Marv.Plugins.Auth/Marv.Plugins.Auth.csproj" />
@@ -12,5 +13,6 @@
   <Folder Name="/tests/">
     <Project Path="tests/Marv.Core.Tests/Marv.Core.Tests.csproj" />
     <Project Path="tests/Marv.Plugins.Tests/Marv.Plugins.Tests.csproj" />
+    <Project Path="tests/Marv.Testing.Tests/Marv.Testing.Tests.csproj" />
   </Folder>
 </Solution>

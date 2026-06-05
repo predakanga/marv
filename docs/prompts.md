@@ -855,3 +855,11 @@
 **Prompt**:
 
 > Okay, now that that's updated and committed, you can continue with the implementation.
+
+## Implement CS-006: Test Infrastructure
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> Okay, continue with implementing CS-006. I agree with the logic regarding the two open questions, so mark them as accepted.

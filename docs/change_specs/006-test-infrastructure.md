@@ -1,9 +1,10 @@
-# CS-006: Test Infrastructure
+# CS-006: Test Infrastructure — COMPLETED
 
 **Source:** `downstream_suggestions/ai_enablers.md` §4
 **Scope:** New package (`Marv.Testing`)
 **Complexity:** Medium
 **Breaking changes:** None (new package)
+**Status:** Completed
 
 ---
 
@@ -152,12 +153,26 @@ var ctx = CommandContextBuilder.Create("hello")
 - **Existing tests:** Marv's own test suite can optionally migrate to
   use these helpers, but this is not required.
 
-## Open questions
+## Resolved questions
 
-1. Should `PluginTestHarness` call `OnLoadAsync` automatically? Probably
-   not — tests may want to set up additional state before load. Provide a
-   `LoadAsync()` method instead.
-2. Should the builders support fluent chaining for `IBot` behavior
-   configuration (e.g. `.WithBotThatReplies()`)? Probably not in v1 —
-   keep it simple. Tests that need custom `IBot` behavior can still use
-   `WithBot(customMock)`.
+1. **Should `PluginTestHarness` call `OnLoadAsync` automatically?**
+   No — tests may want to set up additional state before load. A
+   `LoadAsync()` method is provided for explicit invocation. *(Accepted)*
+2. **Should the builders support fluent chaining for `IBot` behavior
+   configuration (e.g. `.WithBotThatReplies()`)?**
+   Not in v1 — keep it simple. Tests that need custom `IBot` behavior
+   can use `WithBot(customMock)`. *(Accepted)*
+
+## Design note: EventBuilder\<T\> factory approach
+
+The spec originally proposed `EventBuilder<T> where T : MarvEvent, new()` with
+a `With(Action<T> configure)` method. This doesn't work in practice because
+event classes use `required init` properties — the `new()` constraint fails to
+compile (CS9035: required members must be set), and `init` setters cannot be
+assigned in an `Action<T>` lambda.
+
+The implementation uses a factory function approach instead:
+`EventBuilder<T>.Create(Func<IrcMessage, T> factory)`. The factory receives a
+default `IrcMessage` and constructs the event via object initializer syntax,
+which satisfies both `required` and `init` constraints. The builder fills in
+`Timestamp` via reflection if not explicitly set.

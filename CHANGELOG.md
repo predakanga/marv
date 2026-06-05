@@ -29,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `FilterHandlerAsync` override or declarative `IFilteringAttribute` +
   `IFilterEvaluator` pairs for cross-cutting concerns like authorization,
   rate limiting, and auditing
+- New `Marv.Testing` package with fluent builders for `CommandContext`,
+  `RegexMatchContext`, and events, plus `PluginTestHarness<T>` for
+  creating plugin instances with mocked dependencies in ~2 lines
 
 ### Changed
 
