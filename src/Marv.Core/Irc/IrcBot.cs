@@ -64,7 +64,6 @@ internal sealed class IrcBot : IBot
         Platform.Capabilities.MessageTags,
         Platform.Capabilities.InviteNotify,
         Platform.Capabilities.Sasl,
-        Platform.Capabilities.BotMode,
         Platform.Capabilities.StandardReplies
     ];
 
@@ -719,16 +718,13 @@ internal sealed class IrcBot : IBot
     {
         _readyTcs?.TrySetResult(true);
 
-        // Set bot user mode if the server supports the bot capability.
-        // The mode character comes from the ISUPPORT BOT token (e.g. BOT=B).
-        if (_capabilityManager.IsNegotiated(Platform.Capabilities.BotMode))
+        // Set bot user mode if the server advertises the BOT ISUPPORT token.
+        // The token value is the mode character (e.g. BOT=B).
+        var botModeChar = _serverInfo.GetValue("BOT");
+        if (!string.IsNullOrEmpty(botModeChar))
         {
-            var botModeChar = _serverInfo.GetValue("BOT");
-            if (!string.IsNullOrEmpty(botModeChar))
-            {
-                _logger.LogDebug("Setting bot mode +{Mode}", botModeChar);
-                await SendRawAsync(new IrcMessage("MODE", [_currentNick, $"+{botModeChar}"]), ct);
-            }
+            _logger.LogDebug("Setting bot mode +{Mode}", botModeChar);
+            await SendRawAsync(new IrcMessage("MODE", [_currentNick, $"+{botModeChar}"]), ct);
         }
 
         _logger.LogInformation("Bot is ready");

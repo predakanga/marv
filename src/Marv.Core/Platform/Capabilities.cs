@@ -53,9 +53,6 @@ public static class Capabilities
     /// <summary>NAMES replies include full nick!user@host masks.</summary>
     public const string UserhostInNames = "userhost-in-names";
 
-    /// <summary>Marks the bot with a B flag so users and servers know it is a bot.</summary>
-    public const string BotMode = "bot";
-
     /// <summary>Standardized FAIL/WARN/NOTE server responses.</summary>
     public const string StandardReplies = "standard-replies";
 

@@ -725,3 +725,11 @@
 > I'd like to implement two quick changes:
 > - The bot should automatically set the bot mode on itself if it's provided by the server. Ideally this should happen before giving the ready signal.
 > - The bot should provide the server's MOTD in ServerInfo.
+
+## Fix bot mode detection to use ISUPPORT instead of CAP
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> I don't think Capabilities.BotMode is a real capability - according to the spec (https://ircv3.net/specs/extensions/bot-mode), bot mode is detected solely by ISUPPORT. This means that the bot mode change you just added is never being triggered.
