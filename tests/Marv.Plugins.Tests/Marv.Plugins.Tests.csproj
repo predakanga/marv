@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Marv.Core\Marv.Core.csproj" />
+    <ProjectReference Include="..\..\src\Marv.Testing\Marv.Testing.csproj" />
     <ProjectReference Include="..\..\src\plugins\Marv.Plugins.Greet\Marv.Plugins.Greet.csproj" />
     <ProjectReference Include="..\..\src\plugins\Marv.Plugins.Auth\Marv.Plugins.Auth.csproj" />
     <ProjectReference Include="..\..\src\plugins\Marv.Plugins.AuthConsumer\Marv.Plugins.AuthConsumer.csproj" />

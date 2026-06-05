@@ -1,12 +1,11 @@
 using Xunit;
 using NSubstitute;
+using Microsoft.Extensions.DependencyInjection;
 using Marv.Core.Events;
 using Marv.Core.Platform;
-using Marv.Core.Plugin;
-using Marv.Core.Protocol;
 using Marv.Plugins.Auth;
 using Marv.Plugins.AuthConsumer;
-using Microsoft.Extensions.Logging.Abstractions;
+using Marv.Testing;
 
 namespace Marv.Plugins.Tests;
 
@@ -16,36 +15,20 @@ namespace Marv.Plugins.Tests;
 /// </summary>
 public class AuthConsumerPluginTests
 {
-    private static readonly IrcMessage DummyMessage = new("PRIVMSG", ["#test", "!secret"]);
-
-    private static (AuthConsumerPlugin Plugin, IBot Bot) CreatePlugin(IAuthorizationService? auth = null)
-    {
-        var bot = Substitute.For<IBot>();
-        bot.CommandPrefix.Returns("!");
-        var activator = Substitute.For<IPluginActivator>();
-        return (new AuthConsumerPlugin(bot, activator, NullLoggerFactory.Instance, auth), bot);
-    }
-
     [Fact]
     public async Task Secret_WithoutAuth_AlwaysSucceeds()
     {
-        var (plugin, bot) = CreatePlugin(auth: null);
-        var channel = Substitute.For<IChannel>();
-        channel.Name.Returns("#test");
-        var user = Substitute.For<IUser>();
-        user.Nick.Returns("anyone");
-
-        var evt = new MessageEvent
+        var harness = PluginTestHarness<AuthConsumerPlugin>.Create();
+        var evt = EventBuilder<MessageEvent>.Create(raw => new MessageEvent
         {
-            Channel = channel,
-            Sender = user,
+            Channel = MockChannel.Create("#test"),
+            Sender = MockUser.Create("anyone"),
             Text = "!secret",
-            Timestamp = DateTimeOffset.UtcNow,
-            RawMessage = DummyMessage
-        };
+            RawMessage = raw
+        }).Build();
 
-        await plugin.HandleEventAsync(evt, CancellationToken.None);
-        await bot.Received(1).SendMessageAsync("#test", "The secret is: 42", Arg.Any<CancellationToken>());
+        await harness.HandleEventAsync(evt);
+        await harness.Bot.Received(1).SendMessageAsync("#test", "The secret is: 42", Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -55,23 +38,20 @@ public class AuthConsumerPluginTests
         auth.IsAuthorizedAsync(Arg.Any<IUser>(), "secret.view", Arg.Any<CancellationToken>())
             .Returns(true);
 
-        var (plugin, bot) = CreatePlugin(auth);
-        var channel = Substitute.For<IChannel>();
-        channel.Name.Returns("#test");
-        var user = Substitute.For<IUser>();
-        user.Nick.Returns("admin");
-
-        var evt = new MessageEvent
+        var harness = PluginTestHarness<AuthConsumerPlugin>.Create(services =>
         {
-            Channel = channel,
-            Sender = user,
+            services.AddSingleton(auth);
+        });
+        var evt = EventBuilder<MessageEvent>.Create(raw => new MessageEvent
+        {
+            Channel = MockChannel.Create("#test"),
+            Sender = MockUser.Create("admin"),
             Text = "!secret",
-            Timestamp = DateTimeOffset.UtcNow,
-            RawMessage = DummyMessage
-        };
+            RawMessage = raw
+        }).Build();
 
-        await plugin.HandleEventAsync(evt, CancellationToken.None);
-        await bot.Received(1).SendMessageAsync("#test", "The secret is: 42", Arg.Any<CancellationToken>());
+        await harness.HandleEventAsync(evt);
+        await harness.Bot.Received(1).SendMessageAsync("#test", "The secret is: 42", Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -81,22 +61,19 @@ public class AuthConsumerPluginTests
         auth.IsAuthorizedAsync(Arg.Any<IUser>(), "secret.view", Arg.Any<CancellationToken>())
             .Returns(false);
 
-        var (plugin, bot) = CreatePlugin(auth);
-        var channel = Substitute.For<IChannel>();
-        channel.Name.Returns("#test");
-        var user = Substitute.For<IUser>();
-        user.Nick.Returns("nobody");
-
-        var evt = new MessageEvent
+        var harness = PluginTestHarness<AuthConsumerPlugin>.Create(services =>
         {
-            Channel = channel,
-            Sender = user,
+            services.AddSingleton(auth);
+        });
+        var evt = EventBuilder<MessageEvent>.Create(raw => new MessageEvent
+        {
+            Channel = MockChannel.Create("#test"),
+            Sender = MockUser.Create("nobody"),
             Text = "!secret",
-            Timestamp = DateTimeOffset.UtcNow,
-            RawMessage = DummyMessage
-        };
+            RawMessage = raw
+        }).Build();
 
-        await plugin.HandleEventAsync(evt, CancellationToken.None);
-        await bot.Received(1).SendMessageAsync("#test", "Permission denied.", Arg.Any<CancellationToken>());
+        await harness.HandleEventAsync(evt);
+        await harness.Bot.Received(1).SendMessageAsync("#test", "Permission denied.", Arg.Any<CancellationToken>());
     }
 }

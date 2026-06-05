@@ -863,3 +863,11 @@
 **Prompt**:
 
 > Okay, continue with implementing CS-006. I agree with the logic regarding the two open questions, so mark them as accepted.
+
+## Migrate plugin tests to use Marv.Testing
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> Can you update the tests in @tests/Marv.Plugins.Tests/ to use the new testing package?

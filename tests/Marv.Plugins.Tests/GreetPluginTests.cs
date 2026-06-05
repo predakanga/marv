@@ -1,12 +1,10 @@
 using Xunit;
 using NSubstitute;
-using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Marv.Core.Events;
-using Marv.Core.Platform;
-using Marv.Core.Plugin;
-using Marv.Core.Protocol;
 using Marv.Plugins.Greet;
+using Marv.Testing;
 
 namespace Marv.Plugins.Tests;
 
@@ -15,128 +13,85 @@ namespace Marv.Plugins.Tests;
 /// </summary>
 public class GreetPluginTests
 {
-    private static readonly IrcMessage DummyMessage = new("PRIVMSG", ["#test", "hello"]);
-
-    private static (GreetPlugin Plugin, IBot Bot) CreatePlugin(GreetPluginConfig? config = null)
-    {
-        var bot = Substitute.For<IBot>();
-        bot.CommandPrefix.Returns("!");
-        var selfUser = Substitute.For<IUser>();
-        selfUser.Nick.Returns("Marv");
-        bot.Self.Returns(selfUser);
-
-        var activator = Substitute.For<IPluginActivator>();
-        var options = Options.Create(config ?? new GreetPluginConfig());
-
-        var plugin = new GreetPlugin(bot, activator, NullLoggerFactory.Instance, options);
-        return (plugin, bot);
-    }
+    private static PluginTestHarness<GreetPlugin> CreateHarness(GreetPluginConfig? config = null) =>
+        PluginTestHarness<GreetPlugin>.Create(services =>
+        {
+            services.AddSingleton(Options.Create(config ?? new GreetPluginConfig()));
+        });
 
     [Fact]
     public async Task HandleJoin_SendsGreeting()
     {
-        var (plugin, bot) = CreatePlugin();
-        var channel = Substitute.For<IChannel>();
-        channel.Name.Returns("#test");
-        var user = Substitute.For<IUser>();
-        user.Nick.Returns("testuser");
-
-        var evt = new UserJoinedEvent
+        var harness = CreateHarness();
+        var evt = EventBuilder<UserJoinedEvent>.Create(raw => new UserJoinedEvent
         {
-            Channel = channel,
-            User = user,
-            Timestamp = DateTimeOffset.UtcNow,
-            RawMessage = DummyMessage
-        };
+            Channel = MockChannel.Create("#test"),
+            User = MockUser.Create("testuser"),
+            RawMessage = raw
+        }).Build();
 
-        await plugin.HandleEventAsync(evt, CancellationToken.None);
-        await bot.Received(1).SendMessageAsync("#test", "Welcome, testuser!", Arg.Any<CancellationToken>());
+        await harness.HandleEventAsync(evt);
+        await harness.Bot.Received(1).SendMessageAsync("#test", "Welcome, testuser!", Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task HandleJoin_DoesNotGreetSelf()
     {
-        var (plugin, bot) = CreatePlugin();
-        var channel = Substitute.For<IChannel>();
-        channel.Name.Returns("#test");
-        var user = Substitute.For<IUser>();
-        user.Nick.Returns("Marv");
-
-        var evt = new UserJoinedEvent
+        var harness = CreateHarness();
+        var evt = EventBuilder<UserJoinedEvent>.Create(raw => new UserJoinedEvent
         {
-            Channel = channel,
-            User = user,
-            Timestamp = DateTimeOffset.UtcNow,
-            RawMessage = DummyMessage
-        };
+            Channel = MockChannel.Create("#test"),
+            User = MockUser.Create("Marv"),
+            RawMessage = raw
+        }).Build();
 
-        await plugin.HandleEventAsync(evt, CancellationToken.None);
-        await bot.DidNotReceive().SendMessageAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await harness.HandleEventAsync(evt);
+        await harness.Bot.DidNotReceive().SendMessageAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task HandleJoin_DisabledByConfig()
     {
-        var config = new GreetPluginConfig { GreetOnJoin = false };
-        var (plugin, bot) = CreatePlugin(config);
-        var channel = Substitute.For<IChannel>();
-        channel.Name.Returns("#test");
-        var user = Substitute.For<IUser>();
-        user.Nick.Returns("testuser");
-
-        var evt = new UserJoinedEvent
+        var harness = CreateHarness(new GreetPluginConfig { GreetOnJoin = false });
+        var evt = EventBuilder<UserJoinedEvent>.Create(raw => new UserJoinedEvent
         {
-            Channel = channel,
-            User = user,
-            Timestamp = DateTimeOffset.UtcNow,
-            RawMessage = DummyMessage
-        };
+            Channel = MockChannel.Create("#test"),
+            User = MockUser.Create("testuser"),
+            RawMessage = raw
+        }).Build();
 
-        await plugin.HandleEventAsync(evt, CancellationToken.None);
-        await bot.DidNotReceive().SendMessageAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await harness.HandleEventAsync(evt);
+        await harness.Bot.DidNotReceive().SendMessageAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task HandleJoin_CustomMessage()
     {
-        var config = new GreetPluginConfig { GreetMessage = "Hi {nick}, welcome aboard!" };
-        var (plugin, bot) = CreatePlugin(config);
-        var channel = Substitute.For<IChannel>();
-        channel.Name.Returns("#test");
-        var user = Substitute.For<IUser>();
-        user.Nick.Returns("alice");
-
-        var evt = new UserJoinedEvent
+        var harness = CreateHarness(new GreetPluginConfig { GreetMessage = "Hi {nick}, welcome aboard!" });
+        var evt = EventBuilder<UserJoinedEvent>.Create(raw => new UserJoinedEvent
         {
-            Channel = channel,
-            User = user,
-            Timestamp = DateTimeOffset.UtcNow,
-            RawMessage = DummyMessage
-        };
+            Channel = MockChannel.Create("#test"),
+            User = MockUser.Create("alice"),
+            RawMessage = raw
+        }).Build();
 
-        await plugin.HandleEventAsync(evt, CancellationToken.None);
-        await bot.Received(1).SendMessageAsync("#test", "Hi alice, welcome aboard!", Arg.Any<CancellationToken>());
+        await harness.HandleEventAsync(evt);
+        await harness.Bot.Received(1).SendMessageAsync("#test", "Hi alice, welcome aboard!", Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task HandleHello_RepliesWithGreeting()
     {
-        var (plugin, bot) = CreatePlugin();
-        var channel = Substitute.For<IChannel>();
-        channel.Name.Returns("#test");
-        var user = Substitute.For<IUser>();
-        user.Nick.Returns("bob");
-
-        var evt = new MessageEvent
+        var harness = CreateHarness();
+        var evt = EventBuilder<MessageEvent>.Create(raw => new MessageEvent
         {
-            Channel = channel,
-            Sender = user,
+            Channel = MockChannel.Create("#test"),
+            Sender = MockUser.Create("bob"),
             Text = "!hello",
-            Timestamp = DateTimeOffset.UtcNow,
-            RawMessage = DummyMessage
-        };
+            RawMessage = raw
+        }).Build();
 
-        await plugin.HandleEventAsync(evt, CancellationToken.None);
-        await bot.Received(1).SendMessageAsync("#test", "Hello, bob!", Arg.Any<CancellationToken>());
+        await harness.HandleEventAsync(evt);
+        await harness.Bot.Received(1).SendMessageAsync("#test", "Hello, bob!", Arg.Any<CancellationToken>());
     }
 }

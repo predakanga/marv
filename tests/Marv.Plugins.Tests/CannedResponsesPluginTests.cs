@@ -1,11 +1,8 @@
 using Xunit;
 using NSubstitute;
 using Marv.Core.Events;
-using Marv.Core.Platform;
-using Marv.Core.Plugin;
-using Marv.Core.Protocol;
 using Marv.Plugins.CannedResponses;
-using Microsoft.Extensions.Logging.Abstractions;
+using Marv.Testing;
 
 namespace Marv.Plugins.Tests;
 
@@ -15,89 +12,55 @@ namespace Marv.Plugins.Tests;
 /// </summary>
 public class CannedResponsesPluginTests
 {
-    private static readonly IrcMessage DummyMessage = new("PRIVMSG", ["#test", "!ping"]);
-
-    private static (CannedResponsesPlugin Plugin, IBot Bot) CreatePlugin()
-    {
-        var bot = Substitute.For<IBot>();
-        bot.CommandPrefix.Returns("!");
-
-        // The activator must be able to create handler group instances
-        var activator = Substitute.For<IPluginActivator>();
-
-        // Set up the activator to create real handler group instances
-        activator.CreateInstance<InfoHandlers>(Arg.Any<object[]>())
-            .Returns(ci => new InfoHandlers(bot));
-        activator.CreateInstance<FunHandlers>(Arg.Any<object[]>())
-            .Returns(ci => new FunHandlers(bot));
-
-        return (new CannedResponsesPlugin(bot, activator, NullLoggerFactory.Instance), bot);
-    }
+    private static PluginTestHarness<CannedResponsesPlugin> CreateHarness() =>
+        PluginTestHarness<CannedResponsesPlugin>.Create();
 
     [Fact]
     public async Task PingCommand_FromHandlerGroup_Responds()
     {
-        var (plugin, bot) = CreatePlugin();
-        var channel = Substitute.For<IChannel>();
-        channel.Name.Returns("#test");
-        var user = Substitute.For<IUser>();
-        user.Nick.Returns("tester");
-
-        var evt = new MessageEvent
+        var harness = CreateHarness();
+        var evt = EventBuilder<MessageEvent>.Create(raw => new MessageEvent
         {
-            Channel = channel,
-            Sender = user,
+            Channel = MockChannel.Create("#test"),
+            Sender = MockUser.Create("tester"),
             Text = "!ping",
-            Timestamp = DateTimeOffset.UtcNow,
-            RawMessage = DummyMessage
-        };
+            RawMessage = raw
+        }).Build();
 
-        await plugin.HandleEventAsync(evt, CancellationToken.None);
-        await bot.Received(1).SendMessageAsync("#test", "pong", Arg.Any<CancellationToken>());
+        await harness.HandleEventAsync(evt);
+        await harness.Bot.Received(1).SendMessageAsync("#test", "pong", Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task VersionCommand_FromHandlerGroup_Responds()
     {
-        var (plugin, bot) = CreatePlugin();
-        var channel = Substitute.For<IChannel>();
-        channel.Name.Returns("#test");
-        var user = Substitute.For<IUser>();
-        user.Nick.Returns("tester");
-
-        var evt = new MessageEvent
+        var harness = CreateHarness();
+        var evt = EventBuilder<MessageEvent>.Create(raw => new MessageEvent
         {
-            Channel = channel,
-            Sender = user,
+            Channel = MockChannel.Create("#test"),
+            Sender = MockUser.Create("tester"),
             Text = "!version",
-            Timestamp = DateTimeOffset.UtcNow,
-            RawMessage = DummyMessage
-        };
+            RawMessage = raw
+        }).Build();
 
-        await plugin.HandleEventAsync(evt, CancellationToken.None);
-        await bot.Received(1).SendMessageAsync("#test", "Marv IRC Bot v0.1.0", Arg.Any<CancellationToken>());
+        await harness.HandleEventAsync(evt);
+        await harness.Bot.Received(1).SendMessageAsync("#test", "Marv IRC Bot v0.1.0", Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task HelpCommand_FromHandlerGroup_Responds()
     {
-        var (plugin, bot) = CreatePlugin();
-        var channel = Substitute.For<IChannel>();
-        channel.Name.Returns("#test");
-        var user = Substitute.For<IUser>();
-        user.Nick.Returns("tester");
-
-        var evt = new MessageEvent
+        var harness = CreateHarness();
+        var evt = EventBuilder<MessageEvent>.Create(raw => new MessageEvent
         {
-            Channel = channel,
-            Sender = user,
+            Channel = MockChannel.Create("#test"),
+            Sender = MockUser.Create("tester"),
             Text = "!help",
-            Timestamp = DateTimeOffset.UtcNow,
-            RawMessage = DummyMessage
-        };
+            RawMessage = raw
+        }).Build();
 
-        await plugin.HandleEventAsync(evt, CancellationToken.None);
-        await bot.Received(1).SendMessageAsync("#test",
+        await harness.HandleEventAsync(evt);
+        await harness.Bot.Received(1).SendMessageAsync("#test",
             "Available commands: !help, !version, !source, !ping",
             Arg.Any<CancellationToken>());
     }
@@ -105,22 +68,16 @@ public class CannedResponsesPluginTests
     [Fact]
     public async Task GoodBot_RegexMatch_Responds()
     {
-        var (plugin, bot) = CreatePlugin();
-        var channel = Substitute.For<IChannel>();
-        channel.Name.Returns("#test");
-        var user = Substitute.For<IUser>();
-        user.Nick.Returns("tester");
-
-        var evt = new MessageEvent
+        var harness = CreateHarness();
+        var evt = EventBuilder<MessageEvent>.Create(raw => new MessageEvent
         {
-            Channel = channel,
-            Sender = user,
+            Channel = MockChannel.Create("#test"),
+            Sender = MockUser.Create("tester"),
             Text = "you are a good bot",
-            Timestamp = DateTimeOffset.UtcNow,
-            RawMessage = DummyMessage
-        };
+            RawMessage = raw
+        }).Build();
 
-        await plugin.HandleEventAsync(evt, CancellationToken.None);
-        await bot.Received(1).SendMessageAsync("#test", "Thank you! 😊", Arg.Any<CancellationToken>());
+        await harness.HandleEventAsync(evt);
+        await harness.Bot.Received(1).SendMessageAsync("#test", "Thank you! 😊", Arg.Any<CancellationToken>());
     }
 }
