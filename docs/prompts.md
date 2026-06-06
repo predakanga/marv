@@ -1184,3 +1184,16 @@
 > Things to investigate:
 > - `System.Reflection.Metadata`
 > - `System.Reflection.MetadataLoadContext`
+
+## Revise CS-011 based on feedback
+
+**Date**: 2026-06-07T00:00:00Z
+
+> Okay, some notes:
+> Plugins should only ever be loaded from PluginDirectories, so mentions of not being able to find DLLs alongside plugin assemblies don't really make sense.
+> Regarding DI container probing, you call out IOptions, ILoggerFactory, etc as being special-cased core services. Shouldn't these be registered in the DI container anyway?
+> Regarding the metadata scanning phase, can you retrieve the value from the PluginName attribute from the metadata-only context? I expected that that wouldn't be possible.
+> Regarding "Plugin name not found", this should be a fatal error, not a warning.
+> Regarding "Plugin name resolution by convention", I like this idea but it should definitely log a warning so that the user can correct their config. Similarly to above, if we fall back to a substring match, we should not continue with starting the bot.
+> Regarding "Validate all requested plugins are found", this should be a fatal error. If we can't provide the plugins that the user requests, that's a problem that needs to be resolved before continuing. This probably means that our existing logic around skipping failed plugins and those that depend on them should be removed too.
+> Regarding "Assembly resolution improvements", there should never be subdirectories in the plugins folder. We only need to scan the plugin directories and the base dir. It may be worth checking the base directory explicitly though, because we want to be able to package Marv as a single executable (`PublishSingleFile`), but still load DLLs from its basedir.
