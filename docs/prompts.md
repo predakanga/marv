@@ -1,5 +1,15 @@
 # Prompt Log
 
+## Add TODO for regex options on OnRegex attribute
+
+**Date**: 2026-06-06
+
+**Prompt**:
+
+> Add a TODO item: allow passing regex options to the OnRegex attribute
+
+---
+
 ## Research the problem space before writing code
 
 **Date**: 2026-05-30T00:00:00Z
