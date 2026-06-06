@@ -895,3 +895,13 @@
 **Prompt**:
 
 > Create a new change spec for adding more action methods to the bot - in essence, I don't want plugins to have to SendMessageAsync(new IrcMessage("KICK", ...)) when they could just call IBot.KickUserAsync(...)
+
+## Refine CS-009: rename SetModeAsync, add op/voice methods
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+> Some notes about that change spec:
+> - Rename SetModeAsync to SetChannelModeAsync
+> - Consider adding VoiceUser/OpUser methods (how do these interact with ISUPPORT PREFIX parameter?)
