@@ -939,3 +939,11 @@
 **Prompt**:
 
 > Okay, go ahead and implement CS-009 and CS-010
+
+## Update CS-008 to reflect recent changes
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+> Before we implement CS-008, it should be updated with all the changes made since it was originally specced out.
