@@ -1045,3 +1045,11 @@
 **Prompt**:
 
 > Add another TODO: Check whether the docker action can be optimized/cached
+
+## Add TODO for release notes from CHANGELOG.md
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+> Another TODO: Generate release nodes for the github release from CHANGELOG.md
