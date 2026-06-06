@@ -1129,3 +1129,58 @@
 > `PluginDiscovery.IsCoreService()` has a hardcoded allowlist of types the dependency sorter should ignore (`IBot`, `ILoggerFactory`, `IOptions<T>`, etc.). `IHttpClientFactory` is registered by Marv core via `services.AddHttpClient()` in `MarvServiceExtensions`, but is not in the allowlist. The sorter treats any constructor parameter of type `IHttpClientFactory` as a plugin-provided service and throws when no plugin declares `[ProvidesService(typeof(IHttpClientFactory))]`.
 >
 > **Fix:** Either add `IHttpClientFactory` to `CoreServiceTypes`, or change the sorter to only treat types declared via `[ProvidesService]` across loaded plugins as plugin dependencies, rather than treating every unknown constructor parameter as one.
+
+## Create change spec for plugin loading robustness
+
+**Date**: 2026-06-07T00:00:00Z
+
+> The bugs that I've experienced while developing plugins have shown the plugin
+> loading system to be rather fragile - I've included the bugs below to help
+> inform the discussion:
+>
+> - Loading failed with an error about not being able to find IHttpClientFactory.
+>   IHttpClientFactory was in fact available in the DI system, but it hadn't
+>   been included in `CoreServiceTypes`.
+> - Loading some plugins failed with an error about not being able to find 
+>   `Example.Plugins.Common`, while other plugins depending on the same plugin
+>   loaded just fine. This behaviour was caused by the load order mattering -
+>   plugins loaded after Common could find it, but those before could not.
+> - Accidentally including a plugin directory twice in the config caused triggers
+>   to fire twice, due to the plugin being loaded twice.
+> - Accidentally including a plugin directory twice in the config caused an error
+>   to the effect of "Service IDbService is provided by both CommonPlugin and
+>   CommonPlugin", due to the plugin being loaded twice.
+> - Opaque errors such as "System.InvalidOperationException: Plugin 'Misc'
+>   requires service Example.Plugins.Common.IDbService, but no loaded plugin
+>   provides it." were thrown - upon investigation, it turned out that the
+>   relevant plugin had a incorrect name - the config loaded "Common", but the
+>   plugin had a `[PluginName("ExampleCommon")]` attribute.
+>
+> It's clear that the plugin system needs some improvement; I'd like you to
+> create a new change spec in docs/change_specs for this, following the format
+> of other specs in that folder.
+>
+> Goals:
+> - Plugins must be able to load service interfaces from each other. This is a
+>   hard requirement.
+> - Plugin load errors should be understandable by the end-user. Where possible,
+>   use heuristics to explain issues to the user.
+> - Plugins must be able to be loaded from one or more specified directories.
+> - It must not be required to load plugins by their path.
+>
+> Nice-to-haves:
+> - Non-plugin DLLs in the plugin directories should not be loaded unless needed.
+> - Ideally only the plugin DLL should need to be installed, no deps.json or
+>   other metadata files. Non-plugin dependencies are fine.
+> - Minimal instrumenting of plugins should be required. i.e. currently we don't
+>   require plugins to declare a dependency on another plugin if it consumes a
+>   service declared by that plugin.
+> - Minimal magic - follow the principle of least surprise.
+>
+> Non-goals:
+> - Plugins do not need to be reloaded or unloaded.
+> - Dependency loops do not need to be supported.
+>
+> Things to investigate:
+> - `System.Reflection.Metadata`
+> - `System.Reflection.MetadataLoadContext`
