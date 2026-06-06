@@ -8,3 +8,4 @@
 - [ ] Consider moving IrcBot.BatchChannels to a utility class, so that plugins can reuse it
 - [ ] Consider making CommandContext, RegexContext, etc share a common HandlerContext
 - [ ] Potentially remove PluginType from HandlerGroup
+- [ ] Switch the JSON config parser to one that supports JSON5

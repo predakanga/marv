@@ -1101,3 +1101,11 @@
 **Prompt**:
 
 > Add another TODO item: Potentially remove PluginType from HandlerGroup
+
+## Add TODO for JSON5 config parser
+
+**Date**: 2026-06-06
+
+**Prompt**:
+
+> Add another TODO: Switch the JSON config parser to one that supports JSON5
