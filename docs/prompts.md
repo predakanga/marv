@@ -887,3 +887,11 @@
 **Prompt**:
 
 > Slight change to PLUGIN_API.md - remove the references to IAuthorizationService; this is a part of an example plugin, not Marv itself.
+
+## Create change spec for IBot action convenience methods
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+> Create a new change spec for adding more action methods to the bot - in essence, I don't want plugins to have to SendMessageAsync(new IrcMessage("KICK", ...)) when they could just call IBot.KickUserAsync(...)

@@ -18,5 +18,6 @@ Specs are numbered in recommended implementation order.
 | 6 | [Test Infrastructure](006-test-infrastructure.md) | New package | Medium | None | **Done** |
 | 7 | [Plugin API Documentation](007-plugin-api-documentation.md) | Docs | Medium | None | **Done** |
 | 8 | [Example Plugin](008-example-plugin.md) | Examples | Medium | #3, #5 | |
+| 9 | [Bot Action Methods](009-bot-action-methods.md) | Core | Small-Medium | None | |
 
-Specs 1-5 are code changes. Specs 6-8 are documentation/DX changes.
+Specs 1-5 and 9 are code changes. Specs 6-8 are documentation/DX changes.
