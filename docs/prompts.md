@@ -1021,3 +1021,11 @@
 **Prompt**:
 
 > Update @docs/releasing.md to include all the locations that the version needs to be bumped
+
+## Standardize version placeholders in releasing.md
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+> Improve the consistency of @docs/releasing.md - use X.Y.Z or 0.1.0 in the examples, but not both.

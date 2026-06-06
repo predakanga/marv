@@ -73,12 +73,12 @@ Once the workflow completes:
 ### 7. Verify the Docker image
 
 ```bash
-docker pull ghcr.io/predakanga/marv:0.1.0
-docker run --rm ghcr.io/predakanga/marv:0.1.0 --help
+docker pull ghcr.io/predakanga/marv:X.Y.Z
+docker run --rm ghcr.io/predakanga/marv:X.Y.Z --help
 ```
 
 
-Replace `0.1.0` with the release version.
+Replace `X.Y.Z` with the release version.
 
 ## Rolling back a release
 
@@ -87,8 +87,8 @@ If a release has a critical issue:
 1. Delete the GitHub Release from the Releases page
 2. Delete the tag:
    ```bash
-   git tag -d v0.1.0
-   git push origin :refs/tags/v0.1.0
+   git tag -d vX.Y.Z
+   git push origin :refs/tags/vX.Y.Z
    ```
 3. Fix the issue, then re-release following the steps above
 
@@ -100,12 +100,12 @@ For urgent fixes against an older release:
 
 1. Create a branch from the release tag:
    ```bash
-   git checkout -b hotfix/v0.1.1 v0.1.0
+   git checkout -b hotfix/vX.Y.Z vX.Y.Z
    ```
 2. Apply the fix and push the branch
 3. Tag and push:
    ```bash
-   git tag v0.1.1
-   git push origin v0.1.1
+   git tag vX.Y.Z
+   git push origin vX.Y.Z
    ```
 4. Cherry-pick the fix back to `main` if applicable
