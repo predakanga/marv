@@ -1037,3 +1037,11 @@
 **Prompt**:
 
 > Add a TODO: Decide whether the Dockerfile should include the sample plugins
+
+## Add TODO for docker action caching
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+> Add another TODO: Check whether the docker action can be optimized/cached
