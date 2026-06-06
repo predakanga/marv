@@ -71,6 +71,9 @@ as DCC be supported.
   and fix all failures.
 - Never modify the plugin API surface without explicitly flagging it
   and explaining why.
+- When changing the plugin API (attributes, contexts, IBot, events,
+  MarvPlugin, IPlugin, handler filters, or Marv.Testing), update
+  `docs/PLUGIN_API.md` to match.
 - Prefer `async`/`await` throughout. Use `System.Threading.Channels`
   for internal message passing.
 

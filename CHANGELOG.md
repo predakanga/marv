@@ -32,6 +32,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New `Marv.Testing` package with fluent builders for `CommandContext`,
   `RegexMatchContext`, and events, plus `PluginTestHarness<T>` for
   creating plugin instances with mocked dependencies in ~2 lines
+- `docs/PLUGIN_API.md` — consolidated plugin API reference covering all
+  handler attributes, context types, events, IBot, formatting, configuration,
+  services, handler groups, filters, and testing patterns
+- `docs/PLUGIN_PROJECT_CLAUDE.md` — CLAUDE.md template for downstream
+  plugin projects
+- Old `plugin-api-draft.md` archived to `docs/archive/` with redirect
 
 ### Changed
 

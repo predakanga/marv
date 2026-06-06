@@ -871,3 +871,11 @@
 **Prompt**:
 
 > Can you update the tests in @tests/Marv.Plugins.Tests/ to use the new testing package?
+
+## Implement CS-007: Plugin API Documentation
+
+**Date**: 2026-06-05T00:00:00Z
+
+**Prompt**:
+
+> It's time to implement CS-007, from @docs/change_specs/007-plugin-api-documentation.md - make sure you compile each code sample to make sure it's valid, and add an instruction to CLAUDE.md to update PLUGIN_API.md whenever a relevant change is made.

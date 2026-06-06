@@ -1,4 +1,7 @@
-# Plugin API Draft
+# Plugin API Draft (Archived)
+
+> **This document is archived.** The authoritative reference is
+> [`docs/PLUGIN_API.md`](../PLUGIN_API.md).
 
 This document describes the types, patterns, and APIs that plugin
 authors work with when building Marv plugins.
