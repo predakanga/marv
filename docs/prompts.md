@@ -1093,3 +1093,11 @@
 **Prompt**:
 
 > And another: Consider making CommandContext, RegexContext, etc share a common HandlerContext
+
+## Add TODO to potentially remove PluginType from HandlerGroup
+
+**Date**: 2026-06-06
+
+**Prompt**:
+
+> Add another TODO item: Potentially remove PluginType from HandlerGroup
