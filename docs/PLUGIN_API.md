@@ -280,9 +280,9 @@ public class MyServicePlugin : MarvPlugin
 **Consuming a service** (use `= null` for optional):
 
 ```csharp
-public AuthConsumerPlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory,
-    IAuthorizationService? auth = null)
-    : base(bot, activator, loggerFactory) { _auth = auth; }
+public MyConsumerPlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory,
+    IMyService? svc = null)
+    : base(bot, activator, loggerFactory) { _svc = svc; }
 ```
 
 Use `[DependsOn(typeof(OtherPlugin))]` for explicit load ordering without a
@@ -408,11 +408,8 @@ mocks. Pass `bot:` to provide a custom `IBot` mock.
 | `IHostApplicationLifetime` | App shutdown coordination |
 | `IConfiguration` | Raw configuration access |
 
-**Plugin-provided (available to dependent plugins):**
-
-| Service | Provider |
-|---|---|
-| `IAuthorizationService` | `Marv.Plugins.Auth` |
+Services registered by plugins via `[ProvidesService]` + `ConfigureServices`
+are available to dependent plugins in load order (see §9).
 
 ---
 

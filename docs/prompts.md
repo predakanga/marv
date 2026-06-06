@@ -879,3 +879,11 @@
 **Prompt**:
 
 > It's time to implement CS-007, from @docs/change_specs/007-plugin-api-documentation.md - make sure you compile each code sample to make sure it's valid, and add an instruction to CLAUDE.md to update PLUGIN_API.md whenever a relevant change is made.
+
+## Remove IAuthorizationService references from PLUGIN_API.md
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+> Slight change to PLUGIN_API.md - remove the references to IAuthorizationService; this is a part of an example plugin, not Marv itself.
