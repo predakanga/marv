@@ -964,3 +964,19 @@
 **Prompt**:
 
 > Okay, go ahead and implement CS-008.
+
+## Pre-release v0.2 checks
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+> I'm preparing to release version 0.2 of Marv - before I do so can you run some pre-flight checks (lint, format, run all tests) and check the project for consistency?
+
+## Apply version bump for v0.2
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+> yes, go ahead
