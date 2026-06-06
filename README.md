@@ -16,7 +16,7 @@ This project was created to experiment with AI-based development; it was designe
 - Configuration layering: file, environment variables, CLI arguments
 - Outbound rate limiting with configurable token bucket
 - Optional Sentry error reporting
-- Bundled plugins: Greet, Auth, AuthConsumer, CannedResponses
+- Bundled plugins: Greet, Auth, AuthConsumer, CannedResponses, Moderation
 
 ## Quick start
 
@@ -79,6 +79,8 @@ Plugins are .NET assemblies placed in a plugin directory. Each plugin is a class
 - **Auth** — Provides an authorization service based on IRC account names
 - **AuthConsumer** — Example plugin demonstrating how to consume the Auth service
 - **CannedResponses** — Responds to messages matching configured patterns
+- **Moderation** — Example plugin demonstrating advanced API patterns (filters,
+  timers, bot actions, case-mapped collections). Not intended for production use.
 
 ### Plugin configuration
 

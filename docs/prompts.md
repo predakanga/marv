@@ -980,3 +980,11 @@
 **Prompt**:
 
 > yes, go ahead
+
+## Add Moderation plugin to README
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+> One minor change (not worth adjusting the release for) - the README.md lists some of our sample plugins, but doesn't include the moderation plugins. These should also be noted as example plugins, not something for actual use.
