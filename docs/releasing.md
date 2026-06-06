@@ -30,16 +30,28 @@ dotnet test -c Release --filter "Category!=Integration"
 
 Ensure all tests pass and the build is clean.
 
-### 3. Create and push a version tag
+### 3. Bump the version number
+
+Update the version in these locations:
+
+- **`Directory.Build.props`** — the `<Version>` property (sets assembly and
+  package versions for all projects)
+- **`Dockerfile`** — the `ARG VERSION=` default value
+- **`CHANGELOG.md`** — rename the `[Unreleased]` section to
+  `[X.Y.Z] - YYYY-MM-DD` and add a comparison link at the bottom of the file
+
+Commit these changes to `main` before tagging.
+
+### 4. Create and push a version tag
 
 ```bash
-git tag v0.1.0
-git push origin v0.1.0
+git tag vX.Y.Z
+git push origin vX.Y.Z
 ```
 
-Replace `v0.1.0` with the version number you chose.
+Replace `vX.Y.Z` with the version number you chose.
 
-### 4. Monitor the release workflow
+### 5. Monitor the release workflow
 
 The `Release` workflow triggers automatically on version tags. It will:
 
@@ -50,7 +62,7 @@ The `Release` workflow triggers automatically on version tags. It will:
 
 Monitor the workflow at **Actions > Release** in the GitHub UI.
 
-### 5. Review the GitHub Release
+### 6. Review the GitHub Release
 
 Once the workflow completes:
 
@@ -58,7 +70,7 @@ Once the workflow completes:
 2. Review the auto-generated release notes — edit if needed to highlight important changes
 3. If this is a pre-release, check the **Set as a pre-release** box
 
-### 6. Verify the Docker image
+### 7. Verify the Docker image
 
 ```bash
 docker pull ghcr.io/predakanga/marv:0.1.0

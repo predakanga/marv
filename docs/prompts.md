@@ -1013,3 +1013,11 @@
 
 > The `docker` action in CI run #9 failed. Please troubleshoot this.
 > Once the troubleshooting is completed, consider whether we should really be building a docker image for each push - my assumption was that we should only build them for tagged releases.
+
+## Document version bump locations in releasing.md
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+> Update @docs/releasing.md to include all the locations that the version needs to be bumped
