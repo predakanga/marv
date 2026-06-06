@@ -43,6 +43,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `RemoveOpAsync`, `GiveVoiceAsync`, `RemoveVoiceAsync`, `ChangeNickAsync`
 - `IBot.CaseComparer` exposes the server's IRC case mapping as an
   `IEqualityComparer<string>` for correct nick/channel comparisons
+- New `Marv.Plugins.Moderation` example plugin demonstrating advanced API
+  patterns: typed configuration, declarative auth filters, event handling,
+  interval timers, bot action methods, case-mapped collections, handler groups,
+  raw message handling, and `SendAndAwaitAsync`
 
 ### Changed
 

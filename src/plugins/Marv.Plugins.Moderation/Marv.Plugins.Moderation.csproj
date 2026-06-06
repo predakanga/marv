@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Marv.Plugins.Moderation</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Marv.Plugins.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Marv.Core\Marv.Core.csproj" Private="false" />
+    <ProjectReference Include="..\Marv.Plugins.Auth\Marv.Plugins.Auth.csproj" Private="false" />
+  </ItemGroup>
+
+</Project>

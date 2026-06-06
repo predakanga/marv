@@ -23,6 +23,7 @@
     <ProjectReference Include="..\..\src\plugins\Marv.Plugins.Auth\Marv.Plugins.Auth.csproj" />
     <ProjectReference Include="..\..\src\plugins\Marv.Plugins.AuthConsumer\Marv.Plugins.AuthConsumer.csproj" />
     <ProjectReference Include="..\..\src\plugins\Marv.Plugins.CannedResponses\Marv.Plugins.CannedResponses.csproj" />
+    <ProjectReference Include="..\..\src\plugins\Marv.Plugins.Moderation\Marv.Plugins.Moderation.csproj" />
   </ItemGroup>
 
 </Project>

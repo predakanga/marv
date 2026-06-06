@@ -956,3 +956,11 @@
 
 > Comments on CS-008:
 > - Line 48 demonstrates an OnCommand with multiple commands, but as far as I'm aware that isn't supported. Should this case be supported, or should we remove it from the change spec?
+
+## Implement CS-008
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+> Okay, go ahead and implement CS-008.

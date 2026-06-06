@@ -17,7 +17,7 @@ Specs are numbered in recommended implementation order.
 | 5 | [Handler Filter Pipeline](005-handler-filter-pipeline.md) | Core | Medium | #3 | **Done** |
 | 6 | [Test Infrastructure](006-test-infrastructure.md) | New package | Medium | None | **Done** |
 | 7 | [Plugin API Documentation](007-plugin-api-documentation.md) | Docs | Medium | None | **Done** |
-| 8 | [Example Plugin](008-example-plugin.md) | Examples | Medium | #3, #5 | |
+| 8 | [Example Plugin](008-example-plugin.md) | Examples | Medium | #3, #5 | **Done** |
 | 9 | [Bot Action Methods](009-bot-action-methods.md) | Core | Small-Medium | None | **Done** |
 | 10 | [Case Mapping for Plugins](010-casemapping-for-plugins.md) | Core | Small | None | **Done** |
 

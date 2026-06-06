@@ -1,4 +1,4 @@
-# CS-008: Non-Trivial Example Plugin
+# CS-008: Non-Trivial Example Plugin — COMPLETED
 
 **Source:** `downstream_suggestions/ai_enablers.md` §3
 **Scope:** Example plugins
@@ -7,6 +7,7 @@
 CS-006 (test infrastructure), CS-009 (bot action methods),
 CS-010 (case mapping)
 **Breaking changes:** None (new plugin)
+**Status:** Completed
 
 ---
 

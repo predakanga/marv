@@ -9,6 +9,7 @@
     <Project Path="src/plugins/Marv.Plugins.AuthConsumer/Marv.Plugins.AuthConsumer.csproj" />
     <Project Path="src/plugins/Marv.Plugins.CannedResponses/Marv.Plugins.CannedResponses.csproj" />
     <Project Path="src/plugins/Marv.Plugins.Greet/Marv.Plugins.Greet.csproj" />
+    <Project Path="src/plugins/Marv.Plugins.Moderation/Marv.Plugins.Moderation.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Marv.Core.Tests/Marv.Core.Tests.csproj" />
