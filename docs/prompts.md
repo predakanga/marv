@@ -1109,3 +1109,23 @@
 **Prompt**:
 
 > Add another TODO: Switch the JSON config parser to one that supports JSON5
+
+## Fix plugin loading: assembly resolution and dependency sorter
+
+**Date**: 2026-06-06
+
+**Prompt**:
+
+> While working on some plugins downstream, I've come across a couple of issues with plugin loading. I've provided concise problem statements for them below:
+>
+> ## 1. Plugin assembly dependency resolution fails for non-host dependencies
+>
+> `PluginManager.DiscoverAndRegister` loads plugin DLLs via `AssemblyLoadContext.Default.LoadFromAssemblyPath()`, but the Default ALC does not resolve transitive dependencies by probing the plugin directories. If a plugin depends on a library not in Marv's own `deps.json` (e.g. a shared library like `CableGuy.Common`), the runtime throws `FileNotFoundException` during type enumeration — regardless of whether the dependency DLL is present in the same directory.
+>
+> **Fix:** Register `AssemblyLoadContext.Default.Resolving` and `AssemblyLoadContext.Default.ResolvingUnmanagedDll` handlers in `MarvServiceExtensions.AddMarv` (before plugin discovery) that probe the configured `PluginDirectories` for missing managed and native assemblies.
+>
+> ## 2. IHttpClientFactory treated as plugin-provided service by dependency sorter
+>
+> `PluginDiscovery.IsCoreService()` has a hardcoded allowlist of types the dependency sorter should ignore (`IBot`, `ILoggerFactory`, `IOptions<T>`, etc.). `IHttpClientFactory` is registered by Marv core via `services.AddHttpClient()` in `MarvServiceExtensions`, but is not in the allowlist. The sorter treats any constructor parameter of type `IHttpClientFactory` as a plugin-provided service and throws when no plugin declares `[ProvidesService(typeof(IHttpClientFactory))]`.
+>
+> **Fix:** Either add `IHttpClientFactory` to `CoreServiceTypes`, or change the sorter to only treat types declared via `[ProvidesService]` across loaded plugins as plugin dependencies, rather than treating every unknown constructor parameter as one.

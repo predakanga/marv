@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Plugin assembly dependency resolution now probes configured plugin directories
+  for transitive managed and native dependencies, fixing `FileNotFoundException`
+  when plugins depend on libraries not in Marv's own dependency graph
+- Plugin dependency sorter no longer throws for constructor parameters that are
+  not declared via `[ProvidesService]` by any loaded plugin (e.g.
+  `IHttpClientFactory`), treating them as framework-provided DI services instead
+
 ## [0.2.0] - 2026-06-06
 
 ### Added

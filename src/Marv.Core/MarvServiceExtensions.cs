@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+using System.Runtime.Loader;
 using Marv.Core.Irc;
 using Marv.Core.Platform;
 using Marv.Core.Plugin;
@@ -47,6 +49,12 @@ public static class MarvServiceExtensions
 
         // Discover plugins from configured directories, filtered by name
         var config = configuration.Get<MarvConfiguration>() ?? new MarvConfiguration();
+        var pluginDirs = config.PluginDirectories.Select(Path.GetFullPath).ToList();
+
+        // Register assembly resolving handlers so plugin transitive dependencies
+        // (e.g. shared libraries) are found by probing the plugin directories.
+        RegisterAssemblyResolvers(pluginDirs);
+
         var pluginPaths = ResolvePluginPaths(config.PluginDirectories, config.Plugins);
 
         IReadOnlyList<PluginDescriptor> sortedPlugins = [];
@@ -63,6 +71,45 @@ public static class MarvServiceExtensions
         services.AddSingleton(sortedPlugins);
 
         return services;
+    }
+
+    /// <summary>
+    /// Registers handlers on the default <see cref="AssemblyLoadContext"/> to probe
+    /// plugin directories for managed and native assemblies that are not in the host's
+    /// dependency graph. This allows plugin transitive dependencies (e.g. shared libraries)
+    /// to be resolved at runtime.
+    /// </summary>
+    private static void RegisterAssemblyResolvers(IReadOnlyList<string> pluginDirectories)
+    {
+        AssemblyLoadContext.Default.Resolving += (_, assemblyName) =>
+        {
+            foreach (var dir in pluginDirectories)
+            {
+                if (!Directory.Exists(dir))
+                    continue;
+
+                var candidate = Path.Combine(dir, assemblyName.Name + ".dll");
+                if (File.Exists(candidate))
+                    return AssemblyLoadContext.Default.LoadFromAssemblyPath(candidate);
+            }
+
+            return null;
+        };
+
+        AssemblyLoadContext.Default.ResolvingUnmanagedDll += (_, unmanagedDllName) =>
+        {
+            foreach (var dir in pluginDirectories)
+            {
+                if (!Directory.Exists(dir))
+                    continue;
+
+                var candidate = Path.Combine(dir, unmanagedDllName);
+                if (File.Exists(candidate))
+                    return NativeLibrary.Load(candidate);
+            }
+
+            return IntPtr.Zero;
+        };
     }
 
     /// <summary>

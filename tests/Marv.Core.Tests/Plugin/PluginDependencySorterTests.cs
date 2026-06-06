@@ -75,16 +75,16 @@ public class PluginDependencySorterTests
     }
 
     [Fact]
-    public void Sort_MissingRequired_Throws()
+    public void Sort_MissingRequired_AssumedFrameworkService()
     {
+        // Required services not declared via [ProvidesService] by any plugin
+        // are assumed to be framework/core DI services (e.g. IHttpClientFactory).
         var serviceType = typeof(IDisposable);
         var consumer = MakeDescriptor("Consumer",
             requiredServices: [serviceType]);
 
-        var ex = Assert.Throws<InvalidOperationException>(
-            () => PluginDependencySorter.Sort([consumer]));
-        Assert.Contains("Consumer", ex.Message);
-        Assert.Contains("IDisposable", ex.Message);
+        var sorted = PluginDependencySorter.Sort([consumer]);
+        Assert.Single(sorted);
     }
 
     [Fact]

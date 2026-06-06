@@ -27,16 +27,11 @@ internal static class PluginDependencySorter
             }
         }
 
-        // Validate required dependencies exist
-        foreach (var plugin in plugins)
-        {
-            foreach (var required in plugin.RequiredServices)
-            {
-                if (!serviceProviders.ContainsKey(required))
-                    throw new InvalidOperationException(
-                        $"Plugin '{plugin.Name}' requires service {required.FullName}, but no loaded plugin provides it.");
-            }
-        }
+        // Note: we intentionally do NOT validate that every RequiredService has a
+        // plugin provider. Constructor parameters that are not declared via
+        // [ProvidesService] by any loaded plugin are assumed to be registered in the
+        // DI container by the host or core framework (e.g. IHttpClientFactory).
+        // If a required service is truly missing, DI will report it at instantiation.
 
         // Build adjacency list (edges point from dependency → dependent)
         var pluginIndex = new Dictionary<Type, int>();
