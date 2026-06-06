@@ -42,6 +42,42 @@ public interface IBot
     /// <summary>Parts (leaves) a channel, optionally with a reason.</summary>
     Task PartAsync(string channel, string? reason, CancellationToken ct);
 
+    /// <summary>Kicks a user from a channel, optionally with a reason.</summary>
+    Task KickAsync(string channel, string nick, string? reason, CancellationToken ct);
+
+    /// <summary>Sets or changes the topic of a channel.</summary>
+    Task SetTopicAsync(string channel, string topic, CancellationToken ct);
+
+    /// <summary>Invites a user to a channel.</summary>
+    Task InviteAsync(string nick, string channel, CancellationToken ct);
+
+    /// <summary>
+    /// Sets a mode on a channel or user. The mode string should include the
+    /// +/- prefix (e.g. "+i", "-b"). For user modes, pass the bot's own nick
+    /// as the target.
+    /// </summary>
+    Task SetModeAsync(string target, string modeString, CancellationToken ct);
+
+    /// <summary>
+    /// Sets a mode on a channel or user with a parameter (e.g. "+b", "nick!*@*").
+    /// </summary>
+    Task SetModeAsync(string target, string modeString, string parameter, CancellationToken ct);
+
+    /// <summary>Gives operator status (+o) to a user in a channel.</summary>
+    Task GiveOpAsync(string channel, string nick, CancellationToken ct);
+
+    /// <summary>Removes operator status (-o) from a user in a channel.</summary>
+    Task RemoveOpAsync(string channel, string nick, CancellationToken ct);
+
+    /// <summary>Gives voice status (+v) to a user in a channel.</summary>
+    Task GiveVoiceAsync(string channel, string nick, CancellationToken ct);
+
+    /// <summary>Removes voice status (-v) from a user in a channel.</summary>
+    Task RemoveVoiceAsync(string channel, string nick, CancellationToken ct);
+
+    /// <summary>Changes the bot's nickname.</summary>
+    Task ChangeNickAsync(string newNick, CancellationToken ct);
+
     /// <summary>
     /// Dictionary of channels the bot is in, keyed by case-mapped channel name.
     /// </summary>
@@ -51,6 +87,15 @@ public interface IBot
     /// Dictionary of known users, keyed by case-mapped nick.
     /// </summary>
     IReadOnlyDictionary<string, IUser> Users { get; }
+
+    /// <summary>
+    /// String comparer that uses the server's case mapping rules (rfc1459, ascii, etc.)
+    /// for comparing nicks and channel names. Defaults to rfc1459 before connection.
+    /// Plugins should treat collections built with this comparer as connection-scoped
+    /// state — rebuild them in <see cref="Plugin.IPlugin.OnConnectedAsync"/> since the
+    /// comparer instance may change between connections.
+    /// </summary>
+    IEqualityComparer<string> CaseComparer { get; }
 
     /// <summary>Server configuration from ISUPPORT.</summary>
     IServerInfo ServerInfo { get; }

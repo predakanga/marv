@@ -931,3 +931,11 @@
 > Regarding CS-010, how should CaseComparer be handled when the bot is not yet connected? Should it error or fall back to the default? How should plugins which use collections handle that; they'd have to recreate their dictionaries et al on each connection
 >
 > (Follow-up: Yes please [update CS-010 with this guidance])
+
+## Implement CS-009 and CS-010
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+> Okay, go ahead and implement CS-009 and CS-010

@@ -1,9 +1,10 @@
-# CS-010: Expose Case Mapping to Plugins
+# CS-010: Expose Case Mapping to Plugins — COMPLETED
 
 **Source:** Plugin DX feedback
 **Scope:** Core (IBot / IServerInfo interface)
 **Complexity:** Small
 **Breaking changes:** Additive only
+**Status:** Completed
 
 ---
 

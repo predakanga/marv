@@ -22,6 +22,8 @@ public static class MockBot
         bot.Channels.Returns(new Dictionary<string, IChannel>());
         bot.Users.Returns(new Dictionary<string, IUser>());
 
+        bot.CaseComparer.Returns(StringComparer.OrdinalIgnoreCase);
+
         var serverInfo = Substitute.For<IServerInfo>();
         bot.ServerInfo.Returns(serverInfo);
 

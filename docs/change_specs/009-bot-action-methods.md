@@ -1,10 +1,11 @@
-# CS-009: Bot Action Convenience Methods
+# CS-009: Bot Action Convenience Methods — COMPLETED
 
 **Source:** Plugin DX feedback
 **Scope:** Core (IBot interface)
 **Complexity:** Small-Medium
 **Breaking changes:** Additive only (new interface members with default
 implementations)
+**Status:** Completed
 
 ---
 

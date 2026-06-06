@@ -211,6 +211,65 @@ internal sealed class IrcBot : IBot
     }
 
     /// <inheritdoc />
+    public async Task KickAsync(string channel, string nick, string? reason, CancellationToken ct)
+    {
+        if (reason is not null)
+            await SendRawAsync(new IrcMessage("KICK", [channel, nick, reason]), ct);
+        else
+            await SendRawAsync(new IrcMessage("KICK", [channel, nick]), ct);
+    }
+
+    /// <inheritdoc />
+    public async Task SetTopicAsync(string channel, string topic, CancellationToken ct)
+    {
+        await SendRawAsync(new IrcMessage("TOPIC", [channel, topic]), ct);
+    }
+
+    /// <inheritdoc />
+    public async Task InviteAsync(string nick, string channel, CancellationToken ct)
+    {
+        await SendRawAsync(new IrcMessage("INVITE", [nick, channel]), ct);
+    }
+
+    /// <inheritdoc />
+    public async Task SetModeAsync(string target, string modeString, CancellationToken ct)
+    {
+        await SendRawAsync(new IrcMessage("MODE", [target, modeString]), ct);
+    }
+
+    /// <inheritdoc />
+    public async Task SetModeAsync(string target, string modeString, string parameter, CancellationToken ct)
+    {
+        await SendRawAsync(new IrcMessage("MODE", [target, modeString, parameter]), ct);
+    }
+
+    /// <inheritdoc />
+    public Task GiveOpAsync(string channel, string nick, CancellationToken ct) =>
+        SetModeAsync(channel, "+o", nick, ct);
+
+    /// <inheritdoc />
+    public Task RemoveOpAsync(string channel, string nick, CancellationToken ct) =>
+        SetModeAsync(channel, "-o", nick, ct);
+
+    /// <inheritdoc />
+    public Task GiveVoiceAsync(string channel, string nick, CancellationToken ct) =>
+        SetModeAsync(channel, "+v", nick, ct);
+
+    /// <inheritdoc />
+    public Task RemoveVoiceAsync(string channel, string nick, CancellationToken ct) =>
+        SetModeAsync(channel, "-v", nick, ct);
+
+    /// <inheritdoc />
+    public async Task ChangeNickAsync(string newNick, CancellationToken ct)
+    {
+        await SendRawAsync(new IrcMessage("NICK", [newNick]), ct);
+    }
+
+    /// <inheritdoc />
+    public IEqualityComparer<string> CaseComparer =>
+        CaseMapping.GetComparer(_serverInfo.CaseMapping);
+
+    /// <inheritdoc />
     public async Task<IReadOnlyList<IrcMessage>> SendAndAwaitAsync(IrcMessage message, CancellationToken ct)
     {
         if (_capabilityManager.IsNegotiated(Platform.Capabilities.LabeledResponse))

@@ -132,12 +132,23 @@ All `Send*Async` methods are thread-safe.
 | `JoinAsync(channel, key?, ct)` | Join with optional key |
 | `JoinMultipleAsync(channels, ct)` | Batched JOIN (auto-splits) |
 | `PartAsync(channel, reason?, ct)` | Part with optional reason |
+| `KickAsync(channel, nick, reason?, ct)` | Kick user from channel |
+| `SetTopicAsync(channel, topic, ct)` | Set channel topic |
+| `InviteAsync(nick, channel, ct)` | Invite user to channel |
+| `SetModeAsync(target, modeString, ct)` | Set mode (channel or user) |
+| `SetModeAsync(target, modeString, param, ct)` | Set mode with parameter |
+| `GiveOpAsync(channel, nick, ct)` | Give +o |
+| `RemoveOpAsync(channel, nick, ct)` | Remove -o |
+| `GiveVoiceAsync(channel, nick, ct)` | Give +v |
+| `RemoveVoiceAsync(channel, nick, ct)` | Remove -v |
+| `ChangeNickAsync(newNick, ct)` | Change bot's nick |
 | `SendAndAwaitAsync(IrcMessage, ct)` | Send + wait for correlated response |
 
 | Property | Type | Description |
 |---|---|---|
 | `Self` | `IUser` | Bot's own identity |
 | `CommandPrefix` | `string` | Configured prefix (e.g. `"!"`) |
+| `CaseComparer` | `IEqualityComparer<string>` | Server's IRC case mapping comparer |
 | `Channels` | `IReadOnlyDictionary<string, IChannel>` | By case-mapped name |
 | `Users` | `IReadOnlyDictionary<string, IUser>` | By case-mapped nick |
 | `ServerInfo` | `IServerInfo` | ISUPPORT configuration |

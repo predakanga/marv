@@ -38,6 +38,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `docs/PLUGIN_PROJECT_CLAUDE.md` — CLAUDE.md template for downstream
   plugin projects
 - Old `plugin-api-draft.md` archived to `docs/archive/` with redirect
+- `IBot` gains convenience methods for common IRC actions: `KickAsync`,
+  `SetTopicAsync`, `InviteAsync`, `SetModeAsync`, `GiveOpAsync`,
+  `RemoveOpAsync`, `GiveVoiceAsync`, `RemoveVoiceAsync`, `ChangeNickAsync`
+- `IBot.CaseComparer` exposes the server's IRC case mapping as an
+  `IEqualityComparer<string>` for correct nick/channel comparisons
 
 ### Changed
 
