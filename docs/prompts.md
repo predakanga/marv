@@ -1029,3 +1029,11 @@
 **Prompt**:
 
 > Improve the consistency of @docs/releasing.md - use X.Y.Z or 0.1.0 in the examples, but not both.
+
+## Add TODO about sample plugins in Dockerfile
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+> Add a TODO: Decide whether the Dockerfile should include the sample plugins
