@@ -13,7 +13,13 @@
     "ghcr.io/devcontainers/features/node:2": {},
     "ghcr.io/devcontainers/features/dotnet:2": {},
     "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {}
+    "ghcr.io/devcontainers/features/docker-in-docker:3": {
+      "moby": false
+    },
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {},
+    "ghcr.io/devcontainers-extra/features/apt-get-packages:1": {
+      "packages": "netcat-openbsd"
+    }
   },
   "mounts": [
     "source=claude-code-config-${devcontainerId},target=/home/vscode/.claude,type=volume"
@@ -21,5 +27,5 @@
   "containerEnv": {
     "CLAUDE_CONFIG_DIR": "/home/vscode/.claude"
   },
-  "onCreateCommand": "dotnet tool install --global csharp-ls"
+  "onCreateCommand": "dotnet tool install --global csharp-ls && dotnet tool install --global dotnet-script"
 }
