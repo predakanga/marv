@@ -38,8 +38,8 @@ Task InviteAsync(string nick, string channel, CancellationToken ct);
 
 // Moderation
 Task KickAsync(string channel, string nick, string? reason, CancellationToken ct);
-Task SetChannelModeAsync(string channel, string modeString, CancellationToken ct);
-Task SetChannelModeAsync(string channel, string modeString, string parameter, CancellationToken ct);
+Task SetModeAsync(string target, string modeString, CancellationToken ct);
+Task SetModeAsync(string target, string modeString, string parameter, CancellationToken ct);
 
 // Prefix-mode shortcuts (op, voice, etc.)
 Task GiveOpAsync(string channel, string nick, CancellationToken ct);
@@ -61,19 +61,20 @@ handling or state tracking required — the inbound message processor already
 handles the server's responses to these commands (TOPIC replies update
 `IChannel.Topic`, MODE replies update `IChannel.Modes`, etc.).
 
-`SetChannelModeAsync` takes a mode string like `"+b"` or `"-i"` plus an
-optional parameter. For multi-mode changes (`"+bb mask1 mask2"`), plugins
-can use the single-parameter overload with the full mode string, or call
-`SendRawAsync` directly.
+`SetModeAsync` takes a target (channel name or nick) and a mode string
+like `"+b"` or `"-i"` plus an optional parameter. Works for both channel
+modes and user modes (e.g. `Bot.Self.Nick, "+i"`). For multi-mode
+changes (`"+bb mask1 mask2"`), plugins can use the single-parameter
+overload with the full mode string, or call `SendRawAsync` directly.
 
 `GiveOpAsync` / `RemoveOpAsync` / `GiveVoiceAsync` / `RemoveVoiceAsync`
-are thin wrappers around `SetChannelModeAsync` that look up the correct
+are thin wrappers around `SetModeAsync` that look up the correct
 mode character from `IServerInfo.Prefix`. Most servers use `o` for op and
 `v` for voice, but the PREFIX ISUPPORT token is authoritative — some
 servers use additional prefix modes like `a` (admin), `h` (halfop), or
 `q` (owner). These four methods cover the two universally-supported
 prefix modes. Plugins needing other prefix modes (halfop, etc.) can use
-`SetChannelModeAsync` directly with the mode character from
+`SetModeAsync` directly with the mode character from
 `Bot.ServerInfo.Prefix`.
 
 ### 3. Update MockBot (Marv.Testing)
@@ -89,7 +90,7 @@ Add the new methods to the IBot table in §5.
 ## Design decisions
 
 **Why not a fluent builder or ModeBuilder?** The raw
-`SetChannelModeAsync(channel, modeString, param)` covers the common
+`SetModeAsync(channel, modeString, param)` covers the common
 single-mode case cleanly. Multi-mode changes are uncommon enough that
 `SendRawAsync` is acceptable. A builder would add API surface without
 proportional value.
@@ -97,7 +98,7 @@ proportional value.
 **Why only op/voice shortcuts, not halfop/admin/owner?** Op (`o`) and
 voice (`v`) are present in every server's PREFIX. Other prefix modes are
 server-specific and less commonly needed. Plugins targeting those can use
-`SetChannelModeAsync` with the mode character looked up from
+`SetModeAsync` with the mode character looked up from
 `Bot.ServerInfo.Prefix`.
 
 **Why not WHOIS/WHO?** These are query commands that return multi-line

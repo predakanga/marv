@@ -905,3 +905,11 @@
 > Some notes about that change spec:
 > - Rename SetModeAsync to SetChannelModeAsync
 > - Consider adding VoiceUser/OpUser methods (how do these interact with ISUPPORT PREFIX parameter?)
+
+## Revert SetChannelModeAsync rename in CS-009
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+> Actually, roll back that SetChannelModeAsync rename - the method could be used on the bot user itself
