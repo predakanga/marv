@@ -1077,3 +1077,11 @@
 **Prompt**:
 
 > Add another TODO item: Provide a way for handler filters to pass information on to the underlying handler (i.e. authentication info)
+
+## Add TODO for extracting BatchChannels utility
+
+**Date**: 2026-06-06
+
+**Prompt**:
+
+> And another: Consider moving IrcBot.BatchChannels to a utility class, so that plugins can reuse it
