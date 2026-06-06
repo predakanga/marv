@@ -1,9 +1,5 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Marv.Core.Events;
-using Marv.Core.Platform;
 
 namespace Marv.Core.Plugin;
 
@@ -14,35 +10,33 @@ namespace Marv.Core.Plugin;
 internal static class PluginDiscovery
 {
     /// <summary>
-    /// Types that are provided by the core and should not be treated as plugin service dependencies.
+    /// Returns true if a constructor parameter type is a core/host service
+    /// (not a plugin dependency). Checks the DI service collection for
+    /// registered services rather than maintaining a static allowlist.
     /// </summary>
-    private static readonly HashSet<Type> CoreServiceTypes =
-    [
-        typeof(IBot),
-        typeof(IPluginActivator),
-        typeof(ICapabilityManager),
-        typeof(IServerInfo),
-        typeof(CancellationToken)
-    ];
-
-    /// <summary>
-    /// Returns true if a constructor parameter type is a core service (not a plugin dependency).
-    /// </summary>
-    private static bool IsCoreService(Type paramType)
+    internal static bool IsCoreService(Type paramType, IServiceCollection services)
     {
-        if (CoreServiceTypes.Contains(paramType))
+        // CancellationToken is passed at invocation time, not via DI
+        if (paramType == typeof(CancellationToken))
             return true;
 
-        // IOptions<T>, ILogger<T>, ILoggerFactory
-        if (paramType.IsGenericType)
+        // Check if the service is already registered in the DI container
+        foreach (var descriptor in services)
         {
-            var def = paramType.GetGenericTypeDefinition();
-            if (def == typeof(IOptions<>) || def == typeof(ILogger<>))
+            if (descriptor.ServiceType == paramType)
                 return true;
         }
 
-        if (paramType == typeof(ILoggerFactory))
-            return true;
+        // Check open generic registrations for generic parameter types
+        if (paramType.IsGenericType)
+        {
+            var def = paramType.GetGenericTypeDefinition();
+            foreach (var descriptor in services)
+            {
+                if (descriptor.ServiceType == def)
+                    return true;
+            }
+        }
 
         return false;
     }
@@ -51,7 +45,7 @@ internal static class PluginDiscovery
     /// Scans an assembly for plugin types and extracts metadata.
     /// Each assembly must contain exactly one IPlugin implementation.
     /// </summary>
-    public static PluginDescriptor? DiscoverPlugin(Assembly assembly)
+    public static PluginDescriptor? DiscoverPlugin(Assembly assembly, IServiceCollection services)
     {
         var pluginTypes = assembly.GetExportedTypes()
             .Where(t => t is { IsClass: true, IsAbstract: false } &&
@@ -92,8 +86,8 @@ internal static class PluginDiscovery
         {
             var paramType = param.ParameterType;
 
-            // Skip core services
-            if (IsCoreService(paramType))
+            // Skip core services (registered in DI or CancellationToken)
+            if (IsCoreService(paramType, services))
                 continue;
 
             // Check for nullable reference type (T? with default null for optional deps)
@@ -104,12 +98,12 @@ internal static class PluginDiscovery
             if ((isNullable || hasNullableAnnotation) && hasDefault)
             {
                 var actualType = Nullable.GetUnderlyingType(paramType) ?? paramType;
-                if (!IsCoreService(actualType))
+                if (!IsCoreService(actualType, services))
                     optionalServices.Add(actualType);
             }
             else
             {
-                if (!IsCoreService(paramType))
+                if (!IsCoreService(paramType, services))
                     requiredServices.Add(paramType);
             }
         }

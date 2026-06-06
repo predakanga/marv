@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Plugin loading failures are now fatal — the bot will not start if any
+  requested plugin cannot be loaded, instead of silently running in a degraded
+  state
+- Plugin name resolution now supports assembly filename convention matching
+  (e.g., `CannedResponses` matches `Marv.Plugins.CannedResponses.dll`)
+- Non-plugin DLLs in plugin directories are no longer eagerly loaded; only
+  assemblies containing an `IPlugin` implementation are loaded into the runtime
+- Assembly resolver now also probes `AppContext.BaseDirectory` for
+  `PublishSingleFile` support
+
 ### Fixed
 
 - Plugin assembly dependency resolution now probes configured plugin directories
@@ -15,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Plugin dependency sorter no longer throws for constructor parameters that are
   not declared via `[ProvidesService]` by any loaded plugin (e.g.
   `IHttpClientFactory`), treating them as framework-provided DI services instead
+- Duplicate plugin directories in config no longer cause plugins to load twice,
+  preventing duplicate handler registrations and `[ProvidesService]` conflicts
+- Unmatched plugin names in config now produce a fatal error with "did you mean?"
+  suggestions listing available plugins, instead of being silently ignored
 
 ## [0.2.0] - 2026-06-06
 

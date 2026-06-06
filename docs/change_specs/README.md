@@ -20,7 +20,7 @@ Specs are numbered in recommended implementation order.
 | 8 | [Example Plugin](008-example-plugin.md) | Examples | Medium | #3, #5 | **Done** |
 | 9 | [Bot Action Methods](009-bot-action-methods.md) | Core | Small-Medium | None | **Done** |
 | 10 | [Case Mapping for Plugins](010-casemapping-for-plugins.md) | Core | Small | None | **Done** |
-| 11 | [Plugin Loading Robustness](011-plugin-loading-robustness.md) | Core | Medium-Large | None | Draft |
+| 11 | [Plugin Loading Robustness](011-plugin-loading-robustness.md) | Core | Medium-Large | None | **Done** |
 
 Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
 Spec 11 is a robustness/DX improvement to the plugin loading pipeline.

@@ -10,7 +10,8 @@ namespace Marv.Core.Plugin;
 
 /// <summary>
 /// Manages the full plugin lifecycle: discovery, dependency sorting, DI registration,
-/// instantiation, event dispatch, and teardown.
+/// instantiation, event dispatch, and teardown. All plugin loading failures are fatal —
+/// the bot will not start if any requested plugin cannot be loaded.
 /// </summary>
 public sealed class PluginManager
 {
@@ -18,7 +19,6 @@ public sealed class PluginManager
     private readonly IServiceProvider _serviceProvider;
     private IReadOnlyList<PluginDescriptor> _descriptors = [];
     private List<PluginInstance> _instances = [];
-    private readonly HashSet<Type> _failedPlugins = [];
 
     /// <summary>
     /// Creates a new <see cref="PluginManager"/>.
@@ -41,43 +41,46 @@ public sealed class PluginManager
         IServiceCollection services,
         IConfiguration configuration,
         IReadOnlyList<string> pluginPaths,
-        IReadOnlyList<string> requestedPlugins,
         ILogger? bootstrapLogger = null)
     {
         var loadContext = AssemblyLoadContext.Default;
         var descriptors = new List<PluginDescriptor>();
-        var requestedSet = new HashSet<string>(requestedPlugins, StringComparer.OrdinalIgnoreCase);
 
         foreach (var path in pluginPaths)
         {
             var fullPath = Path.GetFullPath(path);
             if (!File.Exists(fullPath))
-            {
-                bootstrapLogger?.LogWarning("Plugin assembly not found: {Path}", fullPath);
-                continue;
-            }
+                throw new InvalidOperationException(
+                    $"Plugin assembly not found: {fullPath}");
 
             try
             {
                 var assembly = loadContext.LoadFromAssemblyPath(fullPath);
-                var descriptor = PluginDiscovery.DiscoverPlugin(assembly);
+                var descriptor = PluginDiscovery.DiscoverPlugin(assembly, services);
                 if (descriptor is not null)
                 {
-                    if (requestedSet.Count > 0 && !requestedSet.Contains(descriptor.Name))
-                    {
-                        bootstrapLogger?.LogDebug("Skipping plugin {Name} (not in requested list)",
-                            descriptor.Name);
-                        continue;
-                    }
-
                     descriptors.Add(descriptor);
                     bootstrapLogger?.LogDebug("Discovered plugin: {Name} from {Assembly}",
                         descriptor.Name, assembly.GetName().Name);
                 }
+                else
+                {
+                    throw new InvalidOperationException(
+                        $"Assembly {fullPath} was identified as a plugin during metadata " +
+                        $"scanning but contains no IPlugin implementation at runtime.");
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
-                bootstrapLogger?.LogError(ex, "Failed to load plugin assembly: {Path}", fullPath);
+                throw new InvalidOperationException(
+                    $"Failed to load plugin assembly: {fullPath}. " +
+                    $"This usually means the plugin has a dependency that is not present " +
+                    $"in the plugin directories. Ensure all required DLLs are placed " +
+                    $"in one of the configured plugin directories.", ex);
             }
         }
 
@@ -118,21 +121,15 @@ public sealed class PluginManager
     /// <summary>
     /// Phase 2: Instantiates all plugins and their handler groups using
     /// ActivatorUtilities. Called after the DI container is built.
-    /// Plugins whose dependencies failed to instantiate are skipped.
+    /// All failures are fatal.
     /// </summary>
     internal void InstantiatePlugins(IReadOnlyList<PluginDescriptor> descriptors)
     {
         _descriptors = descriptors;
         _instances = [];
-        _failedPlugins.Clear();
-
-        var activator = _serviceProvider.GetRequiredService<IPluginActivator>();
 
         foreach (var descriptor in descriptors)
         {
-            if (ShouldSkipDueToFailedDependency(descriptor))
-                continue;
-
             try
             {
                 var plugin = (IPlugin)ActivatorUtilities.CreateInstance(
@@ -143,39 +140,33 @@ public sealed class PluginManager
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to instantiate plugin: {Name}", descriptor.Name);
-                MarkPluginFailed(descriptor);
+                throw new InvalidOperationException(
+                    $"Failed to instantiate plugin '{descriptor.Name}' " +
+                    $"(type: {descriptor.PluginType.FullName}). " +
+                    $"Check that all required services are available.", ex);
             }
         }
     }
 
     /// <summary>
     /// Calls OnLoadAsync on all plugins in dependency order.
-    /// Plugins whose dependencies failed to load are skipped.
+    /// All failures are fatal.
     /// </summary>
     internal async Task LoadPluginsAsync(CancellationToken ct)
     {
-        var loadedInstances = new List<PluginInstance>();
-
         foreach (var instance in _instances)
         {
-            if (ShouldSkipDueToFailedDependency(instance.Descriptor))
-                continue;
-
             try
             {
                 await instance.Plugin.OnLoadAsync(ct);
                 _logger.LogDebug("Loaded plugin: {Name}", instance.Descriptor.Name);
-                loadedInstances.Add(instance);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Plugin {Name} failed during OnLoadAsync", instance.Descriptor.Name);
-                MarkPluginFailed(instance.Descriptor);
+                throw new InvalidOperationException(
+                    $"Plugin '{instance.Descriptor.Name}' failed during OnLoadAsync.", ex);
             }
         }
-
-        _instances = loadedInstances;
     }
 
     /// <summary>
@@ -319,66 +310,6 @@ public sealed class PluginManager
             foreach (var svc in descriptor.OptionalServices)
                 _logger.LogDebug("  Plugin '{Name}' optional: {Service}", descriptor.Name, svc.FullName);
         }
-    }
-    /// <summary>
-    /// Marks a plugin as failed so that dependent plugins can be skipped.
-    /// </summary>
-    private void MarkPluginFailed(PluginDescriptor descriptor)
-    {
-        _failedPlugins.Add(descriptor.PluginType);
-    }
-
-    /// <summary>
-    /// Checks whether any of a plugin's dependencies (explicit, required services,
-    /// or optional services provided by a failed plugin) have failed. If so, the
-    /// plugin is also marked as failed and skipped.
-    /// </summary>
-    private bool ShouldSkipDueToFailedDependency(PluginDescriptor descriptor)
-    {
-        // Check explicit [DependsOn] dependencies
-        foreach (var dep in descriptor.ExplicitDependencies)
-        {
-            if (_failedPlugins.Contains(dep))
-            {
-                _logger.LogWarning(
-                    "Skipping plugin '{Name}' because its dependency '{Dep}' failed",
-                    descriptor.Name, dep.Name);
-                MarkPluginFailed(descriptor);
-                return true;
-            }
-        }
-
-        // Check required service dependencies — if the providing plugin failed,
-        // this plugin can't function
-        foreach (var svc in descriptor.RequiredServices)
-        {
-            var provider = FindProviderDescriptor(svc);
-            if (provider is not null && _failedPlugins.Contains(provider.PluginType))
-            {
-                _logger.LogWarning(
-                    "Skipping plugin '{Name}' because its required service {Service} " +
-                    "is provided by failed plugin '{Provider}'",
-                    descriptor.Name, svc.FullName, provider.Name);
-                MarkPluginFailed(descriptor);
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// Finds the descriptor of the plugin that provides a given service type,
-    /// or null if not found.
-    /// </summary>
-    private PluginDescriptor? FindProviderDescriptor(Type serviceType)
-    {
-        foreach (var descriptor in _descriptors)
-        {
-            if (descriptor.ProvidedServices.Contains(serviceType))
-                return descriptor;
-        }
-        return null;
     }
 }
 

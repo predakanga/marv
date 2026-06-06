@@ -1,10 +1,10 @@
-# CS-011: Plugin Loading Robustness
+# CS-011: Plugin Loading Robustness — COMPLETED
 
 **Source:** Developer experience feedback from downstream plugin authoring
 **Scope:** Core (PluginDiscovery, PluginManager, MarvServiceExtensions)
 **Complexity:** Medium-Large
 **Breaking changes:** `CoreServiceTypes` removal (internal)
-**Status:** Draft
+**Status:** Completed
 
 ---
 

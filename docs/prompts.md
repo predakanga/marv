@@ -1197,3 +1197,9 @@
 > Regarding "Plugin name resolution by convention", I like this idea but it should definitely log a warning so that the user can correct their config. Similarly to above, if we fall back to a substring match, we should not continue with starting the bot.
 > Regarding "Validate all requested plugins are found", this should be a fatal error. If we can't provide the plugins that the user requests, that's a problem that needs to be resolved before continuing. This probably means that our existing logic around skipping failed plugins and those that depend on them should be removed too.
 > Regarding "Assembly resolution improvements", there should never be subdirectories in the plugins folder. We only need to scan the plugin directories and the base dir. It may be worth checking the base directory explicitly though, because we want to be able to package Marv as a single executable (`PublishSingleFile`), but still load DLLs from its basedir.
+
+## Implement CS-011: Plugin Loading Robustness
+
+**Date**: 2026-06-07T00:00:00Z
+
+> Okay, go ahead and implement it

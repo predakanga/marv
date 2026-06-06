@@ -11,8 +11,9 @@ using Xunit;
 namespace Marv.Core.Tests.Plugin;
 
 /// <summary>
-/// Tests that PluginManager handles plugin failures gracefully, skipping
-/// dependent plugins when a dependency fails.
+/// Tests that PluginManager treats all plugin loading failures as fatal,
+/// throwing <see cref="InvalidOperationException"/> to prevent the bot
+/// from starting in a degraded state.
 /// </summary>
 public class PluginManagerResilienceTests
 {
@@ -85,113 +86,46 @@ public class PluginManagerResilienceTests
     }
 
     [Fact]
-    public void InstantiatePlugins_IndependentPluginFailure_DoesNotAffectOthers()
+    public void InstantiatePlugins_FailingPlugin_ThrowsFatal()
     {
         var (manager, _) = CreateManager();
 
         var goodDesc = MakeDescriptor("Good", typeof(GoodPlugin));
         var failDesc = MakeDescriptor("Failing", typeof(FailingPlugin));
-        var good2Desc = MakeDescriptor("Good2", typeof(GoodPlugin));
 
-        // Failing plugin is in the middle — Good and Good2 should still load
-        manager.InstantiatePlugins([goodDesc, failDesc, good2Desc]);
-
-        var instances = GetInstances(manager);
-        Assert.Equal(2, instances.Count);
-        Assert.Equal("Good", instances[0].Descriptor.Name);
-        Assert.Equal("Good2", instances[1].Descriptor.Name);
+        var ex = Assert.Throws<InvalidOperationException>(
+            () => manager.InstantiatePlugins([goodDesc, failDesc]));
+        Assert.Contains("Failing", ex.Message);
+        Assert.Contains("Failed to instantiate plugin", ex.Message);
     }
 
     [Fact]
-    public void InstantiatePlugins_FailedPlugin_SkipsDependents()
-    {
-        var (manager, _) = CreateManager();
-
-        var providerDesc = MakeDescriptor("Provider", typeof(FailingPlugin),
-            providedServices: [typeof(ITestService)]);
-        var consumerDesc = MakeDescriptor("Consumer", typeof(GoodPlugin),
-            requiredServices: [typeof(ITestService)]);
-        var independentDesc = MakeDescriptor("Independent", typeof(GoodPlugin));
-
-        manager.InstantiatePlugins([providerDesc, consumerDesc, independentDesc]);
-
-        var instances = GetInstances(manager);
-        // Provider fails, Consumer should be skipped, Independent should succeed
-        Assert.Single(instances);
-        Assert.Equal("Independent", instances[0].Descriptor.Name);
-    }
-
-    [Fact]
-    public void InstantiatePlugins_FailedPlugin_SkipsExplicitDependents()
-    {
-        var (manager, _) = CreateManager();
-
-        var depDesc = MakeDescriptor("Dependency", typeof(FailingPlugin));
-        var dependentDesc = MakeDescriptor("Dependent", typeof(GoodPlugin),
-            explicitDeps: [typeof(FailingPlugin)]);
-        var independentDesc = MakeDescriptor("Independent", typeof(GoodPlugin));
-
-        manager.InstantiatePlugins([depDesc, dependentDesc, independentDesc]);
-
-        var instances = GetInstances(manager);
-        Assert.Single(instances);
-        Assert.Equal("Independent", instances[0].Descriptor.Name);
-    }
-
-    [Fact]
-    public async Task LoadPlugins_FailedLoad_SkipsDependents()
-    {
-        var (manager, _) = CreateManager();
-
-        var providerDesc = MakeDescriptor("Provider", typeof(LoadFailPlugin),
-            providedServices: [typeof(ITestService)]);
-        var consumerDesc = MakeDescriptor("Consumer", typeof(GoodPlugin),
-            requiredServices: [typeof(ITestService)]);
-        var independentDesc = MakeDescriptor("Independent", typeof(GoodPlugin));
-
-        manager.InstantiatePlugins([providerDesc, consumerDesc, independentDesc]);
-        await manager.LoadPluginsAsync(CancellationToken.None);
-
-        var instances = GetInstances(manager);
-        // Provider fails OnLoad, Consumer should be skipped, Independent stays
-        Assert.Single(instances);
-        Assert.Equal("Independent", instances[0].Descriptor.Name);
-    }
-
-    [Fact]
-    public async Task LoadPlugins_FailedLoad_TransitiveDependentsSkipped()
-    {
-        var (manager, _) = CreateManager();
-
-        // A -> B -> C chain, A fails
-        var aDesc = MakeDescriptor("A", typeof(LoadFailPlugin),
-            providedServices: [typeof(ITestService)]);
-        var bDesc = MakeDescriptor("B", typeof(GoodPlugin),
-            requiredServices: [typeof(ITestService)],
-            providedServices: [typeof(IDisposable)]);
-        var cDesc = MakeDescriptor("C", typeof(GoodPlugin),
-            requiredServices: [typeof(IDisposable)]);
-        var dDesc = MakeDescriptor("D", typeof(GoodPlugin));
-
-        manager.InstantiatePlugins([aDesc, bDesc, cDesc, dDesc]);
-        await manager.LoadPluginsAsync(CancellationToken.None);
-
-        var instances = GetInstances(manager);
-        // A fails OnLoad, B depends on A (skipped), C depends on B (skipped), D independent (stays)
-        Assert.Single(instances);
-        Assert.Equal("D", instances[0].Descriptor.Name);
-    }
-
-    [Fact]
-    public void InstantiatePlugins_AllFail_EmptyInstances()
+    public void InstantiatePlugins_AllFail_ThrowsFatal()
     {
         var (manager, _) = CreateManager();
 
         var desc = MakeDescriptor("Bad", typeof(FailingPlugin));
-        manager.InstantiatePlugins([desc]);
 
-        var instances = GetInstances(manager);
-        Assert.Empty(instances);
+        var ex = Assert.Throws<InvalidOperationException>(
+            () => manager.InstantiatePlugins([desc]));
+        Assert.Contains("Bad", ex.Message);
+    }
+
+    [Fact]
+    public async Task LoadPlugins_FailedLoad_ThrowsFatal()
+    {
+        var (manager, _) = CreateManager();
+
+        var desc = MakeDescriptor("FailLoad", typeof(LoadFailPlugin));
+        var goodDesc = MakeDescriptor("Good", typeof(GoodPlugin));
+
+        // LoadFailPlugin has no constructor issues, so instantiation succeeds
+        manager.InstantiatePlugins([desc, goodDesc]);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => manager.LoadPluginsAsync(CancellationToken.None));
+        Assert.Contains("FailLoad", ex.Message);
+        Assert.Contains("OnLoadAsync", ex.Message);
     }
 
     [Fact]
@@ -207,6 +141,24 @@ public class PluginManagerResilienceTests
 
         var instances = GetInstances(manager);
         Assert.Equal(2, instances.Count);
+    }
+
+    [Fact]
+    public void InstantiatePlugins_AllGood_AllPresent()
+    {
+        var (manager, _) = CreateManager();
+
+        var a = MakeDescriptor("A", typeof(GoodPlugin));
+        var b = MakeDescriptor("B", typeof(GoodPlugin));
+        var c = MakeDescriptor("C", typeof(GoodPlugin));
+
+        manager.InstantiatePlugins([a, b, c]);
+
+        var instances = GetInstances(manager);
+        Assert.Equal(3, instances.Count);
+        Assert.Equal("A", instances[0].Descriptor.Name);
+        Assert.Equal("B", instances[1].Descriptor.Name);
+        Assert.Equal("C", instances[2].Descriptor.Name);
     }
 
     private static List<PluginInstance> GetInstances(PluginManager manager)
