@@ -996,3 +996,11 @@
 **Prompt**:
 
 > That note should be applied to all the plugins, not just moderation.
+
+## Fix version test to use MarvVersion.Current
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+> Thank you. Now, the CI tests are failing because one of the tests (Marv.Plugins.Tests.CannedResponsesPluginTests.VersionCommand_FromHandlerGroup_Responds) references the old version number. This should be updated so that it doesn't break every release.

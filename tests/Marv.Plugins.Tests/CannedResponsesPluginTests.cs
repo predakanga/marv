@@ -1,5 +1,6 @@
 using Xunit;
 using NSubstitute;
+using Marv.Core;
 using Marv.Core.Events;
 using Marv.Plugins.CannedResponses;
 using Marv.Testing;
@@ -44,7 +45,7 @@ public class CannedResponsesPluginTests
         }).Build();
 
         await harness.HandleEventAsync(evt);
-        await harness.Bot.Received(1).SendMessageAsync("#test", "Marv IRC Bot v0.1.0", Arg.Any<CancellationToken>());
+        await harness.Bot.Received(1).SendMessageAsync("#test", $"Marv IRC Bot v{MarvVersion.Current}", Arg.Any<CancellationToken>());
     }
 
     [Fact]
