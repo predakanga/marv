@@ -1,15 +1,5 @@
 # Prompt Log
 
-## Add TODO for regex options on OnRegex attribute
-
-**Date**: 2026-06-06
-
-**Prompt**:
-
-> Add a TODO item: allow passing regex options to the OnRegex attribute
-
----
-
 ## Research the problem space before writing code
 
 **Date**: 2026-05-30T00:00:00Z
@@ -1063,3 +1053,19 @@
 **Prompt**:
 
 > Another TODO: Generate release nodes for the github release from CHANGELOG.md
+
+## Add TODO for regex options on OnRegex attribute
+
+**Date**: 2026-06-06
+
+**Prompt**:
+
+> Add a TODO item: allow passing regex options to the OnRegex attribute
+
+## Prompts should be appended to end of file
+
+**Date**: 2026-06-06
+
+**Prompt**:
+
+> Prompts should be logged to the end of @docs/prompts.md, not the start
