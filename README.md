@@ -75,12 +75,14 @@ Plugins are .NET assemblies placed in a plugin directory. Each plugin is a class
 
 ### Bundled plugins
 
+These plugins are provided as examples and are not intended for production use.
+
 - **Greet** — Welcomes users when they join a channel
 - **Auth** — Provides an authorization service based on IRC account names
-- **AuthConsumer** — Example plugin demonstrating how to consume the Auth service
+- **AuthConsumer** — Demonstrates how to consume the Auth service
 - **CannedResponses** — Responds to messages matching configured patterns
-- **Moderation** — Example plugin demonstrating advanced API patterns (filters,
-  timers, bot actions, case-mapped collections). Not intended for production use.
+- **Moderation** — Demonstrates advanced API patterns (filters, timers, bot
+  actions, case-mapped collections)
 
 ### Plugin configuration
 
