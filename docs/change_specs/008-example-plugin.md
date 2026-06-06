@@ -45,8 +45,9 @@ A moderation-themed plugin that demonstrates the gaps. Structure:
 **ModerationPlugin.cs** — main plugin class:
 - `[OnCommand("kick", ChannelOnly = true)]` — kick a user via
   `Bot.KickAsync` (CS-009)
-- `[OnCommand("ban", "b", ChannelOnly = true)]` — multiple aliases on one
-  method, uses `Bot.SetModeAsync` for +b (CS-009)
+- `[OnCommand("ban", ChannelOnly = true)]` + `[OnCommand("b", ChannelOnly = true)]`
+  on the same method — multiple aliases via stacked attributes, uses
+  `Bot.SetModeAsync` for +b (CS-009)
 - `[OnCommand("mute", ChannelOnly = true)]` — set +q mode via
   `Bot.SetModeAsync` (CS-009)
 - `[OnEvent]` for `UserJoinedEvent` — welcome message via

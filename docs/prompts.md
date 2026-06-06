@@ -947,3 +947,12 @@
 **Prompt**:
 
 > Before we implement CS-008, it should be updated with all the changes made since it was originally specced out.
+
+## Fix CS-008 stacked OnCommand syntax
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+> Comments on CS-008:
+> - Line 48 demonstrates an OnCommand with multiple commands, but as far as I'm aware that isn't supported. Should this case be supported, or should we remove it from the change spec?
