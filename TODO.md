@@ -6,3 +6,4 @@
 - [ ] Allow passing regex options to the OnRegex attribute
 - [ ] Provide a way for handler filters to pass information on to the underlying handler (i.e. authentication info)
 - [ ] Consider moving IrcBot.BatchChannels to a utility class, so that plugins can reuse it
+- [ ] Consider making CommandContext, RegexContext, etc share a common HandlerContext

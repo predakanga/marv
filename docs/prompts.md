@@ -1085,3 +1085,11 @@
 **Prompt**:
 
 > And another: Consider moving IrcBot.BatchChannels to a utility class, so that plugins can reuse it
+
+## Add TODO for common HandlerContext base class
+
+**Date**: 2026-06-06
+
+**Prompt**:
+
+> And another: Consider making CommandContext, RegexContext, etc share a common HandlerContext
