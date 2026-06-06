@@ -57,12 +57,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated Microsoft.NET.Test.Sdk from 17.14.0 to 18.6.0
 - Updated xunit.runner.visualstudio from 3.1.0 to 3.1.5
 
+### Removed
+
+- Docker image build from CI workflow — Docker images are now only built during
+  tagged releases
+
 ### Fixed
 
 - Boolean CLI options (e.g. `--use-tls`, `--rate-limit-enabled`) no longer
   override config file values when not explicitly provided on the command line
 - Nullable string config properties (e.g. `TlsCaCertFile`, `SaslUser`) no
   longer become empty strings when set to `null` in JSON config files
+- Dockerfile missing `.csproj` entries for Moderation plugin, Marv.Testing,
+  and Marv.Testing.Tests, causing `dotnet restore` to fail
 
 ## [0.1.0] - 2026-06-01
 

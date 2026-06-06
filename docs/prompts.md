@@ -1004,3 +1004,12 @@
 **Prompt**:
 
 > Thank you. Now, the CI tests are failing because one of the tests (Marv.Plugins.Tests.CannedResponsesPluginTests.VersionCommand_FromHandlerGroup_Responds) references the old version number. This should be updated so that it doesn't break every release.
+
+## Fix CI docker build and remove from CI
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+> The `docker` action in CI run #9 failed. Please troubleshoot this.
+> Once the troubleshooting is completed, consider whether we should really be building a docker image for each push - my assumption was that we should only build them for tagged releases.
