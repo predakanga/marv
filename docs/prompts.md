@@ -913,3 +913,11 @@
 **Prompt**:
 
 > Actually, roll back that SetChannelModeAsync rename - the method could be used on the bot user itself
+
+## Create change spec for exposing case mapping to plugins
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+> Add another change spec - plugins need a way to compare strings according to the network's casemapping
