@@ -1069,3 +1069,11 @@
 **Prompt**:
 
 > Prompts should be logged to the end of @docs/prompts.md, not the start
+
+## Add TODO for handler filter data passing
+
+**Date**: 2026-06-06
+
+**Prompt**:
+
+> Add another TODO item: Provide a way for handler filters to pass information on to the underlying handler (i.e. authentication info)
