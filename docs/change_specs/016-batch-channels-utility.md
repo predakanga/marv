@@ -18,7 +18,7 @@ it's `internal` to `IrcBot`, plugins cannot use it.
 ## Decisions
 
 - Move the method to a new `public static` utility class
-  `IrcUtils` in `Marv.Core.Utils`.
+  `IrcUtils` in `Marv.Core`.
 - Keep the method named `BatchChannels` — it operates on channel name
   lists specifically, and generalizing to arbitrary comma-separated
   parameters risks missing protocol-specific quirks (e.g., channels with
@@ -36,7 +36,7 @@ it's `internal` to `IrcBot`, plugins cannot use it.
 ### 1. Create `IrcUtils` class
 
 ```csharp
-namespace Marv.Core.Utils;
+namespace Marv.Core;
 
 /// <summary>
 /// Utility methods for working with IRC protocol constraints.
@@ -87,7 +87,7 @@ default, all test call sites must pass `maxPayloadLength` explicitly.
 ## Impact
 
 - **Plugin API:** Adds `IrcUtils.BatchChannels` as a new public utility
-  in `Marv.Core.Utils`. Non-breaking.
+  in `Marv.Core`. Non-breaking.
 - **Existing code:** `IrcBot.JoinMultipleAsync` behavior is unchanged.
   `IrcBot.BatchChannels` is removed (was `internal`, no external impact).
 - **Tests:** Existing batch tests move to the new class. No behavior

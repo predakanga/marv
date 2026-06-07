@@ -1230,3 +1230,9 @@
 > I'm not sure about the discoverability of Marv.Core.IrcMessageUtils - would something like Marv.Core.Utils be better?
 > Don't bother with the internal forwarding method, just rewrite JoinMultipleAsync.
 > I'm also not sure about the maxPayloadLength default - the parameter is definitely necessary, but do we want to encode assumptions about the user?
+
+## Clarify CS-016 namespace — IrcUtils class in Marv.Core, not its own namespace
+
+**Date**: 2026-06-07T00:00:00Z
+
+> I meant that the class would be called Marv.Core.Utils (or Marv.Core.IrcUtils), not moving it to its own namespace
