@@ -10,3 +10,5 @@
 - [x] Potentially remove PluginType from HandlerGroup
 - [x] Switch the JSON config parser to one that supports JSON5
 - [x] Check whether the extra `AppContext.BaseDirectory` logic is actually required for dependency resolution with a `PublishSingleFile` assembly
+- [x] Check whether we can optimize the docker action further using cache mounts
+- [ ] Add integration tests for plugin loading
