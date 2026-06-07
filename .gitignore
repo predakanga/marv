@@ -25,3 +25,6 @@ marv.test.json
 .idea/
 .vscode/
 *.swp
+
+## Local staging dir
+/staging/
