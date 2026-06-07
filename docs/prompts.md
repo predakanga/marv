@@ -1352,3 +1352,9 @@
 > Unfortunately I've discovered from testing that having the plugin config keys be "Plugins:{name}" causes issues with the configuration layer, due to the overlap with the "Plugins" key.
 > I'd like to switch to having the plugin section be simply "{name}", i.e. [PluginSection("IdleRPG")] would map to the "IdleRPG" section in the root of the config.
 > Please implement this, including changing the documentation and the example plugins.
+
+## Fix prepare-release script for macOS
+
+**Date**: 2026-06-07T00:00:00Z
+
+> The prepare-release script doesn't run on macOS - grep doesn't support `-P`

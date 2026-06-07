@@ -8,6 +8,9 @@
 
 set -euo pipefail
 
+# Portable in-place sed (macOS sed requires a suffix with -i)
+sedi() { sed -i'' -e "$@"; }
+
 REPO_ROOT=$(git rev-parse --show-toplevel)
 cd "$REPO_ROOT"
 
@@ -26,7 +29,7 @@ fi
 
 # --- Read current version ---
 
-CURRENT=$(grep -oP '(?<=<Version>)[^<]+' Directory.Build.props)
+CURRENT=$(sed -n 's/.*<Version>\([^<]*\)<\/Version>.*/\1/p' Directory.Build.props)
 IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
 
 NEXT_MAJOR="$((MAJOR + 1)).0.0"
@@ -72,12 +75,12 @@ echo "Releasing ${TAG}..."
 
 # --- Update files ---
 
-sed -i "s|<Version>[^<]*</Version>|<Version>${VERSION}</Version>|" Directory.Build.props
+sedi "s|<Version>[^<]*</Version>|<Version>${VERSION}</Version>|" Directory.Build.props
 
-sed -i "s/^## \[Unreleased\]$/## [Unreleased]\n\n## [${VERSION}] - ${DATE}/" CHANGELOG.md
+sedi "s/^## \[Unreleased\]$/## [Unreleased]\n\n## [${VERSION}] - ${DATE}/" CHANGELOG.md
 
-PREV_TAG=$(grep -oP '^\[[\d.]+\]' CHANGELOG.md | head -2 | tail -1 | tr -d '[]')
-sed -i "/^\[${PREV_TAG}\]:/ i\\[${VERSION}]: https://github.com/predakanga/marv/compare/v${PREV_TAG}...v${VERSION}" CHANGELOG.md
+PREV_TAG=$(grep -o '^\[[0-9][0-9.]*\]' CHANGELOG.md | head -2 | tail -1 | tr -d '[]')
+sedi "/^\[${PREV_TAG}\]:/ i\\[${VERSION}]: https://github.com/predakanga/marv/compare/v${PREV_TAG}...v${VERSION}" CHANGELOG.md
 
 # --- Commit and tag ---
 
