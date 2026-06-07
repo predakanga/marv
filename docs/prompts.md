@@ -1203,3 +1203,9 @@
 **Date**: 2026-06-07T00:00:00Z
 
 > Okay, go ahead and implement it
+
+## Write change specs for TODO items 1-4, 6-9
+
+**Date**: 2026-06-07T00:00:00Z
+
+> I'd like you to write change specs for TODO items 1-4, 6-9
