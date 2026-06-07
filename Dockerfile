@@ -2,16 +2,16 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0.300 AS build
 ARG VERSION=0.3.0
 WORKDIR /src
 
-# Restore dependencies first for layer caching
 COPY Marv.slnx .
 COPY src/Marv/Marv.csproj src/Marv/
 COPY src/Marv.Core/Marv.Core.csproj src/Marv.Core/
-RUN dotnet restore src/Marv/Marv.csproj
+RUN --mount=type=cache,target=/root/.nuget/packages \
+    dotnet restore src/Marv/Marv.csproj
 
-# Copy source and build
 COPY src/Marv/ src/Marv/
 COPY src/Marv.Core/ src/Marv.Core/
-RUN dotnet publish src/Marv/Marv.csproj -c Release -o /app -p:Version="$VERSION"
+RUN --mount=type=cache,target=/root/.nuget/packages \
+    dotnet publish src/Marv/Marv.csproj -c Release -o /app -p:Version="$VERSION" --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0.8 AS runtime
 WORKDIR /app

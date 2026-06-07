@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Docker build uses BuildKit cache mounts for NuGet packages, speeding up
+  restore across builds even when the layer cache is invalidated
+
 ## [0.3.2] - 2026-06-07
 
 ### Fixed

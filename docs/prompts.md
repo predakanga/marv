@@ -1332,3 +1332,9 @@
 > Asking you to prepare these releases seems wasteful - can you write a script to automate it?
 
 > Let's make it a bit more friendly - give the user a choice of whether to bump the major, minor or patch version. Make it interactive, but let the user pass an argument to bypass that
+
+## Add NuGet cache mounts to Dockerfile
+
+**Date**: 2026-06-07T00:00:00Z
+
+> The docker step of the release process still takes quite a while - a lot of it is spent on dotnet restoring projects. Can we improve this? Cache mounts could be a place to start.
