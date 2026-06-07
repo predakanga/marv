@@ -1236,3 +1236,9 @@
 **Date**: 2026-06-07T00:00:00Z
 
 > I meant that the class would be called Marv.Core.Utils (or Marv.Core.IrcUtils), not moving it to its own namespace
+
+## Implement CS-015 through CS-018
+
+**Date**: 2026-06-07T00:00:00Z
+
+> Go ahead and implement CS-0015 through CS-0018

@@ -9,12 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `Options` property on `[OnRegex]` attribute for specifying `RegexOptions`
+  (e.g., `IgnoreCase`, `IgnorePatternWhitespace`)
+- `IrcUtils.BatchChannels` public utility for batching channel lists within
+  the IRC line length limit
+- `HandlerContext` abstract base class shared by `CommandContext` and
+  `RegexMatchContext`, providing common `Sender`, `Channel`, `Bot`,
+  `RawMessage`, `IsDirect`, and `ReplyAsync` members
 - Docker layer caching (`type=gha`) for release Docker builds
 - NuGet package caching in CI and release workflows
 - GitHub release notes are now extracted from CHANGELOG.md instead of
   auto-generated from commit history
 
 ### Changed
+
+- `[HandlerGroup]` attribute no longer requires a `Type pluginType`
+  argument — handler groups are discovered automatically in the plugin's
+  assembly
 
 - Docker image no longer includes sample plugins — users add plugins by
   creating a derived image (`FROM ghcr.io/predakanga/marv:latest`)

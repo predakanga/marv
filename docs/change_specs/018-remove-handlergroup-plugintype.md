@@ -1,9 +1,10 @@
-# CS-018: Remove PluginType from HandlerGroupAttribute
+# CS-018: Remove PluginType from HandlerGroupAttribute — COMPLETED
 
 **Source:** `TODO.md` item 8
 **Scope:** Marv.Core.Plugin
 **Complexity:** Small
 **Breaking changes:** Yes (attribute constructor signature change)
+**Status:** Completed
 
 ---
 

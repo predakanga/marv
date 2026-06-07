@@ -53,13 +53,11 @@ public abstract class MarvPlugin : IPlugin
     /// </summary>
     private void DiscoverHandlerGroups(IPluginActivator activator)
     {
-        var pluginType = GetType();
-        var assembly = pluginType.Assembly;
+        var assembly = GetType().Assembly;
 
         var groupTypes = assembly.GetTypes()
             .Where(t => t is { IsClass: true, IsAbstract: false })
-            .Where(t => t.GetCustomAttribute<HandlerGroupAttribute>() is { } attr &&
-                        attr.PluginType == pluginType);
+            .Where(t => t.GetCustomAttribute<HandlerGroupAttribute>() is not null);
 
         foreach (var groupType in groupTypes)
         {
@@ -121,7 +119,7 @@ public abstract class MarvPlugin : IPlugin
                 WarnOnConflictingFilters(regexAttr.ChannelOnly, regexAttr.DirectOnly, regexAttr.Channel,
                     target.GetType().Name, method.Name, "OnRegex");
                 _regexHandlers.Add(new RegexRegistration(
-                    target, method, new Regex(regexAttr.Pattern, RegexOptions.Compiled),
+                    target, method, new Regex(regexAttr.Pattern, RegexOptions.Compiled | regexAttr.Options),
                     regexAttr.ChannelOnly, regexAttr.DirectOnly, regexAttr.Channel));
             }
 

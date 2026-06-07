@@ -1,25 +1,25 @@
-using Marv.Core.Irc;
+using Marv.Core;
 using Xunit;
 
 namespace Marv.Core.Tests.Irc;
 
 /// <summary>
-/// Tests for the <see cref="IrcBot.BatchChannels"/> batching logic
-/// used by <see cref="IrcBot.JoinMultipleAsync"/>.
+/// Tests for the <see cref="IrcUtils.BatchChannels"/> batching logic
+/// used by <see cref="Marv.Core.Irc.IrcBot.JoinMultipleAsync"/>.
 /// </summary>
 public class IrcBotBulkJoinTests
 {
     [Fact]
     public void BatchChannels_EmptyList_ReturnsNoBatches()
     {
-        var batches = IrcBot.BatchChannels([]).ToList();
+        var batches = IrcUtils.BatchChannels([], 505).ToList();
         Assert.Empty(batches);
     }
 
     [Fact]
     public void BatchChannels_SingleChannel_ReturnsSingleBatch()
     {
-        var batches = IrcBot.BatchChannels(["#test"]).ToList();
+        var batches = IrcUtils.BatchChannels(["#test"], 505).ToList();
 
         Assert.Single(batches);
         Assert.Equal(["#test"], batches[0]);
@@ -29,7 +29,7 @@ public class IrcBotBulkJoinTests
     public void BatchChannels_MultipleChannels_FitInOneBatch()
     {
         var channels = new[] { "#alpha", "#beta", "#gamma" };
-        var batches = IrcBot.BatchChannels(channels).ToList();
+        var batches = IrcUtils.BatchChannels(channels, 505).ToList();
 
         Assert.Single(batches);
         Assert.Equal(channels, batches[0]);
@@ -38,12 +38,12 @@ public class IrcBotBulkJoinTests
     [Fact]
     public void BatchChannels_ExceedsMaxLength_SplitsIntoBatches()
     {
-        // ~42 chars each; with default 505 limit, 505 / 43 ≈ 11 per batch
+        // ~42 chars each; with 505 limit, 505 / 43 ≈ 11 per batch
         var channels = Enumerable.Range(1, 20)
             .Select(i => $"#channel-with-a-long-name-for-test-{i:D3}")
             .ToList();
 
-        var batches = IrcBot.BatchChannels(channels).ToList();
+        var batches = IrcUtils.BatchChannels(channels, 505).ToList();
 
         Assert.True(batches.Count >= 2, $"Expected at least 2 batches, got {batches.Count}");
 
@@ -59,7 +59,7 @@ public class IrcBotBulkJoinTests
             .Select(i => $"#long-channel-name-padding-{i:D4}")
             .ToList();
 
-        var batches = IrcBot.BatchChannels(channels).ToList();
+        var batches = IrcUtils.BatchChannels(channels, 505).ToList();
 
         foreach (var batch in batches)
         {
@@ -74,7 +74,7 @@ public class IrcBotBulkJoinTests
     {
         var channels = new[] { "#aaa", "#bbb", "#ccc", "#ddd" };
         // maxPayloadLength = 9 → "#aaa,#bbb" = 9, fits; "#aaa,#bbb,#ccc" = 14, doesn't
-        var batches = IrcBot.BatchChannels(channels, maxPayloadLength: 9).ToList();
+        var batches = IrcUtils.BatchChannels(channels, maxPayloadLength: 9).ToList();
 
         Assert.Equal(2, batches.Count);
         Assert.Equal(["#aaa", "#bbb"], batches[0]);
@@ -87,7 +87,7 @@ public class IrcBotBulkJoinTests
         var longName = "#" + new string('x', 504);
         var channels = new[] { "#small", longName, "#other" };
 
-        var batches = IrcBot.BatchChannels(channels).ToList();
+        var batches = IrcUtils.BatchChannels(channels, 505).ToList();
 
         Assert.Equal(3, batches.Count);
         Assert.Equal(["#small"], batches[0]);

@@ -1,9 +1,10 @@
-# CS-015: Regex Options for OnRegex Attribute
+# CS-015: Regex Options for OnRegex Attribute — COMPLETED
 
 **Source:** `TODO.md` item 4
 **Scope:** Marv.Core.Plugin
 **Complexity:** Small
 **Breaking changes:** None
+**Status:** Completed
 
 ---
 

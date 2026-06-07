@@ -25,10 +25,10 @@ Specs are numbered in recommended implementation order.
 | 12 | [Dockerfile Sample Plugin Inclusion](012-dockerfile-sample-plugins.md) | Dockerfile | Small | None | **Done** |
 | 13 | [Docker Action Build Caching](013-docker-action-caching.md) | CI/CD | Small | None | **Done** |
 | 14 | [Release Notes from CHANGELOG.md](014-release-notes-from-changelog.md) | CI/CD | Small | None | **Done** |
-| 15 | [Regex Options for OnRegex](015-onregex-options.md) | Core | Small | None | Pending |
-| 16 | [Extract BatchChannels to Utility](016-batch-channels-utility.md) | Core | Trivial | None | Pending |
-| 17 | [Common HandlerContext Base Class](017-common-handler-context.md) | Core | Small-Medium | None | Pending |
-| 18 | [Remove PluginType from HandlerGroup](018-remove-handlergroup-plugintype.md) | Core | Small | None | Pending |
+| 15 | [Regex Options for OnRegex](015-onregex-options.md) | Core | Small | None | **Done** |
+| 16 | [Extract BatchChannels to Utility](016-batch-channels-utility.md) | Core | Trivial | None | **Done** |
+| 17 | [Common HandlerContext Base Class](017-common-handler-context.md) | Core | Small-Medium | None | **Done** |
+| 18 | [Remove PluginType from HandlerGroup](018-remove-handlergroup-plugintype.md) | Core | Small | None | **Done** |
 | 19 | [JSON5 Configuration Parser](019-json5-config-parser.md) | Host | Small-Medium | None | Pending |
 
 Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.

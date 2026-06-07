@@ -69,7 +69,11 @@ case-insensitive. AllowMultiple — same method can handle multiple commands.
 ### `[OnRegex("pattern")]` → `Task Handler(RegexMatchContext ctx, CancellationToken ct)`
 
 Fires when message text (IRC formatting stripped) matches the pattern. Same
-filter properties as `[OnCommand]` minus `Prefix`.
+filter properties as `[OnCommand]` minus `Prefix`, plus:
+
+| Property | Type | Default | Effect |
+|---|---|---|---|
+| `Options` | `RegexOptions` | `None` | Additional regex options (`Compiled` is always added) |
 
 ### `[OnEvent]` → `Task Handler(TEvent evt, CancellationToken ct)`
 
@@ -93,13 +97,18 @@ Fires on a timer while connected. Defaults to 1 minute if neither is set.
 
 ## 4. Context Types
 
-### CommandContext (`Marv.Core.Plugin`)
+### HandlerContext (`Marv.Core.Plugin`) — abstract base
+
+Both `CommandContext` and `RegexMatchContext` extend `HandlerContext`,
+which provides the shared properties. Filter evaluators can pattern-match
+on `HandlerContext` instead of switching on each concrete type:
+
+```csharp
+var sender = (invocation.Context as HandlerContext)?.Sender;
+```
 
 | Property | Type | Description |
 |---|---|---|
-| `Command` | `string` | Matched command (without prefix) |
-| `Args` | `IReadOnlyList<string>` | Arguments split by whitespace |
-| `ArgString` | `string` | Raw argument text |
 | `Channel` | `IChannel?` | `null` for DMs |
 | `Sender` | `IUser` | Who sent it |
 | `IsDirect` | `bool` | `true` when `Channel` is `null` |
@@ -107,15 +116,19 @@ Fires on a timer while connected. Defaults to 1 minute if neither is set.
 | `Bot` | `IBot` | Bot instance |
 | `ReplyAsync(text, ct)` | `Task` | Reply in context (channel or DM) |
 
-### RegexMatchContext (`Marv.Core.Plugin`)
+### CommandContext (`Marv.Core.Plugin`) extends HandlerContext
 
-Same as CommandContext but replaces `Command`/`Args`/`ArgString` with:
+| Property | Type | Description |
+|---|---|---|
+| `Command` | `string` | Matched command (without prefix) |
+| `Args` | `IReadOnlyList<string>` | Arguments split by whitespace |
+| `ArgString` | `string` | Raw argument text |
+
+### RegexMatchContext (`Marv.Core.Plugin`) extends HandlerContext
 
 | Property | Type | Description |
 |---|---|---|
 | `Match` | `System.Text.RegularExpressions.Match` | The regex match result |
-
-Also has `Channel`, `Sender`, `IsDirect`, `RawMessage`, `Bot`, `ReplyAsync`.
 
 ---
 
@@ -306,7 +319,7 @@ service relationship.
 Split handler methods into separate classes to organize large plugins:
 
 ```csharp
-[HandlerGroup(typeof(GroupDemoPlugin))]
+[HandlerGroup]
 public class AdminHandlers
 {
     private readonly IBot _bot;
@@ -345,9 +358,9 @@ public class RequireAccountEvaluator : FilterEvaluator<RequireAccountAttribute>
         RequireAccountAttribute attribute, HandlerInvocation invocation,
         IBot bot, CancellationToken ct)
     {
-        if (invocation.Context is CommandContext cmd && cmd.Sender.Account is null)
+        if (invocation.Context is HandlerContext ctx && ctx.Sender.Account is null)
         {
-            _ = cmd.ReplyAsync("You must be logged in.", ct);
+            _ = ctx.ReplyAsync("You must be logged in.", ct);
             return ValueTask.FromResult(FilterResult.Denied);
         }
         return ValueTask.FromResult(FilterResult.Allowed);

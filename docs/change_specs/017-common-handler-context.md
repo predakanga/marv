@@ -1,9 +1,10 @@
-# CS-017: Common HandlerContext Base Class
+# CS-017: Common HandlerContext Base Class — COMPLETED
 
 **Source:** `TODO.md` item 7
 **Scope:** Marv.Core.Plugin
 **Complexity:** Small-Medium
 **Breaking changes:** Source-compatible, binary-breaking (see Impact)
+**Status:** Completed
 
 ---
 

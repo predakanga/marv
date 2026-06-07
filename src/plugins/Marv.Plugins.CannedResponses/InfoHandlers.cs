@@ -8,7 +8,7 @@ namespace Marv.Plugins.CannedResponses;
 /// Handler group for informational canned responses.
 /// Demonstrates organizing related command handlers into a separate class.
 /// </summary>
-[HandlerGroup(typeof(CannedResponsesPlugin))]
+[HandlerGroup]
 public class InfoHandlers
 {
     private readonly IBot _bot;

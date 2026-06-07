@@ -1,9 +1,10 @@
-# CS-016: Extract BatchChannels to Utility Class
+# CS-016: Extract BatchChannels to Utility Class — COMPLETED
 
 **Source:** `TODO.md` item 6
 **Scope:** Marv.Core
 **Complexity:** Trivial
 **Breaking changes:** None (method is `internal`)
+**Status:** Completed
 
 ---
 

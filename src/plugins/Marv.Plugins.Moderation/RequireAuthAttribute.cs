@@ -51,11 +51,11 @@ public class RequireAuthEvaluator : FilterEvaluator<RequireAuthAttribute>
         if (_auth is null)
             return FilterResult.Allowed;
 
-        if (invocation.Context is CommandContext cmd)
+        if (invocation.Context is HandlerContext ctx)
         {
-            if (!await _auth.IsAuthorizedAsync(cmd.Sender, attribute.Permission, ct))
+            if (!await _auth.IsAuthorizedAsync(ctx.Sender, attribute.Permission, ct))
             {
-                await cmd.ReplyAsync("Permission denied.", ct);
+                await ctx.ReplyAsync("Permission denied.", ct);
                 return FilterResult.Denied;
             }
         }

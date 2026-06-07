@@ -161,44 +161,12 @@ internal sealed class IrcBot : IBot
     {
         if (channels.Count == 0) return;
 
-        foreach (var batch in BatchChannels(channels))
+        // "JOIN " = 5 bytes, "\r\n" = 2 bytes → 505 bytes for the channel list
+        foreach (var batch in IrcUtils.BatchChannels(channels, maxPayloadLength: 505))
         {
             var joined = string.Join(',', batch);
             await SendRawAsync(new IrcMessage("JOIN", [joined]), ct);
         }
-    }
-
-    /// <summary>
-    /// Splits a list of channel names into batches that fit within the
-    /// 512-byte IRC line length limit. "JOIN " = 5 bytes, "\r\n" = 2 bytes,
-    /// leaving 505 bytes for the comma-separated channel list.
-    /// </summary>
-    internal static IEnumerable<List<string>> BatchChannels(
-        IReadOnlyList<string> channels, int maxPayloadLength = 505)
-    {
-        var batch = new List<string>();
-        var currentLength = 0;
-
-        foreach (var channel in channels)
-        {
-            var addedLength = batch.Count == 0
-                ? channel.Length
-                : channel.Length + 1; // +1 for comma separator
-
-            if (currentLength + addedLength > maxPayloadLength && batch.Count > 0)
-            {
-                yield return batch;
-                batch = [];
-                currentLength = 0;
-                addedLength = channel.Length;
-            }
-
-            batch.Add(channel);
-            currentLength += addedLength;
-        }
-
-        if (batch.Count > 0)
-            yield return batch;
     }
 
     /// <inheritdoc />

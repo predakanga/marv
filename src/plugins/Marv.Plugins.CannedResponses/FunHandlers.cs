@@ -8,7 +8,7 @@ namespace Marv.Plugins.CannedResponses;
 /// Handler group for fun/casual canned responses.
 /// Demonstrates [OnCommand] and [OnRegex] handlers in a handler group.
 /// </summary>
-[HandlerGroup(typeof(CannedResponsesPlugin))]
+[HandlerGroup]
 public class FunHandlers
 {
     private readonly IBot _bot;

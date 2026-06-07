@@ -9,7 +9,7 @@ namespace Marv.Plugins.Moderation;
 /// <see cref="HandlerGroupAttribute"/> pattern for organizing handlers into separate
 /// classes, DM-only commands, raw message handling, and <see cref="IBot.SendAndAwaitAsync"/>.
 /// </summary>
-[HandlerGroup(typeof(ModerationPlugin))]
+[HandlerGroup]
 public class ModerationAdminCommands
 {
     private readonly IBot _bot;

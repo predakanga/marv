@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace Marv.Core.Plugin;
 
 /// <summary>
@@ -47,15 +49,11 @@ public sealed class PluginConfigAttribute : Attribute
 }
 
 /// <summary>
-/// Marks a class as a handler group belonging to a specific plugin.
-/// Handler groups are discovered and instantiated by <see cref="MarvPlugin"/>.
+/// Marks a class as a handler group. Handler groups are discovered in the
+/// plugin's assembly and instantiated by <see cref="MarvPlugin"/>.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-public sealed class HandlerGroupAttribute(Type pluginType) : Attribute
-{
-    /// <summary>The plugin type this handler group belongs to.</summary>
-    public Type PluginType { get; } = pluginType;
-}
+public sealed class HandlerGroupAttribute : Attribute;
 
 /// <summary>
 /// Marks a method as an event handler. The event type is inferred from the method's
@@ -102,6 +100,13 @@ public sealed class OnRegexAttribute(string pattern) : Attribute
 {
     /// <summary>The regular expression pattern to match against message text.</summary>
     public string Pattern { get; } = pattern;
+
+    /// <summary>
+    /// Additional <see cref="RegexOptions"/> applied when compiling the pattern.
+    /// <see cref="RegexOptions.Compiled"/> is always added by the framework.
+    /// Defaults to <see cref="RegexOptions.None"/>.
+    /// </summary>
+    public RegexOptions Options { get; init; } = RegexOptions.None;
 
     /// <summary>If true, handler only fires for channel messages (skips DMs).</summary>
     public bool ChannelOnly { get; init; }
