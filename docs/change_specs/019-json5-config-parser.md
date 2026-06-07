@@ -2,7 +2,7 @@
 
 **Source:** `TODO.md` item 9
 **Scope:** Marv (host application)
-**Complexity:** Small-Medium
+**Complexity:** Trivial
 **Breaking changes:** None
 
 ---
@@ -28,164 +28,54 @@ configuration already supports comments, but JSON is the default format
 
 ## Decisions
 
-- Replace the standard JSON configuration provider with one that supports
-  JSON5 (or at minimum, comments and trailing commas).
-- The configuration file extension remains `.json` — JSON5 is a superset
-  of JSON, so existing valid JSON files continue to work.
-- Do not introduce a `.json5` extension. Operators use `.json` and expect
-  it to work with comments. A separate extension would fragment
-  configuration.
-
-## Approach options
-
-### Option A: Custom `IConfigurationProvider` using `System.Text.Json`
-
-`System.Text.Json` supports `JsonCommentHandling.Skip` and
-`AllowTrailingCommas` via `JsonDocumentOptions`. These cover the two most
-requested JSON5 features without adding a dependency.
-
-This requires implementing a custom `IConfigurationSource` and
-`IConfigurationProvider` that reads the JSON file with permissive options
-and flattens it into the key-value pairs that `IConfiguration` expects.
-
-### Option B: Pre-process with a JSON5 library
-
-Use a JSON5 parsing library (e.g., `Json5.Net` or manual preprocessing)
-to convert JSON5 to strict JSON before passing to `AddJsonFile`. This
-supports the full JSON5 spec but adds a dependency and a preprocessing
-step.
-
-### Recommendation: Option A
-
-Comments and trailing commas are the only practical pain points. The full
-JSON5 spec (unquoted keys, single quotes, hex literals, multiline
-strings) adds complexity without clear value for a configuration file.
-Option A uses only the standard library and requires no external
-dependencies.
+- Use the [`Json5.Configuration`](https://www.nuget.org/packages/Json5.Configuration)
+  NuGet package, which provides `AddJson5File` — a drop-in replacement
+  for `AddJsonFile` with full JSON5 support.
+- Handle both `.json` and `.json5` extensions via `AddJson5File`, since
+  JSON5 is a strict superset of JSON. Existing valid JSON files continue
+  to work unchanged.
+- The default configuration filename remains `marv.json`.
 
 ## Changes
 
-### 1. Create `PermissiveJsonConfigurationSource`
+### 1. Add the `Json5.Configuration` NuGet package to `Marv.csproj`
 
-```csharp
-namespace Marv;
-
-/// <summary>
-/// Configuration source that reads JSON files with support for comments
-/// and trailing commas, using System.Text.Json's permissive parsing.
-/// </summary>
-internal sealed class PermissiveJsonConfigurationSource : IConfigurationSource
-{
-    public required string Path { get; init; }
-    public bool Optional { get; init; }
-
-    public IConfigurationProvider Build(IConfigurationBuilder builder)
-        => new PermissiveJsonConfigurationProvider(this);
-}
+```xml
+<PackageReference Include="Json5.Configuration" Version="1.0.4" />
 ```
 
-### 2. Create `PermissiveJsonConfigurationProvider`
+### 2. Update `AddConfigFile` in `Program.cs`
+
+Replace `AddJsonFile` with `AddJson5File` for JSON files, and add
+`.json5` as a supported extension:
 
 ```csharp
-internal sealed class PermissiveJsonConfigurationProvider
-    : ConfigurationProvider
+using Json5;
+
+static void AddConfigFile(IConfigurationBuilder config, string path, bool required)
 {
-    private readonly PermissiveJsonConfigurationSource _source;
+    var extension = Path.GetExtension(path).ToLowerInvariant();
 
-    public PermissiveJsonConfigurationProvider(
-        PermissiveJsonConfigurationSource source)
+    switch (extension)
     {
-        _source = source;
-    }
-
-    public override void Load()
-    {
-        var path = _source.Path;
-        if (!File.Exists(path))
-        {
-            if (_source.Optional)
-                return;
-            throw new FileNotFoundException(
-                $"Configuration file '{path}' not found.");
-        }
-
-        using var stream = File.OpenRead(path);
-        var options = new JsonDocumentOptions
-        {
-            CommentHandling = JsonCommentHandling.Skip,
-            AllowTrailingCommas = true,
-        };
-        using var doc = JsonDocument.Parse(stream, options);
-        Data = JsonConfigurationFlattener.Flatten(doc.RootElement);
+        case ".json" or ".json5":
+            config.AddJson5File(path, optional: !required, reloadOnChange: false);
+            break;
+        case ".yaml" or ".yml":
+            config.AddYamlFile(path, optional: !required, reloadOnChange: false);
+            break;
+        case ".xml":
+            config.AddXmlFile(path, optional: !required, reloadOnChange: false);
+            break;
+        default:
+            throw new InvalidOperationException(
+                $"Unsupported configuration file format: '{extension}'. " +
+                "Supported formats: .json, .json5, .yaml, .yml, .xml");
     }
 }
 ```
 
-### 3. Create `JsonConfigurationFlattener`
-
-A utility that recursively walks a `JsonElement` tree and produces the
-flat `Dictionary<string, string?>` that `ConfigurationProvider.Data`
-expects, using `:` as the key separator (matching the standard JSON
-config provider's behavior):
-
-```csharp
-internal static class JsonConfigurationFlattener
-{
-    public static Dictionary<string, string?> Flatten(JsonElement root)
-    {
-        var data = new Dictionary<string, string?>(
-            StringComparer.OrdinalIgnoreCase);
-        Visit(data, "", root);
-        return data;
-    }
-
-    private static void Visit(
-        Dictionary<string, string?> data, string prefix, JsonElement element)
-    {
-        switch (element.ValueKind)
-        {
-            case JsonValueKind.Object:
-                foreach (var prop in element.EnumerateObject())
-                {
-                    var key = string.IsNullOrEmpty(prefix)
-                        ? prop.Name
-                        : $"{prefix}:{prop.Name}";
-                    Visit(data, key, prop.Value);
-                }
-                break;
-            case JsonValueKind.Array:
-                var index = 0;
-                foreach (var item in element.EnumerateArray())
-                {
-                    Visit(data, $"{prefix}:{index}", item);
-                    index++;
-                }
-                break;
-            default:
-                data[prefix] = element.ValueKind == JsonValueKind.Null
-                    ? null
-                    : element.ToString();
-                break;
-        }
-    }
-}
-```
-
-### 4. Update `AddConfigFile` in `Program.cs`
-
-Replace the `AddJsonFile` call with the permissive provider:
-
-```csharp
-case ".json":
-    config.Add(new PermissiveJsonConfigurationSource
-    {
-        Path = path,
-        Optional = !required,
-    });
-    break;
-```
-
-### 5. Update `marv.example.json`
+### 3. Update `marv.example.json`
 
 Add comments to the example configuration to demonstrate the feature:
 
@@ -202,7 +92,7 @@ Add comments to the example configuration to demonstrate the feature:
     // Channels to join on connect
     "Channels": [
         "#general",
-        "#dev",  // trailing comma OK
+        "#dev",
     ],
 
     "CommandPrefix": "!",
@@ -213,41 +103,36 @@ Add comments to the example configuration to demonstrate the feature:
 
 ## Design decisions
 
-**Why not support the full JSON5 spec?** JSON5 features beyond comments
-and trailing commas (unquoted keys, single-quoted strings, hex literals,
-multiline strings, `Infinity`/`NaN`) are unusual in configuration files
-and would require a third-party parser or significant custom code.
-`System.Text.Json`'s built-in permissive options handle the common cases
-with zero dependencies.
+**Why `Json5.Configuration` instead of a custom provider?** The package
+provides exactly what we need — `AddJson5File` as a drop-in `AddJsonFile`
+replacement with full JSON5 support (comments, trailing commas, unquoted
+keys, single-quoted strings, etc.). Implementing our own provider would
+duplicate work that's already been done and tested. The package is from
+[devlooped](https://github.com/devlooped/json5), a reputable open-source
+maintainer, targets .NET 8+ and is compatible with .NET 10.
 
 **Why not just recommend YAML?** YAML is already supported and handles
 comments natively. However, JSON is the default format, the example config
 is JSON, and many operators prefer JSON's explicit syntax. Telling users
 "switch to YAML for comments" is a workaround, not a solution.
 
-**Why implement a custom provider instead of patching the stream?** A
-stream-preprocessing approach (stripping comments before passing to
-`AddJsonFile`) is fragile — it must handle comments inside strings,
-escaped characters, and edge cases. `System.Text.Json`'s parser handles
-these correctly with `JsonCommentHandling.Skip`.
+**Why support `.json5` as an extension?** Some users may prefer to use the
+`.json5` extension to signal that the file uses JSON5 features, and some
+editors provide better syntax highlighting for `.json5` files. Supporting
+both costs nothing since the parser handles both.
 
 ## Testing
 
-- **Unit tests for flattener:** Verify that nested objects, arrays, null
-  values, and mixed types produce the correct flat key-value pairs.
-- **Unit tests for permissive parsing:** Verify that JSON with comments
-  (single-line and block), trailing commas, and standard JSON all parse
-  correctly.
-- **Integration test:** Load a configuration file with comments and
-  verify the resulting `MarvConfiguration` properties are correct.
-- **Regression test:** Verify that existing `marv.example.json` (without
-  comments) continues to load correctly.
+- **Regression test:** Verify that existing `marv.example.json` continues
+  to load correctly through `AddJson5File`.
+- **Integration test:** Load a configuration file containing comments and
+  trailing commas and verify the resulting `MarvConfiguration` properties
+  are correct.
 
 ## Impact
 
-- **Configuration:** JSON config files now support `//` comments, `/* */`
-  block comments, and trailing commas. Existing valid JSON files work
-  without changes.
-- **Dependencies:** No new dependencies. Uses `System.Text.Json` which is
-  already part of the .NET runtime.
+- **Configuration:** JSON config files now support all JSON5 features.
+  Existing valid JSON files work without changes.
+- **Dependencies:** Adds `Json5.Configuration` (which depends on `Json5`
+  and `Microsoft.Extensions.Configuration.FileExtensions`).
 - **Plugin API:** No changes.

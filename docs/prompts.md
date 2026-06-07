@@ -1242,3 +1242,10 @@
 **Date**: 2026-06-07T00:00:00Z
 
 > Go ahead and implement CS-0015 through CS-0018
+
+## Revise CS-019 to use Json5.Configuration NuGet package
+
+**Date**: 2026-06-07T00:00:00Z
+
+> Regarding CS-019, is there a reason to implement it ourselves instead of just using `Json5.Configuration` off NuGet?
+> That's incorrect - the NuGet package https://www.nuget.org/packages/Json5.Configuration provides exactly that. See the documentation at https://github.com/devlooped/json5#addjson5file
