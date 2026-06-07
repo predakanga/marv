@@ -1284,3 +1284,19 @@
 > > Exception thrown: 'System.IO.FileNotFoundException' in System.Reflection.MetadataLoadContext.dll: 'Could not find assembly 'Marv.Core, Version=0.3.0.0, Culture=neutral, PublicKeyToken=null'. Either explicitly load this assembly using a method such as LoadFromAssemblyPath() or use a MetadataAssemblyResolver that returns a valid assembly.'
 >
 > I suspect this is because we're using `PublishSingleFile`, which loads the assemblies direct from memory. If there's no easy way around this, it would be okay to disable that option.
+
+## Review plugin loading fixes for correctness
+
+**Date**: 2026-06-07T00:00:00Z
+
+> Plugin loading still fails with the following exception:
+> > Exception has occurred: CLR/System.IO.FileNotFoundException
+> > Exception thrown: 'System.IO.FileNotFoundException' in System.Reflection.MetadataLoadContext.dll: 'Could not find assembly 'Marv.Core, Version=0.3.0.0, Culture=neutral, PublicKeyToken=null'. Either explicitly load this assembly using a method such as LoadFromAssemblyPath() or use a MetadataAssemblyResolver that returns a valid assembly.'
+>
+> I've fixed this by enabling `IncludeAllContentForSelfExtract` on the Marv project and tweaked the plugin scanning code to scan all plugin dirs, not just the one the current plugin is in.
+> Check the changes that I've made (they're currently unstaged) for correctness and update the changelog, please.
+
+> Your assumption is incorrect - `IncludeAllContentForSelfExtract` causes all of Marv's bundled assemblies to be extracted to a temporary runtime dir, which is included in our list of assemblies by `GetRuntimeDirectory()`. I've tested this in practice and can confirm that it works.
+> Your point about SelfContained is valid though, and the change from "pluginDirectory" to "dir" is worth making.
+
+> You haven't added those prompts to the log. Make sure you include my follow-up clarifying that Marv.Core is in the runtime dir as well. Once that's done, you can add and commit the changes.

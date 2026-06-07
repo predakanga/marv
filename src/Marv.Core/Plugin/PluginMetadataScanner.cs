@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 
 namespace Marv.Core.Plugin;
@@ -54,7 +55,7 @@ internal static class PluginMetadataScanner
                     continue;
                 }
 
-                var metadata = TryScanAssembly(fullPath, logger);
+                var metadata = TryScanAssembly(fullPath, logger, pluginDirectories);
                 if (metadata is not null)
                     results.Add(metadata);
             }
@@ -67,20 +68,17 @@ internal static class PluginMetadataScanner
     /// Attempts to scan a single assembly for a plugin type using
     /// <see cref="MetadataLoadContext"/>.
     /// </summary>
-    private static PluginMetadata? TryScanAssembly(string assemblyPath, ILogger? logger)
+    private static PluginMetadata? TryScanAssembly(string assemblyPath, ILogger? logger,
+        IReadOnlyList<string> pluginDirectories)
     {
         try
         {
-            var runtimeDir = Path.GetDirectoryName(typeof(object).Assembly.Location)!;
-            var runtimeAssemblies = Directory.GetFiles(runtimeDir, "*.dll");
-            var pluginAssemblies = Directory.GetFiles(
-                Path.GetDirectoryName(assemblyPath)!, "*.dll");
-            var appAssemblies = Directory.GetFiles(AppContext.BaseDirectory, "*.dll");
-            var resolver = new PathAssemblyResolver(
-                pluginAssemblies
-                    .Concat(appAssemblies)
-                    .Concat(runtimeAssemblies)
-                    .Distinct());
+            // Select all DLLs from the runtime dir as well as all plugin dirs
+            var allAssemblies = pluginDirectories
+                .Append(RuntimeEnvironment.GetRuntimeDirectory())
+                .SelectMany(dir => Directory.GetFiles(dir, "*.dll"))
+                .Distinct();
+            var resolver = new PathAssemblyResolver(allAssemblies);
 
             using var mlc = new MetadataLoadContext(resolver);
             var assembly = mlc.LoadFromAssemblyPath(assemblyPath);

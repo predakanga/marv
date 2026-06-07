@@ -261,7 +261,6 @@ public static class MarvServiceExtensions
     {
         // Probe plugin directories + app base directory (for PublishSingleFile support)
         var probeDirs = pluginDirectories
-            .Append(AppContext.BaseDirectory)
             .Select(Path.GetFullPath)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();

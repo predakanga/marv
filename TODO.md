@@ -9,4 +9,4 @@
 - [x] Consider making CommandContext, RegexContext, etc share a common HandlerContext
 - [x] Potentially remove PluginType from HandlerGroup
 - [x] Switch the JSON config parser to one that supports JSON5
-- [ ] Check whether the extra `AppContext.BaseDirectory` logic is actually required for dependency resolution with a `PublishSingleFile` assembly
+- [x] Check whether the extra `AppContext.BaseDirectory` logic is actually required for dependency resolution with a `PublishSingleFile` assembly
