@@ -11,48 +11,53 @@
 
 `IrcBot.BatchChannels` is an `internal static` method that splits a list
 of channel names into batches fitting the 512-byte IRC line length limit.
-This logic is useful to any plugin that needs to batch IRC parameters
-(e.g., sending MODE commands for multiple channels, or WHO queries). Since
+This logic is useful to any plugin that needs to send batched IRC commands
+(e.g., joining many channels, sending MODE for multiple targets). Since
 it's `internal` to `IrcBot`, plugins cannot use it.
 
 ## Decisions
 
 - Move the method to a new `public static` utility class
-  `IrcMessageUtility` in `Marv.Core.Irc`.
-- Keep the existing `IrcBot` code calling the moved method.
-- Name the method `BatchParameters` to reflect its general purpose
-  (batching any comma-separated parameter list within the IRC line limit),
-  not just channels.
-- Keep an `internal` forwarding call from `IrcBot` to avoid churn in the
-  existing code, or update `IrcBot.JoinMultipleAsync` to call the utility
-  directly.
+  `IrcUtils` in `Marv.Core.Utils`.
+- Keep the method named `BatchChannels` — it operates on channel name
+  lists specifically, and generalizing to arbitrary comma-separated
+  parameters risks missing protocol-specific quirks (e.g., channels with
+  keys use a different format than plain comma-separated lists).
+- The `maxPayloadLength` parameter is required (no default). The correct
+  value depends on the IRC command being constructed, and encoding a
+  default would bake in assumptions about which command the caller is
+  building. `IrcBot.JoinMultipleAsync` passes the value it computes for
+  JOIN; other callers compute theirs for their command.
+- Remove `IrcBot.BatchChannels` entirely and update `JoinMultipleAsync`
+  to call `IrcUtils.BatchChannels` directly.
 
 ## Changes
 
-### 1. Create `IrcMessageUtility` class
+### 1. Create `IrcUtils` class
 
 ```csharp
-namespace Marv.Core.Irc;
+namespace Marv.Core.Utils;
 
 /// <summary>
-/// Utility methods for constructing IRC messages within protocol limits.
+/// Utility methods for working with IRC protocol constraints.
 /// </summary>
-public static class IrcMessageUtility
+public static class IrcUtils
 {
     /// <summary>
-    /// Splits a list of values into batches that fit within the IRC
-    /// line length limit when joined with commas. Useful for batching
-    /// JOIN, MODE, WHO, and other commands that accept comma-separated
-    /// parameter lists.
+    /// Splits a list of channel names into batches where each batch's
+    /// comma-separated representation fits within
+    /// <paramref name="maxPayloadLength"/> bytes. Useful for batching
+    /// JOIN, MODE, and other channel-list commands within the 512-byte
+    /// IRC line limit.
     /// </summary>
-    /// <param name="values">The values to batch.</param>
+    /// <param name="channels">The channel names to batch.</param>
     /// <param name="maxPayloadLength">
-    /// Maximum byte length for the comma-separated list. Defaults to 505,
-    /// accounting for a typical command prefix (5 bytes) and CRLF (2 bytes)
-    /// within the 512-byte IRC line limit.
+    /// Maximum byte length for the comma-separated channel list.
+    /// The caller must account for the command prefix and CRLF when
+    /// computing this value (e.g., 512 - len("JOIN ") - len("\r\n")).
     /// </param>
-    public static IEnumerable<List<string>> BatchParameters(
-        IReadOnlyList<string> values, int maxPayloadLength = 505)
+    public static IEnumerable<List<string>> BatchChannels(
+        IReadOnlyList<string> channels, int maxPayloadLength)
     {
         // Implementation moved from IrcBot.BatchChannels
     }
@@ -61,30 +66,29 @@ public static class IrcMessageUtility
 
 ### 2. Update `IrcBot`
 
-Replace the `BatchChannels` method body with a call to the utility:
+Remove the `BatchChannels` method from `IrcBot`. Update
+`JoinMultipleAsync` to call `IrcUtils.BatchChannels` directly, passing
+the computed max payload length (currently 505):
 
 ```csharp
-internal static IEnumerable<List<string>> BatchChannels(
-    IReadOnlyList<string> channels, int maxPayloadLength = 505)
-    => IrcMessageUtility.BatchParameters(channels, maxPayloadLength);
+foreach (var batch in IrcUtils.BatchChannels(channelNames, maxPayloadLength: 505))
+{
+    var joinList = string.Join(",", batch);
+    await SendRawAsync(new IrcMessage("JOIN", [joinList]), ct);
+}
 ```
-
-Alternatively, update `JoinMultipleAsync` to call
-`IrcMessageUtility.BatchParameters` directly and remove `BatchChannels`
-entirely. Since `BatchChannels` is `internal`, this has no external
-impact.
 
 ### 3. Move existing tests
 
-Any existing tests for `IrcBot.BatchChannels` should be updated to test
-`IrcMessageUtility.BatchParameters`. Add a test that verifies `IrcBot`'s
-join batching still works (integration-level, not unit-level on the
-moved method).
+Update existing tests for `IrcBot.BatchChannels` to test
+`IrcUtils.BatchChannels` instead. Since the parameter no longer has a
+default, all test call sites must pass `maxPayloadLength` explicitly.
 
 ## Impact
 
-- **Plugin API:** Adds `IrcMessageUtility.BatchParameters` as a new public
-  utility. Non-breaking.
+- **Plugin API:** Adds `IrcUtils.BatchChannels` as a new public utility
+  in `Marv.Core.Utils`. Non-breaking.
 - **Existing code:** `IrcBot.JoinMultipleAsync` behavior is unchanged.
+  `IrcBot.BatchChannels` is removed (was `internal`, no external impact).
 - **Tests:** Existing batch tests move to the new class. No behavior
   change.

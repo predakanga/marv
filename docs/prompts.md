@@ -1221,3 +1221,12 @@
 **Date**: 2026-06-07T00:00:00Z
 
 > Go ahead and implement CS-012 through CS-014
+
+## Revise CS-016 based on feedback
+
+**Date**: 2026-06-07T00:00:00Z
+
+> Regarding CS-016, I think the spec goes a bit too far - working on any comma-separated list risks missing potential behavioural quirks. It should be scoped specifically to our needs.
+> I'm not sure about the discoverability of Marv.Core.IrcMessageUtils - would something like Marv.Core.Utils be better?
+> Don't bother with the internal forwarding method, just rewrite JoinMultipleAsync.
+> I'm also not sure about the maxPayloadLength default - the parameter is definitely necessary, but do we want to encode assumptions about the user?
