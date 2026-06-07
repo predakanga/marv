@@ -1,4 +1,5 @@
 using System.CommandLine;
+using Json5;
 using Marv;
 using Marv.Core;
 using Microsoft.Extensions.Configuration;
@@ -8,7 +9,7 @@ using Sentry.Extensions.Logging;
 
 var configOption = new Option<string?>("--config", "-c")
 {
-    Description = "Path to the configuration file. Format is determined by extension (.json, .yaml/.yml, .xml)."
+    Description = "Path to the configuration file. Format is determined by extension (.json, .json5, .yaml/.yml, .xml)."
 };
 
 var rootCommand = new RootCommand("Marv IRC Bot") { configOption };
@@ -70,7 +71,7 @@ await parseResult.InvokeAsync();
 
 /// <summary>
 /// Adds a configuration file source based on the file extension.
-/// Supports .json, .yaml/.yml, and .xml formats.
+/// Supports .json, .json5, .yaml/.yml, and .xml formats.
 /// </summary>
 static void AddConfigFile(IConfigurationBuilder config, string path, bool required)
 {
@@ -78,8 +79,8 @@ static void AddConfigFile(IConfigurationBuilder config, string path, bool requir
 
     switch (extension)
     {
-        case ".json":
-            config.AddJsonFile(path, optional: !required, reloadOnChange: false);
+        case ".json" or ".json5":
+            config.AddJson5File(path, optional: !required, reloadOnChange: false);
             break;
         case ".yaml" or ".yml":
             config.AddYamlFile(path, optional: !required, reloadOnChange: false);
@@ -90,6 +91,6 @@ static void AddConfigFile(IConfigurationBuilder config, string path, bool requir
         default:
             throw new InvalidOperationException(
                 $"Unsupported configuration file format: '{extension}'. " +
-                "Supported formats: .json, .yaml, .yml, .xml");
+                "Supported formats: .json, .json5, .yaml, .yml, .xml");
     }
 }

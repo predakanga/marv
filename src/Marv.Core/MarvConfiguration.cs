@@ -99,7 +99,7 @@ public record MarvConfiguration
 
     /// <summary>Channels to join on connect.</summary>
     [Description("Channels to join on connect.")]
-    public List<string> Channels { get; init; } = [];
+    public string[] Channels { get; init; } = [];
 
     /// <summary>The command prefix for plugin commands.</summary>
     [Description("Command prefix for plugin commands.")]
@@ -110,14 +110,14 @@ public record MarvConfiguration
     /// Defaults to a single "plugins" directory relative to the working directory.
     /// </summary>
     [Description("Directories to scan for plugin assemblies.")]
-    public List<string> PluginDirectories { get; init; } = ["plugins"];
+    public string[] PluginDirectories { get; init; } = ["plugins"];
 
     /// <summary>
     /// Plugin names to load. Only plugins whose name matches an entry in this list
     /// will be activated. If empty, no plugins are loaded.
     /// </summary>
     [Description("Plugin names to load.")]
-    public List<string> Plugins { get; init; } = [];
+    public string[] Plugins { get; init; } = [];
 
     /// <summary>
     /// Whether outbound message rate limiting is enabled.

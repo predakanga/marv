@@ -11,5 +11,5 @@ public record AuthPluginConfig
     /// <summary>
     /// List of services account names that are considered administrators.
     /// </summary>
-    public List<string> AdminAccounts { get; init; } = [];
+    public string[] AdminAccounts { get; init; } = [];
 }

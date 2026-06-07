@@ -109,7 +109,7 @@ internal static class ConfigurationOptions
             {
                 AddEnumEntry(entries, underlying, cliName, description, prop.Name);
             }
-            else if (propType.IsGenericType && propType.GetGenericTypeDefinition() == typeof(List<>))
+            else if (propType == typeof(string[]))
             {
                 var opt = new Option<string[]>(cliName)
                 {

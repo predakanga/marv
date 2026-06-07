@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `HandlerContext` abstract base class shared by `CommandContext` and
   `RegexMatchContext`, providing common `Sender`, `Channel`, `Bot`,
   `RawMessage`, `IsDirect`, and `ReplyAsync` members
+- JSON5 support for configuration files — comments, trailing commas, and
+  other JSON5 features are now supported in `.json` and `.json5` config files
 - Docker layer caching (`type=gha`) for release Docker builds
 - NuGet package caching in CI and release workflows
 - GitHub release notes are now extracted from CHANGELOG.md instead of
@@ -53,6 +55,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   preventing duplicate handler registrations and `[ProvidesService]` conflicts
 - Unmatched plugin names in config now produce a fatal error with "did you mean?"
   suggestions listing available plugins, instead of being silently ignored
+- Collection config properties (`Channels`, `PluginDirectories`, `Plugins`)
+  no longer double their values when multiple configuration layers are merged;
+  each layer now overwrites the previous value instead of appending
 
 ## [0.2.0] - 2026-06-06
 

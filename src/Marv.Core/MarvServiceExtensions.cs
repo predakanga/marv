@@ -58,7 +58,7 @@ public static class MarvServiceExtensions
         RegisterAssemblyResolvers(pluginDirs);
 
         IReadOnlyList<PluginDescriptor> sortedPlugins = [];
-        if (config.Plugins.Count > 0)
+        if (config.Plugins.Length > 0)
         {
             using var bootstrapLoggerFactory = LoggerFactory.Create(b => b.AddConsole());
             var bootstrapLogger = bootstrapLoggerFactory.CreateLogger("Marv.Bootstrap");

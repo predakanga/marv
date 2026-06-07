@@ -818,10 +818,10 @@ internal sealed class IrcBot : IBot
         await FanOutEventAsync(readyEvent, ct);
 
         // Join configured channels in bulk
-        if (_config.Channels.Count > 0)
+        if (_config.Channels.Length > 0)
         {
             _logger.LogInformation("Joining {Count} configured channel(s): {Channels}",
-                _config.Channels.Count, string.Join(", ", _config.Channels));
+                _config.Channels.Length, string.Join(", ", _config.Channels));
             await JoinMultipleAsync(_config.Channels, ct);
         }
     }

@@ -59,7 +59,7 @@ public class IrcServerFixture : IAsyncLifetime
             Nick = nick,
             User = "marvtest",
             RealName = "Marv Integration Test",
-            Channels = channels.ToList()
+            Channels = channels.ToArray()
         };
     }
 

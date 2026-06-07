@@ -1,32 +1,46 @@
 {
+  // Connection settings
   "Server": "irc.libera.chat",
   "Port": 6697,
   "UseTls": true,
   "TlsSkipCertificateValidation": false,
   "TlsCaCertFile": null,
+
+  // Bot identity
   "Nick": "Marv",
   "User": "marv",
   "RealName": "Marv IRC Bot",
+
+  // Authentication (uncomment and fill in as needed)
   "SaslUser": null,
   "SaslPassword": null,
   "OperName": null,
   "OperPassword": null,
   "NickServPassword": null,
+
+  // User modes to set after authentication (e.g. "+ix")
   "UserModes": null,
-  "Channels": ["#marv-test"],
+
+  // Channels to auto-join
+  "Channels": [
+    "#marv-test",
+  ],
+
   "CommandPrefix": "!",
   "PluginDirectories": ["plugins"],
   "Plugins": [
     "Greet",
     "Auth",
     "AuthConsumer",
-    "CannedResponses"
+    "CannedResponses",
   ],
+
+  // Plugin-specific configuration
   "Plugins:Greet": {
     "GreetMessage": "Welcome, {nick}!",
-    "GreetOnJoin": true
+    "GreetOnJoin": true,
   },
   "Plugins:Auth": {
-    "AdminAccounts": ["myadmin"]
-  }
+    "AdminAccounts": ["myadmin"],
+  },
 }

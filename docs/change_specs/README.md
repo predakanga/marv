@@ -29,7 +29,7 @@ Specs are numbered in recommended implementation order.
 | 16 | [Extract BatchChannels to Utility](016-batch-channels-utility.md) | Core | Trivial | None | **Done** |
 | 17 | [Common HandlerContext Base Class](017-common-handler-context.md) | Core | Small-Medium | None | **Done** |
 | 18 | [Remove PluginType from HandlerGroup](018-remove-handlergroup-plugintype.md) | Core | Small | None | **Done** |
-| 19 | [JSON5 Configuration Parser](019-json5-config-parser.md) | Host | Small-Medium | None | Pending |
+| 19 | [JSON5 Configuration Parser](019-json5-config-parser.md) | Host | Small-Medium | None | **Done** |
 
 Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
 Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
