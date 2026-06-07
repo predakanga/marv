@@ -8,9 +8,6 @@
 
 set -euo pipefail
 
-# Portable in-place sed (macOS sed requires a suffix with -i)
-sedi() { sed -i'' -e "$@"; }
-
 REPO_ROOT=$(git rev-parse --show-toplevel)
 cd "$REPO_ROOT"
 
@@ -73,14 +70,32 @@ fi
 
 echo "Releasing ${TAG}..."
 
-# --- Update files ---
+# --- Update files (awk for cross-platform compatibility) ---
 
-sedi "s|<Version>[^<]*</Version>|<Version>${VERSION}</Version>|" Directory.Build.props
+# Bump version in Directory.Build.props
+awk -v ver="$VERSION" '{
+    sub(/<Version>[^<]*<\/Version>/, "<Version>" ver "</Version>")
+    print
+}' Directory.Build.props > Directory.Build.props.tmp && mv Directory.Build.props.tmp Directory.Build.props
 
-sedi "s/^## \[Unreleased\]$/## [Unreleased]\n\n## [${VERSION}] - ${DATE}/" CHANGELOG.md
+# Insert version heading after [Unreleased] in CHANGELOG.md
+awk -v ver="$VERSION" -v date="$DATE" '{
+    print
+    if ($0 == "## [Unreleased]") {
+        print ""
+        print "## [" ver "] - " date
+    }
+}' CHANGELOG.md > CHANGELOG.md.tmp && mv CHANGELOG.md.tmp CHANGELOG.md
 
+# Add comparison link before the first existing one
 PREV_TAG=$(grep -o '^\[[0-9][0-9.]*\]' CHANGELOG.md | head -2 | tail -1 | tr -d '[]')
-sedi "/^\[${PREV_TAG}\]:/ i\\[${VERSION}]: https://github.com/predakanga/marv/compare/v${PREV_TAG}...v${VERSION}" CHANGELOG.md
+awk -v ver="$VERSION" -v prev="$PREV_TAG" -v done=0 '{
+    if (!done && $0 ~ "^\\[" prev "\\]:") {
+        print "[" ver "]: https://github.com/predakanga/marv/compare/v" prev "...v" ver
+        done = 1
+    }
+    print
+}' CHANGELOG.md > CHANGELOG.md.tmp && mv CHANGELOG.md.tmp CHANGELOG.md
 
 # --- Commit and tag ---
 

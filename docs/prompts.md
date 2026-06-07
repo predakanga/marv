@@ -1358,3 +1358,8 @@
 **Date**: 2026-06-07T00:00:00Z
 
 > The prepare-release script doesn't run on macOS - grep doesn't support `-P`
+
+> Still erroring:
+> > sed: 1: "/^\[0.3.1\]:/ i\[0.4.0] ...": extra characters after \ at the end of i command
+>
+> Also, the inline sed workaround doesn't seem to be working, it left a file called `CHANGELOG.md-e` behind
