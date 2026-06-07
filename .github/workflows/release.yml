@@ -80,17 +80,20 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ matrix.rid }}-${{ hashFiles('**/*.csproj', 'Marv.slnx') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-${{ matrix.rid }}-
+            nuget-${{ runner.os }}-
+
       - name: Publish
         run: |
           VERSION=${{ needs.version.outputs.version }}
           dotnet publish src/Marv/Marv.csproj -c Release -r ${{ matrix.rid }} -o publish/${{ matrix.artifact }} -p:Version="$VERSION"
-          for plugin in src/plugins/*/; do
-            dotnet build "$plugin" -c Release -r ${{ matrix.rid }} -p:Version="$VERSION"
-            name=$(basename "$plugin")
-            mkdir -p publish/${{ matrix.artifact }}/plugins
-            cp "$plugin/bin/Release/net10.0/${{ matrix.rid }}/$name.dll" publish/${{ matrix.artifact }}/plugins/ 2>/dev/null || \
-            cp "$plugin/bin/Release/net10.0/$name.dll" publish/${{ matrix.artifact }}/plugins/
-          done
+          mkdir -p publish/${{ matrix.artifact }}/plugins
 
       - name: Archive
         run: |
@@ -130,6 +133,8 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.version.outputs.version }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   github-release:
     runs-on: ubuntu-latest
@@ -143,8 +148,28 @@ jobs:
           path: artifacts
           pattern: marv-*
 
+      - name: Extract release notes from CHANGELOG.md
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          NOTES=$(awk -v ver="$VERSION" '
+            /^## \[/ {
+              if (found) exit
+              if ($0 ~ "\\[" ver "\\]") {
+                found=1
+                next
+              }
+            }
+            found { print }
+          ' CHANGELOG.md)
+
+          if [ -z "$NOTES" ]; then
+            NOTES="See [CHANGELOG.md](CHANGELOG.md) for details."
+          fi
+
+          echo "$NOTES" > release-notes.md
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          generate_release_notes: true
+          body_path: release-notes.md
           files: artifacts/**/*.tar.gz

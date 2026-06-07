@@ -7,7 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Docker layer caching (`type=gha`) for release Docker builds
+- NuGet package caching in CI and release workflows
+- GitHub release notes are now extracted from CHANGELOG.md instead of
+  auto-generated from commit history
+
 ### Changed
+
+- Docker image no longer includes sample plugins — users add plugins by
+  creating a derived image (`FROM ghcr.io/predakanga/marv:latest`)
+- Binary release archives no longer include sample plugins
 
 - Plugin loading failures are now fatal — the bot will not start if any
   requested plugin cannot be loaded, instead of silently running in a degraded

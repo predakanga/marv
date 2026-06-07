@@ -1215,3 +1215,9 @@
 **Date**: 2026-06-07T00:00:00Z
 
 > Regarding CS-012, instead of the volume mount approach I'd suggest creating a new docker image and adding plugins there
+
+## Implement CS-012 through CS-014
+
+**Date**: 2026-06-07T00:00:00Z
+
+> Go ahead and implement CS-012 through CS-014

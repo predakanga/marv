@@ -1,9 +1,10 @@
-# CS-012: Dockerfile Sample Plugin Inclusion
+# CS-012: Dockerfile Sample Plugin Inclusion — COMPLETED
 
 **Source:** `TODO.md` item 1
 **Scope:** Dockerfile, CI/CD
 **Complexity:** Small
 **Breaking changes:** None
+**Status:** Completed
 
 ---
 

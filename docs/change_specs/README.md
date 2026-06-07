@@ -22,9 +22,9 @@ Specs are numbered in recommended implementation order.
 | 10 | [Case Mapping for Plugins](010-casemapping-for-plugins.md) | Core | Small | None | **Done** |
 | 11 | [Plugin Loading Robustness](011-plugin-loading-robustness.md) | Core | Medium-Large | None | **Done** |
 
-| 12 | [Dockerfile Sample Plugin Inclusion](012-dockerfile-sample-plugins.md) | Dockerfile | Small | None | Pending |
-| 13 | [Docker Action Build Caching](013-docker-action-caching.md) | CI/CD | Small | None | Pending |
-| 14 | [Release Notes from CHANGELOG.md](014-release-notes-from-changelog.md) | CI/CD | Small | None | Pending |
+| 12 | [Dockerfile Sample Plugin Inclusion](012-dockerfile-sample-plugins.md) | Dockerfile | Small | None | **Done** |
+| 13 | [Docker Action Build Caching](013-docker-action-caching.md) | CI/CD | Small | None | **Done** |
+| 14 | [Release Notes from CHANGELOG.md](014-release-notes-from-changelog.md) | CI/CD | Small | None | **Done** |
 | 15 | [Regex Options for OnRegex](015-onregex-options.md) | Core | Small | None | Pending |
 | 16 | [Extract BatchChannels to Utility](016-batch-channels-utility.md) | Core | Trivial | None | Pending |
 | 17 | [Common HandlerContext Base Class](017-common-handler-context.md) | Core | Small-Medium | None | Pending |

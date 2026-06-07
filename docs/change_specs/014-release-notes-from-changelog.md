@@ -1,9 +1,10 @@
-# CS-014: Generate Release Notes from CHANGELOG.md
+# CS-014: Generate Release Notes from CHANGELOG.md — COMPLETED
 
 **Source:** `TODO.md` item 3
 **Scope:** CI/CD (`.github/workflows/release.yml`)
 **Complexity:** Small
 **Breaking changes:** None
+**Status:** Completed
 
 ---
 
