@@ -1255,3 +1255,9 @@
 **Date**: 2026-06-07T00:00:00Z
 
 > Okay, go ahead and implement CS-019. While you're at it, there's a bug I encountered that we should handle - while testing I discovered that PluginDirectories had doubled values - I think this was caused by the different config layers being merged (i.e. default + config file), not overwriting each other. I think the overwriting approach gives the user the least surprise.
+
+## Prepare v0.3.0 release
+
+**Date**: 2026-06-07T00:00:00Z
+
+> Okay, prepare to release v0.3

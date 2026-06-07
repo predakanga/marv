@@ -1,5 +1,5 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0.300 AS build
-ARG VERSION=0.2.0
+ARG VERSION=0.3.0
 WORKDIR /src
 
 # Restore dependencies first for layer caching
