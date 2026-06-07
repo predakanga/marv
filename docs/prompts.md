@@ -1306,3 +1306,9 @@
 **Date**: 2026-06-07T00:00:00Z
 
 > Okay, let's release this as v0.3.1. Update the versions please, then create the tag (annotated so that I can use `git push --follow-tags`) and I'll push it.
+
+## Remove redundant CI trigger on tags
+
+**Date**: 2026-06-07T00:00:00Z
+
+> When I pushed that tag, 3 GitHub actions were created - one for the push to main (just the CI workflow), two for the new tag (CI and Release workflows). Do we actually need to run the CI workflow on tags? Because the Release workflow just waits for CI to pass on the commit SHA (which matches the CI run on main), it seems like it would be fine to drop it.
