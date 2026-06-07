@@ -1363,3 +1363,13 @@
 > > sed: 1: "/^\[0.3.1\]:/ i\[0.4.0] ...": extra characters after \ at the end of i command
 >
 > Also, the inline sed workaround doesn't seem to be working, it left a file called `CHANGELOG.md-e` behind
+
+## Fix prepare-release picking wrong origin tag
+
+**Date**: 2026-06-07T00:00:00Z
+
+> We're almost there - I just ran the tool and it picked the wrong origin tag. See this diff:
+>
+>      [0.3.2]: https://github.com/predakanga/marv/compare/v0.3.1...v0.3.2
+>     +[0.4.0]: https://github.com/predakanga/marv/compare/v0.3.1...v0.4.0
+>      [0.3.1]: https://github.com/predakanga/marv/compare/v0.3.0...v0.3.1

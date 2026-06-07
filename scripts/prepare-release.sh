@@ -88,7 +88,7 @@ awk -v ver="$VERSION" -v date="$DATE" '{
 }' CHANGELOG.md > CHANGELOG.md.tmp && mv CHANGELOG.md.tmp CHANGELOG.md
 
 # Add comparison link before the first existing one
-PREV_TAG=$(grep -o '^\[[0-9][0-9.]*\]' CHANGELOG.md | head -2 | tail -1 | tr -d '[]')
+PREV_TAG=$(grep -o '^\[[0-9][0-9.]*\]:' CHANGELOG.md | head -1 | tr -d '[]:')
 awk -v ver="$VERSION" -v prev="$PREV_TAG" -v done=0 '{
     if (!done && $0 ~ "^\\[" prev "\\]:") {
         print "[" ver "]: https://github.com/predakanga/marv/compare/v" prev "...v" ver
