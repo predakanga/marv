@@ -1300,3 +1300,9 @@
 > Your point about SelfContained is valid though, and the change from "pluginDirectory" to "dir" is worth making.
 
 > You haven't added those prompts to the log. Make sure you include my follow-up clarifying that Marv.Core is in the runtime dir as well. Once that's done, you can add and commit the changes.
+
+## Prepare v0.3.1 release
+
+**Date**: 2026-06-07T00:00:00Z
+
+> Okay, let's release this as v0.3.1. Update the versions please, then create the tag (annotated so that I can use `git push --follow-tags`) and I'll push it.
