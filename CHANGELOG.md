@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   resolver now includes runtime assemblies so the core assembly can be found
 - `--log-level` CLI option not applying to bootstrap logging during plugin
   discovery, causing scan warnings/errors to be hidden
+- Plugin metadata scanner failing to resolve `Marv.Core` assembly when plugin
+  DLLs are in a separate directory from the application
 
 ## [0.3.0] - 2026-06-07
 

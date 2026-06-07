@@ -1274,3 +1274,13 @@
 > >    at Marv.Core.Plugin.PluginMetadataScanner.TryScanAssembly(String assemblyPath, ILogger logger) in /workspaces/marv/src/Marv.Core/Plugin/PluginMetadataScanner.cs:line 79
 >
 > Additionally, the warning log I would expect from this was never shown - inspecting the logger object it appears that it's set to Informational level, despite passing --log-level Trace on the command line.
+
+## Fix MetadataLoadContext failing to resolve Marv.Core
+
+**Date**: 2026-06-07T00:00:00Z
+
+> Plugin loading still fails with the following exception:
+> > Exception has occurred: CLR/System.IO.FileNotFoundException
+> > Exception thrown: 'System.IO.FileNotFoundException' in System.Reflection.MetadataLoadContext.dll: 'Could not find assembly 'Marv.Core, Version=0.3.0.0, Culture=neutral, PublicKeyToken=null'. Either explicitly load this assembly using a method such as LoadFromAssemblyPath() or use a MetadataAssemblyResolver that returns a valid assembly.'
+>
+> I suspect this is because we're using `PublishSingleFile`, which loads the assemblies direct from memory. If there's no easy way around this, it would be okay to disable that option.
