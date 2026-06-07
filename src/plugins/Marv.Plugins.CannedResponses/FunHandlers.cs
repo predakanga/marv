@@ -37,7 +37,7 @@ public class FunHandlers
     }
 
     /// <summary>Responds when someone says "good bot".</summary>
-    [OnRegex(@"(?i)\bgood\s+bot\b")]
+    [OnRegex(@"\bgood\s+bot\b", Options = RegexOptions.IgnoreCase)]
     public async Task HandleGoodBot(RegexMatchContext ctx, CancellationToken ct)
     {
         await ctx.ReplyAsync("Thank you! 😊", ct);

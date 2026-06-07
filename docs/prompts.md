@@ -1312,3 +1312,9 @@
 **Date**: 2026-06-07T00:00:00Z
 
 > When I pushed that tag, 3 GitHub actions were created - one for the push to main (just the CI workflow), two for the new tag (CI and Release workflows). Do we actually need to run the CI workflow on tags? Because the Release workflow just waits for CI to pass on the commit SHA (which matches the CI run on main), it seems like it would be fine to drop it.
+
+## Update FunHandlers to use OnRegex Options property
+
+**Date**: 2026-06-07T00:00:00Z
+
+> Also, a minor issue that I noticed - `HandleGoodBot` in @src/plugins/Marv.Plugins.CannedResponses/FunHandlers.cs still uses the old-style regex options. Update it to use the new style
