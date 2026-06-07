@@ -1324,3 +1324,11 @@
 **Date**: 2026-06-07T00:00:00Z
 
 > It turns out that AppContext.BaseDirectory is only needed when SelfContained is false, which my testing didn't catch. I've made the appropriate change in code, can you log the change, test and prepare to release it as v0.3.2
+
+## Add release preparation script
+
+**Date**: 2026-06-07T00:00:00Z
+
+> Asking you to prepare these releases seems wasteful - can you write a script to automate it?
+
+> Let's make it a bit more friendly - give the user a choice of whether to bump the major, minor or patch version. Make it interactive, but let the user pass an argument to bypass that
