@@ -1209,3 +1209,9 @@
 **Date**: 2026-06-07T00:00:00Z
 
 > I'd like you to write change specs for TODO items 1-4, 6-9
+
+## Revise CS-012 to use derived Docker images instead of volume mounts
+
+**Date**: 2026-06-07T00:00:00Z
+
+> Regarding CS-012, instead of the volume mount approach I'd suggest creating a new docker image and adding plugins there
