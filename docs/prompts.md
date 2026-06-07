@@ -1338,3 +1338,9 @@
 **Date**: 2026-06-07T00:00:00Z
 
 > The docker step of the release process still takes quite a while - a lot of it is spent on dotnet restoring projects. Can we improve this? Cache mounts could be a place to start.
+
+## Update release runbook for bump script
+
+**Date**: 2026-06-07T00:00:00Z
+
+> One more thing, we should probably update the release runbook to mention the bump script

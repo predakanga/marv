@@ -30,26 +30,27 @@ dotnet test -c Release --filter "Category!=Integration"
 
 Ensure all tests pass and the build is clean.
 
-### 3. Bump the version number
+### 3. Prepare the release
 
-Update the version in these locations:
-
-- **`Directory.Build.props`** — the `<Version>` property (sets assembly and
-  package versions for all projects)
-- **`Dockerfile`** — the `ARG VERSION=` default value
-- **`CHANGELOG.md`** — rename the `[Unreleased]` section to
-  `[X.Y.Z] - YYYY-MM-DD` and add a comparison link at the bottom of the file
-
-Commit these changes to `main` before tagging.
-
-### 4. Create and push a version tag
+Run the release preparation script:
 
 ```bash
-git tag vX.Y.Z
-git push origin vX.Y.Z
+./scripts/prepare-release.sh        # interactive — prompts for major/minor/patch
+./scripts/prepare-release.sh patch   # non-interactive
 ```
 
-Replace `vX.Y.Z` with the version number you chose.
+This will:
+
+- Bump the `<Version>` in `Directory.Build.props`
+- Move the `[Unreleased]` section in `CHANGELOG.md` to a dated version heading
+- Add a comparison link to the bottom of `CHANGELOG.md`
+- Commit the changes and create an annotated tag
+
+### 4. Push the tag
+
+```bash
+git push --follow-tags
+```
 
 ### 5. Monitor the release workflow
 
