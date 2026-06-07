@@ -60,7 +60,13 @@ public static class MarvServiceExtensions
         IReadOnlyList<PluginDescriptor> sortedPlugins = [];
         if (config.Plugins.Length > 0)
         {
-            using var bootstrapLoggerFactory = LoggerFactory.Create(b => b.AddConsole());
+            var configuredLogLevel = configuration.GetValue<LogLevel?>("LogLevel");
+            using var bootstrapLoggerFactory = LoggerFactory.Create(b =>
+            {
+                b.AddConsole();
+                if (configuredLogLevel.HasValue)
+                    b.SetMinimumLevel(configuredLogLevel.Value);
+            });
             var bootstrapLogger = bootstrapLoggerFactory.CreateLogger("Marv.Bootstrap");
 
             // Phase 1: Metadata scan — identify plugins without loading assemblies

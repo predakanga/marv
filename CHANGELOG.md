@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Plugin loading failing with `FileNotFoundException` from
+  `MetadataLoadContext` when scanning plugin assemblies — the metadata
+  resolver now includes runtime assemblies so the core assembly can be found
+- `--log-level` CLI option not applying to bootstrap logging during plugin
+  discovery, causing scan warnings/errors to be hidden
+
 ## [0.3.0] - 2026-06-07
 
 ### Added

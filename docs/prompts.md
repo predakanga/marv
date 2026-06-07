@@ -1261,3 +1261,16 @@
 **Date**: 2026-06-07T00:00:00Z
 
 > Okay, prepare to release v0.3
+
+## Fix plugin loading and bootstrap log level
+
+**Date**: 2026-06-07T00:00:00Z
+
+> Plugin loading isn't working at all at the minute. Marv reports "Plugin 'Moderation' was requested in the config but no config with that name was found.", but the root cause seems to be an exception occuring in PluginMetadataScanner.TryScanAssembly:
+> > Exception has occurred: CLR/System.IO.FileNotFoundException
+> > Exception thrown: 'System.IO.FileNotFoundException' in System.Reflection.MetadataLoadContext.dll: 'Could not find core assembly. Either specify a valid core assembly name in the MetadataLoadContext constructor or provide a MetadataAssemblyResolver that can load the core assembly.'
+> >    at System.Reflection.TypeLoading.CoreTypes..ctor(MetadataLoadContext loader, String coreAssemblyName)
+> >    at System.Reflection.MetadataLoadContext..ctor(MetadataAssemblyResolver resolver, String coreAssemblyName)
+> >    at Marv.Core.Plugin.PluginMetadataScanner.TryScanAssembly(String assemblyPath, ILogger logger) in /workspaces/marv/src/Marv.Core/Plugin/PluginMetadataScanner.cs:line 79
+>
+> Additionally, the warning log I would expect from this was never shown - inspecting the logger object it appears that it's set to Informational level, despite passing --log-level Trace on the command line.

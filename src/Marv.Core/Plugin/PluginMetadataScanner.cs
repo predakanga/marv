@@ -71,10 +71,12 @@ internal static class PluginMetadataScanner
     {
         try
         {
+            var runtimeDir = Path.GetDirectoryName(typeof(object).Assembly.Location)!;
+            var runtimeAssemblies = Directory.GetFiles(runtimeDir, "*.dll");
+            var pluginAssemblies = Directory.GetFiles(
+                Path.GetDirectoryName(assemblyPath)!, "*.dll");
             var resolver = new PathAssemblyResolver(
-                Directory.GetFiles(
-                    Path.GetDirectoryName(assemblyPath)!, "*.dll")
-                .Append(typeof(object).Assembly.Location));
+                pluginAssemblies.Concat(runtimeAssemblies).Distinct());
 
             using var mlc = new MetadataLoadContext(resolver);
             var assembly = mlc.LoadFromAssemblyPath(assemblyPath);
