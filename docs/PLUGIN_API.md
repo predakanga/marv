@@ -279,7 +279,7 @@ public GreetExamplePlugin(IBot bot, IPluginActivator activator, ILoggerFactory l
 }
 ```
 
-Config binds to `Plugins:{Section}` in appsettings (e.g. `Plugins:Greet`).
+Config binds to a root-level section in the configuration file (e.g. `"Greet"`).
 
 ---
 

@@ -3,7 +3,7 @@ using Marv.Core.Plugin;
 namespace Marv.Plugins.Moderation;
 
 /// <summary>
-/// Configuration for the Moderation plugin. Bound to the "Plugins:Moderation" section.
+/// Configuration for the Moderation plugin. Bound to the "Moderation" configuration section.
 /// Demonstrates the typed plugin configuration pattern with <see cref="PluginConfigAttribute"/>.
 /// </summary>
 [PluginConfig(Section = "Moderation")]

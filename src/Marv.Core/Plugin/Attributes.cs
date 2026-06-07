@@ -37,13 +37,14 @@ public sealed class PluginNameAttribute(string name) : Attribute
 
 /// <summary>
 /// Tags a configuration class for automatic registration as IOptions&lt;T&gt;
-/// bound to the Plugins:{Section} configuration section.
+/// bound to a root-level configuration section.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class PluginConfigAttribute : Attribute
 {
     /// <summary>
-    /// The configuration section name under "Plugins" (e.g. "Greet" maps to "Plugins:Greet").
+    /// The root-level configuration section name (e.g. <c>"Greet"</c> binds to the
+    /// <c>Greet</c> section in the configuration file).
     /// </summary>
     public required string Section { get; init; }
 }

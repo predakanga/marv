@@ -92,13 +92,13 @@ public sealed class PluginManager
         {
             foreach (var (configType, section) in descriptor.Configurations)
             {
-                var configSection = configuration.GetSection($"Plugins:{section}");
+                var configSection = configuration.GetSection(section);
                 var method = typeof(OptionsConfigurationServiceCollectionExtensions)
                     .GetMethod("Configure", [typeof(IServiceCollection), typeof(IConfiguration)])!
                     .MakeGenericMethod(configType);
                 method.Invoke(null, [services, configSection]);
 
-                bootstrapLogger?.LogDebug("Registered configuration {Type} for section Plugins:{Section}",
+                bootstrapLogger?.LogDebug("Registered configuration {Type} for section {Section}",
                     configType.Name, section);
             }
         }

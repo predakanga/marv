@@ -159,7 +159,7 @@ logic. Handler methods on direct `IPlugin` implementations must be
 Plugins that need configuration declare a separate configuration
 class tagged with `[PluginConfig(Section = "Name")]`. The plugin
 loader discovers these during assembly scanning and registers
-`IOptions<TConfig>` bound to the `Plugins:{Section}` configuration
+`IOptions<TConfig>` bound to the matching root-level configuration
 section — no `ConfigureServices` boilerplate needed. Plugins access
 their configuration via constructor injection of `IOptions<TConfig>`.
 
@@ -615,7 +615,7 @@ public class GreetPlugin : MarvPlugin
 }
 ```
 
-Configuration is automatically bound to `Plugins:Greet` in the
+Configuration is automatically bound to the `Greet` section in the
 config file (from the `[PluginConfig]` attribute's `Section`). No
 `ConfigureServices` needed.
 

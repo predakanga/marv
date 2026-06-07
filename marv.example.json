@@ -36,11 +36,11 @@
   ],
 
   // Plugin-specific configuration
-  "Plugins:Greet": {
+  "Greet": {
     "GreetMessage": "Welcome, {nick}!",
     "GreetOnJoin": true,
   },
-  "Plugins:Auth": {
+  "Auth": {
     "AdminAccounts": ["myadmin"],
   },
 }

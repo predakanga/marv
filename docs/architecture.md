@@ -360,7 +360,7 @@ sequence inside `Marv.Core`.
 
 6. **Plugin configuration registration**: For each configuration class
    tagged with `[PluginConfig(Section = "Name")]`, automatically
-   register `IOptions<TConfig>` bound to the `Plugins:{Section}`
+   register `IOptions<TConfig>` bound to the matching root-level
    configuration section. No boilerplate needed in the plugin —
    plugins access configuration via constructor injection of
    `IOptions<TConfig>`.
@@ -590,7 +590,7 @@ public class GreetPlugin : MarvPlugin
 The plugin loader discovers configuration classes tagged with
 `[PluginConfig(Section = "Name")]` during assembly scanning and
 automatically registers `IOptions<TConfig>` bound to the
-`Plugins:{Section}` configuration section. Plugins access their
+the matching root-level configuration section. Plugins access their
 configuration via constructor injection of `IOptions<TConfig>`.
 
 There is no need for a `ConfigureServices` method just for

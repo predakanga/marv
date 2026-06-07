@@ -3,7 +3,7 @@ using Marv.Core.Plugin;
 namespace Marv.Plugins.Greet;
 
 /// <summary>
-/// Configuration for the Greet plugin. Bound to the "Plugins:Greet" configuration section.
+/// Configuration for the Greet plugin. Bound to the "Greet" configuration section.
 /// </summary>
 [PluginConfig(Section = "Greet")]
 public record GreetPluginConfig
