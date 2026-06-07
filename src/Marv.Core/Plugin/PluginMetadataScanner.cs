@@ -76,6 +76,7 @@ internal static class PluginMetadataScanner
             // Select all DLLs from the runtime dir as well as all plugin dirs
             var allAssemblies = pluginDirectories
                 .Append(RuntimeEnvironment.GetRuntimeDirectory())
+                .Append(AppContext.BaseDirectory)
                 .SelectMany(dir => Directory.GetFiles(dir, "*.dll"))
                 .Distinct();
             var resolver = new PathAssemblyResolver(allAssemblies);

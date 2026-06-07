@@ -1318,3 +1318,9 @@
 **Date**: 2026-06-07T00:00:00Z
 
 > Also, a minor issue that I noticed - `HandleGoodBot` in @src/plugins/Marv.Plugins.CannedResponses/FunHandlers.cs still uses the old-style regex options. Update it to use the new style
+
+## Fix MetadataLoadContext for framework-dependent deployments
+
+**Date**: 2026-06-07T00:00:00Z
+
+> It turns out that AppContext.BaseDirectory is only needed when SelfContained is false, which my testing didn't catch. I've made the appropriate change in code, can you log the change, test and prepare to release it as v0.3.2
