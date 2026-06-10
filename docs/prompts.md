@@ -1373,3 +1373,14 @@
 >      [0.3.2]: https://github.com/predakanga/marv/compare/v0.3.1...v0.3.2
 >     +[0.4.0]: https://github.com/predakanga/marv/compare/v0.3.1...v0.4.0
 >      [0.3.1]: https://github.com/predakanga/marv/compare/v0.3.0...v0.3.1
+
+## Create change specifications for downstream feature requests
+
+**Date**: 2026-06-10T00:00:00Z
+
+> I've collected a few feature requests from downstream; I'd like you to create change specifications for each of them:
+> - Add a statistics property on the bot (gather uptime, bytes/lines sent/received, commands executed, etc)
+> - Add support for managing the bot's message queue (check how many items are in the queue, clear the queue)
+> - Update the plugin API documentation to note that the full IOptions API is available, including IOptionsMonitor
+> - Allow user to override the CTCP version response (should this be done by a config option, writing a property on IBot, subclassing IrcBot, etc?)
+> - Implement SendAndAwaitAsync fallback support for messages like WHO which have an ENDOF* message

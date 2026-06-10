@@ -31,6 +31,13 @@ Specs are numbered in recommended implementation order.
 | 18 | [Remove PluginType from HandlerGroup](018-remove-handlergroup-plugintype.md) | Core | Small | None | **Done** |
 | 19 | [JSON5 Configuration Parser](019-json5-config-parser.md) | Host | Small-Medium | None | **Done** |
 
+| 20 | [Bot Statistics Property](020-bot-statistics.md) | Core | Medium | None | **Pending** |
+| 21 | [Message Queue Management](021-message-queue-management.md) | Core | Small | None | **Pending** |
+| 22 | [Document IOptions API Variants](022-plugin-api-ioptions-docs.md) | Docs | Trivial | None | **Pending** |
+| 23 | [CTCP VERSION Response Override](023-ctcp-version-override.md) | Core | Small | None | **Pending** |
+| 24 | [SendAndAwaitAsync ENDOF* Fallback](024-sendandawait-endof-fallback.md) | Core | Medium | None | **Pending** |
+
 Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
 Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
 Specs 12-14 are CI/CD and infrastructure changes. Specs 15-19 are code changes.
+Specs 20-24 are downstream feature requests (code and docs).
