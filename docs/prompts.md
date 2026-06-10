@@ -1410,3 +1410,13 @@
 **Date**: 2026-06-11T00:00:00Z
 
 > Update change spec 22 to set reloadOnChange on all file-based config providers. It's all part of the same story, so it can go in the same change spec
+
+## Revise CS-023 to drop delegate in favor of config-only approach
+
+**Date**: 2026-06-11T00:00:00Z
+
+> Regarding CS-23, the use of a delegate is elegant but it's the only such use throughout the entire project. Is there another way we can achieve this that's more in line with Marv's current API?
+
+> I don't think OnRawMessage gives us any way to suppress the default response, does it? Or is that idea that it would be disabled in the config then handled in OnRawMessage?
+
+> We actually already have an equivalent for that - OnEvent with a CtcpEvent. I'd suggest we go with pattern A, but in the documentation note that the user can override the default response by setting an empty response and implementing that.
