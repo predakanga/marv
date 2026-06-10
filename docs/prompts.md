@@ -1404,3 +1404,9 @@
 **Date**: 2026-06-10T00:00:00Z
 
 > That integration test really shouldn't be flaky - can you run it with trace-level logging and see what's going on?
+
+## Expand CS-022 to include reloadOnChange on all file-based config providers
+
+**Date**: 2026-06-11T00:00:00Z
+
+> Update change spec 22 to set reloadOnChange on all file-based config providers. It's all part of the same story, so it can go in the same change spec
