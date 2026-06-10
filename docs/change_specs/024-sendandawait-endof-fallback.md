@@ -104,9 +104,14 @@ else if (EndOfNumerics.TryGetValue(message.Command, out var terminator))
 }
 else
 {
-    // Unknown command, no correlation possible
-    await SendRawAsync(message, ct);
-    return [];
+    // Unknown command, no correlation possible — warn and throw
+    _logger.LogWarning(
+        "SendAndAwaitAsync: no labeled-response support and no known ENDOF* " +
+        "terminator for command '{Command}'. Response correlation is not possible",
+        message.Command);
+    throw new NotSupportedException(
+        $"Cannot correlate responses for '{message.Command}': the server does not " +
+        $"support labeled-response and no ENDOF* fallback is defined for this command.");
 }
 ```
 
@@ -171,9 +176,13 @@ concurrent `WHO #channel1` and `WHO #channel2` requests would
 cross-contaminate. Parameter matching isn't perfect (servers may
 normalize the parameter), but it handles the common case.
 
-**What about commands not in the table?** The fallback still returns `[]`
-for unknown commands. The table can be extended over time. Plugins with
-exotic needs can always parse raw messages via `[OnRawMessage]`.
+**What about commands not in the table?** The fallback logs a warning and
+throws `NotSupportedException`. Silent empty returns would mask bugs —
+a plugin calling `SendAndAwaitAsync` expects responses, and getting an
+empty list with no indication that correlation failed is misleading.
+Throwing forces the caller to handle the unsupported case explicitly
+(e.g. falling back to `SendRawAsync` + `[OnRawMessage]`). The table
+can be extended over time as new commands are identified.
 
 **Why not a general "numeric sequence collector"?** Over-engineering. The
 terminator pattern is well-established in the IRC protocol and covers all
@@ -189,6 +198,8 @@ the common query commands.
   — verify TimeoutException after 30s.
 - **Unit test:** Two concurrent WHO requests for different targets —
   verify responses are correctly separated.
+- **Unit test:** Send an unsupported command without labeled-response —
+  verify a warning is logged and `NotSupportedException` is thrown.
 - **Integration test:** Connect to ngircd (which does not support
   labeled-response), send WHO, verify the reply list is non-empty.
 
