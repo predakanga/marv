@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `WaitForReadyAsync` and `WaitForRegistrationAsync` race condition where
+  calling either method immediately after `Task.Run(() => bot.RunAsync(...))`
+  could return before the bot had actually completed registration, causing
+  subsequent commands to be sent before the IRC connection was ready
+
 ## [0.4.0] - 2026-06-07
 
 ### Changed

@@ -1691,7 +1691,14 @@ internal sealed class IrcBot : IBot
     /// </summary>
     public async Task WaitForRegistrationAsync(CancellationToken ct)
     {
-        if (_registrationTcs is null) return;
+        // Spin-wait for RunAsync to initialize _registrationTcs (avoids race
+        // when called immediately after Task.Run(() => bot.RunAsync(...))).
+        while (_registrationTcs is null)
+        {
+            ct.ThrowIfCancellationRequested();
+            await Task.Delay(10, ct);
+        }
+
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         cts.CancelAfter(TimeSpan.FromSeconds(30));
         await _registrationTcs.Task.WaitAsync(cts.Token);
@@ -1703,7 +1710,14 @@ internal sealed class IrcBot : IBot
     /// </summary>
     public async Task WaitForReadyAsync(CancellationToken ct)
     {
-        if (_readyTcs is null) return;
+        // Spin-wait for RunAsync to initialize _readyTcs (avoids race
+        // when called immediately after Task.Run(() => bot.RunAsync(...))).
+        while (_readyTcs is null)
+        {
+            ct.ThrowIfCancellationRequested();
+            await Task.Delay(10, ct);
+        }
+
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         cts.CancelAfter(TimeSpan.FromSeconds(60));
         await _readyTcs.Task.WaitAsync(cts.Token);

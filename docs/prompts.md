@@ -1398,3 +1398,9 @@
 > Okay, for CS-025 resolve the open questions as follows, then implement:
 > 1. No custom config at this point
 > 2. Share the container across test classes
+
+## Investigate flaky Bot_JoinMultipleAsync integration test
+
+**Date**: 2026-06-10T00:00:00Z
+
+> That integration test really shouldn't be flaky - can you run it with trace-level logging and see what's going on?
