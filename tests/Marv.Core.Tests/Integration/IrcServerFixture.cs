@@ -1,4 +1,5 @@
-using System.Net.Sockets;
+using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Containers;
 using Marv.Core.Irc;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
@@ -6,23 +7,33 @@ using Xunit;
 namespace Marv.Core.Tests.Integration;
 
 /// <summary>
-/// Shared fixture that verifies the local IRC server is reachable.
-/// Tests using this fixture are skipped when the server is not available.
+/// Shared fixture that starts an ngircd container via Testcontainers.
+/// The container is started once and shared across all integration tests
+/// via the <see cref="IrcServerCollection"/> collection fixture.
 /// </summary>
 public class IrcServerFixture : IAsyncLifetime
 {
-    public const string Host = "localhost";
-    public const int Port = 6667;
+    private readonly IContainer _container = new ContainerBuilder("linuxserver/ngircd")
+        .WithPortBinding(6667, true)
+        .WithWaitStrategy(Wait.ForUnixContainer()
+            .UntilInternalTcpPortIsAvailable(6667))
+        .Build();
 
-    /// <summary>True if the IRC server was reachable during setup.</summary>
-    public bool IsAvailable { get; private set; }
+    /// <summary>The hostname to connect to the IRC server.</summary>
+    public string Host => _container.Hostname;
+
+    /// <summary>The mapped host port for the IRC server.</summary>
+    public int Port => _container.GetMappedPublicPort(6667);
 
     public async Task InitializeAsync()
     {
-        IsAvailable = await ProbeServerAsync();
+        await _container.StartAsync();
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public async Task DisposeAsync()
+    {
+        await _container.DisposeAsync();
+    }
 
     /// <summary>
     /// Creates a connected <see cref="IrcConnection"/> to the test server.
@@ -49,7 +60,7 @@ public class IrcServerFixture : IAsyncLifetime
     /// <summary>
     /// Creates a <see cref="MarvConfiguration"/> suitable for testing.
     /// </summary>
-    public static MarvConfiguration CreateConfig(string nick = "MarvTest", params string[] channels)
+    public MarvConfiguration CreateConfig(string nick = "MarvTest", params string[] channels)
     {
         return new MarvConfiguration
         {
@@ -61,20 +72,5 @@ public class IrcServerFixture : IAsyncLifetime
             RealName = "Marv Integration Test",
             Channels = channels.ToArray()
         };
-    }
-
-    private static async Task<bool> ProbeServerAsync()
-    {
-        try
-        {
-            using var client = new TcpClient();
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
-            await client.ConnectAsync(Host, Port, cts.Token);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
     }
 }

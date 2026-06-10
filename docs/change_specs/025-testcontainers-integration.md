@@ -1,10 +1,10 @@
-# CS-025: Replace Custom Docker Logic with Testcontainers
+# CS-025: Replace Custom Docker Logic with Testcontainers — COMPLETED
 
 **Source:** Developer feedback
 **Scope:** Tests / Build infrastructure
 **Complexity:** Small-Medium
 **Breaking changes:** None (test infrastructure only)
-**Status:** Pending
+**Status:** Completed
 
 ---
 
@@ -130,14 +130,12 @@ No changes to production assemblies.
 5. Simplify `Makefile` targets.
 6. Verify all integration tests pass with `dotnet test --filter "Category=Integration"`.
 
-## Open questions
+## Resolved questions
 
-1. **Should we use a custom ngircd configuration?** Currently the container
-   runs with the default ngircd config from the `linuxserver/ngircd` image.
-   If custom config is needed (e.g. for auth testing), Testcontainers supports
-   bind mounts and file copies into the container via `WithResourceMapping`.
-2. **Shared container across test classes?** The current `IrcServerCollection`
-   shares one fixture across all integration tests. Testcontainers supports
-   both per-class and shared containers. Recommendation: keep a single shared
-   container via collection fixture to avoid starting multiple ngircd
-   instances.
+1. **Should we use a custom ngircd configuration?**
+   No — use the default config from the `linuxserver/ngircd` image. Custom
+   config can be added later via `WithResourceMapping` if needed. *(Accepted)*
+2. **Shared container across test classes?**
+   Yes — keep the existing `IrcServerCollection` collection fixture pattern
+   so a single container is shared across all integration test classes.
+   *(Accepted)*

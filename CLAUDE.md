@@ -100,8 +100,8 @@ structural changes.
 ## How to run things
 
 Integration tests use an ngircd IRC server running in a Docker container
-on localhost:6667. The Makefile manages the container lifecycle via
-`make ircd-start` and `make ircd-stop`.
+managed automatically by Testcontainers. The container is started and
+stopped by the test fixture — no manual Docker commands are needed.
 
 To simplify building and testing the bot, provide a makefile that builds and
 tests the bot, and copies the bot and all plugins into a single directory for
@@ -110,17 +110,11 @@ the user to run.
 ## Testing
 
 - `make test` — runs unit tests only (excludes integration tests).
-- `make test-integration` — starts the IRC server container, runs integration
-  tests, then stops it. Requires Docker.
-- `make ircd-start` / `make ircd-stop` — manage the IRC server container
-  independently.
+- `make test-integration` — runs integration tests. Requires Docker.
+  Testcontainers manages the IRC server container automatically.
 - Integration tests live in `tests/Marv.Core.Tests/Integration/` and are tagged
-  with `[Trait("Category", "Integration")]`. They are skipped automatically
-  when the IRC server is not reachable.
-- When doing your own testing, start the IRC server, run both unit and
-  integration tests, then stop the server:
+  with `[Trait("Category", "Integration")]`.
+- When doing your own testing, just run all tests directly:
   ```
-  make ircd-start
   dotnet test -c Release
-  make ircd-stop
   ```

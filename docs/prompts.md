@@ -1390,3 +1390,11 @@
 **Date**: 2026-06-10T00:00:00Z
 
 > I've just learned about a project called TestContainers that seems like a great candidate for replacing our custom docker logic for tests. Can you create a change specification outlining that change?
+
+## Implement CS-025: Testcontainers integration
+
+**Date**: 2026-06-10T00:00:00Z
+
+> Okay, for CS-025 resolve the open questions as follows, then implement:
+> 1. No custom config at this point
+> 2. Share the container across test classes

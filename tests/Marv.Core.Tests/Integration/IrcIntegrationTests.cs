@@ -3,13 +3,12 @@ using Marv.Core.Events;
 using Marv.Core.Irc;
 using Marv.Core.Protocol;
 using Xunit;
-using Xunit.Sdk;
 
 namespace Marv.Core.Tests.Integration;
 
 /// <summary>
-/// Integration tests that connect to a real IRC server on localhost:6667.
-/// These tests require ngircd to be running and are excluded from default test runs.
+/// Integration tests that connect to a real IRC server managed by Testcontainers.
+/// Excluded from default test runs.
 /// Run with: dotnet test --filter "Category=Integration"
 /// </summary>
 [Trait("Category", "Integration")]
@@ -23,17 +22,9 @@ public class IrcIntegrationTests
         _fixture = fixture;
     }
 
-    private void SkipIfUnavailable()
-    {
-        if (!_fixture.IsAvailable)
-            throw SkipException.ForSkip("IRC server not available on localhost:6667");
-    }
-
     [Fact]
     public async Task Connection_CanConnectAndDisconnect()
     {
-        SkipIfUnavailable();
-
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         var connection = await _fixture.CreateConnectionAsync(cts.Token);
         await using (connection)
@@ -45,11 +36,10 @@ public class IrcIntegrationTests
     [Fact]
     public async Task Bot_RegistersWithServer()
     {
-        SkipIfUnavailable();
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
         var bot = IrcServerFixture.CreateBot("MarvReg");
-        var config = IrcServerFixture.CreateConfig("MarvReg");
+        var config = _fixture.CreateConfig("MarvReg");
 
         var eventChannel = Channel.CreateUnbounded<MarvEvent>();
 
@@ -72,11 +62,10 @@ public class IrcIntegrationTests
     [Fact]
     public async Task Bot_JoinsConfiguredChannel()
     {
-        SkipIfUnavailable();
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
         var bot = IrcServerFixture.CreateBot("MarvJoin");
-        var config = IrcServerFixture.CreateConfig("MarvJoin", "#marvtest");
+        var config = _fixture.CreateConfig("MarvJoin", "#marvtest");
 
         var eventChannel = Channel.CreateUnbounded<MarvEvent>();
 
@@ -102,12 +91,11 @@ public class IrcIntegrationTests
     [Fact]
     public async Task Bot_ReceivesPrivmsgFromOtherClient()
     {
-        SkipIfUnavailable();
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
         var bot = IrcServerFixture.CreateBot("MarvMsg");
-        var config = IrcServerFixture.CreateConfig("MarvMsg", "#msgtest");
+        var config = _fixture.CreateConfig("MarvMsg", "#msgtest");
         var eventChannel = Channel.CreateUnbounded<MarvEvent>();
 
         var botConnection = await _fixture.CreateConnectionAsync(cts.Token);
@@ -142,11 +130,10 @@ public class IrcIntegrationTests
     [Fact]
     public async Task Bot_RespondsToServerPing()
     {
-        SkipIfUnavailable();
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
         var bot = IrcServerFixture.CreateBot("MarvPing");
-        var config = IrcServerFixture.CreateConfig("MarvPing");
+        var config = _fixture.CreateConfig("MarvPing");
 
         var eventChannel = Channel.CreateUnbounded<MarvEvent>();
 
@@ -168,12 +155,11 @@ public class IrcIntegrationTests
     [Fact]
     public async Task Bot_CanSendAndReceiveNotice()
     {
-        SkipIfUnavailable();
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
         var bot = IrcServerFixture.CreateBot("MarvNote");
-        var config = IrcServerFixture.CreateConfig("MarvNote", "#noticetest");
+        var config = _fixture.CreateConfig("MarvNote", "#noticetest");
         var eventChannel = Channel.CreateUnbounded<MarvEvent>();
 
         var botConnection = await _fixture.CreateConnectionAsync(cts.Token);
@@ -206,12 +192,11 @@ public class IrcIntegrationTests
     [Fact]
     public async Task Bot_TracksUserPartingChannel()
     {
-        SkipIfUnavailable();
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
         var bot = IrcServerFixture.CreateBot("MarvPart");
-        var config = IrcServerFixture.CreateConfig("MarvPart", "#parttest");
+        var config = _fixture.CreateConfig("MarvPart", "#parttest");
         var eventChannel = Channel.CreateUnbounded<MarvEvent>();
 
         var botConnection = await _fixture.CreateConnectionAsync(cts.Token);
@@ -245,12 +230,11 @@ public class IrcIntegrationTests
     [Fact]
     public async Task Bot_TracksNickChange()
     {
-        SkipIfUnavailable();
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
         var bot = IrcServerFixture.CreateBot("MarvNick");
-        var config = IrcServerFixture.CreateConfig("MarvNick", "#nicktest");
+        var config = _fixture.CreateConfig("MarvNick", "#nicktest");
         var eventChannel = Channel.CreateUnbounded<MarvEvent>();
 
         var botConnection = await _fixture.CreateConnectionAsync(cts.Token);
@@ -284,12 +268,11 @@ public class IrcIntegrationTests
     [Fact]
     public async Task Bot_TracksUserQuit()
     {
-        SkipIfUnavailable();
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
         var bot = IrcServerFixture.CreateBot("MarvQuit");
-        var config = IrcServerFixture.CreateConfig("MarvQuit", "#quittest");
+        var config = _fixture.CreateConfig("MarvQuit", "#quittest");
         var eventChannel = Channel.CreateUnbounded<MarvEvent>();
 
         var botConnection = await _fixture.CreateConnectionAsync(cts.Token);
@@ -322,12 +305,11 @@ public class IrcIntegrationTests
     [Fact]
     public async Task Bot_SendsMessageToChannel()
     {
-        SkipIfUnavailable();
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
         var bot = IrcServerFixture.CreateBot("MarvSend");
-        var config = IrcServerFixture.CreateConfig("MarvSend", "#sendtest");
+        var config = _fixture.CreateConfig("MarvSend", "#sendtest");
         var eventChannel = Channel.CreateUnbounded<MarvEvent>();
 
         var botConnection = await _fixture.CreateConnectionAsync(cts.Token);
@@ -359,11 +341,10 @@ public class IrcIntegrationTests
     [Fact]
     public async Task Bot_ParsesISupport()
     {
-        SkipIfUnavailable();
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
         var bot = IrcServerFixture.CreateBot("MarvISup");
-        var config = IrcServerFixture.CreateConfig("MarvISup");
+        var config = _fixture.CreateConfig("MarvISup");
 
         var eventChannel = Channel.CreateUnbounded<MarvEvent>();
 
@@ -386,11 +367,10 @@ public class IrcIntegrationTests
     [Fact]
     public async Task Bot_FiresReadyEvent_WithoutAuth()
     {
-        SkipIfUnavailable();
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
         var bot = IrcServerFixture.CreateBot("MarvReady");
-        var config = IrcServerFixture.CreateConfig("MarvReady", "#readytest");
+        var config = _fixture.CreateConfig("MarvReady", "#readytest");
 
         var eventChannel = Channel.CreateUnbounded<MarvEvent>();
 
@@ -417,14 +397,13 @@ public class IrcIntegrationTests
     [Fact]
     public async Task Bot_SendsPassBeforeRegistration()
     {
-        SkipIfUnavailable();
 
         // Verify that PASS is sent before NICK/USER by watching the raw connection.
         // ngircd has no server password, so this connection will still register fine
         // (PASS with a wrong password is ignored when no password is configured).
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
         var bot = IrcServerFixture.CreateBot("MarvPass");
-        var config = IrcServerFixture.CreateConfig("MarvPass");
+        var config = _fixture.CreateConfig("MarvPass");
 
         var eventChannel = Channel.CreateUnbounded<MarvEvent>();
 
@@ -446,11 +425,10 @@ public class IrcIntegrationTests
     [Fact]
     public async Task Bot_ReadyEventFiresBeforeChannelJoin()
     {
-        SkipIfUnavailable();
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
         var bot = IrcServerFixture.CreateBot("MarvOrd");
-        var config = IrcServerFixture.CreateConfig("MarvOrd", "#ordertest");
+        var config = _fixture.CreateConfig("MarvOrd", "#ordertest");
 
         var eventChannel = Channel.CreateUnbounded<MarvEvent>();
         var eventOrder = new List<string>();
@@ -488,11 +466,10 @@ public class IrcIntegrationTests
     [Fact]
     public async Task Bot_JoinsMultipleConfiguredChannels()
     {
-        SkipIfUnavailable();
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
         var bot = IrcServerFixture.CreateBot("MarvBulk");
-        var config = IrcServerFixture.CreateConfig("MarvBulk", "#bulktest1", "#bulktest2", "#bulktest3");
+        var config = _fixture.CreateConfig("MarvBulk", "#bulktest1", "#bulktest2", "#bulktest3");
 
         var eventChannel = Channel.CreateUnbounded<MarvEvent>();
 
@@ -526,11 +503,10 @@ public class IrcIntegrationTests
     [Fact]
     public async Task Bot_JoinMultipleAsync_JoinsChannelsAtRuntime()
     {
-        SkipIfUnavailable();
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
         var bot = IrcServerFixture.CreateBot("MarvRtJn");
-        var config = IrcServerFixture.CreateConfig("MarvRtJn");
+        var config = _fixture.CreateConfig("MarvRtJn");
 
         var eventChannel = Channel.CreateUnbounded<MarvEvent>();
 

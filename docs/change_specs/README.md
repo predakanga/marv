@@ -36,7 +36,7 @@ Specs are numbered in recommended implementation order.
 | 22 | [Document IOptions API Variants](022-plugin-api-ioptions-docs.md) | Docs | Trivial | None | **Pending** |
 | 23 | [CTCP VERSION Response Override](023-ctcp-version-override.md) | Core | Small | None | **Pending** |
 | 24 | [SendAndAwaitAsync ENDOF* Fallback](024-sendandawait-endof-fallback.md) | Core | Medium | None | **Pending** |
-| 25 | [Testcontainers Integration](025-testcontainers-integration.md) | Tests | Small-Medium | None | **Pending** |
+| 25 | [Testcontainers Integration](025-testcontainers-integration.md) | Tests | Small-Medium | None | **Done** |
 
 Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
 Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
