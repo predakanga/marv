@@ -80,13 +80,13 @@ static void AddConfigFile(IConfigurationBuilder config, string path, bool requir
     switch (extension)
     {
         case ".json" or ".json5":
-            config.AddJson5File(path, optional: !required, reloadOnChange: false);
+            config.AddJson5File(path, optional: !required, reloadOnChange: true);
             break;
         case ".yaml" or ".yml":
-            config.AddYamlFile(path, optional: !required, reloadOnChange: false);
+            config.AddYamlFile(path, optional: !required, reloadOnChange: true);
             break;
         case ".xml":
-            config.AddXmlFile(path, optional: !required, reloadOnChange: false);
+            config.AddXmlFile(path, optional: !required, reloadOnChange: true);
             break;
         default:
             throw new InvalidOperationException(

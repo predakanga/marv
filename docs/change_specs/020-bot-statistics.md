@@ -1,10 +1,10 @@
-# CS-020: Bot Statistics Property
+# CS-020: Bot Statistics Property — COMPLETED
 
 **Source:** Downstream feature request
 **Scope:** Core (IBot interface)
 **Complexity:** Medium
 **Breaking changes:** Additive only (new interface member)
-**Status:** Pending
+**Status:** Completed
 
 ---
 

@@ -1,10 +1,10 @@
-# CS-023: CTCP VERSION Response Override
+# CS-023: CTCP VERSION Response Override — COMPLETED
 
 **Source:** Downstream feature request
 **Scope:** Core
 **Complexity:** Small
 **Breaking changes:** None
-**Status:** Pending
+**Status:** Completed
 
 ---
 

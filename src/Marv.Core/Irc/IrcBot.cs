@@ -18,6 +18,7 @@ internal sealed class IrcBot : IBot
     private readonly ILogger<IrcBot> _logger;
     private readonly ServerInfo _serverInfo;
     private readonly CapabilityManager _capabilityManager;
+    private readonly BotStatistics _statistics = new();
     private IrcConnection? _connection;
 
     private readonly ConcurrentDictionary<string, IrcUser> _users;
@@ -41,6 +42,28 @@ internal sealed class IrcBot : IBot
     private int _labelCounter;
     private readonly ConcurrentDictionary<string, TaskCompletionSource<IReadOnlyList<IrcMessage>>> _pendingLabels = new();
     private readonly ConcurrentDictionary<string, List<IrcMessage>> _labelBuffers = new();
+
+    // ENDOF* fallback correlation (when labeled-response is unavailable)
+    private readonly ConcurrentDictionary<string, (
+        TaskCompletionSource<IReadOnlyList<IrcMessage>> Tcs,
+        List<IrcMessage> Buffer,
+        string Terminator,
+        string? MatchParam)> _pendingEndOf = new();
+
+    /// <summary>
+    /// Maps IRC commands to their ENDOF* terminator numerics for
+    /// fallback response correlation.
+    /// </summary>
+    private static readonly Dictionary<string, string> EndOfNumerics = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["WHO"] = "315",
+        ["WHOIS"] = "318",
+        ["WHOWAS"] = "369",
+        ["LIST"] = "323",
+        ["NAMES"] = "366",
+        ["LINKS"] = "365",
+        ["INFO"] = "374",
+    };
 
     // Plugin event dispatch
     private IReadOnlyList<ChannelWriter<MarvEvent>> _eventWriters = [];
@@ -145,6 +168,7 @@ internal sealed class IrcBot : IBot
             throw new InvalidOperationException("Not connected.");
 
         await _connection.Outbound.WriteAsync(message, ct);
+        _statistics.IncrementLinesSent();
     }
 
     /// <inheritdoc />
@@ -234,6 +258,20 @@ internal sealed class IrcBot : IBot
     }
 
     /// <inheritdoc />
+    public IBotStatistics Statistics => _statistics;
+
+    /// <inheritdoc />
+    public int OutboundQueueCount => _connection?.OutboundQueueCount ?? 0;
+
+    /// <inheritdoc />
+    public Task ClearOutboundQueueAsync(CancellationToken ct)
+    {
+        var drained = _connection?.DrainOutboundQueue() ?? 0;
+        _logger.LogInformation("Drained {Count} messages from outbound queue", drained);
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
     public IEqualityComparer<string> CaseComparer =>
         CaseMapping.GetComparer(_serverInfo.CaseMapping);
 
@@ -266,11 +304,41 @@ internal sealed class IrcBot : IBot
                 throw new TimeoutException($"Timed out waiting for labeled response '{label}'.");
             }
         }
+        else if (EndOfNumerics.TryGetValue(message.Command, out var terminator))
+        {
+            var matchParam = message.Parameters.Count > 0 ? message.Parameters[0] : null;
+            var tcs = new TaskCompletionSource<IReadOnlyList<IrcMessage>>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+            var buffer = new List<IrcMessage>();
+            var key = $"endof-{message.Command}-{matchParam}";
+
+            _pendingEndOf[key] = (tcs, buffer, terminator, matchParam);
+
+            await SendRawAsync(message, ct);
+
+            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            timeoutCts.CancelAfter(TimeSpan.FromSeconds(30));
+
+            try
+            {
+                return await tcs.Task.WaitAsync(timeoutCts.Token);
+            }
+            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+            {
+                _pendingEndOf.TryRemove(key, out _);
+                throw new TimeoutException(
+                    $"Timed out waiting for {terminator} response to {message.Command}.");
+            }
+        }
         else
         {
-            // Fallback: just send and return empty (no correlation available)
-            await SendRawAsync(message, ct);
-            return [];
+            _logger.LogWarning(
+                "SendAndAwaitAsync: no labeled-response support and no known ENDOF* " +
+                "terminator for command '{Command}'. Response correlation is not possible",
+                message.Command);
+            throw new NotSupportedException(
+                $"Cannot correlate responses for '{message.Command}': the server does not " +
+                $"support labeled-response and no ENDOF* fallback is defined for this command.");
         }
     }
 
@@ -289,6 +357,8 @@ internal sealed class IrcBot : IBot
         _currentNick = config.Nick;
         _saslInProgress = false;
         _pendingCaps.Clear();
+        _statistics.Reset(DateTimeOffset.UtcNow);
+        connection.Statistics = _statistics;
 
         var comparer = CaseMapping.GetComparer(_serverInfo.CaseMapping);
         _self = new IrcUser(_currentNick, comparer);
@@ -332,6 +402,12 @@ internal sealed class IrcBot : IBot
         _pendingLabels.Clear();
         _labelBuffers.Clear();
 
+        foreach (var kvp in _pendingEndOf)
+        {
+            kvp.Value.Tcs.TrySetCanceled();
+        }
+        _pendingEndOf.Clear();
+
         _readyTcs?.TrySetCanceled();
         _readyTcs = null;
         _nickServPending = false;
@@ -371,6 +447,8 @@ internal sealed class IrcBot : IBot
 
     private async Task ProcessMessageAsync(IrcMessage message, CancellationToken ct)
     {
+        _statistics.IncrementLinesReceived();
+
         // Check for labeled-response correlation
         if (message.Tags.TryGetValue("label", out var label) && label is not null
             && _labelBuffers.TryGetValue(label, out var buffer))
@@ -383,6 +461,31 @@ internal sealed class IrcBot : IBot
                 _labelBuffers.TryRemove(label, out _);
                 tcs.TrySetResult(buffer);
                 return;
+            }
+        }
+
+        // Check for ENDOF* fallback correlation
+        if (!_pendingEndOf.IsEmpty)
+        {
+            foreach (var (key, pending) in _pendingEndOf)
+            {
+                var (endOfTcs, endOfBuffer, terminator, matchParam) = pending;
+
+                // Match: the numeric's second parameter (after bot nick) matches our expected param
+                if (matchParam is not null && message.Parameters.Count > 1
+                    && !CaseComparer.Equals(message.Parameters[1], matchParam))
+                    continue;
+
+                if (message.Command == terminator)
+                {
+                    endOfBuffer.Add(message);
+                    _pendingEndOf.TryRemove(key, out _);
+                    endOfTcs.TrySetResult(endOfBuffer.AsReadOnly());
+                }
+                else
+                {
+                    endOfBuffer.Add(message);
+                }
             }
         }
 
@@ -901,8 +1004,14 @@ internal sealed class IrcBot : IBot
                     break;
                 }
             case "VERSION":
-                await SendRawAsync(new IrcMessage("NOTICE", [sender.Nick,
-                    $"\x01VERSION Marv IRC Bot {MarvVersion.Current}\x01"]), ct);
+                var versionResponse = _config.CtcpVersionResponse
+                    ?? $"Marv IRC Bot {MarvVersion.Current}";
+
+                if (!string.IsNullOrEmpty(versionResponse))
+                {
+                    await SendRawAsync(new IrcMessage("NOTICE", [sender.Nick,
+                        $"\x01VERSION {versionResponse}\x01"]), ct);
+                }
                 break;
             case "PING":
                 await SendRawAsync(new IrcMessage("NOTICE", [sender.Nick,

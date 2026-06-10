@@ -103,6 +103,20 @@ public interface IBot
     /// <summary>IRCv3 capability negotiation state.</summary>
     ICapabilityManager Capabilities { get; }
 
+    /// <summary>Operational statistics for the current connection.</summary>
+    IBotStatistics Statistics { get; }
+
+    /// <summary>
+    /// Number of messages currently waiting in the outbound send queue.
+    /// </summary>
+    int OutboundQueueCount { get; }
+
+    /// <summary>
+    /// Discards all messages currently waiting in the outbound send queue.
+    /// Messages already handed to the rate limiter or TCP write are not affected.
+    /// </summary>
+    Task ClearOutboundQueueAsync(CancellationToken ct);
+
     /// <summary>
     /// Sends an IRC command and waits for the server's correlated response.
     /// Uses labeled-response to correlate, or falls back to timeout-based correlation.

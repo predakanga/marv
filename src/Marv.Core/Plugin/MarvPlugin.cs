@@ -340,6 +340,8 @@ public abstract class MarvPlugin : IPlugin
                 await InvokeHandler(target, method, arg, ct);
             else
                 await InvokeHandler(target, method, ct);
+
+            (Bot.Statistics as Irc.BotStatistics)?.IncrementHandlersInvoked();
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {

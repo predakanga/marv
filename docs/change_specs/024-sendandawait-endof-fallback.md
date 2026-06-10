@@ -1,10 +1,10 @@
-# CS-024: SendAndAwaitAsync ENDOF* Fallback
+# CS-024: SendAndAwaitAsync ENDOF* Fallback — COMPLETED
 
 **Source:** Downstream feature request
 **Scope:** Core
 **Complexity:** Medium
 **Breaking changes:** None (behavioral improvement to existing method)
-**Status:** Pending
+**Status:** Completed
 
 ---
 

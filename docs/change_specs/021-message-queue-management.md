@@ -1,10 +1,10 @@
-# CS-021: Message Queue Management
+# CS-021: Message Queue Management — COMPLETED
 
 **Source:** Downstream feature request
 **Scope:** Core (IBot interface)
 **Complexity:** Small
 **Breaking changes:** Additive only (new interface members)
-**Status:** Pending
+**Status:** Completed
 
 ---
 

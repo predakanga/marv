@@ -32,6 +32,13 @@ public static class MockBot
         caps.AvailableCapabilities.Returns(new Dictionary<string, string?>());
         bot.Capabilities.Returns(caps);
 
+        bot.OutboundQueueCount.Returns(0);
+
+        var stats = Substitute.For<IBotStatistics>();
+        stats.ConnectedAt.Returns(DateTimeOffset.UtcNow);
+        stats.Uptime.Returns(_ => TimeSpan.Zero);
+        bot.Statistics.Returns(stats);
+
         return bot;
     }
 }

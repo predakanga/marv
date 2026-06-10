@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `IBotStatistics` interface with connection-level counters: uptime, bytes
+  sent/received, lines sent/received, and handler invocations. Accessible via
+  `IBot.Statistics` or by injecting `IBotStatistics` directly
+- `IBot.OutboundQueueCount` property and `ClearOutboundQueueAsync` method for
+  inspecting and draining the outbound message queue
+- `CtcpVersionResponse` configuration property to customize or suppress the
+  bot's CTCP VERSION response
+- `SendAndAwaitAsync` ENDOF\* fallback: when `labeled-response` is unavailable,
+  commands with known terminators (WHO, WHOIS, LIST, NAMES, etc.) are now
+  correlated by their ENDOF\* numeric instead of returning empty results
+
+### Changed
+
+- File-based configuration providers now use `reloadOnChange: true`, enabling
+  `IOptionsMonitor<T>.OnChange` to fire when the config file is edited at
+  runtime
+
 ### Fixed
 
 - `WaitForReadyAsync` and `WaitForRegistrationAsync` race condition where

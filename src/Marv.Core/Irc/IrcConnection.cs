@@ -49,6 +49,22 @@ internal sealed class IrcConnection : IAsyncDisposable
     /// <summary>True if the connection is currently established.</summary>
     public bool IsConnected => _tcpClient?.Connected == true;
 
+    /// <summary>Statistics object for recording byte counts. Set by IrcBot before processing begins.</summary>
+    internal BotStatistics? Statistics { get; set; }
+
+    /// <summary>Number of items waiting in the outbound channel.</summary>
+    public int OutboundQueueCount => _outboundChannel?.Reader.Count ?? 0;
+
+    /// <summary>Drains all pending messages from the outbound channel.</summary>
+    public int DrainOutboundQueue()
+    {
+        if (_outboundChannel is null) return 0;
+        var drained = 0;
+        while (_outboundChannel.Reader.TryRead(out _))
+            drained++;
+        return drained;
+    }
+
     /// <summary>
     /// Establishes a TCP (optionally TLS) connection to the IRC server and starts
     /// the read/write loop tasks.
@@ -192,6 +208,9 @@ internal sealed class IrcConnection : IAsyncDisposable
 
                 _logger.LogTrace("<< {Line}", line);
 
+                // Count bytes: line content + \r\n terminator
+                Statistics?.AddBytesReceived(Encoding.UTF8.GetByteCount(line) + 2);
+
                 var message = IrcParser.Parse(line);
                 if (message is not null)
                 {
@@ -241,6 +260,7 @@ internal sealed class IrcConnection : IAsyncDisposable
                 var bytes = Encoding.UTF8.GetBytes(line + "\r\n");
                 await _stream!.WriteAsync(bytes, ct);
                 await _stream.FlushAsync(ct);
+                Statistics?.AddBytesSent(bytes.Length);
             }
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)

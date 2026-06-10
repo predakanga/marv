@@ -155,6 +155,14 @@ public record MarvConfiguration
     private readonly string? _sentryDsn;
 
     /// <summary>
+    /// Custom response to CTCP VERSION queries. If null, uses the default
+    /// "Marv IRC Bot {version}" string. Set to empty string to suppress
+    /// VERSION responses entirely.
+    /// </summary>
+    [Description("Custom CTCP VERSION response (empty = suppress).")]
+    public string? CtcpVersionResponse { get; init; }
+
+    /// <summary>
     /// Override for the minimum log level. When set, replaces the default log level
     /// from appsettings.json.
     /// </summary>

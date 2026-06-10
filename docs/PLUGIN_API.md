@@ -156,6 +156,7 @@ All `Send*Async` methods are thread-safe.
 | `RemoveVoiceAsync(channel, nick, ct)` | Remove -v |
 | `ChangeNickAsync(newNick, ct)` | Change bot's nick |
 | `SendAndAwaitAsync(IrcMessage, ct)` | Send + wait for correlated response |
+| `ClearOutboundQueueAsync(ct)` | Discard all pending outbound messages |
 
 | Property | Type | Description |
 |---|---|---|
@@ -166,6 +167,30 @@ All `Send*Async` methods are thread-safe.
 | `Users` | `IReadOnlyDictionary<string, IUser>` | By case-mapped nick |
 | `ServerInfo` | `IServerInfo` | ISUPPORT configuration |
 | `Capabilities` | `ICapabilityManager` | IRCv3 capability state |
+| `Statistics` | `IBotStatistics` | Connection statistics (uptime, bytes, lines, handlers) |
+| `OutboundQueueCount` | `int` | Messages waiting in the outbound send queue |
+
+### CTCP VERSION override
+
+The bot's CTCP VERSION response can be customized via the `CtcpVersionResponse`
+configuration property. Set it to a custom string to change the response, or to
+an empty string to suppress the response entirely.
+
+For dynamic VERSION responses (e.g. including loaded plugins or uptime), set
+`CtcpVersionResponse` to `""` in config to suppress the built-in response, then
+handle `CtcpEvent` via `[OnEvent]` to send your own NOTICE:
+
+```csharp
+[OnEvent]
+public async Task HandleCtcpVersion(CtcpEvent evt, CancellationToken ct)
+{
+    if (evt.Command != "VERSION") return;
+
+    var response = $"MyBot v1.0 — up {_bot.Statistics.Uptime:hh\\:mm\\:ss}";
+    await _bot.SendRawAsync(
+        new IrcMessage("NOTICE", [evt.Sender.Nick, $"\x01VERSION {response}\x01"]), ct);
+}
+```
 
 ---
 
@@ -280,6 +305,38 @@ public GreetExamplePlugin(IBot bot, IPluginActivator activator, ILoggerFactory l
 ```
 
 Config binds to a root-level section in the configuration file (e.g. `"Greet"`).
+
+### Options API variants
+
+The full `Microsoft.Extensions.Options` API is available for plugin
+configuration. In addition to `IOptions<T>`, you can inject:
+
+| Type | Lifetime | Use case |
+|---|---|---|
+| `IOptions<T>` | Singleton | Read config once at construction |
+| `IOptionsMonitor<T>` | Singleton | React to config changes at runtime via `OnChange` |
+| `IOptionsSnapshot<T>` | Scoped | Re-read config per scope (rarely needed for plugins) |
+
+Marv enables `reloadOnChange` on all file-based configuration providers, so
+`IOptionsMonitor<T>.OnChange` fires automatically when the config file is
+edited at runtime.
+
+Example using `IOptionsMonitor<T>` to react to config file edits:
+
+```csharp
+public class MyPlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory,
+    IOptionsMonitor<MyConfig> configMonitor)
+    : MarvPlugin(bot, activator, loggerFactory)
+{
+    private MyConfig _config = configMonitor.CurrentValue;
+
+    public override Task OnConnectedAsync(CancellationToken ct)
+    {
+        configMonitor.OnChange(updated => _config = updated);
+        return Task.CompletedTask;
+    }
+}
+```
 
 ---
 
@@ -425,7 +482,10 @@ mocks. Pass `bot:` to provide a custom `IBot` mock.
 | `IBot` | Bot instance |
 | `IPluginActivator` | Creates instances with DI resolution |
 | `ILoggerFactory` / `ILogger<T>` | Logging |
-| `IOptions<T>` | Config for `[PluginConfig]` types |
+| `IOptions<T>` | Singleton config for `[PluginConfig]` types |
+| `IOptionsMonitor<T>` | Config with change notification support |
+| `IOptionsSnapshot<T>` | Scoped config (re-reads per scope) |
+| `IBotStatistics` | Connection statistics (also via `IBot.Statistics`) |
 | `IServerInfo` | ISUPPORT configuration |
 | `ICapabilityManager` | IRCv3 capability state |
 | `IHttpClientFactory` | HTTP clients (no extra NuGet needed) |
@@ -452,5 +512,9 @@ are available to dependent plugins in load order (see §9).
 
 **ICapabilityManager:** `IsNegotiated(cap)`, `IsAvailable(cap)`,
 `NegotiatedCapabilities`, `AvailableCapabilities`, `CapabilitiesChanged` event.
+
+**IBotStatistics:** `ConnectedAt`, `Uptime`, `BytesReceived`, `BytesSent`,
+`LinesReceived`, `LinesSent`, `HandlersInvoked`. All properties are thread-safe.
+Counters reset on each new connection.
 
 **IrcMessage:** `Tags`, `Source?`, `Command`, `Parameters`.

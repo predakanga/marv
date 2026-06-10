@@ -1420,3 +1420,13 @@
 > I don't think OnRawMessage gives us any way to suppress the default response, does it? Or is that idea that it would be disabled in the config then handled in OnRawMessage?
 
 > We actually already have an equivalent for that - OnEvent with a CtcpEvent. I'd suggest we go with pattern A, but in the documentation note that the user can override the default response by setting an empty response and implementing that.
+
+## Implement CS-020 through CS-024
+
+**Date**: 2026-06-11T00:00:00Z
+
+> Okay, go ahead and implement CS-020 through CS-024
+
+> The note about CTCP VERSION override in PLUGIN_API should probably have an example
+
+> Should SendAndAwaitAsync only allow the WHO, etc, commands even when not using the fallback? Labeled responses does support any command, but I think it's less surprising to the users of the API if the command's visible behaviour doesn't change depending on the server.

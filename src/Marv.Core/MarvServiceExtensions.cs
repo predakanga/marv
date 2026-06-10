@@ -45,6 +45,7 @@ public static class MarvServiceExtensions
         // Register the bot and hosted service
         services.AddSingleton<IrcBot>();
         services.AddSingleton<IBot>(sp => sp.GetRequiredService<IrcBot>());
+        services.AddSingleton<IBotStatistics>(sp => sp.GetRequiredService<IrcBot>().Statistics);
         services.AddHostedService<MarvBotService>();
 
         // Discover plugins from configured directories, filtered by name
