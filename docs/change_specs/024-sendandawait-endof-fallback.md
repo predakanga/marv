@@ -165,24 +165,24 @@ Clear it in `RunAsync` alongside `_pendingLabels`.
 
 ## Design decisions
 
-**Why not use the ENDOF* fallback always (even when labeled-response is
-available)?** Labeled-response is strictly superior — it correlates any
-command, not just ones with known terminators, and uses server-assigned
-labels for unambiguous matching. The ENDOF* approach is inherently racy
-when multiple requests for the same command/target are in flight.
+**Why restrict to ENDOF\* commands even when labeled-response is available?**
+Consistency. If `SendAndAwaitAsync` accepted any command with labeled-response
+but only a subset without it, the method's visible behaviour would change
+depending on the server — a plugin that works on one server would silently
+break on another. Restricting to the well-known ENDOF\* commands (WHO, WHOIS,
+WHOWAS, LIST, NAMES, LINKS, INFO) ensures the API contract is the same
+regardless of server capabilities. Plugins that need to send other commands
+and collect responses can use `SendRawAsync` + `[OnRawMessage]`.
 
 **Why match on the command parameter?** Without parameter matching, two
 concurrent `WHO #channel1` and `WHO #channel2` requests would
 cross-contaminate. Parameter matching isn't perfect (servers may
 normalize the parameter), but it handles the common case.
 
-**What about commands not in the table?** The fallback logs a warning and
-throws `NotSupportedException`. Silent empty returns would mask bugs —
-a plugin calling `SendAndAwaitAsync` expects responses, and getting an
-empty list with no indication that correlation failed is misleading.
-Throwing forces the caller to handle the unsupported case explicitly
-(e.g. falling back to `SendRawAsync` + `[OnRawMessage]`). The table
-can be extended over time as new commands are identified.
+**What about commands not in the table?** `SendAndAwaitAsync` throws
+`NotSupportedException` upfront — before sending the command. This makes
+the error obvious and avoids silent misbehaviour. The table can be
+extended over time as new commands are identified.
 
 **Why not a general "numeric sequence collector"?** Over-engineering. The
 terminator pattern is well-established in the IRC protocol and covers all

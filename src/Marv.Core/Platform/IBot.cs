@@ -119,7 +119,11 @@ public interface IBot
 
     /// <summary>
     /// Sends an IRC command and waits for the server's correlated response.
-    /// Uses labeled-response to correlate, or falls back to timeout-based correlation.
+    /// Only commands with well-known ENDOF* terminators are supported: WHO,
+    /// WHOIS, WHOWAS, LIST, NAMES, LINKS, INFO. Uses labeled-response when
+    /// available, otherwise falls back to ENDOF* numeric correlation.
     /// </summary>
+    /// <exception cref="NotSupportedException">The command is not in the supported set.</exception>
+    /// <exception cref="TimeoutException">No response received within 30 seconds.</exception>
     Task<IReadOnlyList<IrcMessage>> SendAndAwaitAsync(IrcMessage message, CancellationToken ct);
 }

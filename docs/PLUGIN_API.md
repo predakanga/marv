@@ -155,7 +155,7 @@ All `Send*Async` methods are thread-safe.
 | `GiveVoiceAsync(channel, nick, ct)` | Give +v |
 | `RemoveVoiceAsync(channel, nick, ct)` | Remove -v |
 | `ChangeNickAsync(newNick, ct)` | Change bot's nick |
-| `SendAndAwaitAsync(IrcMessage, ct)` | Send + wait for correlated response |
+| `SendAndAwaitAsync(IrcMessage, ct)` | Send + wait for correlated response (WHO, WHOIS, WHOWAS, LIST, NAMES, LINKS, INFO only) |
 | `ClearOutboundQueueAsync(ct)` | Discard all pending outbound messages |
 
 | Property | Type | Description |

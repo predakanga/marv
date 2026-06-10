@@ -278,6 +278,13 @@ internal sealed class IrcBot : IBot
     /// <inheritdoc />
     public async Task<IReadOnlyList<IrcMessage>> SendAndAwaitAsync(IrcMessage message, CancellationToken ct)
     {
+        if (!EndOfNumerics.ContainsKey(message.Command))
+        {
+            throw new NotSupportedException(
+                $"SendAndAwaitAsync does not support '{message.Command}'. " +
+                $"Supported commands: {string.Join(", ", EndOfNumerics.Keys)}.");
+        }
+
         if (_capabilityManager.IsNegotiated(Platform.Capabilities.LabeledResponse))
         {
             var label = $"marv-{Interlocked.Increment(ref _labelCounter)}";
@@ -330,16 +337,10 @@ internal sealed class IrcBot : IBot
                     $"Timed out waiting for {terminator} response to {message.Command}.");
             }
         }
-        else
-        {
-            _logger.LogWarning(
-                "SendAndAwaitAsync: no labeled-response support and no known ENDOF* " +
-                "terminator for command '{Command}'. Response correlation is not possible",
-                message.Command);
-            throw new NotSupportedException(
-                $"Cannot correlate responses for '{message.Command}': the server does not " +
-                $"support labeled-response and no ENDOF* fallback is defined for this command.");
-        }
+
+        // Unreachable: the guard at the top ensures the command is in EndOfNumerics,
+        // so one of the two branches above always executes.
+        throw new InvalidOperationException("Unexpected state in SendAndAwaitAsync.");
     }
 
     // --- Connection lifecycle ---
