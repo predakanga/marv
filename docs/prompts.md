@@ -1384,3 +1384,9 @@
 > - Update the plugin API documentation to note that the full IOptions API is available, including IOptionsMonitor
 > - Allow user to override the CTCP version response (should this be done by a config option, writing a property on IBot, subclassing IrcBot, etc?)
 > - Implement SendAndAwaitAsync fallback support for messages like WHO which have an ENDOF* message
+
+## Create change spec for Testcontainers integration
+
+**Date**: 2026-06-10T00:00:00Z
+
+> I've just learned about a project called TestContainers that seems like a great candidate for replacing our custom docker logic for tests. Can you create a change specification outlining that change?
