@@ -1430,3 +1430,9 @@
 > The note about CTCP VERSION override in PLUGIN_API should probably have an example
 
 > Should SendAndAwaitAsync only allow the WHO, etc, commands even when not using the fallback? Labeled responses does support any command, but I think it's less surprising to the users of the API if the command's visible behaviour doesn't change depending on the server.
+
+## Remove external Docker service from CI integration tests
+
+**Date**: 2026-06-11T00:00:00Z
+
+> The Github CI workflow still launches a docker container for the integration tests, even though that's done internally now

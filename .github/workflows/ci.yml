@@ -111,11 +111,6 @@ jobs:
 
   integration-test:
     runs-on: ubuntu-latest
-    services:
-      ircd:
-        image: linuxserver/ngircd
-        ports:
-          - 6667:6667
     steps:
       - uses: actions/checkout@v4
 
@@ -137,14 +132,6 @@ jobs:
 
       - name: Build
         run: dotnet build -c Release --no-restore
-
-      - name: Wait for IRC server
-        run: |
-          for i in $(seq 1 30); do
-            nc -z localhost 6667 && exit 0
-            sleep 1
-          done
-          echo "IRC server did not start" && exit 1
 
       - name: Run integration tests
         run: dotnet test -c Release --no-build --filter "Category=Integration"
