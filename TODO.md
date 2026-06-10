@@ -12,3 +12,4 @@
 - [x] Check whether the extra `AppContext.BaseDirectory` logic is actually required for dependency resolution with a `PublishSingleFile` assembly
 - [x] Check whether we can optimize the docker action further using cache mounts
 - [ ] Add integration tests for plugin loading
+- [ ] Make config loading more idiomatic (use default stack, but replace json provider with json5, add a config provider for CommandLine)
