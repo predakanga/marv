@@ -1466,3 +1466,9 @@
 **Date**: 2026-06-13T00:00:00Z
 
 > Update CLAUDE.md to have a section codifying our change specification format - file location, template, info about the index, etc. Move the relevant info from "Mandatory instructions" to this new section, and add that if a change spec is related to a GitHub issue, you should update the issue's status and link to the relevant commit.
+
+## Triage GitHub issues
+
+**Date**: 2026-06-13T00:00:00Z
+
+> /triage-issues
