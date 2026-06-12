@@ -1454,3 +1454,9 @@
 **Date**: 2026-06-13T00:00:00Z
 
 > /triage-issues (×3 — initial analysis, follow-up discussion, accept → CS-026)
+
+## Implement CS-026: Connection-Scoped DI Services
+
+**Date**: 2026-06-13T00:00:00Z
+
+> Okay, go ahead and implement it.

@@ -13,3 +13,4 @@
 - [x] Check whether we can optimize the docker action further using cache mounts
 - [ ] Add integration tests for plugin loading
 - [ ] Make config loading more idiomatic (use default stack, but replace json provider with json5, add a config provider for CommandLine)
+- [ ] Triage skill: after creating a change spec, push to main and add a permalink to the spec in the issue comment

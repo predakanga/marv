@@ -1,10 +1,10 @@
-# CS-026: Connection-Scoped DI Services
+# CS-026: Connection-Scoped DI Services — COMPLETED
 
 **Source:** GitHub issue #1
 **Scope:** Core (Plugin API, DI container setup)
 **Complexity:** Medium-Large
 **Breaking changes:** Yes — core services move from singleton to scoped registration
-**Status:** Pending
+**Status:** Completed
 
 ---
 

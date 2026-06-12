@@ -28,24 +28,23 @@ public static class MarvServiceExtensions
         // Bind configuration from the root (flat layout)
         services.Configure<MarvConfiguration>(configuration);
 
-        // Register core services
-        var serverInfo = new ServerInfo();
-        var capabilityManager = new CapabilityManager();
+        // Register connection-scoped core services — fresh instances per connection
+        services.AddScoped<ServerInfo>();
+        services.AddScoped<IServerInfo>(sp => sp.GetRequiredService<ServerInfo>());
+        services.AddScoped<CapabilityManager>();
+        services.AddScoped<ICapabilityManager>(sp => sp.GetRequiredService<CapabilityManager>());
+        services.AddScoped<IPluginActivator, PluginActivator>();
+        services.AddScoped<IrcBot>();
+        services.AddScoped<IBot>(sp => sp.GetRequiredService<IrcBot>());
+        services.AddScoped<IBotStatistics>(sp => sp.GetRequiredService<IrcBot>().Statistics);
 
-        services.AddSingleton<IServerInfo>(serverInfo);
-        services.AddSingleton(serverInfo);
-        services.AddSingleton<ICapabilityManager>(capabilityManager);
-        services.AddSingleton(capabilityManager);
-        services.AddSingleton<IPluginActivator, PluginActivator>();
+        // Register application-lifetime services
         services.AddSingleton<PluginManager>();
 
         // Register IHttpClientFactory so plugins can inject it without adding the package themselves
         services.AddHttpClient();
 
-        // Register the bot and hosted service
-        services.AddSingleton<IrcBot>();
-        services.AddSingleton<IBot>(sp => sp.GetRequiredService<IrcBot>());
-        services.AddSingleton<IBotStatistics>(sp => sp.GetRequiredService<IrcBot>().Statistics);
+        // Register the hosted service
         services.AddHostedService<MarvBotService>();
 
         // Discover plugins from configured directories, filtered by name

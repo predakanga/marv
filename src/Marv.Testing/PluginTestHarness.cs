@@ -8,37 +8,49 @@ namespace Marv.Testing;
 
 /// <summary>
 /// Creates a plugin instance with a mocked <see cref="IBot"/>, a real
-/// <see cref="IPluginActivator"/> backed by a test <see cref="IServiceProvider"/>,
-/// and a <see cref="NullLoggerFactory"/>. Reduces plugin test setup to a single call.
+/// <see cref="IPluginActivator"/> backed by a connection-scoped
+/// <see cref="IServiceProvider"/>, and a <see cref="NullLoggerFactory"/>.
+/// Reduces plugin test setup to a single call.
 /// </summary>
 /// <remarks>
+/// <para>
+/// Services are registered as scoped to match the production lifetime semantics,
+/// where core services are scoped to each IRC connection.
+/// </para>
+/// <para>
 /// <see cref="MarvPlugin.OnLoadAsync"/> is NOT called automatically — tests may need
 /// to set up additional state before loading. Call <see cref="LoadAsync"/> explicitly.
+/// </para>
 /// </remarks>
 /// <example>
 /// <code>
-/// var harness = PluginTestHarness&lt;GreetPlugin&gt;.Create();
+/// using var harness = PluginTestHarness&lt;GreetPlugin&gt;.Create();
 /// await harness.LoadAsync();
 /// // exercise the plugin...
 /// </code>
 /// </example>
 /// <typeparam name="TPlugin">The concrete plugin type to test.</typeparam>
-public sealed class PluginTestHarness<TPlugin> where TPlugin : MarvPlugin
+public sealed class PluginTestHarness<TPlugin> : IDisposable where TPlugin : MarvPlugin
 {
+    private readonly ServiceProvider _rootProvider;
+    private readonly IServiceScope _scope;
+
     /// <summary>The plugin instance under test.</summary>
     public TPlugin Plugin { get; }
 
     /// <summary>The mocked <see cref="IBot"/> injected into the plugin.</summary>
     public IBot Bot { get; }
 
-    /// <summary>The service provider backing the plugin activator.</summary>
+    /// <summary>The scoped service provider backing the plugin activator.</summary>
     public IServiceProvider Services { get; }
 
-    private PluginTestHarness(TPlugin plugin, IBot bot, IServiceProvider services)
+    private PluginTestHarness(TPlugin plugin, IBot bot, ServiceProvider rootProvider, IServiceScope scope)
     {
         Plugin = plugin;
         Bot = bot;
-        Services = services;
+        _rootProvider = rootProvider;
+        _scope = scope;
+        Services = scope.ServiceProvider;
     }
 
     /// <summary>
@@ -59,17 +71,19 @@ public sealed class PluginTestHarness<TPlugin> where TPlugin : MarvPlugin
         bot ??= MockBot.Create();
 
         var services = new ServiceCollection();
-        services.AddSingleton(bot);
+        services.AddScoped<IBot>(_ => bot);
         services.AddSingleton<ILoggerFactory>(NullLoggerFactory.Instance);
-        services.AddSingleton<IPluginActivator, TestPluginActivator>();
+        services.AddScoped<IPluginActivator, TestPluginActivator>();
 
         configureServices?.Invoke(services);
 
-        var provider = services.BuildServiceProvider();
-        var activator = provider.GetRequiredService<IPluginActivator>();
+        var rootProvider = services.BuildServiceProvider();
+        var scope = rootProvider.CreateScope();
+        var scopedProvider = scope.ServiceProvider;
 
+        var activator = scopedProvider.GetRequiredService<IPluginActivator>();
         var plugin = activator.CreateInstance<TPlugin>();
-        return new PluginTestHarness<TPlugin>(plugin, bot, provider);
+        return new PluginTestHarness<TPlugin>(plugin, bot, rootProvider, scope);
     }
 
     /// <summary>
@@ -90,6 +104,13 @@ public sealed class PluginTestHarness<TPlugin> where TPlugin : MarvPlugin
     /// </summary>
     public Task HandleEventAsync(Core.Events.MarvEvent evt, CancellationToken ct = default) =>
         Plugin.HandleEventAsync(evt, ct);
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        _scope.Dispose();
+        _rootProvider.Dispose();
+    }
 
     /// <summary>
     /// Activator implementation that uses the test service provider.

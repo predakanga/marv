@@ -1,4 +1,5 @@
 ---
+name: triage-issues
 description: Triage open GitHub issues — analyse suggestions, discuss in comments, and convert accepted issues into change specifications. Use when the user asks to triage issues, process issues, or check GitHub issues.
 disable-model-invocation: true
 ---

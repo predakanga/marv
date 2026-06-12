@@ -16,17 +16,15 @@ namespace Marv.Core.Plugin;
 public sealed class PluginManager
 {
     private readonly ILogger<PluginManager> _logger;
-    private readonly IServiceProvider _serviceProvider;
     private IReadOnlyList<PluginDescriptor> _descriptors = [];
     private List<PluginInstance> _instances = [];
 
     /// <summary>
     /// Creates a new <see cref="PluginManager"/>.
     /// </summary>
-    public PluginManager(ILogger<PluginManager> logger, IServiceProvider serviceProvider)
+    public PluginManager(ILogger<PluginManager> logger)
     {
         _logger = logger;
-        _serviceProvider = serviceProvider;
     }
 
     /// <summary>The loaded and sorted plugin descriptors.</summary>
@@ -123,7 +121,11 @@ public sealed class PluginManager
     /// ActivatorUtilities. Called after the DI container is built.
     /// All failures are fatal.
     /// </summary>
-    internal void InstantiatePlugins(IReadOnlyList<PluginDescriptor> descriptors)
+    /// <param name="descriptors">The sorted plugin descriptors to instantiate.</param>
+    /// <param name="scopedProvider">
+    /// The connection-scoped <see cref="IServiceProvider"/> to resolve dependencies from.
+    /// </param>
+    internal void InstantiatePlugins(IReadOnlyList<PluginDescriptor> descriptors, IServiceProvider scopedProvider)
     {
         _descriptors = descriptors;
         _instances = [];
@@ -133,7 +135,7 @@ public sealed class PluginManager
             try
             {
                 var plugin = (IPlugin)ActivatorUtilities.CreateInstance(
-                    _serviceProvider, descriptor.PluginType);
+                    scopedProvider, descriptor.PluginType);
 
                 _instances.Add(new PluginInstance(descriptor, plugin));
                 _logger.LogDebug("Instantiated plugin: {Name}", descriptor.Name);

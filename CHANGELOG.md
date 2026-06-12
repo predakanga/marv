@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **BREAKING:** Core services (`IBot`, `IServerInfo`, `ICapabilityManager`,
+  `IBotStatistics`, `IPluginActivator`) are now connection-scoped instead of
+  singletons. Each IRC connection gets fresh instances, and they are disposed on
+  disconnect. Plugins that register singleton services injecting these types
+  must change to scoped registration or use `IServiceScopeFactory`.
+- Plugins can now register scoped services via `ConfigureServices` and they
+  will be correctly resolved per connection.
+
+### Removed
+
+- `IrcBot.ResetState()` — no longer needed since each connection gets a fresh
+  bot instance via DI scoping.
+
 ## [0.5.0] - 2026-06-11
 
 ### Added

@@ -73,28 +73,29 @@ public class PluginManagerResilienceTests
         };
     }
 
-    private static (PluginManager Manager, IServiceProvider Provider) CreateManager()
+    private static (PluginManager Manager, IServiceProvider ScopedProvider) CreateManager()
     {
         var services = new ServiceCollection();
-        services.AddSingleton<IPluginActivator, PluginActivator>();
-        services.AddSingleton(Substitute.For<IBot>());
+        services.AddScoped<IPluginActivator, PluginActivator>();
+        services.AddScoped(_ => Substitute.For<IBot>());
         services.AddSingleton<ILoggerFactory>(NullLoggerFactory.Instance);
-        var sp = services.BuildServiceProvider();
+        var rootProvider = services.BuildServiceProvider();
+        var scope = rootProvider.CreateScope();
 
         var logger = NullLoggerFactory.Instance.CreateLogger<PluginManager>();
-        return (new PluginManager(logger, sp), sp);
+        return (new PluginManager(logger), scope.ServiceProvider);
     }
 
     [Fact]
     public void InstantiatePlugins_FailingPlugin_ThrowsFatal()
     {
-        var (manager, _) = CreateManager();
+        var (manager, sp) = CreateManager();
 
         var goodDesc = MakeDescriptor("Good", typeof(GoodPlugin));
         var failDesc = MakeDescriptor("Failing", typeof(FailingPlugin));
 
         var ex = Assert.Throws<InvalidOperationException>(
-            () => manager.InstantiatePlugins([goodDesc, failDesc]));
+            () => manager.InstantiatePlugins([goodDesc, failDesc], sp));
         Assert.Contains("Failing", ex.Message);
         Assert.Contains("Failed to instantiate plugin", ex.Message);
     }
@@ -102,25 +103,25 @@ public class PluginManagerResilienceTests
     [Fact]
     public void InstantiatePlugins_AllFail_ThrowsFatal()
     {
-        var (manager, _) = CreateManager();
+        var (manager, sp) = CreateManager();
 
         var desc = MakeDescriptor("Bad", typeof(FailingPlugin));
 
         var ex = Assert.Throws<InvalidOperationException>(
-            () => manager.InstantiatePlugins([desc]));
+            () => manager.InstantiatePlugins([desc], sp));
         Assert.Contains("Bad", ex.Message);
     }
 
     [Fact]
     public async Task LoadPlugins_FailedLoad_ThrowsFatal()
     {
-        var (manager, _) = CreateManager();
+        var (manager, sp) = CreateManager();
 
         var desc = MakeDescriptor("FailLoad", typeof(LoadFailPlugin));
         var goodDesc = MakeDescriptor("Good", typeof(GoodPlugin));
 
         // LoadFailPlugin has no constructor issues, so instantiation succeeds
-        manager.InstantiatePlugins([desc, goodDesc]);
+        manager.InstantiatePlugins([desc, goodDesc], sp);
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(
             () => manager.LoadPluginsAsync(CancellationToken.None));
@@ -131,12 +132,12 @@ public class PluginManagerResilienceTests
     [Fact]
     public async Task LoadPlugins_AllSucceed_AllPresent()
     {
-        var (manager, _) = CreateManager();
+        var (manager, sp) = CreateManager();
 
         var a = MakeDescriptor("A", typeof(GoodPlugin));
         var b = MakeDescriptor("B", typeof(GoodPlugin));
 
-        manager.InstantiatePlugins([a, b]);
+        manager.InstantiatePlugins([a, b], sp);
         await manager.LoadPluginsAsync(CancellationToken.None);
 
         var instances = GetInstances(manager);
@@ -146,13 +147,13 @@ public class PluginManagerResilienceTests
     [Fact]
     public void InstantiatePlugins_AllGood_AllPresent()
     {
-        var (manager, _) = CreateManager();
+        var (manager, sp) = CreateManager();
 
         var a = MakeDescriptor("A", typeof(GoodPlugin));
         var b = MakeDescriptor("B", typeof(GoodPlugin));
         var c = MakeDescriptor("C", typeof(GoodPlugin));
 
-        manager.InstantiatePlugins([a, b, c]);
+        manager.InstantiatePlugins([a, b, c], sp);
 
         var instances = GetInstances(manager);
         Assert.Equal(3, instances.Count);

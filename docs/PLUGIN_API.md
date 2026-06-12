@@ -342,6 +342,27 @@ public class MyPlugin(IBot bot, IPluginActivator activator, ILoggerFactory logge
 
 ## 9. Services
 
+### Service lifetimes
+
+Core services like `IBot`, `IServerInfo`, `ICapabilityManager`,
+`IBotStatistics`, and `IPluginActivator` are **connection-scoped** — a fresh
+instance is created for each IRC connection and disposed on disconnect.
+Plugins are also recreated per connection, so they always receive the
+current connection's services.
+
+Plugins can register services with any standard DI lifetime:
+
+| Lifetime | `ConfigureServices` call | Behaviour |
+|---|---|---|
+| **Scoped** | `services.AddScoped<T, TImpl>()` | Fresh instance per connection — matches plugin lifetime |
+| **Singleton** | `services.AddSingleton<T, TImpl>()` | Survives reconnects — use for cross-connection state (caches, metrics) |
+| **Transient** | `services.AddTransient<T, TImpl>()` | New instance per resolution |
+
+> **Note:** Singleton services must not capture scoped services (e.g. `IBot`)
+> in their constructors. The DI container will reject this. If a singleton
+> needs access to connection-scoped services, inject `IServiceScopeFactory`
+> and create a scope on demand.
+
 **Providing a service:**
 
 ```csharp
@@ -353,7 +374,7 @@ public class MyServicePlugin : MarvPlugin
 
     public static void ConfigureServices(IServiceCollection services)
     {
-        services.AddSingleton<IMyService, MyServiceImpl>();
+        services.AddScoped<IMyService, MyServiceImpl>();
     }
 }
 ```
@@ -477,20 +498,20 @@ mocks. Pass `bot:` to provide a custom `IBot` mock.
 
 **Always available (registered by Marv host):**
 
-| Service | Description |
-|---|---|
-| `IBot` | Bot instance |
-| `IPluginActivator` | Creates instances with DI resolution |
-| `ILoggerFactory` / `ILogger<T>` | Logging |
-| `IOptions<T>` | Singleton config for `[PluginConfig]` types |
-| `IOptionsMonitor<T>` | Config with change notification support |
-| `IOptionsSnapshot<T>` | Scoped config (re-reads per scope) |
-| `IBotStatistics` | Connection statistics (also via `IBot.Statistics`) |
-| `IServerInfo` | ISUPPORT configuration |
-| `ICapabilityManager` | IRCv3 capability state |
-| `IHttpClientFactory` | HTTP clients (no extra NuGet needed) |
-| `IHostApplicationLifetime` | App shutdown coordination |
-| `IConfiguration` | Raw configuration access |
+| Service | Lifetime | Description |
+|---|---|---|
+| `IBot` | Scoped | Bot instance (fresh per connection) |
+| `IPluginActivator` | Scoped | Creates instances with DI resolution |
+| `IBotStatistics` | Scoped | Connection statistics (also via `IBot.Statistics`) |
+| `IServerInfo` | Scoped | ISUPPORT configuration |
+| `ICapabilityManager` | Scoped | IRCv3 capability state |
+| `ILoggerFactory` / `ILogger<T>` | Singleton | Logging |
+| `IOptions<T>` | Singleton | Config for `[PluginConfig]` types |
+| `IOptionsMonitor<T>` | Singleton | Config with change notification support |
+| `IOptionsSnapshot<T>` | Scoped | Re-read config per connection scope |
+| `IHttpClientFactory` | Singleton | HTTP clients (no extra NuGet needed) |
+| `IHostApplicationLifetime` | Singleton | App shutdown coordination |
+| `IConfiguration` | Singleton | Raw configuration access |
 
 Services registered by plugins via `[ProvidesService]` + `ConfigureServices`
 are available to dependent plugins in load order (see §9).

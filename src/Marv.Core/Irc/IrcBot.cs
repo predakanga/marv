@@ -386,38 +386,6 @@ internal sealed class IrcBot : IBot
         await ProcessMessagesAsync(ct);
     }
 
-    /// <summary>
-    /// Resets state on disconnection — clears users, channels, pending labels.
-    /// </summary>
-    public void ResetState()
-    {
-        _users.Clear();
-        _channels.Clear();
-        _serverInfo.Reset();
-        _capabilityManager.Reset();
-
-        foreach (var kvp in _pendingLabels)
-        {
-            kvp.Value.TrySetCanceled();
-        }
-        _pendingLabels.Clear();
-        _labelBuffers.Clear();
-
-        foreach (var kvp in _pendingEndOf)
-        {
-            kvp.Value.Tcs.TrySetCanceled();
-        }
-        _pendingEndOf.Clear();
-
-        _readyTcs?.TrySetCanceled();
-        _readyTcs = null;
-        _nickServPending = false;
-        _operPending = false;
-
-        _eventWriters = [];
-        _connection = null;
-    }
-
     // --- Message processor ---
 
     private async Task ProcessMessagesAsync(CancellationToken ct)

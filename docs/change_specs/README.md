@@ -38,7 +38,7 @@ Specs are numbered in recommended implementation order.
 | 24 | [SendAndAwaitAsync ENDOF* Fallback](024-sendandawait-endof-fallback.md) | Core | Medium | None | **Done** |
 | 25 | [Testcontainers Integration](025-testcontainers-integration.md) | Tests | Small-Medium | None | **Done** |
 
-| 26 | [Connection-Scoped DI Services](026-connection-scoped-services.md) | Core | Medium-Large | None | **Pending** |
+| 26 | [Connection-Scoped DI Services](026-connection-scoped-services.md) | Core | Medium-Large | None | **Done** |
 
 Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
 Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
