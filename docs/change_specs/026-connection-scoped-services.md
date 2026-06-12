@@ -17,12 +17,13 @@ that plugins depend on — `IBot`, `IServerInfo`, `ICapabilityManager`,
 `IBotStatistics` — are registered as singletons via `AddMarv`. This
 means:
 
-1. **Stale state across reconnects.** Singleton services survive scope
-   boundaries that plugins don't. A plugin that caches a reference to
-   `IServerInfo` in `OnLoadAsync` silently holds the same instance across
-   reconnects, even though the bot calls `ResetState()` and the
-   underlying data is cleared. This works *today* because the object is
-   mutated in place, but it's fragile and semantically incorrect.
+1. **Semantic mismatch.** Core services like `IBot`, `IServerInfo`, and
+   `ICapabilityManager` are registered as singletons but conceptually
+   belong to a single connection — the bot calls `ResetState()` on them
+   between connections. Plugins are torn down and recreated each
+   connection, so they don't currently hold stale references, but the
+   singleton lifetime is misleading and prevents the DI container from
+   enforcing connection boundaries.
 
 2. **Scoped services are unusable.** Plugins can call
    `services.AddScoped<T>()` in `ConfigureServices`, but because
@@ -69,9 +70,11 @@ In `MarvServiceExtensions.AddMarv`, change these registrations from
 | `IrcBot` | `IBot`, concrete | Holds connection, message loop state |
 | `BotStatistics` | `IBotStatistics` | Derived from `IrcBot` |
 
+| `PluginActivator` | `IPluginActivator` | Used by `MarvPlugin` for handler groups |
+
 Services that are genuinely application-lifetime (`PluginManager`,
-`IPluginActivator`, `IReadOnlyList<PluginDescriptor>`,
-`IHttpClientFactory`, `IOptions<MarvConfiguration>`) remain singletons.
+`IReadOnlyList<PluginDescriptor>`, `IHttpClientFactory`,
+`IOptions<MarvConfiguration>`) remain singletons.
 
 The scoped `IrcBot` replaces the current pattern where a single
 singleton instance calls `ResetState()` between connections. Each scope
@@ -95,22 +98,21 @@ internal void InstantiatePlugins(
 
 This keeps `PluginManager` as a singleton (so it survives reconnects and
 maintains descriptor state) while ensuring plugins receive scoped
-dependencies.
+dependencies. The `IServiceProvider` currently injected into
+`PluginManager`'s constructor is no longer needed and should be removed.
 
-### 4. Update `PluginActivator` similarly
+### 4. Make `PluginActivator` scoped
 
-`PluginActivator` currently captures `IServiceProvider` in its
-constructor. Since it's a singleton, it always holds the root provider.
-Either:
+`PluginActivator` implements `IPluginActivator`, which is part of the
+plugin API — `MarvPlugin` injects it and uses it to create
+`HandlerGroup` instances. It currently captures `IServiceProvider` in
+its constructor, but since it's registered as a singleton it always
+holds the root provider.
 
-- **(a)** Make `PluginActivator` scoped (so it naturally gets the scoped
-  provider), or
-- **(b)** Remove `PluginActivator` and inline `ActivatorUtilities` usage
-  in `PluginManager`, passing the scoped provider directly.
-
-Option (b) is simpler since `PluginActivator` is only used in one place
-and the `IPluginActivator` interface is an internal detail, not part of
-the plugin API.
+Change its registration from `AddSingleton` to `AddScoped` so that each
+connection scope gets a `PluginActivator` backed by the scoped provider.
+Plugins that inject `IPluginActivator` will then automatically create
+handler groups with correctly-scoped dependencies.
 
 ### 5. Update `MarvBotService` constructor and connection loop
 
@@ -184,11 +186,13 @@ unnecessary and expensive.
 
 ## Impact
 
-- **Plugin API:** Breaking change — plugins that stored `IBot` or
-  `IServerInfo` references in static fields or singleton services will
-  hold stale references after reconnect. This is already a latent bug
-  (since the objects are reset), so the fix makes the failure mode
-  explicit rather than silent.
+- **Plugin API:** Breaking change for any plugin-provided singleton
+  services that inject `IBot`, `IServerInfo`, or other now-scoped
+  services — the DI container will reject resolving a scoped service
+  from a singleton. Plugins must change such services to scoped
+  registration, or use `IServiceScopeFactory` to create their own
+  scopes. Plugin instances themselves are unaffected since they are
+  already recreated per connection.
 - **Plugin DX:** Scoped services now work correctly. Plugins can use the
   standard .NET DI lifetime model without surprises.
 - **Core:** `IrcBot.ResetState()` can be removed since each connection
