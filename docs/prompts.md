@@ -1448,3 +1448,9 @@
 > At this point, the loop doesn't need to be automated - I'm happy to run a command in Claude Code when I want to iterate this reconciliation loop.
 > At this point, code reviews and other GitHub features are also out of scope.
 > Is there a pre-made skill that would fit my requirements, or if not can you create one for me?
+
+## Triage issues (skill invocations)
+
+**Date**: 2026-06-13T00:00:00Z
+
+> /triage-issues (×3 — initial analysis, follow-up discussion, accept → CS-026)

@@ -38,7 +38,10 @@ Specs are numbered in recommended implementation order.
 | 24 | [SendAndAwaitAsync ENDOF* Fallback](024-sendandawait-endof-fallback.md) | Core | Medium | None | **Done** |
 | 25 | [Testcontainers Integration](025-testcontainers-integration.md) | Tests | Small-Medium | None | **Done** |
 
+| 26 | [Connection-Scoped DI Services](026-connection-scoped-services.md) | Core | Medium-Large | None | **Pending** |
+
 Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
 Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
 Specs 12-14 are CI/CD and infrastructure changes. Specs 15-19 are code changes.
-Specs 20-24 are downstream feature requests (code and docs).
+Specs 20-25 are downstream feature requests (code, docs, and tests).
+Spec 26 is a GitHub issue-driven architectural change.
