@@ -81,7 +81,7 @@ When a CS-nnn is implemented, mark it done in three places:
 When a change spec originates from a GitHub issue, set the `**Source:**`
 field to reference the issue (e.g. `GitHub issue #42`). When completing
 the spec, also update the GitHub issue: post a comment linking to the
-implementing commit and add the `triaged` label if not already present.
+implementing commit and close the issue.
 
 # IRC Bot — Claude Code Instructions
 
