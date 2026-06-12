@@ -23,8 +23,9 @@ in the interaction between phases go undetected until a release is built.
 
 Create a test fixture class (e.g. `PublishedOutputFixture`) that:
 
-- Runs `dotnet publish` on the Marv host project and plugin projects to a
-  temporary directory, producing the same artifact layout as `make publish`.
+- Runs `dotnet publish` on the Marv host project and plugin projects,
+  then copies only the Marv executable and the plugin DLLs to a
+  temporary directory (not the entire publish artifact tree).
 - Exposes the output directory paths (host output dir, plugin dir) to tests.
 - Caches the build output for the test run (build once, run many tests).
 
