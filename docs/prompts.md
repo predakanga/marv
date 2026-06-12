@@ -1436,3 +1436,15 @@
 **Date**: 2026-06-11T00:00:00Z
 
 > The Github CI workflow still launches a docker container for the integration tests, even though that's done internally now
+
+## Create a GitHub issue triage skill for Claude Code
+
+**Date**: 2026-06-13T00:00:00Z
+
+> I'd like to experiment with a more github-native workflow.
+> To start with, I'd like to be able to create issues in Marv's repo and have you review those issues and respond with a summary analysis of the suggestion.
+> I'll then either respond with clarifications and we continue this loop, or I'll accept/reject the change in a comment.
+> When an issue is accepted, you should commit one or more change specifications to the codebase to fulfil that issue, but not add any code.
+> At this point, the loop doesn't need to be automated - I'm happy to run a command in Claude Code when I want to iterate this reconciliation loop.
+> At this point, code reviews and other GitHub features are also out of scope.
+> Is there a pre-made skill that would fit my requirements, or if not can you create one for me?
