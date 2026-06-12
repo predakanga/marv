@@ -10,10 +10,78 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Add a changelog entry to `CHANGELOG.md` under the `[Unreleased]` section
   for every user-visible change, following
   [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conventions.
-- When completing a change spec (CS-nnn), mark it done in three places:
-  append " — COMPLETED" to the spec's `#` heading, add a
-  `**Status:** Completed` line to the spec's metadata block, and set
-  its Status to `**Done**` in `docs/change_specs/README.md`.
+
+## Change specifications
+
+Change specifications (CS-nnn) are self-contained design documents that
+describe a single change or closely related group of changes. They live in
+`docs/change_specs/` and are tracked by an index in
+`docs/change_specs/README.md`.
+
+### File location and naming
+
+Specs are numbered sequentially: `docs/change_specs/NNN-short-slug.md`.
+Determine the next number by reading the index in `README.md`.
+
+### Template
+
+```markdown
+# CS-NNN: Title
+
+**Source:** <origin — e.g. "GitHub issue #42", "Downstream feature request">
+**Scope:** <Core / Host / Plugin API / Docs / CI/CD / New package>
+**Complexity:** <Trivial / Small / Small-Medium / Medium / Medium-Large / Large>
+**Breaking changes:** <None / Yes — brief description>
+**Status:** <Pending / Completed>
+
+---
+
+## Problem
+
+<Description of the problem or motivation for the change.>
+
+## Changes
+
+### 1. First change
+
+<Description, with code snippets where they aid clarity.>
+
+### 2. Second change
+
+<...>
+
+## Design decisions
+
+<Explain key choices and rejected alternatives.>
+
+## Testing
+
+<Bullet list of unit, integration, and/or manual tests.>
+
+## Impact
+
+<Effect on plugin API, DX, risk assessment.>
+```
+
+### Index (`docs/change_specs/README.md`)
+
+The index is a markdown table with columns: #, Spec (link), Scope,
+Complexity, Dependencies, Status. Add new specs with status **Pending**.
+
+### Completing a change spec
+
+When a CS-nnn is implemented, mark it done in three places:
+
+1. Append " — COMPLETED" to the spec's `#` heading.
+2. Set `**Status:** Completed` in the spec's metadata block.
+3. Set its Status to `**Done**` in `docs/change_specs/README.md`.
+
+### GitHub issue integration
+
+When a change spec originates from a GitHub issue, set the `**Source:**`
+field to reference the issue (e.g. `GitHub issue #42`). When completing
+the spec, also update the GitHub issue: post a comment linking to the
+implementing commit and add the `triaged` label if not already present.
 
 # IRC Bot — Claude Code Instructions
 
