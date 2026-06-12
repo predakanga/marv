@@ -1472,3 +1472,9 @@
 **Date**: 2026-06-13T00:00:00Z
 
 > /triage-issues
+
+## Restrict /accept and /reject to repo owner
+
+**Date**: 2026-06-13T00:00:00Z
+
+> Can you update the triage-issues skill to make sure only the repository owner can use /accept and /reject.
