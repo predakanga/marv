@@ -39,7 +39,7 @@ Specs are numbered in recommended implementation order.
 | 25 | [Testcontainers Integration](025-testcontainers-integration.md) | Tests | Small-Medium | None | **Done** |
 
 | 26 | [Connection-Scoped DI Services](026-connection-scoped-services.md) | Core | Medium-Large | None | **Done** |
-| 27 | [Idiomatic Configuration Loading](027-idiomatic-config-loading.md) | Host | Small-Medium | None | **Pending** |
+| 27 | [Idiomatic Configuration Loading](027-idiomatic-config-loading.md) | Host | Small-Medium | None | **Done** |
 | 28 | [Plugin Loading Integration Tests](028-plugin-loading-integration-tests.md) | Tests | Medium | None | **Pending** |
 
 Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.

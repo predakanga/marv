@@ -1478,3 +1478,9 @@
 **Date**: 2026-06-13T00:00:00Z
 
 > Can you update the triage-issues skill to make sure only the repository owner can use /accept and /reject.
+
+## Implement CS-027: Idiomatic Configuration Loading
+
+**Date**: 2026-06-13T00:00:00Z
+
+> Okay, go ahead and implement CS-027

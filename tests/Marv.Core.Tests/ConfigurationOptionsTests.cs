@@ -12,7 +12,7 @@ namespace Marv.Core.Tests;
 /// <summary>
 /// Tests for <see cref="ConfigurationOptions"/> — verifies that CLI overrides are only
 /// produced when the user explicitly provides an option, and that all property types
-/// round-trip correctly.
+/// round-trip correctly through the <see cref="CommandLineConfigurationProvider"/>.
 /// </summary>
 public class ConfigurationOptionsTests
 {
@@ -26,18 +26,35 @@ public class ConfigurationOptionsTests
     }
 
     /// <summary>
+    /// Builds configuration data from a <see cref="ParseResult"/> using the
+    /// <see cref="CommandLineConfigurationProvider"/>, mirroring the real configuration source.
+    /// </summary>
+    private static Dictionary<string, string?> GetCliData(ParseResult result)
+    {
+        var configBuilder = new ConfigurationBuilder();
+        configBuilder.Sources.Add(ConfigurationOptions.CreateSource(result));
+        var config = configBuilder.Build();
+
+        var data = new Dictionary<string, string?>();
+        foreach (var kvp in config.AsEnumerable())
+        {
+            if (kvp.Value is not null)
+                data[kvp.Key] = kvp.Value;
+        }
+        return data;
+    }
+
+    /// <summary>
     /// Builds a <see cref="MarvConfiguration"/> by layering a base config dictionary
-    /// with CLI overrides, mirroring the real layering in Program.cs.
+    /// with CLI overrides via the <see cref="CommandLineConfigurationProvider"/>.
     /// </summary>
     private static MarvConfiguration BuildConfig(Dictionary<string, string?> baseConfig, params string[] cliArgs)
     {
         var result = Parse(cliArgs);
-        var overrides = ConfigurationOptions.GetOverrides(result);
 
         var configBuilder = new ConfigurationBuilder();
         configBuilder.AddInMemoryCollection(baseConfig);
-        if (overrides.Count > 0)
-            configBuilder.AddInMemoryCollection(overrides);
+        configBuilder.Sources.Add(ConfigurationOptions.CreateSource(result));
 
         var config = configBuilder.Build();
         var marvConfig = new MarvConfiguration();
@@ -49,9 +66,9 @@ public class ConfigurationOptionsTests
     public void NoArguments_ProducesNoOverrides()
     {
         var result = Parse();
-        var overrides = ConfigurationOptions.GetOverrides(result);
+        var data = GetCliData(result);
 
-        Assert.Empty(overrides);
+        Assert.Empty(data);
     }
 
     // -- Bool options ----------------------------------------------------------
@@ -60,29 +77,29 @@ public class ConfigurationOptionsTests
     public void BoolOption_NotProvided_IsNotInOverrides()
     {
         var result = Parse("--server", "irc.example.com");
-        var overrides = ConfigurationOptions.GetOverrides(result);
+        var data = GetCliData(result);
 
-        Assert.DoesNotContain("UseTls", overrides.Keys);
-        Assert.DoesNotContain("TlsSkipCertificateValidation", overrides.Keys);
-        Assert.DoesNotContain("RateLimitEnabled", overrides.Keys);
+        Assert.DoesNotContain("UseTls", data.Keys);
+        Assert.DoesNotContain("TlsSkipCertificateValidation", data.Keys);
+        Assert.DoesNotContain("RateLimitEnabled", data.Keys);
     }
 
     [Fact]
     public void BoolOption_ExplicitlyTrue_IsInOverrides()
     {
         var result = Parse("--use-tls", "true");
-        var overrides = ConfigurationOptions.GetOverrides(result);
+        var data = GetCliData(result);
 
-        Assert.Equal("True", overrides["UseTls"]);
+        Assert.Equal("True", data["UseTls"]);
     }
 
     [Fact]
     public void BoolOption_ExplicitlyFalse_IsInOverrides()
     {
         var result = Parse("--rate-limit-enabled", "false");
-        var overrides = ConfigurationOptions.GetOverrides(result);
+        var data = GetCliData(result);
 
-        Assert.Equal("False", overrides["RateLimitEnabled"]);
+        Assert.Equal("False", data["RateLimitEnabled"]);
     }
 
     // -- String options --------------------------------------------------------
@@ -91,19 +108,19 @@ public class ConfigurationOptionsTests
     public void StringOption_NotProvided_IsNotInOverrides()
     {
         var result = Parse("--port", "6697");
-        var overrides = ConfigurationOptions.GetOverrides(result);
+        var data = GetCliData(result);
 
-        Assert.DoesNotContain("Server", overrides.Keys);
-        Assert.DoesNotContain("Nick", overrides.Keys);
+        Assert.DoesNotContain("Server", data.Keys);
+        Assert.DoesNotContain("Nick", data.Keys);
     }
 
     [Fact]
     public void StringOption_Provided_IsInOverrides()
     {
         var result = Parse("--server", "irc.example.com");
-        var overrides = ConfigurationOptions.GetOverrides(result);
+        var data = GetCliData(result);
 
-        Assert.Equal("irc.example.com", overrides["Server"]);
+        Assert.Equal("irc.example.com", data["Server"]);
     }
 
     // -- Int options -----------------------------------------------------------
@@ -112,18 +129,18 @@ public class ConfigurationOptionsTests
     public void IntOption_NotProvided_IsNotInOverrides()
     {
         var result = Parse("--server", "irc.example.com");
-        var overrides = ConfigurationOptions.GetOverrides(result);
+        var data = GetCliData(result);
 
-        Assert.DoesNotContain("Port", overrides.Keys);
+        Assert.DoesNotContain("Port", data.Keys);
     }
 
     [Fact]
     public void IntOption_Provided_IsInOverrides()
     {
         var result = Parse("--port", "6697");
-        var overrides = ConfigurationOptions.GetOverrides(result);
+        var data = GetCliData(result);
 
-        Assert.Equal("6697", overrides["Port"]);
+        Assert.Equal("6697", data["Port"]);
     }
 
     // -- Double options --------------------------------------------------------
@@ -132,18 +149,18 @@ public class ConfigurationOptionsTests
     public void DoubleOption_NotProvided_IsNotInOverrides()
     {
         var result = Parse("--server", "irc.example.com");
-        var overrides = ConfigurationOptions.GetOverrides(result);
+        var data = GetCliData(result);
 
-        Assert.DoesNotContain("RateLimitRefillRate", overrides.Keys);
+        Assert.DoesNotContain("RateLimitRefillRate", data.Keys);
     }
 
     [Fact]
     public void DoubleOption_Provided_IsInOverrides()
     {
         var result = Parse("--rate-limit-refill-rate", "2.5");
-        var overrides = ConfigurationOptions.GetOverrides(result);
+        var data = GetCliData(result);
 
-        Assert.Equal("2.5", overrides["RateLimitRefillRate"]);
+        Assert.Equal("2.5", data["RateLimitRefillRate"]);
     }
 
     // -- Collection options ----------------------------------------------------
@@ -152,20 +169,20 @@ public class ConfigurationOptionsTests
     public void CollectionOption_NotProvided_IsNotInOverrides()
     {
         var result = Parse("--server", "irc.example.com");
-        var overrides = ConfigurationOptions.GetOverrides(result);
+        var data = GetCliData(result);
 
-        Assert.DoesNotContain("Channels:0", overrides.Keys);
-        Assert.DoesNotContain("Plugins:0", overrides.Keys);
+        Assert.DoesNotContain("Channels:0", data.Keys);
+        Assert.DoesNotContain("Plugins:0", data.Keys);
     }
 
     [Fact]
     public void CollectionOption_Provided_IsInOverrides()
     {
         var result = Parse("--channels", "#foo", "#bar");
-        var overrides = ConfigurationOptions.GetOverrides(result);
+        var data = GetCliData(result);
 
-        Assert.Equal("#foo", overrides["Channels:0"]);
-        Assert.Equal("#bar", overrides["Channels:1"]);
+        Assert.Equal("#foo", data["Channels:0"]);
+        Assert.Equal("#bar", data["Channels:1"]);
     }
 
     // -- Enum options ----------------------------------------------------------
@@ -174,18 +191,18 @@ public class ConfigurationOptionsTests
     public void EnumOption_NotProvided_IsNotInOverrides()
     {
         var result = Parse("--server", "irc.example.com");
-        var overrides = ConfigurationOptions.GetOverrides(result);
+        var data = GetCliData(result);
 
-        Assert.DoesNotContain("LogLevel", overrides.Keys);
+        Assert.DoesNotContain("LogLevel", data.Keys);
     }
 
     [Fact]
     public void EnumOption_Provided_IsInOverrides()
     {
         var result = Parse("--log-level", "Debug");
-        var overrides = ConfigurationOptions.GetOverrides(result);
+        var data = GetCliData(result);
 
-        Assert.Equal("Debug", overrides["LogLevel"]);
+        Assert.Equal("Debug", data["LogLevel"]);
     }
 
     // -- End-to-end config layering --------------------------------------------
@@ -213,16 +230,16 @@ public class ConfigurationOptionsTests
     public void NullableStringOption_NotProvided_IsNotInOverrides()
     {
         var result = Parse("--server", "irc.example.com");
-        var overrides = ConfigurationOptions.GetOverrides(result);
+        var data = GetCliData(result);
 
-        Assert.DoesNotContain("TlsCaCertFile", overrides.Keys);
-        Assert.DoesNotContain("SaslUser", overrides.Keys);
-        Assert.DoesNotContain("SaslPassword", overrides.Keys);
-        Assert.DoesNotContain("ServerPassword", overrides.Keys);
-        Assert.DoesNotContain("NickServPassword", overrides.Keys);
-        Assert.DoesNotContain("OperName", overrides.Keys);
-        Assert.DoesNotContain("OperPassword", overrides.Keys);
-        Assert.DoesNotContain("SentryDsn", overrides.Keys);
+        Assert.DoesNotContain("TlsCaCertFile", data.Keys);
+        Assert.DoesNotContain("SaslUser", data.Keys);
+        Assert.DoesNotContain("SaslPassword", data.Keys);
+        Assert.DoesNotContain("ServerPassword", data.Keys);
+        Assert.DoesNotContain("NickServPassword", data.Keys);
+        Assert.DoesNotContain("OperName", data.Keys);
+        Assert.DoesNotContain("OperPassword", data.Keys);
+        Assert.DoesNotContain("SentryDsn", data.Keys);
     }
 
     [Fact]
@@ -277,7 +294,6 @@ public class ConfigurationOptionsTests
             ["SaslUser"] = "testuser",
         };
 
-        // Provide some other CLI arg but not --tls-ca-cert-file or --sasl-user
         var config = BuildConfig(baseConfig, "--server", "irc.example.com");
 
         Assert.Equal("/path/to/ca.pem", config.TlsCaCertFile);
@@ -302,8 +318,6 @@ public class ConfigurationOptionsTests
     [Fact]
     public void JsonConfigFile_ExplicitNull_NotOverriddenByAbsentCliArgs()
     {
-        // Reproduce the real config layering: JSON file with explicit null values,
-        // then CLI overrides for unrelated options.
         var json = JsonSerializer.Serialize(new
         {
             Server = "irc.libera.chat",
@@ -319,12 +333,10 @@ public class ConfigurationOptionsTests
         try
         {
             var result = Parse("--nick", "CliBot");
-            var overrides = ConfigurationOptions.GetOverrides(result);
 
             var configBuilder = new ConfigurationBuilder();
             configBuilder.AddJsonFile(tempFile, optional: false, reloadOnChange: false);
-            if (overrides.Count > 0)
-                configBuilder.AddInMemoryCollection(overrides);
+            configBuilder.Sources.Add(ConfigurationOptions.CreateSource(result));
 
             var builtConfig = configBuilder.Build();
             var marvConfig = new MarvConfiguration();
@@ -345,7 +357,6 @@ public class ConfigurationOptionsTests
     [Fact]
     public void JsonConfigFile_StringValues_NotOverriddenByAbsentCliArgs()
     {
-        // JSON file with real string values — verify CLI for other options doesn't clobber them.
         var json = JsonSerializer.Serialize(new
         {
             Server = "irc.libera.chat",
@@ -359,12 +370,10 @@ public class ConfigurationOptionsTests
         try
         {
             var result = Parse("--nick", "CliBot");
-            var overrides = ConfigurationOptions.GetOverrides(result);
 
             var configBuilder = new ConfigurationBuilder();
             configBuilder.AddJsonFile(tempFile, optional: false, reloadOnChange: false);
-            if (overrides.Count > 0)
-                configBuilder.AddInMemoryCollection(overrides);
+            configBuilder.Sources.Add(ConfigurationOptions.CreateSource(result));
 
             var builtConfig = configBuilder.Build();
             var marvConfig = new MarvConfiguration();

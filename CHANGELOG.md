@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for `appsettings.json` and `appsettings.{Environment}.json`
+  configuration files via the standard .NET configuration stack.
+
 ### Changed
 
 - **BREAKING:** Core services (`IBot`, `IServerInfo`, `ICapabilityManager`,

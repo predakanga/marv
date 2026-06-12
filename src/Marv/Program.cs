@@ -3,6 +3,7 @@ using Json5;
 using Marv;
 using Marv.Core;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensions.Logging;
@@ -22,21 +23,20 @@ rootCommand.SetAction(async (result, ct) =>
 
     var builder = Host.CreateApplicationBuilder();
 
-    // Clear default config sources and rebuild with our layered approach
-    builder.Configuration.Sources.Clear();
+    // Replace default JSON sources with JSON5 equivalents so appsettings.json
+    // files gain JSON5 comment support
+    ReplaceJsonWithJson5(builder.Configuration);
 
-    // Layer 1: Default configuration file (marv.json)
-    // Layer 2: User-specified configuration file (via --config)
+    // Add marv.json (or user-specified config) on top of the default stack
     var effectivePath = configPath ?? "marv.json";
     AddConfigFile(builder.Configuration, effectivePath, required: configPath is not null);
 
-    // Layer 3: Environment variables with MARV_ prefix
+    // Environment variables with MARV_ prefix (the default host builder adds
+    // an unprefixed provider, so standard .NET env vars still work)
     builder.Configuration.AddEnvironmentVariables("MARV_");
 
-    // Layer 4: CLI argument overrides (highest priority)
-    var overrides = ConfigurationOptions.GetOverrides(result);
-    if (overrides.Count > 0)
-        builder.Configuration.AddInMemoryCollection(overrides);
+    // CLI argument overrides (highest priority)
+    builder.Configuration.Sources.Add(ConfigurationOptions.CreateSource(result));
 
     // Register Marv core services
     builder.Services.AddMarv(builder.Configuration);
@@ -68,6 +68,29 @@ rootCommand.SetAction(async (result, ct) =>
 
 var parseResult = rootCommand.Parse(args);
 await parseResult.InvokeAsync();
+
+/// <summary>
+/// Walks the configuration sources and replaces any <see cref="JsonConfigurationSource"/>
+/// instances with <see cref="Json5ConfigurationSource"/> equivalents, preserving
+/// path, optional, and reloadOnChange settings.
+/// </summary>
+static void ReplaceJsonWithJson5(IConfigurationBuilder config)
+{
+    var sources = config.Sources;
+    for (var i = 0; i < sources.Count; i++)
+    {
+        if (sources[i] is JsonConfigurationSource jsonSource)
+        {
+            sources[i] = new Json5ConfigurationSource
+            {
+                Path = jsonSource.Path!,
+                Optional = jsonSource.Optional,
+                ReloadOnChange = jsonSource.ReloadOnChange,
+                FileProvider = jsonSource.FileProvider,
+            };
+        }
+    }
+}
 
 /// <summary>
 /// Adds a configuration file source based on the file extension.

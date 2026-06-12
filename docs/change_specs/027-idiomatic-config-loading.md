@@ -1,10 +1,10 @@
-# CS-027: Idiomatic Configuration Loading
+# CS-027: Idiomatic Configuration Loading — COMPLETED
 
 **Source:** GitHub issue #4
 **Scope:** Host
 **Complexity:** Small-Medium
 **Breaking changes:** None — existing `marv.json` and `MARV_` env var behaviour preserved
-**Status:** Pending
+**Status:** Completed
 
 ---
 

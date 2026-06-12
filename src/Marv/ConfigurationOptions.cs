@@ -4,56 +4,58 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Text;
 using Marv.Core;
+using Microsoft.Extensions.Configuration;
 
 namespace Marv;
 
 /// <summary>
 /// Auto-generates System.CommandLine <see cref="Option"/> instances from
-/// <see cref="MarvConfiguration"/> properties, and extracts CLI overrides
-/// into a config-compatible dictionary after parsing.
+/// <see cref="MarvConfiguration"/> properties for use as CLI arguments,
+/// and creates an <see cref="IConfigurationSource"/> to feed explicitly-provided
+/// CLI values into the configuration system.
 /// </summary>
 internal static class ConfigurationOptions
 {
-    private abstract record Entry(Option Option)
+    internal abstract record Entry(Option Option, string ConfigKey)
     {
         /// <summary>
-        /// If the option was provided on the command line, writes the value(s) into the overrides dictionary
-        /// using .NET configuration keys (e.g. "Server", "Channels:0").
+        /// If the option was provided on the command line, writes the value(s) into the
+        /// data dictionary using .NET configuration keys (e.g. "Server", "Channels:0").
         /// </summary>
-        public abstract void Apply(ParseResult result, Dictionary<string, string?> overrides);
+        public abstract void Extract(ParseResult result, Dictionary<string, string?> data);
     }
 
-    private sealed record ScalarEntry<T>(Option<T> TypedOption, string ConfigKey) : Entry(TypedOption)
+    private sealed record ScalarEntry<T>(Option<T> TypedOption, string ConfigKey) : Entry(TypedOption, ConfigKey)
     {
-        public override void Apply(ParseResult result, Dictionary<string, string?> overrides)
+        public override void Extract(ParseResult result, Dictionary<string, string?> data)
         {
             if (result.GetResult(TypedOption) is null) return;
             var value = result.GetValue(TypedOption);
             if (value is not null)
-                overrides[ConfigKey] = value.ToString();
+                data[ConfigKey] = value.ToString();
         }
     }
 
-    private sealed record BoolEntry(Option<bool?> TypedOption, string ConfigKey) : Entry(TypedOption)
+    private sealed record BoolEntry(Option<bool?> TypedOption, string ConfigKey) : Entry(TypedOption, ConfigKey)
     {
-        public override void Apply(ParseResult result, Dictionary<string, string?> overrides)
+        public override void Extract(ParseResult result, Dictionary<string, string?> data)
         {
             if (result.GetResult(TypedOption) is null) return;
             var value = result.GetValue(TypedOption);
             if (value is not null)
-                overrides[ConfigKey] = value.Value.ToString();
+                data[ConfigKey] = value.Value.ToString();
         }
     }
 
-    private sealed record CollectionEntry(Option<string[]> TypedOption, string ConfigKey) : Entry(TypedOption)
+    private sealed record CollectionEntry(Option<string[]> TypedOption, string ConfigKey) : Entry(TypedOption, ConfigKey)
     {
-        public override void Apply(ParseResult result, Dictionary<string, string?> overrides)
+        public override void Extract(ParseResult result, Dictionary<string, string?> data)
         {
             if (result.GetResult(TypedOption) is null) return;
             var values = result.GetValue(TypedOption);
             if (values is null) return;
             for (var i = 0; i < values.Length; i++)
-                overrides[$"{ConfigKey}:{i}"] = values[i];
+                data[$"{ConfigKey}:{i}"] = values[i];
         }
     }
 
@@ -63,16 +65,11 @@ internal static class ConfigurationOptions
     public static IEnumerable<Option> All => Entries.Select(e => e.Option);
 
     /// <summary>
-    /// Inspects the <see cref="ParseResult"/> and returns a dictionary of configuration
-    /// overrides for any options the user explicitly provided on the command line.
+    /// Creates an <see cref="IConfigurationSource"/> that extracts explicitly-provided
+    /// CLI values from the given <see cref="ParseResult"/>.
     /// </summary>
-    public static Dictionary<string, string?> GetOverrides(ParseResult result)
-    {
-        var overrides = new Dictionary<string, string?>();
-        foreach (var entry in Entries)
-            entry.Apply(result, overrides);
-        return overrides;
-    }
+    public static IConfigurationSource CreateSource(ParseResult result)
+        => new CommandLineConfigurationSource { ParseResult = result, Entries = Entries };
 
     private static List<Entry> Build()
     {
