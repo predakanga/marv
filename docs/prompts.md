@@ -1484,3 +1484,11 @@
 **Date**: 2026-06-13T00:00:00Z
 
 > Okay, go ahead and implement CS-027
+
+## Update CS-028 spec and implement it
+
+**Date**: 2026-06-13T00:00:00Z
+
+> Okay, now you can start implementing it.
+
+(Also updated CS-028 spec per user note: fixture should only copy Marv executable and plugin DLLs, not the whole artifact directory.)
