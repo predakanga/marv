@@ -1498,3 +1498,7 @@
 **Date**: 2026-06-14T00:00:00Z
 
 > triage-issues
+
+- Posted triage analysis on #5
+- Responded to owner discussion on #5 (NSubstitute clarification)
+- Created CS-029 from #5 (NuGet Packages for Marv.Core and Marv.Testing)

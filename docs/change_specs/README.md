@@ -41,6 +41,7 @@ Specs are numbered in recommended implementation order.
 | 26 | [Connection-Scoped DI Services](026-connection-scoped-services.md) | Core | Medium-Large | None | **Done** |
 | 27 | [Idiomatic Configuration Loading](027-idiomatic-config-loading.md) | Host | Small-Medium | None | **Done** |
 | 28 | [Plugin Loading Integration Tests](028-plugin-loading-integration-tests.md) | Tests | Medium | None | **Done** |
+| 29 | [NuGet Packages](029-nuget-packages.md) | CI/CD + Core | Small-Medium | None | **Pending** |
 
 Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
 Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
@@ -48,3 +49,4 @@ Specs 12-14 are CI/CD and infrastructure changes. Specs 15-19 are code changes.
 Specs 20-25 are downstream feature requests (code, docs, and tests).
 Spec 26 is a GitHub issue-driven architectural change.
 Specs 27-28 are GitHub issue-driven changes (host config and test infrastructure).
+Spec 29 is a GitHub issue-driven CI/CD change (NuGet packaging).
