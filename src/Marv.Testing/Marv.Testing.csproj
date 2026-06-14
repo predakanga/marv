@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Marv.Testing</RootNamespace>
     <IsPackable>true</IsPackable>
-    <PackageId>Marv.Testing</PackageId>
+    <PackageId>TDW.Marv.Testing</PackageId>
     <Authors>predakanga</Authors>
     <Description>Test helpers for Marv IRC bot plugins. Provides builders for CommandContext, RegexMatchContext, events, and a plugin test harness.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

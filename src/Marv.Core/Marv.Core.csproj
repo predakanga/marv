@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Marv.Core</RootNamespace>
     <IsPackable>true</IsPackable>
-    <PackageId>Marv.Core</PackageId>
+    <PackageId>TDW.Marv.Core</PackageId>
     <Authors>predakanga</Authors>
     <Description>Core library for the Marv IRC bot. Provides the plugin API, bot abstractions, IRC protocol handling, and service registry.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

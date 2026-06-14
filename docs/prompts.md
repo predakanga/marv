@@ -1573,3 +1573,9 @@
 **Date**: 2026-06-14T00:00:00Z
 
 > Okay, go ahead and implement it. I'll get started on the registration side.
+
+## Rename NuGet package IDs to TDW.Marv.*
+
+**Date**: 2026-06-15T00:00:00Z
+
+> Unfortunately I don't know what prefix was reserved, only that the package name was rejected. I was hoping there was a way to check so that I could choose a new name that avoids this issue. For now let's go with TDW.Marv.*
