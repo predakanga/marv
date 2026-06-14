@@ -1,10 +1,10 @@
-# CS-031: Migrate NuGet Packages to nuget.org
+# CS-031: Migrate NuGet Packages to nuget.org — COMPLETED
 
 **Source:** GitHub issue #7
 **Scope:** CI/CD
 **Complexity:** Small
 **Breaking changes:** None
-**Status:** Pending
+**Status:** Completed
 
 ---
 

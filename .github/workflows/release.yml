@@ -108,6 +108,8 @@ jobs:
   publish-nuget:
     runs-on: ubuntu-latest
     needs: [wait-for-ci, version]
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v6
 
@@ -130,11 +132,17 @@ jobs:
           dotnet pack src/Marv.Core/Marv.Core.csproj -c Release -p:Version="$VERSION" -o packages/
           dotnet pack src/Marv.Testing/Marv.Testing.csproj -c Release -p:Version="$VERSION" -o packages/
 
-      - name: Push to GitHub Packages
+      - name: NuGet login (OIDC)
+        uses: NuGet/login@v1
+        id: nuget-login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Push to NuGet Gallery
         run: |
           dotnet nuget push packages/*.nupkg \
-            --source "https://nuget.pkg.github.com/predakanga/index.json" \
-            --api-key ${{ secrets.GITHUB_TOKEN }}
+            --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} \
+            --source https://api.nuget.org/v3/index.json
 
   docker:
     runs-on: ubuntu-latest

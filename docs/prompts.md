@@ -1567,3 +1567,9 @@
 **Date**: 2026-06-14T00:00:00Z
 
 > Regarding CS-031, we should use the Trusted Publishing workflow rather than adding a legacy API token to the action runner. See https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing for reference.
+
+## Implement CS-031
+
+**Date**: 2026-06-14T00:00:00Z
+
+> Okay, go ahead and implement it. I'll get started on the registration side.

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- NuGet packages (Marv.Core, Marv.Testing) are now published to nuget.org
+  instead of GitHub Packages, removing the authentication requirement for
+  downstream consumers.
+
 ## [0.6.1] - 2026-06-14
 
 ### Added

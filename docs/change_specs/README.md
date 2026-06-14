@@ -43,7 +43,7 @@ Specs are numbered in recommended implementation order.
 | 28 | [Plugin Loading Integration Tests](028-plugin-loading-integration-tests.md) | Tests | Medium | None | **Done** |
 | 29 | [NuGet Packages](029-nuget-packages.md) | CI/CD + Core | Small-Medium | None | **Done** |
 | 30 | [Update GitHub Actions](030-update-github-actions.md) | CI/CD | Small | None | **Done** |
-| 31 | [NuGet Gallery Migration](031-nuget-gallery-migration.md) | CI/CD | Small | #29 | **Pending** |
+| 31 | [NuGet Gallery Migration](031-nuget-gallery-migration.md) | CI/CD | Small | #29 | **Done** |
 
 Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
 Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
