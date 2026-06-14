@@ -106,9 +106,11 @@ When an issue is accepted:
   specifications.
 - Only log to `docs/prompts.md` if actions were taken (e.g. posted
   analysis, created change specs, responded to discussion). If no
-  issues needed action, skip the prompt log. Keep the entry concise —
-  a one-line summary per action taken (e.g. "Posted triage analysis
-  on #5", "Created CS-029 from #2").
+  issues needed action, skip the prompt log. The entry must match the
+  format used by the rest of the file — a `##` heading, a `**Date**:`
+  line, the prompt in a blockquote, then a concise bulleted summary of
+  actions taken (e.g. "Posted triage analysis on #5", "Created CS-029
+  from #2").
 - When analysing feasibility, read relevant source files — don't guess.
 - Keep issue comments concise and professional.
 - If `gh` commands fail with auth errors, ask the user to run
