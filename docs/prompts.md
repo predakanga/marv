@@ -1509,3 +1509,9 @@
 
 - Responded to owner discussion on #5 (NSubstitute clarification)
 - Created CS-029 from #5 (NuGet Packages for Marv.Core and Marv.Testing)
+
+## Update CS-029 to simplify release binaries
+
+**Date**: 2026-06-14T00:00:00Z
+
+> Update CS-029 to do one extra thing - change the main artifact for the GitHub release to be just the per-platform Marv executables. We no longer need to include any extra files with it, given the NuGet packages exist.

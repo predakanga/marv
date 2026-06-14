@@ -77,7 +77,22 @@ Packages are published to **GitHub Packages only** (not nuget.org).
 Publishing occurs only on tagged releases (the workflow already triggers
 on `v*` tags).
 
-### 5. Update the `github-release` job dependency
+### 5. Simplify release binary artifacts
+
+Now that Marv.Core and Marv.Testing are available as NuGet packages,
+downstream plugin authors no longer need the shared framework assemblies
+from the release archive. Change the `publish-binaries` job to publish
+a self-contained, single-file executable per platform using
+`-p:PublishSingleFile=true -p:SelfContained=true`. Remove the
+`mkdir -p plugins` step — plugin authors will build their plugins
+against the NuGet packages and deploy them alongside the executable
+themselves.
+
+The release archive for each platform becomes a single executable
+(plus any native dependencies that can't be bundled), rather than a
+directory tree of assemblies.
+
+### 6. Update the `github-release` job dependency
 
 Add `publish-nuget` to the `needs` list of the `github-release` job so
 that the GitHub release is only created after all artifacts (binaries,
@@ -94,6 +109,11 @@ Docker image, and NuGet packages) are published successfully.
   the risk of accidental publishing.
 - **Tagged releases only:** No pre-release packages from CI. This keeps
   the feed clean and avoids version confusion for downstream consumers.
+- **Single-file release binaries:** With NuGet packages providing the
+  shared assemblies for plugin development, the release archive no
+  longer needs to include the full framework output. A single
+  self-contained executable per platform is simpler to download and
+  deploy.
 
 ## Testing
 
@@ -107,6 +127,8 @@ Docker image, and NuGet packages) are published successfully.
 - Test downstream consumption: create a test project that uses
   `PackageReference` for Marv.Core, build a plugin DLL, and load it
   against the published Marv binary.
+- Verify the single-file publish produces a working executable on at
+  least one platform (e.g. `linux-x64`).
 
 ## Impact
 
