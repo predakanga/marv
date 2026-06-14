@@ -1492,3 +1492,9 @@
 > Okay, now you can start implementing it.
 
 (Also updated CS-028 spec per user note: fixture should only copy Marv executable and plugin DLLs, not the whole artifact directory.)
+
+## Triage GitHub issues
+
+**Date**: 2026-06-14T00:00:00Z
+
+> triage-issues
