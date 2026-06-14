@@ -1,10 +1,10 @@
-# CS-029: NuGet Packages for Marv.Core and Marv.Testing
+# CS-029: NuGet Packages for Marv.Core and Marv.Testing — COMPLETED
 
 **Source:** GitHub issue #5
 **Scope:** CI/CD + Core
 **Complexity:** Small-Medium
 **Breaking changes:** None
-**Status:** Pending
+**Status:** Completed
 
 ---
 

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Marv.Core and Marv.Testing are now published as NuGet packages to GitHub
+  Packages on each tagged release, allowing downstream plugin projects to
+  consume them via PackageReference.
+
+### Changed
+
+- Release binaries are now bare per-platform executables instead of tar.gz
+  archives containing a directory tree.
+
 ## [0.6.0] - 2026-06-13
 
 ### Added

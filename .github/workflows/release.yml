@@ -92,19 +92,49 @@ jobs:
       - name: Publish
         run: |
           VERSION=${{ needs.version.outputs.version }}
-          dotnet publish src/Marv/Marv.csproj -c Release -r ${{ matrix.rid }} -o publish/${{ matrix.artifact }} -p:Version="$VERSION"
-          mkdir -p publish/${{ matrix.artifact }}/plugins
-
-      - name: Archive
-        run: |
-          cd publish
-          tar -czf ${{ matrix.artifact }}.tar.gz ${{ matrix.artifact }}
+          dotnet publish src/Marv/Marv.csproj -c Release -r ${{ matrix.rid }} -o publish/ -p:Version="$VERSION"
+          if [ -f publish/Marv.exe ]; then
+            mv publish/Marv.exe publish/${{ matrix.artifact }}.exe
+          else
+            mv publish/Marv publish/${{ matrix.artifact }}
+          fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
-          path: publish/${{ matrix.artifact }}.tar.gz
+          path: publish/${{ matrix.artifact }}*
+
+  publish-nuget:
+    runs-on: ubuntu-latest
+    needs: [wait-for-ci, version]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Marv.slnx') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Pack
+        run: |
+          VERSION=${{ needs.version.outputs.version }}
+          dotnet pack src/Marv.Core/Marv.Core.csproj -c Release -p:Version="$VERSION" -o packages/
+          dotnet pack src/Marv.Testing/Marv.Testing.csproj -c Release -p:Version="$VERSION" -o packages/
+
+      - name: Push to GitHub Packages
+        run: |
+          dotnet nuget push packages/*.nupkg \
+            --source "https://nuget.pkg.github.com/predakanga/index.json" \
+            --api-key ${{ secrets.GITHUB_TOKEN }}
 
   docker:
     runs-on: ubuntu-latest
@@ -138,7 +168,7 @@ jobs:
 
   github-release:
     runs-on: ubuntu-latest
-    needs: [publish-binaries, docker]
+    needs: [publish-binaries, publish-nuget, docker]
     steps:
       - uses: actions/checkout@v4
 
@@ -172,4 +202,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           body_path: release-notes.md
-          files: artifacts/**/*.tar.gz
+          files: artifacts/**/marv-*

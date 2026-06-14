@@ -41,7 +41,7 @@ Specs are numbered in recommended implementation order.
 | 26 | [Connection-Scoped DI Services](026-connection-scoped-services.md) | Core | Medium-Large | None | **Done** |
 | 27 | [Idiomatic Configuration Loading](027-idiomatic-config-loading.md) | Host | Small-Medium | None | **Done** |
 | 28 | [Plugin Loading Integration Tests](028-plugin-loading-integration-tests.md) | Tests | Medium | None | **Done** |
-| 29 | [NuGet Packages](029-nuget-packages.md) | CI/CD + Core | Small-Medium | None | **Pending** |
+| 29 | [NuGet Packages](029-nuget-packages.md) | CI/CD + Core | Small-Medium | None | **Done** |
 
 Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
 Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
