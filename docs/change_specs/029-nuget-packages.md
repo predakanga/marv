@@ -80,13 +80,11 @@ on `v*` tags).
 ### 5. Simplify release binary artifacts
 
 Now that Marv.Core and Marv.Testing are available as NuGet packages,
-downstream plugin authors no longer need the empty `plugins/` scaffold
-in the release archive. Remove the `mkdir -p plugins` step from the
-`publish-binaries` job — plugin authors will build their plugins against
-the NuGet packages and deploy them alongside the executable themselves.
-
-The release archive for each platform contains just the published Marv
-executable and its runtime dependencies.
+the release artifact for each platform is just the Marv executable — no
+plugins directory or other files are needed. Replace the tar.gz archive
+with the bare executable: remove the `mkdir -p plugins` step, the
+`Archive` step, and upload the executable directly as the release
+artifact. Update the `github-release` job's `files` glob accordingly.
 
 ### 6. Update the `github-release` job dependency
 
@@ -105,10 +103,9 @@ Docker image, and NuGet packages) are published successfully.
   the risk of accidental publishing.
 - **Tagged releases only:** No pre-release packages from CI. This keeps
   the feed clean and avoids version confusion for downstream consumers.
-- **No plugins directory in release archive:** With NuGet packages
-  available, the empty `plugins/` scaffold in the release archive is
-  unnecessary. Plugin authors build against the NuGet packages and
-  manage deployment themselves.
+- **Bare executable, no archive:** With NuGet packages available, the
+  release artifact is just the executable per platform — no archive
+  wrapping needed. Simpler to download and deploy.
 
 ## Testing
 
@@ -122,9 +119,8 @@ Docker image, and NuGet packages) are published successfully.
 - Test downstream consumption: create a test project that uses
   `PackageReference` for Marv.Core, build a plugin DLL, and load it
   against the published Marv binary.
-- Verify the published executable still works without the `plugins/`
-  directory present (it should — the directory is created at runtime
-  if missing, or configured explicitly).
+- Verify the per-platform executable uploads correctly as a GitHub
+  release asset and is directly downloadable.
 
 ## Impact
 
