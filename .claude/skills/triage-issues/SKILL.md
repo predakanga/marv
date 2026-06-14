@@ -104,8 +104,11 @@ When an issue is accepted:
 
 - This skill does NOT implement any code. It only creates change
   specifications.
-- Do NOT log this skill's invocation to `docs/prompts.md`. The prompt
-  log is for user-initiated prompts, not automated skill runs.
+- Only log to `docs/prompts.md` if actions were taken (e.g. posted
+  analysis, created change specs, responded to discussion). If no
+  issues needed action, skip the prompt log. Keep the entry concise —
+  a one-line summary per action taken (e.g. "Posted triage analysis
+  on #5", "Created CS-029 from #2").
 - When analysing feasibility, read relevant source files — don't guess.
 - Keep issue comments concise and professional.
 - If `gh` commands fail with auth errors, ask the user to run
