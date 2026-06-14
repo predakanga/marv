@@ -20,12 +20,49 @@ NuGet Gallery (nuget.org) removes this barrier entirely.
 
 ### 1. Update the `publish-nuget` job in `.github/workflows/release.yml`
 
-Change the `dotnet nuget push` target from GitHub Packages to nuget.org:
+Replace the legacy API key approach with NuGet Trusted Publishing (OIDC):
 
-- Replace the source URL with `https://api.nuget.org/v3/index.json`.
-- Replace the API key from `${{ secrets.GITHUB_TOKEN }}` to
-  `${{ secrets.NUGET_API_KEY }}` (a new repository secret).
-- Rename the step from "Push to GitHub Packages" to "Push to NuGet Gallery".
+- Add `id-token: write` permission to the `publish-nuget` job so GitHub
+  can issue an OIDC token.
+- Add a step using `NuGet/login@v1` to exchange the OIDC token for a
+  short-lived nuget.org API key. The `user` input should reference a
+  repository secret (`${{ secrets.NUGET_USER }}`) containing the nuget.org
+  profile name (not email).
+- Update the `dotnet nuget push` step to use the temporary API key from
+  the login step's output (`${{ steps.nuget-login.outputs.NUGET_API_KEY }}`)
+  and target `https://api.nuget.org/v3/index.json`.
+- Remove the old "Push to GitHub Packages" step entirely.
+
+Example workflow snippet:
+
+```yaml
+publish-nuget:
+  runs-on: ubuntu-latest
+  needs: [wait-for-ci, version]
+  permissions:
+    id-token: write
+  steps:
+    - uses: actions/checkout@v6
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 10.0.x
+
+    # ... cache and pack steps unchanged ...
+
+    - name: NuGet login (OIDC)
+      uses: NuGet/login@v1
+      id: nuget-login
+      with:
+        user: ${{ secrets.NUGET_USER }}
+
+    - name: Push to NuGet Gallery
+      run: |
+        dotnet nuget push packages/*.nupkg \
+          --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} \
+          --source https://api.nuget.org/v3/index.json
+```
 
 ### 2. Remove the `packages: write` permission
 
@@ -43,14 +80,28 @@ After the first successful nuget.org publish, delete the existing packages
 from GitHub Packages to avoid confusion. This is a manual step performed
 by the repository owner via the GitHub UI or API.
 
-### 4. Add `NUGET_API_KEY` repository secret
+### 4. Configure Trusted Publishing policy on nuget.org (manual)
 
-The repository owner must create an API key on nuget.org scoped to the
-`Marv.Core` and `Marv.Testing` packages, then add it as a repository
-secret named `NUGET_API_KEY`. This is a manual step.
+The repository owner must configure a Trusted Publishing policy on
+nuget.org before the first release:
+
+1. Log into nuget.org, go to username → **Trusted Publishing**.
+2. Add a policy with:
+   - **Repository Owner:** `predakanga`
+   - **Repository:** `marv`
+   - **Workflow File:** `release.yml`
+   - **Environment:** (leave empty unless a GitHub environment is added)
+3. Add a repository secret `NUGET_USER` containing the nuget.org profile
+   name used above.
 
 ## Design decisions
 
+- **Trusted Publishing over legacy API keys:** NuGet's Trusted Publishing
+  uses GitHub OIDC tokens to obtain short-lived (1 hour) API keys at publish
+  time. This eliminates the need to store a long-lived nuget.org API key as a
+  repository secret, reducing the risk of credential leakage and removing the
+  need for key rotation. See
+  https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing.
 - **Single feed, not dual-publish:** The owner confirmed that GitHub Packages
   should be removed entirely rather than kept as a mirror. This avoids
   confusion about which feed is canonical and simplifies the workflow.
@@ -76,5 +127,6 @@ secret named `NUGET_API_KEY`. This is a manual step.
   GitHub Packages authentication to consume Marv.Core and Marv.Testing.
 - **Risk:** Low — the change is isolated to the release workflow and does not
   affect the build, tests, or application code.
-- **Manual steps required:** The owner must create a nuget.org API key and
-  add it as a repository secret before the next release.
+- **Manual steps required:** The owner must configure a Trusted Publishing
+  policy on nuget.org and add a `NUGET_USER` secret to the repository before
+  the next release.

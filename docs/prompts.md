@@ -1561,3 +1561,9 @@
 
 - Issue #7 accepted by owner — created CS-031 (NuGet Gallery Migration)
 - Issue #2 unchanged, no new comments to address
+
+## Update CS-031 to use Trusted Publishing
+
+**Date**: 2026-06-14T00:00:00Z
+
+> Regarding CS-031, we should use the Trusted Publishing workflow rather than adding a legacy API token to the action runner. See https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing for reference.
