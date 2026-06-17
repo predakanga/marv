@@ -20,8 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New `AutoReconnect` configuration option (default: `true`). When set to
   `false`, the bot logs the error and exits with a non-zero exit code
   instead of reconnecting after a connection failure.
-- NuGet packages now include symbol packages (`.snupkg`) with Source Link
-  for debugger step-into support.
+- NuGet packages now include embedded debug symbols with Source Link,
+  enabling debugger step-into support without a separate symbol download.
 - NuGet packages now include per-package README files visible on nuget.org.
 - Deterministic builds enabled for NuGet packages in CI.
 - Lowered NuGet package dependency minimums from 10.0.8 to 10.0.0 for
