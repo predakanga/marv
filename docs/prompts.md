@@ -1618,3 +1618,12 @@
 - Created CS-034 from #10 (trailing parameter colon consistency) — `/accept` from OWNER
 - #8, #9 already triaged
 - #2 (filter data passing) still awaiting decision, no new comments
+
+## Triage GitHub issues (fourth pass)
+
+**Date**: 2026-06-17T00:00:00Z
+
+> /triage-issues
+
+- Posted follow-up on #2 addressing OWNER's design concerns about filter data passing complexity
+- #8, #9, #10 already triaged
