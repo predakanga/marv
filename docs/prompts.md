@@ -1661,3 +1661,6 @@
 > - Marv.Core.AssemblyInfo.cs
 >
 > Similar files are missing from Marv.Testing.
+>
+> Is there a reason that all the documentation says to use EmbedUntracked instead of EmbedAll?
+> This comment has a solution that seems like it would do the trick using EmbedUntracked: https://github.com/dotnet/sourcelink/issues/572#issuecomment-1047399068

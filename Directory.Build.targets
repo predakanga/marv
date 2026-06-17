@@ -1,4 +1,20 @@
 <Project>
+  <!-- NuGet package improvements for packable projects.
+       These must be in .targets (not .props) because IsPackable is set
+       to true in individual .csproj files, after .props has evaluated. -->
+  <PropertyGroup Condition="'$(IsPackable)' == 'true'">
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IsPackable)' == 'true'">
+    <PackageReference Include="DotNet.ReproducibleBuilds" Version="1.*" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.*" PrivateAssets="All" />
+  </ItemGroup>
+
   <!-- Workaround for dotnet/sourcelink#572: auto-generated files in obj/
        are not embedded by EmbedUntrackedSources. -->
   <PropertyGroup>
