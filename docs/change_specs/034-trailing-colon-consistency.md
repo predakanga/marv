@@ -1,10 +1,10 @@
-# CS-034: Always Use Colon on Trailing Parameters — COMPLETED
+# CS-034: Always Use Colon on Trailing Parameters — REVERTED
 
 **Source:** GitHub issue #10
 **Scope:** Core
 **Complexity:** Small
 **Breaking changes:** None — wire format change is backwards-compatible with all IRC parsers
-**Status:** Completed
+**Status:** Reverted
 
 ---
 

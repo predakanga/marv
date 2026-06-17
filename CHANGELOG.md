@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Reverted always-colon trailing parameter serialization (CS-034) — the
+  unconditional colon caused more false positives than the original
+  conditional logic. The serializer now only prefixes the last parameter
+  with `:` when it contains spaces, starts with `:`, or is empty.
+
 ## [0.7.1] - 2026-06-17
 
 ### Fixed

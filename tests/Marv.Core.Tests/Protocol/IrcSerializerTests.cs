@@ -14,7 +14,7 @@ public class IrcSerializerTests
     {
         var msg = new IrcMessage("foo", ["bar", "baz", "asdf"]);
         var result = IrcSerializer.Serialize(msg);
-        Assert.Equal("FOO bar baz :asdf", result);
+        Assert.Equal("FOO bar baz asdf", result);
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public class IrcSerializerTests
         // Tags may be in any order
         Assert.Contains("a=b\\\\and\\nk", result);
         Assert.Contains("d=gh\\:764", result);
-        Assert.Contains("FOO par1 :par2", result);
+        Assert.Contains("FOO par1 par2", result);
     }
 
     [Fact]

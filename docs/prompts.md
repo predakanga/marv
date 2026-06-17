@@ -1670,3 +1670,9 @@
 **Date**: 2026-06-17T00:00:00Z
 
 > At some point, .DS_Store got added to the repo. Remove and ignore it, but no need to rewrite history.
+
+## Revert CS-034
+
+**Date**: 2026-06-18T00:00:00Z
+
+> I'd like you to revert CS-034 - it turned out to cause more false positives than we had before.
