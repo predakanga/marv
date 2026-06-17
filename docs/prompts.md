@@ -1649,3 +1649,15 @@
 **Date**: 2026-06-17T00:00:00Z
 
 > If we're making changes to the packaging, perhaps we should improve our PackageReference version constraints as well - the official Microsoft guidance at https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/dependencies seems like a good place to start
+
+## Fix Source Link validation warnings in NuGet packages
+
+**Date**: 2026-06-17T00:00:00Z
+
+> Okay, I've released v0.7.0 containing the changes we just made, but the NuGet package explorer is giving me some warnings about Source Link and Deterministic Builds.
+> The tooltip points me to https://github.com/dotnet/sourcelink/issues/572 and notes the following files from the obj dir (I believe that they're files not included which should be):
+> - Marv.Core.GlobalUsings.g.cs
+> - AssemblyAttributes.cs
+> - Marv.Core.AssemblyInfo.cs
+>
+> Similar files are missing from Marv.Testing.
