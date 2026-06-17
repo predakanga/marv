@@ -6,7 +6,7 @@
 
   <!-- NuGet package improvements for packable projects -->
   <PropertyGroup Condition="'$(IsPackable)' == 'true'">
-    <EmbedAllSources>true</EmbedAllSources>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>

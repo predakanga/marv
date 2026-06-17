@@ -1,0 +1,12 @@
+<Project>
+  <!-- Workaround for dotnet/sourcelink#572: auto-generated files in obj/
+       are not embedded by EmbedUntrackedSources. -->
+  <PropertyGroup>
+    <TargetFrameworkMonikerAssemblyAttributesPath>$([System.IO.Path]::Combine('$(IntermediateOutputPath)','$(TargetFrameworkMoniker).AssemblyAttributes$(DefaultLanguageSourceExtension)'))</TargetFrameworkMonikerAssemblyAttributesPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedFiles Include="$(GeneratedAssemblyInfoFile)"/>
+    <EmbeddedFiles Include="$(GeneratedGlobalUsingsFile)"/>
+    <EmbeddedFiles Include="$(TargetFrameworkMonikerAssemblyAttributesPath)"/>
+  </ItemGroup>
+</Project>

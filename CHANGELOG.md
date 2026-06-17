@@ -9,8 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- NuGet symbol packages now embed all source files (including auto-generated
-  files from `obj/`) in the PDB, fixing Source Link validation warnings.
+- NuGet symbol packages now correctly embed auto-generated source files
+  (GlobalUsings, AssemblyInfo, AssemblyAttributes) in the PDB, fixing
+  Source Link validation warnings.
 
 ## [0.7.0] - 2026-06-17
 
