@@ -1627,3 +1627,12 @@
 
 - Posted follow-up on #2 addressing OWNER's design concerns about filter data passing complexity
 - #8, #9, #10 already triaged
+
+## Triage GitHub issues (fifth pass)
+
+**Date**: 2026-06-17T00:00:00Z
+
+> /triage-issues
+
+- Rejected #2 (filter data passing) per OWNER's `/reject` — labelled `rejected`, posted acknowledgement
+- #8, #9, #10 already triaged
