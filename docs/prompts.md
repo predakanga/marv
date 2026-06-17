@@ -1643,3 +1643,9 @@
 
 > Okay, go ahead and implement CS-032, CS-033 and CS-034.
 > My only note is that for CS-033, you might consider using the plugin API document as a model for the READMEs. The consumers of the packages are almost always going to be plugin creators.
+
+## Lower NuGet package dependency minimums
+
+**Date**: 2026-06-17T00:00:00Z
+
+> If we're making changes to the packaging, perhaps we should improve our PackageReference version constraints as well - the official Microsoft guidance at https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/dependencies seems like a good place to start

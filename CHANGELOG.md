@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   for debugger step-into support.
 - NuGet packages now include per-package README files visible on nuget.org.
 - Deterministic builds enabled for NuGet packages in CI.
+- Lowered NuGet package dependency minimums from 10.0.8 to 10.0.0 for
+  all `Microsoft.Extensions.*` and `System.Reflection.MetadataLoadContext`
+  references, giving consumers more flexibility in version resolution.
 
 ### Changed
 
