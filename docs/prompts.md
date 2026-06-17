@@ -1664,3 +1664,9 @@
 >
 > Is there a reason that all the documentation says to use EmbedUntracked instead of EmbedAll?
 > This comment has a solution that seems like it would do the trick using EmbedUntracked: https://github.com/dotnet/sourcelink/issues/572#issuecomment-1047399068
+
+## Remove .DS_Store from repo
+
+**Date**: 2026-06-17T00:00:00Z
+
+> At some point, .DS_Store got added to the repo. Remove and ignore it, but no need to rewrite history.
