@@ -46,6 +46,7 @@ Specs are numbered in recommended implementation order.
 | 31 | [NuGet Gallery Migration](031-nuget-gallery-migration.md) | CI/CD | Small | #29 | **Done** |
 | 32 | [Disable Auto-Reconnect Option](032-disable-auto-reconnect.md) | Core / Host | Small | None | Pending |
 | 33 | [NuGet Package Improvements](033-nuget-package-improvements.md) | CI/CD + Core | Small-Medium | #29, #31 | Pending |
+| 34 | [Always Use Colon on Trailing Parameters](034-trailing-colon-consistency.md) | Core | Small | None | Pending |
 
 Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
 Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
@@ -56,3 +57,4 @@ Specs 27-28 are GitHub issue-driven changes (host config and test infrastructure
 Specs 29-31 are GitHub issue-driven CI/CD changes (NuGet packaging, Actions audit, gallery migration).
 Spec 32 is a GitHub issue-driven configuration change (auto-reconnect opt-out).
 Spec 33 is a GitHub issue-driven CI/CD change (NuGet package improvements).
+Spec 34 is a GitHub issue-driven protocol change (trailing parameter colon consistency).
