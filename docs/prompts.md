@@ -1579,3 +1579,11 @@
 **Date**: 2026-06-15T00:00:00Z
 
 > Unfortunately I don't know what prefix was reserved, only that the package name was rejected. I was hoping there was a way to check so that I could choose a new name that avoids this issue. For now let's go with TDW.Marv.*
+
+## Remove marv.debug.json from repo history
+
+**Date**: 2026-06-17T00:00:00Z
+
+> I just noticed that @marv.debug.json is committed to the repo - that file contains some sensitive data so it should never have been committed.
+> I'd like you to remove it from the repo entirely, including the history. You may install tools to help do this.
+> Only consider the repository at this point - when you're done we'll consider other aspects like release artifacts.

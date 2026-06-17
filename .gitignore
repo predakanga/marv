@@ -17,6 +17,7 @@ TestResults/
 ## Local test configs
 marv.json
 marv.test.json
+marv.debug.json
 
 ## OS files
 .DS_Store

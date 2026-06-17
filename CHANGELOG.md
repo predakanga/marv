@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Removed `marv.debug.json` from repository and git history (contained
+  sensitive configuration data).
+
+### Fixed
+
+- Added `marv.debug.json` to `.gitignore` to prevent accidental commits.
+
 ## [0.6.2] - 2026-06-14
 
 ### Changed
