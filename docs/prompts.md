@@ -1597,3 +1597,14 @@
 - Posted triage analysis on #8 (disable reconnects)
 - Posted triage analysis on #9 (improve NuGet packages)
 - #2 (filter data passing) already triaged, no new commands to process
+
+## Triage GitHub issues (second pass)
+
+**Date**: 2026-06-17T00:00:00Z
+
+> /triage-issues
+
+- Created CS-032 from #8 (disable auto-reconnect) — `/accept` from OWNER
+- Created CS-033 from #9 (NuGet package improvements) — `/accept` from OWNER
+- Posted triage analysis on #10 (trailing parameter colon consistency)
+- #2 (filter data passing) still awaiting decision, no new comments

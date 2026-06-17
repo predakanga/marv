@@ -44,6 +44,8 @@ Specs are numbered in recommended implementation order.
 | 29 | [NuGet Packages](029-nuget-packages.md) | CI/CD + Core | Small-Medium | None | **Done** |
 | 30 | [Update GitHub Actions](030-update-github-actions.md) | CI/CD | Small | None | **Done** |
 | 31 | [NuGet Gallery Migration](031-nuget-gallery-migration.md) | CI/CD | Small | #29 | **Done** |
+| 32 | [Disable Auto-Reconnect Option](032-disable-auto-reconnect.md) | Core / Host | Small | None | Pending |
+| 33 | [NuGet Package Improvements](033-nuget-package-improvements.md) | CI/CD + Core | Small-Medium | #29, #31 | Pending |
 
 Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
 Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
@@ -52,3 +54,5 @@ Specs 20-25 are downstream feature requests (code, docs, and tests).
 Spec 26 is a GitHub issue-driven architectural change.
 Specs 27-28 are GitHub issue-driven changes (host config and test infrastructure).
 Specs 29-31 are GitHub issue-driven CI/CD changes (NuGet packaging, Actions audit, gallery migration).
+Spec 32 is a GitHub issue-driven configuration change (auto-reconnect opt-out).
+Spec 33 is a GitHub issue-driven CI/CD change (NuGet package improvements).
