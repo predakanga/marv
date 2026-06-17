@@ -1,10 +1,10 @@
-# CS-032: Disable Auto-Reconnect Option
+# CS-032: Disable Auto-Reconnect Option — COMPLETED
 
 **Source:** GitHub issue #8
 **Scope:** Core / Host
 **Complexity:** Small
 **Breaking changes:** None — new opt-in configuration property, default preserves current behaviour
-**Status:** Pending
+**Status:** Completed
 
 ---
 

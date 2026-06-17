@@ -1636,3 +1636,10 @@
 
 - Rejected #2 (filter data passing) per OWNER's `/reject` — labelled `rejected`, posted acknowledgement
 - #8, #9, #10 already triaged
+
+## Implement CS-032, CS-033, and CS-034
+
+**Date**: 2026-06-17T00:00:00Z
+
+> Okay, go ahead and implement CS-032, CS-033 and CS-034.
+> My only note is that for CS-033, you might consider using the plugin API document as a model for the READMEs. The consumers of the packages are almost always going to be plugin creators.

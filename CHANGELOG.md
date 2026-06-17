@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- New `AutoReconnect` configuration option (default: `true`). When set to
+  `false`, the bot logs the error and exits with a non-zero exit code
+  instead of reconnecting after a connection failure.
+- NuGet packages now include symbol packages (`.snupkg`) with Source Link
+  for debugger step-into support.
+- NuGet packages now include per-package README files visible on nuget.org.
+- Deterministic builds enabled for NuGet packages in CI.
+
+### Changed
+
+- IRC message serialization now always includes a `:` prefix on the last
+  parameter, improving compatibility with non-standard IRC software.
+
 ### Removed
 
 - Removed `marv.debug.json` from repository and git history (contained

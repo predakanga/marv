@@ -52,10 +52,7 @@ public static class IrcSerializer
             sb.Append(' ');
             var param = message.Parameters[i];
 
-            // Last parameter needs trailing prefix if it contains spaces,
-            // starts with ':', or is empty
-            if (i == message.Parameters.Count - 1 &&
-                (param.Contains(' ') || param.StartsWith(':') || param.Length == 0))
+            if (i == message.Parameters.Count - 1)
             {
                 sb.Append(':');
             }

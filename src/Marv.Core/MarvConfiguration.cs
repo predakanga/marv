@@ -163,6 +163,13 @@ public record MarvConfiguration
     public string? CtcpVersionResponse { get; init; }
 
     /// <summary>
+    /// Whether the bot should automatically reconnect after a connection failure.
+    /// When false, the bot logs the error and exits with a non-zero exit code.
+    /// </summary>
+    [Description("Auto-reconnect on connection failure (default: true).")]
+    public bool AutoReconnect { get; init; } = true;
+
+    /// <summary>
     /// Override for the minimum log level. When set, replaces the default log level
     /// from appsettings.json.
     /// </summary>

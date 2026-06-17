@@ -3,4 +3,22 @@
     <Version>0.6.2</Version>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
+
+  <!-- NuGet package improvements for packable projects -->
+  <PropertyGroup Condition="'$(IsPackable)' == 'true'">
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(CI)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IsPackable)' == 'true'">
+    <PackageReference Include="DotNet.ReproducibleBuilds" Version="1.*" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.*" PrivateAssets="All" />
+  </ItemGroup>
 </Project>

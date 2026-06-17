@@ -102,6 +102,13 @@ internal sealed class MarvBotService : BackgroundService
 
             if (stoppingToken.IsCancellationRequested) break;
 
+            if (!_config.AutoReconnect)
+            {
+                _logger.LogInformation("Auto-reconnect is disabled, exiting");
+                Environment.ExitCode = 1;
+                break;
+            }
+
             // Exponential backoff before reconnection
             _logger.LogInformation("Reconnecting in {Seconds} seconds...", backoff);
             try
