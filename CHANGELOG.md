@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-06-17
+
 ### Fixed
 
 - NuGet symbol packages now correctly embed auto-generated source files
@@ -281,6 +283,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI/CD with GitHub Actions (build, test, lint, static analysis, security, integration tests, Docker)
 - Release workflow producing cross-platform binaries and multi-arch Docker images
 
+[0.7.1]: https://github.com/predakanga/marv/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/predakanga/marv/compare/v0.6.2...v0.7.0
 [0.6.2]: https://github.com/predakanga/marv/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/predakanga/marv/compare/v0.6.0...v0.6.1
