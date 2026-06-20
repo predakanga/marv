@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Generate Claude Code transcript HTML files
+if ! uvx claude-code-transcripts all -o docs/claude-transcripts 2>/dev/null; then
+    echo "Warning: claude-code-transcripts failed to run. Continuing with commit." >&2
+fi
+
+# Stage any generated/updated transcript files
+git add docs/claude-transcripts/ 2>/dev/null
+
+exit 0

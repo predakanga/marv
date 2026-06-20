@@ -163,12 +163,21 @@ details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom
 <a href="page-001.html">Next &rarr;</a>
 </div>
 
-        <p style="color: var(--text-muted); margin-bottom: 24px;">1 prompts · 32 messages · 11 tool calls · 0 commits · 1 pages</p>
+        <p style="color: var(--text-muted); margin-bottom: 24px;">2 prompts · 46 messages · 16 tool calls · 1 commits · 1 pages</p>
         
 <div class="index-item"><a href="page-001.html#msg-2026-06-20T08-13-38-119Z"><div class="index-item-header"><span class="index-item-number">#1</span><time datetime="2026-06-20T08:13:38.119Z" data-timestamp="2026-06-20T08:13:38.119Z">2026-06-20T08:13:38.119Z</time></div><div class="index-item-content"><p>I've decided to change how we log prompts - I've found a tool that will render the transcripts of these sessions to HTML, which we'll include in the git repo.</p>
 <p>I'd like you to set up a git pre-commit hook that runs <code>uvx claude-code-transcripts all -o docs/claude-transcripts</code> on each commit.
 Make sure the hook is silent unless the tool fails to run, in which case you should warn the user but continue with the commit anyway.</p>
-<p>After the hook is working, remove the note to update docs/prompts.md from CLAUDE.md and add a note not to read/list docs/claude-transcripts - I don't want to pollute your context window with all of that.</p></div></a><div class="index-item-stats"><span>6 bash · 2 read · 2 write · 1 edit</span>
+<p>After the hook is working, remove the note to update docs/prompts.md from CLAUDE.md and add a note not to read/list docs/claude-transcripts - I don't want to pollute your context window with all of that.</p></div></a><div class="index-item-stats"><span>7 bash · 2 read · 2 write · 1 edit</span>
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>Done. Here's what was set up:</p>
+<ol>
+<li><strong>Pre-commit hook</strong> (<code>.git/hooks/pre-commit</code>) — runs <code>uvx claude-code-transcripts all -o docs/claude-transcripts</code> on every commit, stages the output, and warns but doesn't block if the tool fails.</li>
+<li><strong>CLAUDE.md</strong> — removed the <code>docs/prompts.md</code> logging instruction, added a note not to read/list <code>docs/claude-transcripts/</code>.</li>
+<li><strong>Initial transcripts</strong> — 30 sessions rendered to HTML and committed.</li>
+</ol>
+<p>One caveat: the hook lives in <code>.git/hooks/</code> which isn't tracked by git. If you clone this repo elsewhere, the hook won't be present. You may want to consider a shared hooks directory (e.g. <code>.githooks/</code> with <code>core.hooksPath</code>) if portability matters.</p></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div><div class="index-commit"><div class="index-commit-header"><span class="index-commit-hash">ebece66</span><time datetime="2026-06-20T08:15:06.402Z" data-timestamp="2026-06-20T08:15:06.402Z">2026-06-20T08:15:06.402Z</time></div><div class="index-commit-msg">Replace manual prompt logging with auto-generated HTML transcripts</div></div>
+<div class="index-item"><a href="page-001.html#msg-2026-06-20T08-32-08-319Z"><div class="index-item-header"><span class="index-item-number">#2</span><time datetime="2026-06-20T08:32:08.319Z" data-timestamp="2026-06-20T08:32:08.319Z">2026-06-20T08:32:08.319Z</time></div><div class="index-item-content"><p>Good point - setting core.hooksPath would be local-only as well, right? I guess then the better approach would be to commit the hook somewhere outside .git and include an instruction in CLAUDE.md to copy it into place if need be?</p></div></a><div class="index-item-stats"><span>2 bash · 1 read · 1 edit</span>
 </div></div>
         
 
