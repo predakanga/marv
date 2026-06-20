@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 1</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 1/1</h1>
+        
+
+<div class="pagination"><a href="index.html" class="index-link">Index</a></div>
+
+        
+<div class="message user" id="msg-2026-06-06T13-39-14-089Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-06T13-39-14-089Z" class="timestamp-link"><time datetime="2026-06-06T13:39:14.089Z" data-timestamp="2026-06-06T13:39:14.089Z">2026-06-06T13:39:14.089Z</time></a></div><div class="message-content">
+<div class="user-content"><p>While working on some plugins downstream, I've come across a couple of issues with plugin loading. I've provided concise problem statements for them below:</p>
+<h2>1. Plugin assembly dependency resolution fails for non-host dependencies</h2>
+<p><code>PluginManager.DiscoverAndRegister</code> loads plugin DLLs via
+<code>AssemblyLoadContext.Default.LoadFromAssemblyPath()</code>, but the Default ALC does
+not resolve transitive dependencies by probing the plugin directories. If a
+plugin depends on a library not in Marv's own <code>deps.json</code> (e.g. a shared
+library like <code>CableGuy.Common</code>), the runtime throws <code>FileNotFoundException</code>
+during type enumeration — regardless of whether the dependency DLL is present
+in the same directory.</p>
+<p><strong>Fix:</strong> Register <code>AssemblyLoadContext.Default.Resolving</code> and
+<code>AssemblyLoadContext.Default.ResolvingUnmanagedDll</code> handlers in
+<code>MarvServiceExtensions.AddMarv</code> (before plugin discovery) that probe the
+configured <code>PluginDirectories</code> for missing managed and native assemblies.</p>
+<h2>2. IHttpClientFactory treated as plugin-provided service by dependency sorter</h2>
+<p><code>PluginDiscovery.IsCoreService()</code> has a hardcoded allowlist of types the
+dependency sorter should ignore (<code>IBot</code>, <code>ILoggerFactory</code>, <code>IOptions&lt;T&gt;</code>, etc.).
+<code>IHttpClientFactory</code> is registered by Marv core via <code>services.AddHttpClient()</code>
+in <code>MarvServiceExtensions</code>, but is not in the allowlist. The sorter treats any
+constructor parameter of type <code>IHttpClientFactory</code> as a plugin-provided service
+and throws when no plugin declares <code>[ProvidesService(typeof(IHttpClientFactory))]</code>.</p>
+<p><strong>Fix:</strong> Either add <code>IHttpClientFactory</code> to <code>CoreServiceTypes</code>, or change the
+sorter to only treat types declared via <code>[ProvidesService]</code> across loaded
+plugins as plugin dependencies, rather than treating every unknown constructor
+parameter as one.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-39-17-129Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-39-17-129Z" class="timestamp-link"><time datetime="2026-06-06T13:39:17.129Z" data-timestamp="2026-06-06T13:39:17.129Z">2026-06-06T13:39:17.129Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-39-17-695Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-39-17-695Z" class="timestamp-link"><time datetime="2026-06-06T13:39:17.695Z" data-timestamp="2026-06-06T13:39:17.695Z">2026-06-06T13:39:17.695Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>I'll look at the relevant files for both issues in parallel.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-39-21-076Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-39-21-076Z" class="timestamp-link"><time datetime="2026-06-06T13:39:21.076Z" data-timestamp="2026-06-06T13:39:21.076Z">2026-06-06T13:39:21.076Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01BRBNevWRtX1w8k7jSY3HFR"><div class="tool-header"><span class="tool-icon">⚙</span> Agent</div><div class="tool-description">Find plugin loading files</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;subagent_type&#34;: &#34;Explore&#34;,
+  &#34;prompt&#34;: &#34;Find the following files in this C# project and return their full paths and key content:\n\n1. `PluginManager` class - particularly the `DiscoverAndRegister` method and how it loads assemblies\n2. `PluginDiscovery` class - particularly the `IsCoreService` method and the `CoreServiceTypes` list\n3. `MarvServiceExtensions` class - particularly the `AddMarv` method and where `AddHttpClient` is called\n\nSearch breadth: medium. Return full file paths and relevant line numbers.&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-39-31-193Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-39-31-193Z" class="timestamp-link"><time datetime="2026-06-06T13:39:31.193Z" data-timestamp="2026-06-06T13:39:31.193Z">2026-06-06T13:39:31.193Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Perfect! I have found all three files with the key content you requested. Here&#x27;s a summary:
+
+## Files Found
+
+### 1. PluginManager Class
+**File Path:** `/workspaces/marv/src/Marv.Core/Plugin/PluginManager.cs`
+
+**Key Method - `DiscoverAndRegister` (lines 40-116):**
+- **Lines 40-45:** Method signature with parameters for service collection, configuration, plugin paths, and requested plugins
+- **Lines 47-82:** Assembly loading logic - loops through plugin paths, loads assemblies using `AssemblyLoadContext.Default.LoadFromAssemblyPath()`, calls `PluginDiscovery.DiscoverPlugin()`, and filters by requested plugins
+- **Lines 84-115:** Dependency sorting, configuration registration via reflection, and ConfigureServices method invocation on plugins
+
+### 2. PluginDiscovery Class
+**File Path:** `/workspaces/marv/src/Marv.Core/Plugin/PluginDiscovery.cs`
+
+**Key Elements:**
+- **`CoreServiceTypes` list (lines 19-26):** Contains 5 core types: `IBot`, `IPluginActivator`, `ICapabilityManager`, `IServerInfo`, `CancellationToken`
+- **`IsCoreService` method (lines 31-48):** 
+  - Checks if a type is in `CoreServiceTypes`
+  - Handles generic types like `IOptions&lt;T&gt;`, `ILogger&lt;T&gt;`
+  - Checks for `ILoggerFactory`
+
+### 3. MarvServiceExtensions Class
+**File Path:** `/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs`
+
+**Key Method - `AddMarv` (lines 22-66):**
+- **Line 41:** `AddHttpClient()` call - registers `IHttpClientFactory` so plugins can inject it without adding the package themselves
+- **Lines 58-59:** Calls `PluginManager.DiscoverAndRegister()` with bootstrap logger
+- **Line 63:** Stores sorted plugin descriptors as singleton for later use</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-39-33-682Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-39-33-682Z" class="timestamp-link"><time datetime="2026-06-06T13:39:33.682Z" data-timestamp="2026-06-06T13:39:33.682Z">2026-06-06T13:39:33.682Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Let me read the specific files to understand the exact implementation details.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-39-34-473Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-39-34-473Z" class="timestamp-link"><time datetime="2026-06-06T13:39:34.473Z" data-timestamp="2026-06-06T13:39:34.473Z">2026-06-06T13:39:34.473Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01Nyx6ShvHGdk9AzAPoYYo3i"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Plugin/PluginDiscovery.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-39-34-489Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-39-34-489Z" class="timestamp-link"><time datetime="2026-06-06T13:39:34.489Z" data-timestamp="2026-06-06T13:39:34.489Z">2026-06-06T13:39:34.489Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using System.Reflection;
+2	using Microsoft.Extensions.DependencyInjection;
+3	using Microsoft.Extensions.Logging;
+4	using Microsoft.Extensions.Options;
+5	using Marv.Core.Events;
+6	using Marv.Core.Platform;
+7	
+8	namespace Marv.Core.Plugin;
+9	
+10	/// &lt;summary&gt;
+11	/// Discovers plugins from loaded assemblies and extracts metadata for dependency sorting
+12	/// and service registration.
+13	/// &lt;/summary&gt;
+14	internal static class PluginDiscovery
+15	{
+16	    /// &lt;summary&gt;
+17	    /// Types that are provided by the core and should not be treated as plugin service dependencies.
+18	    /// &lt;/summary&gt;
+19	    private static readonly HashSet&lt;Type&gt; CoreServiceTypes =
+20	    [
+21	        typeof(IBot),
+22	        typeof(IPluginActivator),
+23	        typeof(ICapabilityManager),
+24	        typeof(IServerInfo),
+25	        typeof(CancellationToken)
+26	    ];
+27	
+28	    /// &lt;summary&gt;
+29	    /// Returns true if a constructor parameter type is a core service (not a plugin dependency).
+30	    /// &lt;/summary&gt;
+31	    private static bool IsCoreService(Type paramType)
+32	    {
+33	        if (CoreServiceTypes.Contains(paramType))
+34	            return true;
+35	
+36	        // IOptions&lt;T&gt;, ILogger&lt;T&gt;, ILoggerFactory
+37	        if (paramType.IsGenericType)
+38	        {
+39	            var def = paramType.GetGenericTypeDefinition();
+40	            if (def == typeof(IOptions&lt;&gt;) || def == typeof(ILogger&lt;&gt;))
+41	                return true;
+42	        }
+43	
+44	        if (paramType == typeof(ILoggerFactory))
+45	            return true;
+46	
+47	        return false;
+48	    }
+49	
+50	    /// &lt;summary&gt;
+51	    /// Scans an assembly for plugin types and extracts metadata.
+52	    /// Each assembly must contain exactly one IPlugin implementation.
+53	    /// &lt;/summary&gt;
+54	    public static PluginDescriptor? DiscoverPlugin(Assembly assembly)
+55	    {
+56	        var pluginTypes = assembly.GetExportedTypes()
+57	            .Where(t =&gt; t is { IsClass: true, IsAbstract: false } &amp;&amp;
+58	                        t.GetInterfaces().Any(i =&gt; i == typeof(IPlugin)))
+59	            .ToList();
+60	
+61	        if (pluginTypes.Count == 0)
+62	            return null;
+63	
+64	        if (pluginTypes.Count &gt; 1)
+65	            throw new InvalidOperationException(
+66	                $&quot;Assembly {assembly.GetName().Name} contains {pluginTypes.Count} IPlugin implementations, but exactly one is required.&quot;);
+67	
+68	        var pluginType = pluginTypes[0];
+69	
+70	        var nameAttr = pluginType.GetCustomAttribute&lt;PluginNameAttribute&gt;();
+71	        var name = nameAttr?.Name
+72	            ?? (pluginType.Name.EndsWith(&quot;Plugin&quot;, StringComparison.Ordinal)
+73	                ? pluginType.Name[..^6]
+74	                : pluginType.Name);
+75	
+76	        // Read [ProvidesService] attributes
+77	        var providedServices = pluginType.GetCustomAttributes&lt;ProvidesServiceAttribute&gt;()
+78	            .Select(a =&gt; a.ServiceType)
+79	            .ToList();
+80	
+81	        // Read [DependsOn] attributes
+82	        var explicitDeps = pluginType.GetCustomAttributes&lt;DependsOnAttribute&gt;()
+83	            .Select(a =&gt; a.PluginType)
+84	            .ToList();
+85	
+86	        // Inspect constructor parameters for service dependencies
+87	        var ctor = pluginType.GetConstructors().OrderByDescending(c =&gt; c.GetParameters().Length).First();
+88	        var requiredServices = new List&lt;Type&gt;();
+89	        var optionalServices = new List&lt;Type&gt;();
+90	
+91	        foreach (var param in ctor.GetParameters())
+92	        {
+93	            var paramType = param.ParameterType;
+94	
+95	            // Skip core services
+96	            if (IsCoreService(paramType))
+97	                continue;
+98	
+99	            // Check for nullable reference type (T? with default null for optional deps)
+100	            var isNullable = Nullable.GetUnderlyingType(paramType) is not null;
+101	            var hasNullableAnnotation = new NullabilityInfoContext().Create(param).WriteState == NullabilityState.Nullable;
+102	            var hasDefault = param.HasDefaultValue &amp;&amp; param.DefaultValue is null;
+103	
+104	            if ((isNullable || hasNullableAnnotation) &amp;&amp; hasDefault)
+105	            {
+106	                var actualType = Nullable.GetUnderlyingType(paramType) ?? paramType;
+107	                if (!IsCoreService(actualType))
+108	                    optionalServices.Add(actualType);
+109	            }
+110	            else
+111	            {
+112	                if (!IsCoreService(paramType))
+113	                    requiredServices.Add(paramType);
+114	            }
+115	        }
+116	
+117	        // Discover [PluginConfig] classes in the assembly
+118	        var configs = assembly.GetExportedTypes()
+119	            .Select(t =&gt; (Type: t, Attr: t.GetCustomAttribute&lt;PluginConfigAttribute&gt;()))
+120	            .Where(x =&gt; x.Attr is not null)
+121	            .Select(x =&gt; (x.Type, x.Attr!.Section))
+122	            .ToList();
+123	
+124	        return new PluginDescriptor
+125	        {
+126	            PluginType = pluginType,
+127	            Name = name,
+128	            ProvidedServices = providedServices,
+129	            ExplicitDependencies = explicitDeps,
+130	            RequiredServices = requiredServices,
+131	            OptionalServices = optionalServices,
+132	            Configurations = configs,
+133	            Assembly = assembly
+134	        };
+135	    }
+136	}
+137	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-39-34-783Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-39-34-783Z" class="timestamp-link"><time datetime="2026-06-06T13:39:34.783Z" data-timestamp="2026-06-06T13:39:34.783Z">2026-06-06T13:39:34.783Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_019BvvDQz2SMAABidRLUs2NF"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-39-34-798Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-39-34-798Z" class="timestamp-link"><time datetime="2026-06-06T13:39:34.798Z" data-timestamp="2026-06-06T13:39:34.798Z">2026-06-06T13:39:34.798Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using Marv.Core.Irc;
+2	using Marv.Core.Platform;
+3	using Marv.Core.Plugin;
+4	using Microsoft.Extensions.Configuration;
+5	using Microsoft.Extensions.DependencyInjection;
+6	using Microsoft.Extensions.Logging;
+7	
+8	namespace Marv.Core;
+9	
+10	/// &lt;summary&gt;
+11	/// Extension methods for registering Marv services into an &lt;see cref=&quot;IServiceCollection&quot;/&gt;.
+12	/// &lt;/summary&gt;
+13	public static class MarvServiceExtensions
+14	{
+15	    /// &lt;summary&gt;
+16	    /// Registers all Marv core services, discovers and loads plugins, and configures
+17	    /// the DI container for the bot. This is the single entry point called by the host application.
+18	    /// &lt;/summary&gt;
+19	    /// &lt;param name=&quot;services&quot;&gt;The service collection to register into.&lt;/param&gt;
+20	    /// &lt;param name=&quot;configuration&quot;&gt;The application configuration.&lt;/param&gt;
+21	    /// &lt;returns&gt;The service collection for chaining.&lt;/returns&gt;
+22	    public static IServiceCollection AddMarv(
+23	        this IServiceCollection services,
+24	        IConfiguration configuration)
+25	    {
+26	        // Bind configuration from the root (flat layout)
+27	        services.Configure&lt;MarvConfiguration&gt;(configuration);
+28	
+29	        // Register core services
+30	        var serverInfo = new ServerInfo();
+31	        var capabilityManager = new CapabilityManager();
+32	
+33	        services.AddSingleton&lt;IServerInfo&gt;(serverInfo);
+34	        services.AddSingleton(serverInfo);
+35	        services.AddSingleton&lt;ICapabilityManager&gt;(capabilityManager);
+36	        services.AddSingleton(capabilityManager);
+37	        services.AddSingleton&lt;IPluginActivator, PluginActivator&gt;();
+38	        services.AddSingleton&lt;PluginManager&gt;();
+39	
+40	        // Register IHttpClientFactory so plugins can inject it without adding the package themselves
+41	        services.AddHttpClient();
+42	
+43	        // Register the bot and hosted service
+44	        services.AddSingleton&lt;IrcBot&gt;();
+45	        services.AddSingleton&lt;IBot&gt;(sp =&gt; sp.GetRequiredService&lt;IrcBot&gt;());
+46	        services.AddHostedService&lt;MarvBotService&gt;();
+47	
+48	        // Discover plugins from configured directories, filtered by name
+49	        var config = configuration.Get&lt;MarvConfiguration&gt;() ?? new MarvConfiguration();
+50	        var pluginPaths = ResolvePluginPaths(config.PluginDirectories, config.Plugins);
+51	
+52	        IReadOnlyList&lt;PluginDescriptor&gt; sortedPlugins = [];
+53	        if (pluginPaths.Count &gt; 0)
+54	        {
+55	            using var bootstrapLoggerFactory = LoggerFactory.Create(b =&gt; b.AddConsole());
+56	            var bootstrapLogger = bootstrapLoggerFactory.CreateLogger(&quot;Marv.Bootstrap&quot;);
+57	
+58	            sortedPlugins = PluginManager.DiscoverAndRegister(
+59	                services, configuration, pluginPaths, config.Plugins, bootstrapLogger);
+60	        }
+61	
+62	        // Store the sorted descriptors for later use during instantiation
+63	        services.AddSingleton(sortedPlugins);
+64	
+65	        return services;
+66	    }
+67	
+68	    /// &lt;summary&gt;
+69	    /// Scans plugin directories for assemblies, discovers which ones contain plugins,
+70	    /// and returns paths to assemblies whose plugin name matches the requested list.
+71	    /// &lt;/summary&gt;
+72	    private static IReadOnlyList&lt;string&gt; ResolvePluginPaths(
+73	        List&lt;string&gt; pluginDirectories,
+74	        List&lt;string&gt; requestedPlugins)
+75	    {
+76	        if (requestedPlugins.Count == 0)
+77	            return [];
+78	
+79	        var paths = new List&lt;string&gt;();
+80	
+81	        foreach (var dir in pluginDirectories)
+82	        {
+83	            var fullDir = Path.GetFullPath(dir);
+84	            if (!Directory.Exists(fullDir))
+85	                continue;
+86	
+87	            foreach (var dll in Directory.GetFiles(fullDir, &quot;*.dll&quot;, SearchOption.AllDirectories))
+88	            {
+89	                paths.Add(dll);
+90	            }
+91	        }
+92	
+93	        return paths;
+94	    }
+95	}
+96	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-39-35-149Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-39-35-149Z" class="timestamp-link"><time datetime="2026-06-06T13:39:35.149Z" data-timestamp="2026-06-06T13:39:35.149Z">2026-06-06T13:39:35.149Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_018R4WEk7CBQ8vAbiNnonPCh"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Plugin/PluginManager.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-39-35-160Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-39-35-160Z" class="timestamp-link"><time datetime="2026-06-06T13:39:35.160Z" data-timestamp="2026-06-06T13:39:35.160Z">2026-06-06T13:39:35.160Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using System.Reflection;
+2	using System.Runtime.Loader;
+3	using System.Threading.Channels;
+4	using Marv.Core.Events;
+5	using Microsoft.Extensions.Configuration;
+6	using Microsoft.Extensions.DependencyInjection;
+7	using Microsoft.Extensions.Logging;
+8	
+9	namespace Marv.Core.Plugin;
+10	
+11	/// &lt;summary&gt;
+12	/// Manages the full plugin lifecycle: discovery, dependency sorting, DI registration,
+13	/// instantiation, event dispatch, and teardown.
+14	/// &lt;/summary&gt;
+15	public sealed class PluginManager
+16	{
+17	    private readonly ILogger&lt;PluginManager&gt; _logger;
+18	    private readonly IServiceProvider _serviceProvider;
+19	    private IReadOnlyList&lt;PluginDescriptor&gt; _descriptors = [];
+20	    private List&lt;PluginInstance&gt; _instances = [];
+21	    private readonly HashSet&lt;Type&gt; _failedPlugins = [];
+22	
+23	    /// &lt;summary&gt;
+24	    /// Creates a new &lt;see cref=&quot;PluginManager&quot;/&gt;.
+25	    /// &lt;/summary&gt;
+26	    public PluginManager(ILogger&lt;PluginManager&gt; logger, IServiceProvider serviceProvider)
+27	    {
+28	        _logger = logger;
+29	        _serviceProvider = serviceProvider;
+30	    }
+31	
+32	    /// &lt;summary&gt;The loaded and sorted plugin descriptors.&lt;/summary&gt;
+33	    internal IReadOnlyList&lt;PluginDescriptor&gt; Descriptors =&gt; _descriptors;
+34	
+35	    /// &lt;summary&gt;
+36	    /// Phase 1: Discovers plugins from assemblies, sorts them by dependency,
+37	    /// and registers services and configurations into the service collection.
+38	    /// Called during &lt;c&gt;AddMarv&lt;/c&gt; before the container is built.
+39	    /// &lt;/summary&gt;
+40	    internal static IReadOnlyList&lt;PluginDescriptor&gt; DiscoverAndRegister(
+41	        IServiceCollection services,
+42	        IConfiguration configuration,
+43	        IReadOnlyList&lt;string&gt; pluginPaths,
+44	        IReadOnlyList&lt;string&gt; requestedPlugins,
+45	        ILogger? bootstrapLogger = null)
+46	    {
+47	        var loadContext = AssemblyLoadContext.Default;
+48	        var descriptors = new List&lt;PluginDescriptor&gt;();
+49	        var requestedSet = new HashSet&lt;string&gt;(requestedPlugins, StringComparer.OrdinalIgnoreCase);
+50	
+51	        foreach (var path in pluginPaths)
+52	        {
+53	            var fullPath = Path.GetFullPath(path);
+54	            if (!File.Exists(fullPath))
+55	            {
+56	                bootstrapLogger?.LogWarning(&quot;Plugin assembly not found: {Path}&quot;, fullPath);
+57	                continue;
+58	            }
+59	
+60	            try
+61	            {
+62	                var assembly = loadContext.LoadFromAssemblyPath(fullPath);
+63	                var descriptor = PluginDiscovery.DiscoverPlugin(assembly);
+64	                if (descriptor is not null)
+65	                {
+66	                    if (requestedSet.Count &gt; 0 &amp;&amp; !requestedSet.Contains(descriptor.Name))
+67	                    {
+68	                        bootstrapLogger?.LogDebug(&quot;Skipping plugin {Name} (not in requested list)&quot;,
+69	                            descriptor.Name);
+70	                        continue;
+71	                    }
+72	
+73	                    descriptors.Add(descriptor);
+74	                    bootstrapLogger?.LogDebug(&quot;Discovered plugin: {Name} from {Assembly}&quot;,
+75	                        descriptor.Name, assembly.GetName().Name);
+76	                }
+77	            }
+78	            catch (Exception ex)
+79	            {
+80	                bootstrapLogger?.LogError(ex, &quot;Failed to load plugin assembly: {Path}&quot;, fullPath);
+81	            }
+82	        }
+83	
+84	        // Sort by dependencies
+85	        var sorted = PluginDependencySorter.Sort(descriptors);
+86	
+87	        // Register plugin configurations
+88	        foreach (var descriptor in sorted)
+89	        {
+90	            foreach (var (configType, section) in descriptor.Configurations)
+91	            {
+92	                var configSection = configuration.GetSection($&quot;Plugins:{section}&quot;);
+93	                var method = typeof(OptionsConfigurationServiceCollectionExtensions)
+94	                    .GetMethod(&quot;Configure&quot;, [typeof(IServiceCollection), typeof(IConfiguration)])!
+95	                    .MakeGenericMethod(configType);
+96	                method.Invoke(null, [services, configSection]);
+97	
+98	                bootstrapLogger?.LogDebug(&quot;Registered configuration {Type} for section Plugins:{Section}&quot;,
+99	                    configType.Name, section);
+100	            }
+101	        }
+102	
+103	        // Call ConfigureServices on each plugin (in dependency order)
+104	        foreach (var descriptor in sorted)
+105	        {
+106	            var method = descriptor.PluginType.GetMethod(&quot;ConfigureServices&quot;,
+107	                BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+108	            if (method is not null)
+109	            {
+110	                method.Invoke(null, [services]);
+111	                bootstrapLogger?.LogDebug(&quot;Called ConfigureServices on {Plugin}&quot;, descriptor.Name);
+112	            }
+113	        }
+114	
+115	        return sorted;
+116	    }
+117	
+118	    /// &lt;summary&gt;
+119	    /// Phase 2: Instantiates all plugins and their handler groups using
+120	    /// ActivatorUtilities. Called after the DI container is built.
+121	    /// Plugins whose dependencies failed to instantiate are skipped.
+122	    /// &lt;/summary&gt;
+123	    internal void InstantiatePlugins(IReadOnlyList&lt;PluginDescriptor&gt; descriptors)
+124	    {
+125	        _descriptors = descriptors;
+126	        _instances = [];
+127	        _failedPlugins.Clear();
+128	
+129	        var activator = _serviceProvider.GetRequiredService&lt;IPluginActivator&gt;();
+130	
+131	        foreach (var descriptor in descriptors)
+132	        {
+133	            if (ShouldSkipDueToFailedDependency(descriptor))
+134	                continue;
+135	
+136	            try
+137	            {
+138	                var plugin = (IPlugin)ActivatorUtilities.CreateInstance(
+139	                    _serviceProvider, descriptor.PluginType);
+140	
+141	                _instances.Add(new PluginInstance(descriptor, plugin));
+142	                _logger.LogDebug(&quot;Instantiated plugin: {Name}&quot;, descriptor.Name);
+143	            }
+144	            catch (Exception ex)
+145	            {
+146	                _logger.LogError(ex, &quot;Failed to instantiate plugin: {Name}&quot;, descriptor.Name);
+147	                MarkPluginFailed(descriptor);
+148	            }
+149	        }
+150	    }
+151	
+152	    /// &lt;summary&gt;
+153	    /// Calls OnLoadAsync on all plugins in dependency order.
+154	    /// Plugins whose dependencies failed to load are skipped.
+155	    /// &lt;/summary&gt;
+156	    internal async Task LoadPluginsAsync(CancellationToken ct)
+157	    {
+158	        var loadedInstances = new List&lt;PluginInstance&gt;();
+159	
+160	        foreach (var instance in _instances)
+161	        {
+162	            if (ShouldSkipDueToFailedDependency(instance.Descriptor))
+163	                continue;
+164	
+165	            try
+166	            {
+167	                await instance.Plugin.OnLoadAsync(ct);
+168	                _logger.LogDebug(&quot;Loaded plugin: {Name}&quot;, instance.Descriptor.Name);
+169	                loadedInstances.Add(instance);
+170	            }
+171	            catch (Exception ex)
+172	            {
+173	                _logger.LogError(ex, &quot;Plugin {Name} failed during OnLoadAsync&quot;, instance.Descriptor.Name);
+174	                MarkPluginFailed(instance.Descriptor);
+175	            }
+176	        }
+177	
+178	        _instances = loadedInstances;
+179	    }
+180	
+181	    /// &lt;summary&gt;
+182	    /// Calls OnConnectedAsync on all plugins in dependency order.
+183	    /// &lt;/summary&gt;
+184	    internal async Task NotifyConnectedAsync(CancellationToken ct)
+185	    {
+186	        foreach (var instance in _instances)
+187	        {
+188	            try
+189	            {
+190	                await instance.Plugin.OnConnectedAsync(ct);
+191	            }
+192	            catch (Exception ex)
+193	            {
+194	                _logger.LogError(ex, &quot;Plugin {Name} failed during OnConnectedAsync&quot;, instance.Descriptor.Name);
+195	            }
+196	        }
+197	    }
+198	
+199	    /// &lt;summary&gt;
+200	    /// Calls OnDisconnectedAsync on all plugins in reverse dependency order.
+201	    /// &lt;/summary&gt;
+202	    internal async Task NotifyDisconnectedAsync()
+203	    {
+204	        for (var i = _instances.Count - 1; i &gt;= 0; i--)
+205	        {
+206	            try
+207	            {
+208	                await _instances[i].Plugin.OnDisconnectedAsync();
+209	            }
+210	            catch (Exception ex)
+211	            {
+212	                _logger.LogError(ex, &quot;Plugin {Name} failed during OnDisconnectedAsync&quot;,
+213	                    _instances[i].Descriptor.Name);
+214	            }
+215	        }
+216	    }
+217	
+218	    /// &lt;summary&gt;
+219	    /// Calls OnUnloadAsync on all plugins in reverse dependency order.
+220	    /// &lt;/summary&gt;
+221	    internal async Task UnloadPluginsAsync()
+222	    {
+223	        for (var i = _instances.Count - 1; i &gt;= 0; i--)
+224	        {
+225	            try
+226	            {
+227	                await _instances[i].Plugin.OnUnloadAsync();
+228	                _logger.LogDebug(&quot;Unloaded plugin: {Name}&quot;, _instances[i].Descriptor.Name);
+229	            }
+230	            catch (Exception ex)
+231	            {
+232	                _logger.LogError(ex, &quot;Plugin {Name} failed during OnUnloadAsync&quot;,
+233	                    _instances[i].Descriptor.Name);
+234	            }
+235	        }
+236	    }
+237	
+238	    /// &lt;summary&gt;
+239	    /// Creates per-plugin event channels and starts event dispatch tasks.
+240	    /// Returns the list of channels for the message processor to fan out to.
+241	    /// &lt;/summary&gt;
+242	    internal IReadOnlyList&lt;ChannelWriter&lt;MarvEvent&gt;&gt; StartEventDispatchers(CancellationToken ct)
+243	    {
+244	        var writers = new List&lt;ChannelWriter&lt;MarvEvent&gt;&gt;();
+245	
+246	        foreach (var instance in _instances)
+247	        {
+248	            var channel = Channel.CreateBounded&lt;MarvEvent&gt;(new BoundedChannelOptions(256)
+249	            {
+250	                FullMode = BoundedChannelFullMode.Wait,
+251	                SingleReader = true,
+252	                SingleWriter = false
+253	            });
+254	
+255	            writers.Add(channel.Writer);
+256	
+257	            var pluginName = instance.Descriptor.Name;
+258	            _ = Task.Run(async () =&gt;
+259	            {
+260	                try
+261	                {
+262	                    await foreach (var evt in channel.Reader.ReadAllAsync(ct))
+263	                    {
+264	                        try
+265	                        {
+266	                            await instance.Plugin.HandleEventAsync(evt, ct);
+267	                        }
+268	                        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+269	                        {
+270	                            break;
+271	                        }
+272	                        catch (Exception ex)
+273	                        {
+274	                            _logger.LogError(ex, &quot;Plugin {Name} threw in HandleEventAsync for {EventType}&quot;,
+275	                                pluginName, evt.GetType().Name);
+276	                        }
+277	                    }
+278	                }
+279	                catch (OperationCanceledException)
+280	                {
+281	                    // Normal shutdown
+282	                }
+283	            }, ct);
+284	        }
+285	
+286	        return writers;
+287	    }
+288	
+289	    /// &lt;summary&gt;
+290	    /// Fans out an event to all plugin channels.
+291	    /// &lt;/summary&gt;
+292	    internal async Task DispatchEventAsync(MarvEvent evt, IReadOnlyList&lt;ChannelWriter&lt;MarvEvent&gt;&gt; writers, CancellationToken ct)
+293	    {
+294	        foreach (var writer in writers)
+295	        {
+296	            try
+297	            {
+298	                await writer.WriteAsync(evt, ct);
+299	            }
+300	            catch (ChannelClosedException)
+301	            {
+302	                // Plugin task has ended
+303	            }
+304	        }
+305	    }
+306	
+307	    /// &lt;summary&gt;
+308	    /// Logs diagnostic information about loaded plugins, their services, and dependencies.
+309	    /// &lt;/summary&gt;
+310	    internal void LogDiagnostics()
+311	    {
+312	        foreach (var descriptor in _descriptors)
+313	        {
+314	            _logger.LogInformation(&quot;Plugin &#x27;{Name}&#x27; loaded&quot;, descriptor.Name);
+315	            foreach (var svc in descriptor.ProvidedServices)
+316	                _logger.LogDebug(&quot;  Plugin &#x27;{Name}&#x27; provides: {Service}&quot;, descriptor.Name, svc.FullName);
+317	            foreach (var svc in descriptor.RequiredServices)
+318	                _logger.LogDebug(&quot;  Plugin &#x27;{Name}&#x27; requires: {Service}&quot;, descriptor.Name, svc.FullName);
+319	            foreach (var svc in descriptor.OptionalServices)
+320	                _logger.LogDebug(&quot;  Plugin &#x27;{Name}&#x27; optional: {Service}&quot;, descriptor.Name, svc.FullName);
+321	        }
+322	    }
+323	    /// &lt;summary&gt;
+324	    /// Marks a plugin as failed so that dependent plugins can be skipped.
+325	    /// &lt;/summary&gt;
+326	    private void MarkPluginFailed(PluginDescriptor descriptor)
+327	    {
+328	        _failedPlugins.Add(descriptor.PluginType);
+329	    }
+330	
+331	    /// &lt;summary&gt;
+332	    /// Checks whether any of a plugin&#x27;s dependencies (explicit, required services,
+333	    /// or optional services provided by a failed plugin) have failed. If so, the
+334	    /// plugin is also marked as failed and skipped.
+335	    /// &lt;/summary&gt;
+336	    private bool ShouldSkipDueToFailedDependency(PluginDescriptor descriptor)
+337	    {
+338	        // Check explicit [DependsOn] dependencies
+339	        foreach (var dep in descriptor.ExplicitDependencies)
+340	        {
+341	            if (_failedPlugins.Contains(dep))
+342	            {
+343	                _logger.LogWarning(
+344	                    &quot;Skipping plugin &#x27;{Name}&#x27; because its dependency &#x27;{Dep}&#x27; failed&quot;,
+345	                    descriptor.Name, dep.Name);
+346	                MarkPluginFailed(descriptor);
+347	                return true;
+348	            }
+349	        }
+350	
+351	        // Check required service dependencies — if the providing plugin failed,
+352	        // this plugin can&#x27;t function
+353	        foreach (var svc in descriptor.RequiredServices)
+354	        {
+355	            var provider = FindProviderDescriptor(svc);
+356	            if (provider is not null &amp;&amp; _failedPlugins.Contains(provider.PluginType))
+357	            {
+358	                _logger.LogWarning(
+359	                    &quot;Skipping plugin &#x27;{Name}&#x27; because its required service {Service} &quot; +
+360	                    &quot;is provided by failed plugin &#x27;{Provider}&#x27;&quot;,
+361	                    descriptor.Name, svc.FullName, provider.Name);
+362	                MarkPluginFailed(descriptor);
+363	                return true;
+364	            }
+365	        }
+366	
+367	        return false;
+368	    }
+369	
+370	    /// &lt;summary&gt;
+371	    /// Finds the descriptor of the plugin that provides a given service type,
+372	    /// or null if not found.
+373	    /// &lt;/summary&gt;
+374	    private PluginDescriptor? FindProviderDescriptor(Type serviceType)
+375	    {
+376	        foreach (var descriptor in _descriptors)
+377	        {
+378	            if (descriptor.ProvidedServices.Contains(serviceType))
+379	                return descriptor;
+380	        }
+381	        return null;
+382	    }
+383	}
+384	
+385	/// &lt;summary&gt;
+386	/// Pairs a plugin descriptor with its runtime instance.
+387	/// &lt;/summary&gt;
+388	internal sealed class PluginInstance(PluginDescriptor descriptor, IPlugin plugin)
+389	{
+390	    public PluginDescriptor Descriptor =&gt; descriptor;
+391	    public IPlugin Plugin =&gt; plugin;
+392	}
+393	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-39-37-905Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-39-37-905Z" class="timestamp-link"><time datetime="2026-06-06T13:39:37.905Z" data-timestamp="2026-06-06T13:39:37.905Z">2026-06-06T13:39:37.905Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me check the dependency sorter to understand how it uses <code>RequiredServices</code>.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-39-38-451Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-39-38-451Z" class="timestamp-link"><time datetime="2026-06-06T13:39:38.451Z" data-timestamp="2026-06-06T13:39:38.451Z">2026-06-06T13:39:38.451Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_015CcuNz5QwbQM9S61mHDpiN"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Plugin/PluginDependencySorter.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-39-38-476Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-39-38-476Z" class="timestamp-link"><time datetime="2026-06-06T13:39:38.476Z" data-timestamp="2026-06-06T13:39:38.476Z">2026-06-06T13:39:38.476Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	namespace Marv.Core.Plugin;
+2	
+3	/// &lt;summary&gt;
+4	/// Topologically sorts plugins based on their dependency graph.
+5	/// Detects cycles and missing required dependencies.
+6	/// &lt;/summary&gt;
+7	internal static class PluginDependencySorter
+8	{
+9	    /// &lt;summary&gt;
+10	    /// Sorts plugin descriptors in dependency order (providers before consumers).
+11	    /// &lt;/summary&gt;
+12	    /// &lt;exception cref=&quot;InvalidOperationException&quot;&gt;
+13	    /// Thrown when a dependency cycle is detected or a required dependency is missing.
+14	    /// &lt;/exception&gt;
+15	    public static IReadOnlyList&lt;PluginDescriptor&gt; Sort(IReadOnlyList&lt;PluginDescriptor&gt; plugins)
+16	    {
+17	        // Build a map of service type → providing plugin
+18	        var serviceProviders = new Dictionary&lt;Type, PluginDescriptor&gt;();
+19	        foreach (var plugin in plugins)
+20	        {
+21	            foreach (var svc in plugin.ProvidedServices)
+22	            {
+23	                if (serviceProviders.ContainsKey(svc))
+24	                    throw new InvalidOperationException(
+25	                        $&quot;Service {svc.FullName} is provided by both &#x27;{serviceProviders[svc].Name}&#x27; and &#x27;{plugin.Name}&#x27;.&quot;);
+26	                serviceProviders[svc] = plugin;
+27	            }
+28	        }
+29	
+30	        // Validate required dependencies exist
+31	        foreach (var plugin in plugins)
+32	        {
+33	            foreach (var required in plugin.RequiredServices)
+34	            {
+35	                if (!serviceProviders.ContainsKey(required))
+36	                    throw new InvalidOperationException(
+37	                        $&quot;Plugin &#x27;{plugin.Name}&#x27; requires service {required.FullName}, but no loaded plugin provides it.&quot;);
+38	            }
+39	        }
+40	
+41	        // Build adjacency list (edges point from dependency → dependent)
+42	        var pluginIndex = new Dictionary&lt;Type, int&gt;();
+43	        for (var i = 0; i &lt; plugins.Count; i++)
+44	            pluginIndex[plugins[i].PluginType] = i;
+45	
+46	        var inDegree = new int[plugins.Count];
+47	        var adj = new List&lt;int&gt;[plugins.Count];
+48	        for (var i = 0; i &lt; plugins.Count; i++)
+49	            adj[i] = [];
+50	
+51	        void AddEdge(int from, int to)
+52	        {
+53	            if (from == to) return;
+54	            adj[from].Add(to);
+55	            inDegree[to]++;
+56	        }
+57	
+58	        for (var i = 0; i &lt; plugins.Count; i++)
+59	        {
+60	            var plugin = plugins[i];
+61	
+62	            // Explicit [DependsOn] edges
+63	            foreach (var dep in plugin.ExplicitDependencies)
+64	            {
+65	                if (pluginIndex.TryGetValue(dep, out var depIdx))
+66	                    AddEdge(depIdx, i);
+67	            }
+68	
+69	            // Required service dependencies
+70	            foreach (var svc in plugin.RequiredServices)
+71	            {
+72	                if (serviceProviders.TryGetValue(svc, out var provider) &amp;&amp;
+73	                    pluginIndex.TryGetValue(provider.PluginType, out var provIdx))
+74	                    AddEdge(provIdx, i);
+75	            }
+76	
+77	            // Optional service dependencies (order-if-present)
+78	            foreach (var svc in plugin.OptionalServices)
+79	            {
+80	                if (serviceProviders.TryGetValue(svc, out var provider) &amp;&amp;
+81	                    pluginIndex.TryGetValue(provider.PluginType, out var provIdx))
+82	                    AddEdge(provIdx, i);
+83	            }
+84	        }
+85	
+86	        // Kahn&#x27;s algorithm for topological sort
+87	        var queue = new Queue&lt;int&gt;();
+88	        for (var i = 0; i &lt; plugins.Count; i++)
+89	        {
+90	            if (inDegree[i] == 0)
+91	                queue.Enqueue(i);
+92	        }
+93	
+94	        var result = new List&lt;PluginDescriptor&gt;();
+95	        while (queue.Count &gt; 0)
+96	        {
+97	            var current = queue.Dequeue();
+98	            result.Add(plugins[current]);
+99	
+100	            foreach (var neighbor in adj[current])
+101	            {
+102	                inDegree[neighbor]--;
+103	                if (inDegree[neighbor] == 0)
+104	                    queue.Enqueue(neighbor);
+105	            }
+106	        }
+107	
+108	        if (result.Count != plugins.Count)
+109	        {
+110	            var missing = plugins.Where((_, i) =&gt; inDegree[i] &gt; 0).Select(p =&gt; p.Name);
+111	            throw new InvalidOperationException(
+112	                $&quot;Dependency cycle detected among plugins: {string.Join(&quot;, &quot;, missing)}&quot;);
+113	        }
+114	
+115	        return result;
+116	    }
+117	}
+118	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-39-46-471Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-39-46-471Z" class="timestamp-link"><time datetime="2026-06-06T13:39:46.471Z" data-timestamp="2026-06-06T13:39:46.471Z">2026-06-06T13:39:46.471Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-39-54-305Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-39-54-305Z" class="timestamp-link"><time datetime="2026-06-06T13:39:54.305Z" data-timestamp="2026-06-06T13:39:54.305Z">2026-06-06T13:39:54.305Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>I understand both issues clearly. Let me implement the fixes.</p>
+<p><strong>Issue 1:</strong> I'll register <code>Resolving</code>/<code>ResolvingUnmanagedDll</code> handlers in <code>AddMarv</code> before plugin discovery.</p>
+<p><strong>Issue 2:</strong> I'll take the second approach — change the discovery to only treat constructor parameters as plugin dependencies when they match a <code>[ProvidesService]</code> type across loaded plugins. This is more maintainable than growing the allowlist.</p>
+<p>Let me first check how the dependency sorter and discovery interact to plan the refactor for issue 2.</p>
+<p>The key insight for issue 2: currently <code>PluginDiscovery.DiscoverPlugin</code> classifies constructor params into <code>RequiredServices</code>/<code>OptionalServices</code> at discovery time (per-plugin), but at that point we don't know what services other plugins provide. Then <code>PluginDependencySorter.Sort</code> treats every <code>RequiredServices</code> entry as needing a provider. The fix: move the classification so that only types actually declared via <code>[ProvidesService]</code> across <em>all</em> discovered plugins are treated as plugin dependencies.</p>
+<p>Let me check what fields <code>PluginDescriptor</code> has.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-39-54-780Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-39-54-780Z" class="timestamp-link"><time datetime="2026-06-06T13:39:54.780Z" data-timestamp="2026-06-06T13:39:54.780Z">2026-06-06T13:39:54.780Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01R2kpdW4PEbDPk9zKkvK6hP"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Plugin/PluginDescriptor.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-39-54-813Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-39-54-813Z" class="timestamp-link"><time datetime="2026-06-06T13:39:54.813Z" data-timestamp="2026-06-06T13:39:54.813Z">2026-06-06T13:39:54.813Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	namespace Marv.Core.Plugin;
+2	
+3	/// &lt;summary&gt;
+4	/// Metadata about a discovered plugin, extracted from assembly scanning.
+5	/// Used during the bootstrap phase for dependency sorting and service registration.
+6	/// &lt;/summary&gt;
+7	internal sealed class PluginDescriptor
+8	{
+9	    /// &lt;summary&gt;The plugin implementation type.&lt;/summary&gt;
+10	    public required Type PluginType { get; init; }
+11	
+12	    /// &lt;summary&gt;The human-readable plugin name, from [PluginName] or derived from the class name.&lt;/summary&gt;
+13	    public required string Name { get; init; }
+14	
+15	    /// &lt;summary&gt;Service types this plugin provides (from [ProvidesService] attributes).&lt;/summary&gt;
+16	    public required IReadOnlyList&lt;Type&gt; ProvidedServices { get; init; }
+17	
+18	    /// &lt;summary&gt;Plugin types this plugin explicitly depends on (from [DependsOn] attributes).&lt;/summary&gt;
+19	    public required IReadOnlyList&lt;Type&gt; ExplicitDependencies { get; init; }
+20	
+21	    /// &lt;summary&gt;
+22	    /// Required service types consumed by this plugin (non-nullable constructor parameters
+23	    /// that are not core services).
+24	    /// &lt;/summary&gt;
+25	    public required IReadOnlyList&lt;Type&gt; RequiredServices { get; init; }
+26	
+27	    /// &lt;summary&gt;
+28	    /// Optional service types consumed by this plugin (nullable constructor parameters
+29	    /// with default null).
+30	    /// &lt;/summary&gt;
+31	    public required IReadOnlyList&lt;Type&gt; OptionalServices { get; init; }
+32	
+33	    /// &lt;summary&gt;Configuration types found in this plugin&#x27;s assembly (tagged with [PluginConfig]).&lt;/summary&gt;
+34	    public required IReadOnlyList&lt;(Type ConfigType, string Section)&gt; Configurations { get; init; }
+35	
+36	    /// &lt;summary&gt;The assembly from which this plugin was loaded.&lt;/summary&gt;
+37	    public required System.Reflection.Assembly Assembly { get; init; }
+38	}
+39	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-39-57-420Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-39-57-420Z" class="timestamp-link"><time datetime="2026-06-06T13:39:57.420Z" data-timestamp="2026-06-06T13:39:57.420Z">2026-06-06T13:39:57.420Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me check for existing tests related to the dependency sorter and plugin discovery.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-39-58-392Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-39-58-392Z" class="timestamp-link"><time datetime="2026-06-06T13:39:58.392Z" data-timestamp="2026-06-06T13:39:58.392Z">2026-06-06T13:39:58.392Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01CRmekm7p5q8aC1y3uWQLrx">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Find test files for dependency sorter and discovery</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">find /workspaces/marv -name &#34;*.cs&#34; | xargs grep -l &#34;PluginDependencySorter\|PluginDiscovery\|IsCoreService&#34; | head -20</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-39-58-620Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-39-58-620Z" class="timestamp-link"><time datetime="2026-06-06T13:39:58.620Z" data-timestamp="2026-06-06T13:39:58.620Z">2026-06-06T13:39:58.620Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/Marv.Core/Plugin/PluginDiscovery.cs
+/workspaces/marv/src/Marv.Core/Plugin/PluginManager.cs
+/workspaces/marv/src/Marv.Core/Plugin/PluginDependencySorter.cs
+/workspaces/marv/tests/Marv.Core.Tests/Plugin/PluginDependencySorterTests.cs</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-40-01-808Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-40-01-808Z" class="timestamp-link"><time datetime="2026-06-06T13:40:01.808Z" data-timestamp="2026-06-06T13:40:01.808Z">2026-06-06T13:40:01.808Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01FLv7Q7s6sYjVZVoZQAysmR"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/tests/Marv.Core.Tests/Plugin/PluginDependencySorterTests.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-40-01-839Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-40-01-839Z" class="timestamp-link"><time datetime="2026-06-06T13:40:01.839Z" data-timestamp="2026-06-06T13:40:01.839Z">2026-06-06T13:40:01.839Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using Xunit;
+2	using Marv.Core.Plugin;
+3	using System.Reflection;
+4	
+5	namespace Marv.Core.Tests.Plugin;
+6	
+7	/// &lt;summary&gt;
+8	/// Tests for &lt;see cref=&quot;PluginDependencySorter&quot;/&gt; topological sorting.
+9	/// &lt;/summary&gt;
+10	public class PluginDependencySorterTests
+11	{
+12	    private static PluginDescriptor MakeDescriptor(
+13	        string name,
+14	        Type? pluginType = null,
+15	        IReadOnlyList&lt;Type&gt;? providedServices = null,
+16	        IReadOnlyList&lt;Type&gt;? explicitDeps = null,
+17	        IReadOnlyList&lt;Type&gt;? requiredServices = null,
+18	        IReadOnlyList&lt;Type&gt;? optionalServices = null)
+19	    {
+20	        return new PluginDescriptor
+21	        {
+22	            Name = name,
+23	            PluginType = pluginType ?? typeof(object),
+24	            ProvidedServices = providedServices ?? [],
+25	            ExplicitDependencies = explicitDeps ?? [],
+26	            RequiredServices = requiredServices ?? [],
+27	            OptionalServices = optionalServices ?? [],
+28	            Configurations = [],
+29	            Assembly = Assembly.GetExecutingAssembly()
+30	        };
+31	    }
+32	
+33	    [Fact]
+34	    public void Sort_NoDependencies_ReturnsAll()
+35	    {
+36	        var plugins = new[]
+37	        {
+38	            MakeDescriptor(&quot;A&quot;),
+39	            MakeDescriptor(&quot;B&quot;),
+40	            MakeDescriptor(&quot;C&quot;),
+41	        };
+42	
+43	        var sorted = PluginDependencySorter.Sort(plugins);
+44	        Assert.Equal(3, sorted.Count);
+45	    }
+46	
+47	    [Fact]
+48	    public void Sort_ExplicitDependency_OrdersCorrectly()
+49	    {
+50	        var typeA = typeof(string);
+51	        var typeB = typeof(int);
+52	
+53	        var a = MakeDescriptor(&quot;A&quot;, pluginType: typeA);
+54	        var b = MakeDescriptor(&quot;B&quot;, pluginType: typeB, explicitDeps: [typeA]);
+55	
+56	        var sorted = PluginDependencySorter.Sort([b, a]); // B first, should be reordered
+57	        Assert.Equal(&quot;A&quot;, sorted[0].Name);
+58	        Assert.Equal(&quot;B&quot;, sorted[1].Name);
+59	    }
+60	
+61	    [Fact]
+62	    public void Sort_ServiceDependency_OrdersProviderFirst()
+63	    {
+64	        var serviceType = typeof(IDisposable);
+65	        var typeA = typeof(string);
+66	
+67	        var provider = MakeDescriptor(&quot;Provider&quot;, pluginType: typeA,
+68	            providedServices: [serviceType]);
+69	        var consumer = MakeDescriptor(&quot;Consumer&quot;,
+70	            requiredServices: [serviceType]);
+71	
+72	        var sorted = PluginDependencySorter.Sort([consumer, provider]);
+73	        Assert.Equal(&quot;Provider&quot;, sorted[0].Name);
+74	        Assert.Equal(&quot;Consumer&quot;, sorted[1].Name);
+75	    }
+76	
+77	    [Fact]
+78	    public void Sort_MissingRequired_Throws()
+79	    {
+80	        var serviceType = typeof(IDisposable);
+81	        var consumer = MakeDescriptor(&quot;Consumer&quot;,
+82	            requiredServices: [serviceType]);
+83	
+84	        var ex = Assert.Throws&lt;InvalidOperationException&gt;(
+85	            () =&gt; PluginDependencySorter.Sort([consumer]));
+86	        Assert.Contains(&quot;Consumer&quot;, ex.Message);
+87	        Assert.Contains(&quot;IDisposable&quot;, ex.Message);
+88	    }
+89	
+90	    [Fact]
+91	    public void Sort_MissingOptional_DoesNotThrow()
+92	    {
+93	        var serviceType = typeof(IDisposable);
+94	        var consumer = MakeDescriptor(&quot;Consumer&quot;,
+95	            optionalServices: [serviceType]);
+96	
+97	        var sorted = PluginDependencySorter.Sort([consumer]);
+98	        Assert.Single(sorted);
+99	    }
+100	
+101	    [Fact]
+102	    public void Sort_DuplicateServiceProvider_Throws()
+103	    {
+104	        var serviceType = typeof(IDisposable);
+105	        var a = MakeDescriptor(&quot;A&quot;, providedServices: [serviceType]);
+106	        var b = MakeDescriptor(&quot;B&quot;, providedServices: [serviceType]);
+107	
+108	        Assert.Throws&lt;InvalidOperationException&gt;(
+109	            () =&gt; PluginDependencySorter.Sort([a, b]));
+110	    }
+111	
+112	    [Fact]
+113	    public void Sort_Cycle_Throws()
+114	    {
+115	        var typeA = typeof(string);
+116	        var typeB = typeof(int);
+117	
+118	        var a = MakeDescriptor(&quot;A&quot;, pluginType: typeA, explicitDeps: [typeB]);
+119	        var b = MakeDescriptor(&quot;B&quot;, pluginType: typeB, explicitDeps: [typeA]);
+120	
+121	        var ex = Assert.Throws&lt;InvalidOperationException&gt;(
+122	            () =&gt; PluginDependencySorter.Sort([a, b]));
+123	        Assert.Contains(&quot;cycle&quot;, ex.Message, StringComparison.OrdinalIgnoreCase);
+124	    }
+125	}
+126	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-40-48-302Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-40-48-302Z" class="timestamp-link"><time datetime="2026-06-06T13:40:48.302Z" data-timestamp="2026-06-06T13:40:48.302Z">2026-06-06T13:40:48.302Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-40-51-237Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-40-51-237Z" class="timestamp-link"><time datetime="2026-06-06T13:40:51.237Z" data-timestamp="2026-06-06T13:40:51.237Z">2026-06-06T13:40:51.237Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now I have a clear picture. Let me implement both fixes.</p>
+<p><strong>Issue 1:</strong> Register assembly resolving handlers in <code>AddMarv</code> before discovery.</p>
+<p><strong>Issue 2:</strong> In <code>PluginDependencySorter.Sort</code>, remove the validation that throws when a required service has no <code>[ProvidesService]</code> provider — such services are assumed to come from the DI container (framework/core). The ordering edges already handle the case where a provider <em>does</em> exist.</p>
+<p>Let me also check if there's a changelog and prompts file to update.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-40-51-999Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-40-51-999Z" class="timestamp-link"><time datetime="2026-06-06T13:40:51.999Z" data-timestamp="2026-06-06T13:40:51.999Z">2026-06-06T13:40:51.999Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_013R96dS6SdJNuWEZHU8Yavj">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check changelog and prompts format</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">head -30 /workspaces/marv/CHANGELOG.md &amp;&amp; echo &#34;---&#34; &amp;&amp; tail -10 /workspaces/marv/docs/prompts.md</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-40-52-060Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-40-52-060Z" class="timestamp-link"><time datetime="2026-06-06T13:40:52.060Z" data-timestamp="2026-06-06T13:40:52.060Z">2026-06-06T13:40:52.060Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre># Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.2.0] - 2026-06-06
+
+### Added
+
+- Command prefix is now configurable via `CommandPrefix` in bot configuration
+  (previously hardcoded to `!`), with support for multi-character prefixes
+- `IBot.CommandPrefix` property exposes the configured prefix to plugins
+- `[OnCommand]` attribute gains a `Prefix` property to override the bot-wide
+  prefix on a per-handler basis (e.g. `[OnCommand(&quot;invite&quot;, Prefix = &quot;.&quot;)]`)
+- `IHttpClientFactory` is now registered by default, so plugins can inject it
+  without adding the `Microsoft.Extensions.Http` package themselves
+- `[OnCommand]` and `[OnRegex]` attributes gain `ChannelOnly`, `DirectOnly`,
+  and `Channel` filter properties for declarative message context filtering
+- Bot automatically sets bot user mode (e.g. `+B`) when the server advertises
+  the `BOT` ISUPPORT token
+- `UserModes` config option to set additional user modes after authentication
+  (e.g. `&quot;+ix&quot;`), applied before the ready signal
+- Server MOTD is now available via `IServerInfo.Motd` after connection
+- `IBot.JoinMultipleAsync` sends a single comma-separated `JOIN` command per
+  RFC 2812, with automatic batching to stay within the 512-byte line limit
+- Handler filter pipeline: plugins can intercept handler invocations via
+  `FilterHandlerAsync` override or declarative `IFilteringAttribute` +
+  `IFilterEvaluator` pairs for cross-cutting concerns like authorization,
+---
+
+&gt; Add another TODO item: Potentially remove PluginType from HandlerGroup
+
+## Add TODO for JSON5 config parser
+
+**Date**: 2026-06-06
+
+**Prompt**:
+
+&gt; Add another TODO: Switch the JSON config parser to one that supports JSON5</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-40-55-020Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-40-55-020Z" class="timestamp-link"><time datetime="2026-06-06T13:40:55.020Z" data-timestamp="2026-06-06T13:40:55.020Z">2026-06-06T13:40:55.020Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me implement the changes. Starting with both issues:</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-40-57-531Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-40-57-531Z" class="timestamp-link"><time datetime="2026-06-06T13:40:57.531Z" data-timestamp="2026-06-06T13:40:57.531Z">2026-06-06T13:40:57.531Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_015vZEHBfGqmm7Uk8iVEuew5">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">MarvServiceExtensions.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">using Marv.Core.Irc;
+using Marv.Core.Platform;
+using Marv.Core.Plugin;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Runtime.Loader;
+using Marv.Core.Irc;
+using Marv.Core.Platform;
+using Marv.Core.Plugin;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-41-27-021Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-41-27-021Z" class="timestamp-link"><time datetime="2026-06-06T13:41:27.021Z" data-timestamp="2026-06-06T13:41:27.021Z">2026-06-06T13:41:27.021Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-41-33-589Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-41-33-589Z" class="timestamp-link"><time datetime="2026-06-06T13:41:33.589Z" data-timestamp="2026-06-06T13:41:33.589Z">2026-06-06T13:41:33.589Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01SRxXC1AZzPDc7vSSUo9i1d">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">MarvServiceExtensions.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">        // Discover plugins from configured directories, filtered by name
+        var config = configuration.Get&lt;MarvConfiguration&gt;() ?? new MarvConfiguration();
+        var pluginPaths = ResolvePluginPaths(config.PluginDirectories, config.Plugins);</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">        // Discover plugins from configured directories, filtered by name
+        var config = configuration.Get&lt;MarvConfiguration&gt;() ?? new MarvConfiguration();
+        var pluginDirs = config.PluginDirectories.Select(Path.GetFullPath).ToList();
+
+        // Register assembly resolving handlers so plugin transitive dependencies
+        // (e.g. shared libraries) are found by probing the plugin directories.
+        RegisterAssemblyResolvers(pluginDirs);
+
+        var pluginPaths = ResolvePluginPaths(config.PluginDirectories, config.Plugins);</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-41-33-609Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-41-33-609Z" class="timestamp-link"><time datetime="2026-06-06T13:41:33.609Z" data-timestamp="2026-06-06T13:41:33.609Z">2026-06-06T13:41:33.609Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-41-36-811Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-41-36-811Z" class="timestamp-link"><time datetime="2026-06-06T13:41:36.811Z" data-timestamp="2026-06-06T13:41:36.811Z">2026-06-06T13:41:36.811Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now add the resolver methods at the end of the class:</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-41-46-921Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-41-46-921Z" class="timestamp-link"><time datetime="2026-06-06T13:41:46.921Z" data-timestamp="2026-06-06T13:41:46.921Z">2026-06-06T13:41:46.921Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01EkH3mqZidGLgS4F8p2vYPV">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">MarvServiceExtensions.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    /// &lt;summary&gt;
+    /// Scans plugin directories for assemblies, discovers which ones contain plugins,
+    /// and returns paths to assemblies whose plugin name matches the requested list.
+    /// &lt;/summary&gt;
+    private static IReadOnlyList&lt;string&gt; ResolvePluginPaths(
+        List&lt;string&gt; pluginDirectories,
+        List&lt;string&gt; requestedPlugins)
+    {
+        if (requestedPlugins.Count == 0)
+            return [];
+
+        var paths = new List&lt;string&gt;();
+
+        foreach (var dir in pluginDirectories)
+        {
+            var fullDir = Path.GetFullPath(dir);
+            if (!Directory.Exists(fullDir))
+                continue;
+
+            foreach (var dll in Directory.GetFiles(fullDir, &#34;*.dll&#34;, SearchOption.AllDirectories))
+            {
+                paths.Add(dll);
+            }
+        }
+
+        return paths;
+    }
+}</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    /// &lt;summary&gt;
+    /// Registers handlers on the default &lt;see cref=&#34;AssemblyLoadContext&#34;/&gt; to probe
+    /// plugin directories for managed and native assemblies that are not in the host&#39;s
+    /// dependency graph. This allows plugin transitive dependencies (e.g. shared libraries)
+    /// to be resolved at runtime.
+    /// &lt;/summary&gt;
+    private static void RegisterAssemblyResolvers(IReadOnlyList&lt;string&gt; pluginDirectories)
+    {
+        AssemblyLoadContext.Default.Resolving += (_, assemblyName) =&gt;
+        {
+            foreach (var dir in pluginDirectories)
+            {
+                if (!Directory.Exists(dir))
+                    continue;
+
+                var candidate = Path.Combine(dir, assemblyName.Name + &#34;.dll&#34;);
+                if (File.Exists(candidate))
+                    return AssemblyLoadContext.Default.LoadFromAssemblyPath(candidate);
+            }
+
+            return null;
+        };
+
+        AssemblyLoadContext.Default.ResolvingUnmanagedDll += (_, unmanagedDllName) =&gt;
+        {
+            foreach (var dir in pluginDirectories)
+            {
+                if (!Directory.Exists(dir))
+                    continue;
+
+                var candidate = Path.Combine(dir, unmanagedDllName);
+                if (File.Exists(candidate))
+                    return NativeLibrary.Load(candidate);
+            }
+
+            return IntPtr.Zero;
+        };
+    }
+
+    /// &lt;summary&gt;
+    /// Scans plugin directories for assemblies, discovers which ones contain plugins,
+    /// and returns paths to assemblies whose plugin name matches the requested list.
+    /// &lt;/summary&gt;
+    private static IReadOnlyList&lt;string&gt; ResolvePluginPaths(
+        List&lt;string&gt; pluginDirectories,
+        List&lt;string&gt; requestedPlugins)
+    {
+        if (requestedPlugins.Count == 0)
+            return [];
+
+        var paths = new List&lt;string&gt;();
+
+        foreach (var dir in pluginDirectories)
+        {
+            var fullDir = Path.GetFullPath(dir);
+            if (!Directory.Exists(fullDir))
+                continue;
+
+            foreach (var dll in Directory.GetFiles(fullDir, &#34;*.dll&#34;, SearchOption.AllDirectories))
+            {
+                paths.Add(dll);
+            }
+        }
+
+        return paths;
+    }
+}</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-41-46-964Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-41-46-964Z" class="timestamp-link"><time datetime="2026-06-06T13:41:46.964Z" data-timestamp="2026-06-06T13:41:46.964Z">2026-06-06T13:41:46.964Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-41-50-515Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-41-50-515Z" class="timestamp-link"><time datetime="2026-06-06T13:41:50.515Z" data-timestamp="2026-06-06T13:41:50.515Z">2026-06-06T13:41:50.515Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now fix Issue 2 — change the dependency sorter to not throw for required services that no plugin provides:</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-41-55-832Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-41-55-832Z" class="timestamp-link"><time datetime="2026-06-06T13:41:55.832Z" data-timestamp="2026-06-06T13:41:55.832Z">2026-06-06T13:41:55.832Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01T79U78CAbcyAbPu2wZffRQ">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">PluginDependencySorter.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/Plugin/PluginDependencySorter.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">        // Validate required dependencies exist
+        foreach (var plugin in plugins)
+        {
+            foreach (var required in plugin.RequiredServices)
+            {
+                if (!serviceProviders.ContainsKey(required))
+                    throw new InvalidOperationException(
+                        $&#34;Plugin &#39;{plugin.Name}&#39; requires service {required.FullName}, but no loaded plugin provides it.&#34;);
+            }
+        }</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">        // Validate required plugin-provided dependencies exist.
+        // Only services that some loaded plugin declares via [ProvidesService] are
+        // considered plugin dependencies. All other constructor parameters are assumed
+        // to be registered in the DI container by the host or core framework.
+        var allProvidedServices = new HashSet&lt;Type&gt;(serviceProviders.Keys);
+        foreach (var plugin in plugins)
+        {
+            foreach (var required in plugin.RequiredServices)
+            {
+                if (allProvidedServices.Contains(required) &amp;&amp; !serviceProviders.ContainsKey(required))
+                    throw new InvalidOperationException(
+                        $&#34;Plugin &#39;{plugin.Name}&#39; requires service {required.FullName}, but no loaded plugin provides it.&#34;);
+            }
+        }</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-41-55-884Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-41-55-884Z" class="timestamp-link"><time datetime="2026-06-06T13:41:55.884Z" data-timestamp="2026-06-06T13:41:55.884Z">2026-06-06T13:41:55.884Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/Plugin/PluginDependencySorter.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-42-05-059Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-42-05-059Z" class="timestamp-link"><time datetime="2026-06-06T13:42:05.059Z" data-timestamp="2026-06-06T13:42:05.059Z">2026-06-06T13:42:05.059Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-42-06-941Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-42-06-941Z" class="timestamp-link"><time datetime="2026-06-06T13:42:06.941Z" data-timestamp="2026-06-06T13:42:06.941Z">2026-06-06T13:42:06.941Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Wait, the logic I wrote is tautological — <code>allProvidedServices</code> is exactly <code>serviceProviders.Keys</code>. The correct fix is simpler: just remove the validation entirely. Services not provided by any plugin are framework services; if a plugin-provided service's provider isn't loaded, DI will report it clearly at instantiation time.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-42-10-689Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-42-10-689Z" class="timestamp-link"><time datetime="2026-06-06T13:42:10.689Z" data-timestamp="2026-06-06T13:42:10.689Z">2026-06-06T13:42:10.689Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01H4aJNZDAePiUGypmCV1E28">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">PluginDependencySorter.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/Plugin/PluginDependencySorter.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">        // Validate required plugin-provided dependencies exist.
+        // Only services that some loaded plugin declares via [ProvidesService] are
+        // considered plugin dependencies. All other constructor parameters are assumed
+        // to be registered in the DI container by the host or core framework.
+        var allProvidedServices = new HashSet&lt;Type&gt;(serviceProviders.Keys);
+        foreach (var plugin in plugins)
+        {
+            foreach (var required in plugin.RequiredServices)
+            {
+                if (allProvidedServices.Contains(required) &amp;&amp; !serviceProviders.ContainsKey(required))
+                    throw new InvalidOperationException(
+                        $&#34;Plugin &#39;{plugin.Name}&#39; requires service {required.FullName}, but no loaded plugin provides it.&#34;);
+            }
+        }</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">        // Note: we intentionally do NOT validate that every RequiredService has a
+        // plugin provider. Constructor parameters that are not declared via
+        // [ProvidesService] by any loaded plugin are assumed to be registered in the
+        // DI container by the host or core framework (e.g. IHttpClientFactory).
+        // If a required service is truly missing, DI will report it at instantiation.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-42-10-732Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-42-10-732Z" class="timestamp-link"><time datetime="2026-06-06T13:42:10.732Z" data-timestamp="2026-06-06T13:42:10.732Z">2026-06-06T13:42:10.732Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/Plugin/PluginDependencySorter.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-42-13-468Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-42-13-468Z" class="timestamp-link"><time datetime="2026-06-06T13:42:13.468Z" data-timestamp="2026-06-06T13:42:13.468Z">2026-06-06T13:42:13.468Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now fix the unused using warning:</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-42-15-194Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-42-15-194Z" class="timestamp-link"><time datetime="2026-06-06T13:42:15.194Z" data-timestamp="2026-06-06T13:42:15.194Z">2026-06-06T13:42:15.194Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01Wax9SCZdz8aJWW3XwKBR9Z">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">MarvServiceExtensions.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Runtime.Loader;
+using Marv.Core.Irc;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">using System.Runtime.InteropServices;
+using System.Runtime.Loader;
+using Marv.Core.Irc;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-42-15-246Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-42-15-246Z" class="timestamp-link"><time datetime="2026-06-06T13:42:15.246Z" data-timestamp="2026-06-06T13:42:15.246Z">2026-06-06T13:42:15.246Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-42-20-249Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-42-20-249Z" class="timestamp-link"><time datetime="2026-06-06T13:42:20.249Z" data-timestamp="2026-06-06T13:42:20.249Z">2026-06-06T13:42:20.249Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the test that expects the sorter to throw for missing required services — it should no longer throw:</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-42-25-451Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-42-25-451Z" class="timestamp-link"><time datetime="2026-06-06T13:42:25.451Z" data-timestamp="2026-06-06T13:42:25.451Z">2026-06-06T13:42:25.451Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01MgEj1eD7yHbxbMZDSkd8LJ">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">PluginDependencySorterTests.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/tests/Marv.Core.Tests/Plugin/PluginDependencySorterTests.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    [Fact]
+    public void Sort_MissingRequired_Throws()
+    {
+        var serviceType = typeof(IDisposable);
+        var consumer = MakeDescriptor(&#34;Consumer&#34;,
+            requiredServices: [serviceType]);
+
+        var ex = Assert.Throws&lt;InvalidOperationException&gt;(
+            () =&gt; PluginDependencySorter.Sort([consumer]));
+        Assert.Contains(&#34;Consumer&#34;, ex.Message);
+        Assert.Contains(&#34;IDisposable&#34;, ex.Message);
+    }</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    [Fact]
+    public void Sort_MissingRequired_AssumedFrameworkService()
+    {
+        // Required services not declared via [ProvidesService] by any plugin
+        // are assumed to be framework/core DI services (e.g. IHttpClientFactory).
+        var serviceType = typeof(IDisposable);
+        var consumer = MakeDescriptor(&#34;Consumer&#34;,
+            requiredServices: [serviceType]);
+
+        var sorted = PluginDependencySorter.Sort([consumer]);
+        Assert.Single(sorted);
+    }</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-42-25-509Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-42-25-509Z" class="timestamp-link"><time datetime="2026-06-06T13:42:25.509Z" data-timestamp="2026-06-06T13:42:25.509Z">2026-06-06T13:42:25.509Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/tests/Marv.Core.Tests/Plugin/PluginDependencySorterTests.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-42-28-161Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-42-28-161Z" class="timestamp-link"><time datetime="2026-06-06T13:42:28.161Z" data-timestamp="2026-06-06T13:42:28.161Z">2026-06-06T13:42:28.161Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let's build and test:</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-42-28-630Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-42-28-630Z" class="timestamp-link"><time datetime="2026-06-06T13:42:28.630Z" data-timestamp="2026-06-06T13:42:28.630Z">2026-06-06T13:42:28.630Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_015EWUBk198B47z3gf4p9AJk">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Build the solution</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">dotnet build -c Release 2&gt;&amp;1 | tail -5</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-42-37-061Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-42-37-061Z" class="timestamp-link"><time datetime="2026-06-06T13:42:37.061Z" data-timestamp="2026-06-06T13:42:37.061Z">2026-06-06T13:42:37.061Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:08.18</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-42-40-729Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-42-40-729Z" class="timestamp-link"><time datetime="2026-06-06T13:42:40.729Z" data-timestamp="2026-06-06T13:42:40.729Z">2026-06-06T13:42:40.729Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_013m6Z2dnRssm8onZbkNfRkx">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Run unit tests</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">make test 2&gt;&amp;1 | tail -10</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-43-03-706Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-43-03-706Z" class="timestamp-link"><time datetime="2026-06-06T13:43:03.706Z" data-timestamp="2026-06-06T13:43:03.706Z">2026-06-06T13:43:03.706Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Test run for /workspaces/marv/tests/Marv.Plugins.Tests/bin/Release/net10.0/Marv.Plugins.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    35, Skipped:     0, Total:    35, Duration: 242 ms - Marv.Testing.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:    24, Skipped:     0, Total:    24, Duration: 314 ms - Marv.Plugins.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   239, Skipped:     0, Total:   239, Duration: 1 s - Marv.Core.Tests.dll (net10.0)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-43-11-452Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-43-11-452Z" class="timestamp-link"><time datetime="2026-06-06T13:43:11.452Z" data-timestamp="2026-06-06T13:43:11.452Z">2026-06-06T13:43:11.452Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>All 298 tests pass. Now let me also remove <code>IsCoreService</code> and <code>CoreServiceTypes</code> from <code>PluginDiscovery</code> since they're no longer needed — wait, they're still used in <code>DiscoverPlugin</code> to skip core services from constructor analysis. That's still valuable to avoid unnecessary entries in <code>RequiredServices</code>/<code>OptionalServices</code>. Let me keep them but also remove <code>IHttpClientFactory</code> from the concern since the sorter no longer cares about unknown types.</p>
+<p>Actually, <code>IsCoreService</code> is still useful as an optimization to avoid cluttering the descriptor with types we know aren't plugin services. No changes needed there — the sorter fix handles the general case.</p>
+<p>Now let me update the changelog and prompts log.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-43-11-974Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-43-11-974Z" class="timestamp-link"><time datetime="2026-06-06T13:43:11.974Z" data-timestamp="2026-06-06T13:43:11.974Z">2026-06-06T13:43:11.974Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01KdWRrZ4QiH95TD5Gtiq5iK"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/CHANGELOG.md&#34;,
+  &#34;limit&#34;: 15
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-43-12-004Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-43-12-004Z" class="timestamp-link"><time datetime="2026-06-06T13:43:12.004Z" data-timestamp="2026-06-06T13:43:12.004Z">2026-06-06T13:43:12.004Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# Changelog
+2	
+3	All notable changes to this project will be documented in this file.
+4	
+5	The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+6	and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+7	
+8	## [0.2.0] - 2026-06-06
+9	
+10	### Added
+11	
+12	- Command prefix is now configurable via `CommandPrefix` in bot configuration
+13	  (previously hardcoded to `!`), with support for multi-character prefixes
+14	- `IBot.CommandPrefix` property exposes the configured prefix to plugins
+15	- `[OnCommand]` attribute gains a `Prefix` property to override the bot-wide</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-43-15-253Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-43-15-253Z" class="timestamp-link"><time datetime="2026-06-06T13:43:15.253Z" data-timestamp="2026-06-06T13:43:15.253Z">2026-06-06T13:43:15.253Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>There's no <code>[Unreleased]</code> section yet, so I need to add one:</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-43-19-429Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-43-19-429Z" class="timestamp-link"><time datetime="2026-06-06T13:43:19.429Z" data-timestamp="2026-06-06T13:43:19.429Z">2026-06-06T13:43:19.429Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01QPwdb8js8UHmbanhDo56dL">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">CHANGELOG.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/CHANGELOG.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">## [0.2.0] - 2026-06-06</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">## [Unreleased]
+
+### Fixed
+
+- Plugin assembly dependency resolution now probes configured plugin directories
+  for transitive managed and native dependencies, fixing `FileNotFoundException`
+  when plugins depend on libraries not in Marv&#39;s own dependency graph
+- Plugin dependency sorter no longer throws for constructor parameters that are
+  not declared via `[ProvidesService]` by any loaded plugin (e.g.
+  `IHttpClientFactory`), treating them as framework-provided DI services instead
+
+## [0.2.0] - 2026-06-06</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-43-19-493Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-43-19-493Z" class="timestamp-link"><time datetime="2026-06-06T13:43:19.493Z" data-timestamp="2026-06-06T13:43:19.493Z">2026-06-06T13:43:19.493Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/CHANGELOG.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-43-21-371Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-43-21-371Z" class="timestamp-link"><time datetime="2026-06-06T13:43:21.371Z" data-timestamp="2026-06-06T13:43:21.371Z">2026-06-06T13:43:21.371Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the prompts log:</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-43-21-958Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-43-21-958Z" class="timestamp-link"><time datetime="2026-06-06T13:43:21.958Z" data-timestamp="2026-06-06T13:43:21.958Z">2026-06-06T13:43:21.958Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01WZfLmNsX82aoBfe3p8KQ72">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check prompts file size</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">wc -l /workspaces/marv/docs/prompts.md</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-43-21-999Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-43-21-999Z" class="timestamp-link"><time datetime="2026-06-06T13:43:21.999Z" data-timestamp="2026-06-06T13:43:21.999Z">2026-06-06T13:43:21.999Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1111 /workspaces/marv/docs/prompts.md</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-43-25-028Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-43-25-028Z" class="timestamp-link"><time datetime="2026-06-06T13:43:25.028Z" data-timestamp="2026-06-06T13:43:25.028Z">2026-06-06T13:43:25.028Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01GQdvtmUMT8Jc8P2svfy9FN"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/prompts.md&#34;,
+  &#34;offset&#34;: 1105
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-43-25-039Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-43-25-039Z" class="timestamp-link"><time datetime="2026-06-06T13:43:25.039Z" data-timestamp="2026-06-06T13:43:25.039Z">2026-06-06T13:43:25.039Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1105	## Add TODO for JSON5 config parser
+1106	
+1107	**Date**: 2026-06-06
+1108	
+1109	**Prompt**:
+1110	
+1111	&gt; Add another TODO: Switch the JSON config parser to one that supports JSON5
+1112	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-43-41-532Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-43-41-532Z" class="timestamp-link"><time datetime="2026-06-06T13:43:41.532Z" data-timestamp="2026-06-06T13:43:41.532Z">2026-06-06T13:43:41.532Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_014Xok5uuGmcGwqwKv3MyCjR">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">prompts.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/prompts.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">&gt; Add another TODO: Switch the JSON config parser to one that supports JSON5</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">&gt; Add another TODO: Switch the JSON config parser to one that supports JSON5
+
+## Fix plugin loading: assembly resolution and dependency sorter
+
+**Date**: 2026-06-06
+
+**Prompt**:
+
+&gt; While working on some plugins downstream, I&#39;ve come across a couple of issues with plugin loading. I&#39;ve provided concise problem statements for them below:
+&gt;
+&gt; ## 1. Plugin assembly dependency resolution fails for non-host dependencies
+&gt;
+&gt; `PluginManager.DiscoverAndRegister` loads plugin DLLs via `AssemblyLoadContext.Default.LoadFromAssemblyPath()`, but the Default ALC does not resolve transitive dependencies by probing the plugin directories. If a plugin depends on a library not in Marv&#39;s own `deps.json` (e.g. a shared library like `CableGuy.Common`), the runtime throws `FileNotFoundException` during type enumeration — regardless of whether the dependency DLL is present in the same directory.
+&gt;
+&gt; **Fix:** Register `AssemblyLoadContext.Default.Resolving` and `AssemblyLoadContext.Default.ResolvingUnmanagedDll` handlers in `MarvServiceExtensions.AddMarv` (before plugin discovery) that probe the configured `PluginDirectories` for missing managed and native assemblies.
+&gt;
+&gt; ## 2. IHttpClientFactory treated as plugin-provided service by dependency sorter
+&gt;
+&gt; `PluginDiscovery.IsCoreService()` has a hardcoded allowlist of types the dependency sorter should ignore (`IBot`, `ILoggerFactory`, `IOptions&lt;T&gt;`, etc.). `IHttpClientFactory` is registered by Marv core via `services.AddHttpClient()` in `MarvServiceExtensions`, but is not in the allowlist. The sorter treats any constructor parameter of type `IHttpClientFactory` as a plugin-provided service and throws when no plugin declares `[ProvidesService(typeof(IHttpClientFactory))]`.
+&gt;
+&gt; **Fix:** Either add `IHttpClientFactory` to `CoreServiceTypes`, or change the sorter to only treat types declared via `[ProvidesService]` across loaded plugins as plugin dependencies, rather than treating every unknown constructor parameter as one.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-43-41-578Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-43-41-578Z" class="timestamp-link"><time datetime="2026-06-06T13:43:41.578Z" data-timestamp="2026-06-06T13:43:41.578Z">2026-06-06T13:43:41.578Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/prompts.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-43-44-325Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-43-44-325Z" class="timestamp-link"><time datetime="2026-06-06T13:43:44.325Z" data-timestamp="2026-06-06T13:43:44.325Z">2026-06-06T13:43:44.325Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me commit:</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-43-44-906Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-43-44-906Z" class="timestamp-link"><time datetime="2026-06-06T13:43:44.906Z" data-timestamp="2026-06-06T13:43:44.906Z">2026-06-06T13:43:44.906Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01MgS4TqSDTh8uQUX9EMtER4">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Show changed files</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git -C /workspaces/marv diff --stat</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-43-44-952Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-43-44-952Z" class="timestamp-link"><time datetime="2026-06-06T13:43:44.952Z" data-timestamp="2026-06-06T13:43:44.952Z">2026-06-06T13:43:44.952Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre> CHANGELOG.md                                       | 11 +++++
+ docs/prompts.md                                    | 20 +++++++++
+ src/Marv.Core/MarvServiceExtensions.cs             | 47 ++++++++++++++++++++++
+ src/Marv.Core/Plugin/PluginDependencySorter.cs     | 15 +++----
+ .../Plugin/PluginDependencySorterTests.cs          | 10 ++---
+ 5 files changed, 88 insertions(+), 15 deletions(-)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-43-50-289Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-43-50-289Z" class="timestamp-link"><time datetime="2026-06-06T13:43:50.289Z" data-timestamp="2026-06-06T13:43:50.289Z">2026-06-06T13:43:50.289Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01PNzUYbgHZSY73rqpRVcZZy">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit the plugin loading fixes</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git -C /workspaces/marv add CHANGELOG.md docs/prompts.md src/Marv.Core/MarvServiceExtensions.cs src/Marv.Core/Plugin/PluginDependencySorter.cs tests/Marv.Core.Tests/Plugin/PluginDependencySorterTests.cs &amp;&amp; git -C /workspaces/marv commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Fix plugin loading: assembly resolution and dependency sorter
+
+Register AssemblyLoadContext resolving handlers to probe plugin directories
+for transitive managed/native dependencies, and change the dependency sorter
+to treat unknown constructor parameters as framework-provided DI services
+rather than requiring [ProvidesService] declarations for them.
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T13-43-50-415Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T13-43-50-415Z" class="timestamp-link"><time datetime="2026-06-06T13:43:50.415Z" data-timestamp="2026-06-06T13:43:50.415Z">2026-06-06T13:43:50.415Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">370cb7a</span> Fix plugin loading: assembly resolution and dependency sorter</div><pre>5 files changed, 88 insertions(+), 15 deletions(-)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T13-43-57-339Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T13-43-57-339Z" class="timestamp-link"><time datetime="2026-06-06T13:43:57.339Z" data-timestamp="2026-06-06T13:43:57.339Z">2026-06-06T13:43:57.339Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Both fixes are committed. Here's a summary:</p>
+<p><strong>Issue 1 — Assembly dependency resolution:</strong> Added <code>Resolving</code> and <code>ResolvingUnmanagedDll</code> handlers on <code>AssemblyLoadContext.Default</code> in <code>MarvServiceExtensions.AddMarv</code> (before plugin discovery). They probe all configured <code>PluginDirectories</code> for missing managed (<code>.dll</code>) and native assemblies, so plugin transitive dependencies like shared libraries are found automatically.</p>
+<p><strong>Issue 2 — Dependency sorter false positives:</strong> Removed the validation in <code>PluginDependencySorter.Sort</code> that threw when a required constructor parameter had no <code>[ProvidesService]</code> provider. Unknown types are now assumed to be framework/core DI services (e.g. <code>IHttpClientFactory</code>). The ordering edges still work correctly for services that <em>are</em> provided by plugins. Updated the corresponding test to match the new behavior.</p>
+<p>All 298 tests pass, zero build warnings.</p></div></div></div>
+        
+
+<div class="pagination"><a href="index.html" class="index-link">Index</a></div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

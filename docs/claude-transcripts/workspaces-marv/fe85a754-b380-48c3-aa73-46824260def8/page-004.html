@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 4</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 4/6</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-003.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<span class="current">4</span>
+<a href="page-005.html">5</a>
+<a href="page-006.html">6</a>
+<a href="page-005.html">Next &rarr;</a>
+</div>
+
+        
+<div class="message user" id="msg-2026-06-12T14-24-06-222Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-12T14-24-06-222Z" class="timestamp-link"><time datetime="2026-06-12T14:24:06.222Z" data-timestamp="2026-06-12T14:24:06.222Z">2026-06-12T14:24:06.222Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Base directory for this skill: /workspaces/marv/.claude/skills/triage-issues</p>
+<h1>Triage GitHub Issues</h1>
+<p>Reconcile open GitHub issues with the local codebase by reviewing,
+discussing, and — when accepted — converting them into change specifications.</p>
+<h2>When to use</h2>
+<p>Invoke with <code>/triage-issues</code> when you want to process open GitHub issues.</p>
+<h2>Workflow</h2>
+<h3>1. Fetch open issues</h3>
+<p>Run:</p>
+<pre><code>gh issue list --repo predakanga/marv --state open --json number,title,body,labels,comments --limit 50
+</code></pre>
+<p>Filter out issues that already have a label <code>triaged</code> or <code>rejected</code>.</p>
+<h3>2. For each untriaged issue</h3>
+<h4>2a. If the issue has NO prior bot analysis comment</h4>
+<p>Read the issue body and any comments. Analyse the suggestion against the
+current codebase:</p>
+<ul>
+<li>Is it feasible?</li>
+<li>Does it overlap with an existing change spec or completed work?</li>
+<li>What is the estimated scope/complexity?</li>
+<li>Are there any design concerns or open questions?</li>
+</ul>
+<p>Post a comment on the issue with your analysis using this template:</p>
+<pre><code>## Triage Analysis
+
+**Feasibility:** &lt;High / Medium / Low&gt;
+**Scope:** &lt;Core / Host / Plugin API / Docs / CI/CD / New package&gt;
+**Complexity:** &lt;Trivial / Small / Medium / Large&gt;
+**Overlaps:** &lt;None / CS-NNN — description&gt;
+
+### Summary
+
+&lt;2-4 sentence summary of what the issue proposes and how it fits the project&gt;
+
+### Design Notes
+
+&lt;Bullet points covering key design considerations, potential approaches,
+and any concerns or trade-offs&gt;
+
+### Open Questions
+
+&lt;Numbered list of questions for the issue author, if any&gt;
+
+---
+*Automated triage by Claude Code. Reply to discuss, or comment
+`/accept` to approve or `/reject` to decline.*
+</code></pre>
+<p>Report to the user what you posted and move to the next issue.</p>
+<h4>2b. If the issue already has a bot analysis comment</h4>
+<p>Read ALL comments after the analysis. Look for:</p>
+<ul>
+<li><strong><code>/accept</code></strong> — the issue author has approved the change. Proceed to
+  step 3.</li>
+<li><strong><code>/reject</code></strong> — the issue author has declined the change. Add the
+  <code>rejected</code> label and post a short acknowledgement comment. Move on.</li>
+<li><strong>Other comments</strong> — these are discussion/clarification. Post a
+  follow-up comment addressing the points raised, updating your analysis
+  if needed. Move on.</li>
+</ul>
+<h3>3. Create change specifications (on <code>/accept</code>)</h3>
+<p>When an issue is accepted:</p>
+<ol>
+<li>Determine the next change spec number by reading
+   <code>docs/change_specs/README.md</code>.</li>
+<li>Write one or more change spec <code>.md</code> files following the established
+   format (see existing specs in <code>docs/change_specs/</code> for the template).
+   The spec's <code>Source</code> metadata should reference the GitHub issue
+   (e.g. <code>**Source:** GitHub issue #42</code>).
+   Do NOT write any code — specs only.</li>
+<li>Update <code>docs/change_specs/README.md</code> to include the new spec(s) with
+   status <strong>Pending</strong>.</li>
+<li>Add the <code>triaged</code> label to the issue.</li>
+<li>Post a comment on the issue noting which change spec(s) were created.</li>
+<li>Follow the mandatory instructions in CLAUDE.md (commit, changelog if
+   user-visible, prompt log).</li>
+</ol>
+<h2>Important notes</h2>
+<ul>
+<li>This skill does NOT implement any code. It only creates change
+  specifications.</li>
+<li>When analysing feasibility, read relevant source files — don't guess.</li>
+<li>Keep issue comments concise and professional.</li>
+<li>If <code>gh</code> commands fail with auth errors, ask the user to run
+  <code>! gh auth login</code> in their terminal.</li>
+</ul></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-24-11-171Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-24-11-171Z" class="timestamp-link"><time datetime="2026-06-12T14:24:11.171Z" data-timestamp="2026-06-12T14:24:11.171Z">2026-06-12T14:24:11.171Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Fetching open issues.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-24-11-512Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-24-11-512Z" class="timestamp-link"><time datetime="2026-06-12T14:24:11.512Z" data-timestamp="2026-06-12T14:24:11.512Z">2026-06-12T14:24:11.512Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01A931RTxZ3fNaGwRtTyNW6D">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Fetch open GitHub issues</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">gh issue list --repo predakanga/marv --state open --json number,title,body,labels,comments --limit 50</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-24-12-249Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-24-12-249Z" class="timestamp-link"><time datetime="2026-06-12T14:24:12.249Z" data-timestamp="2026-06-12T14:24:12.249Z">2026-06-12T14:24:12.249Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>[{&quot;body&quot;:&quot;At the minute, plugins are implicitly scoped to each IRC connection ([source](/src/Marv.Core/Irc/MarvBotService.cs#L52), but plugins can only register singleton or transient services.\n\nWe should extend Marv to create a new IServiceScope on each connection and use that to explicitly scope plugins, while allowing them to also registered scoped plugins to fit the plugin lifecycle.&quot;,&quot;comments&quot;:[{&quot;id&quot;:&quot;IC_kwDOStVOK88AAAABF6sfAg&quot;,&quot;author&quot;:{&quot;login&quot;:&quot;predakanga&quot;},&quot;authorAssociation&quot;:&quot;OWNER&quot;,&quot;body&quot;:&quot;## Triage Analysis\n\n**Feasibility:** High\n**Scope:** Core (Plugin API, DI container setup)\n**Complexity:** Medium-Large\n**Overlaps:** None\n\n### Summary\n\nThis proposes introducing `IServiceScope` into the plugin lifecycle so that plugins are explicitly scoped to each IRC connection rather than being implicitly tied to it. Currently, all core services and plugins are registered as singletons, and plugin instances are created once per connection cycle in `MarvBotService.ExecuteAsync`. Plugins can only register singleton or transient services via `ConfigureServices`. This change would create a new DI scope per connection and allow plugins to register scoped services that follow the connection lifecycle.\n\n### Design Notes\n\n- Currently `MarvBotService` calls `PluginManager.InstantiatePlugins` at the top of each reconnect loop — plugins are recreated per connection, but DI services they register are singletons that survive reconnects. This mismatch is the core issue.\n- The `ConfigureServices` static method is called during `AddMarv` (at startup), long before any connection. A new scope would need to be created in `MarvBotService` at connection time and disposed on disconnect.\n- `IrcBot`, `ServerInfo`, `CapabilityManager`, and `IBotStatistics` are currently singletons but semantically belong to a single connection — they reset on reconnect. These would be natural candidates for scoped registration.\n- `PluginActivator` currently resolves from the root `IServiceProvider`. It would need to resolve from the connection-scoped `IServiceProvider` instead, so that plugins receive scoped dependencies.\n- This is a **breaking change to the plugin API**: plugin services registered as singletons today might need to become scoped, and plugins that inject `IServiceProvider` directly would get a scoped provider.\n- The `Marv.Testing` package would need updates to create appropriate scopes in test fixtures.\n\n### Open Questions\n\n1. Should plugins themselves be scoped services (created by the DI container per scope), or should they remain manually instantiated but receive scoped dependencies?\n2. Should `ConfigureServices` gain a way to register scoped services (e.g. `services.AddScoped&lt;T&gt;()`), or should a new registration point be introduced?\n3. How should plugin-provided services that genuinely need to be singletons (e.g. a shared cache across reconnects) coexist with connection-scoped services?\n\n---\n*Automated triage by Claude Code. Reply to discuss, or comment `/accept` to approve or `/reject` to decline.*&quot;,&quot;createdAt&quot;:&quot;2026-06-12T14:11:49Z&quot;,&quot;includesCreatedEdit&quot;:false,&quot;isMinimized&quot;:false,&quot;minimizedReason&quot;:&quot;&quot;,&quot;reactionGroups&quot;:[],&quot;url&quot;:&quot;https://github.com/predakanga/marv/issues/1#issuecomment-4692057858&quot;,&quot;viewerDidAuthor&quot;:true},{&quot;id&quot;:&quot;IC_kwDOStVOK88AAAABF6yaKg&quot;,&quot;author&quot;:{&quot;login&quot;:&quot;predakanga&quot;},&quot;authorAssociation&quot;:&quot;OWNER&quot;,&quot;body&quot;:&quot;&gt; Currently, all core services and plugins are registered as singletons\n\nThis isn&#x27;t correct - at the minute, plugins aren&#x27;t registered at all.\n\n&gt; ### Open Questions\n&gt; \n&gt;     1. Should plugins themselves be scoped services (created by the DI container per scope), or should they remain manually instantiated but receive scoped dependencies?\nI think plugins should remain outside of the container - `PluginManager` currently instantiates them in a particular order, which the DI container could get in the way of.\n\n&gt;     2. Should `ConfigureServices` gain a way to register scoped services (e.g. `services.AddScoped&lt;T&gt;()`), or should a new registration point be introduced?\nThe `IServiceCollection` that is passed to `ConfigureServices` already contains `AddScoped&lt;T&gt;()`.\n\n&gt;     3. How should plugin-provided services that genuinely need to be singletons (e.g. a shared cache across reconnects) coexist with connection-scoped services?\nI don&#x27;t see any issue with them being able to register singletons when they need them. So long as no stateful Marv objects are stored there it should be fine.&quot;,&quot;createdAt&quot;:&quot;2026-06-12T14:23:56Z&quot;,&quot;includesCreatedEdit&quot;:false,&quot;isMinimized&quot;:false,&quot;minimizedReason&quot;:&quot;&quot;,&quot;reactionGroups&quot;:[],&quot;url&quot;:&quot;https://github.com/predakanga/marv/issues/1#issuecomment-4692154922&quot;,&quot;viewerDidAuthor&quot;:true}],&quot;labels&quot;:[],&quot;number&quot;:1,&quot;title&quot;:&quot;Add support for IServiceScopes&quot;}]</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-24-15-984Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-24-15-984Z" class="timestamp-link"><time datetime="2026-06-12T14:24:15.984Z" data-timestamp="2026-06-12T14:24:15.984Z">2026-06-12T14:24:15.984Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Issue #1 has a triage analysis and a follow-up clarification from the owner. No <code>/accept</code> or <code>/reject</code> — this is discussion. Let me post a follow-up addressing the corrections.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-24-26-056Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-24-26-056Z" class="timestamp-link"><time datetime="2026-06-12T14:24:26.056Z" data-timestamp="2026-06-12T14:24:26.056Z">2026-06-12T14:24:26.056Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_014ZThSffgRfvAXKJ11FoNL5">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Post follow-up comment on issue #1</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">gh issue comment 1 --repo predakanga/marv --body &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Thanks for the corrections — updated understanding:
+
+**On plugin registration:** You&#39;re right, plugins are instantiated by `PluginManager` via `PluginActivator.CreateInstance`, not registered in the container themselves. The DI container only holds services that plugins *provide* via `ConfigureServices`. The change here is about creating a connection-scoped `IServiceProvider` so that scoped service registrations (which `IServiceCollection` already supports) actually resolve correctly.
+
+**On plugin instantiation:** Agreed — plugins should stay outside the container, with `PluginManager` controlling instantiation order. The key change is that `PluginActivator` should resolve constructor dependencies from the connection-scoped `IServiceProvider` rather than the root one, so plugins receive scoped services when available.
+
+**On singleton coexistence:** Makes sense — plugins can freely register singletons for cross-connection state. The core just needs to ensure connection-scoped Marv objects (like `IBot`, `IServerInfo`, `ICapabilityManager`) are registered as scoped so they don&#39;t leak across reconnects.
+
+### Revised design sketch
+
+1. `MarvBotService` creates an `IServiceScope` at the start of each connection loop iteration and disposes it on disconnect.
+2. Connection-specific core services (`IrcBot`/`IBot`, `ServerInfo`/`IServerInfo`, `CapabilityManager`/`ICapabilityManager`, `IBotStatistics`) move from singleton to scoped registration.
+3. `PluginActivator` resolves from the scoped `IServiceProvider`.
+4. `ConfigureServices` continues to work as-is — plugins can use `AddScoped`, `AddSingleton`, or `AddTransient` freely.
+5. `Marv.Testing` fixtures create a scope to match the runtime behaviour.
+
+Does this match your intent?
+
+---
+*Automated triage by Claude Code. Reply to discuss, or comment `/accept` to approve or `/reject` to decline.*
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-24-27-481Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-24-27-481Z" class="timestamp-link"><time datetime="2026-06-12T14:24:27.481Z" data-timestamp="2026-06-12T14:24:27.481Z">2026-06-12T14:24:27.481Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>https://github.com/predakanga/marv/issues/1#issuecomment-4692158839</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-24-32-456Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-24-32-456Z" class="timestamp-link"><time datetime="2026-06-12T14:24:32.456Z" data-timestamp="2026-06-12T14:24:32.456Z">2026-06-12T14:24:32.456Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Posted a follow-up on <strong>issue #1</strong> addressing the three corrections:
+- Acknowledged plugins aren't in the container — only their provided services are
+- Agreed plugins stay manually instantiated, but <code>PluginActivator</code> resolves from the scoped provider
+- Singletons coexist fine alongside scoped services</p>
+<p>Proposed a revised 5-point design sketch and asked for confirmation. No other open issues to process.</p></div></div></div>
+<div class="message user" id="msg-2026-06-12T14-25-51-379Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-12T14-25-51-379Z" class="timestamp-link"><time datetime="2026-06-12T14:25:51.379Z" data-timestamp="2026-06-12T14:25:51.379Z">2026-06-12T14:25:51.379Z</time></a></div><div class="message-content">
+<div class="user-content"><p><command-message>triage-issues</command-message>
+<command-name>/triage-issues</command-name></p></div></div></div>
+<div class="message user" id="msg-2026-06-12T14-25-51-379Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-12T14-25-51-379Z" class="timestamp-link"><time datetime="2026-06-12T14:25:51.379Z" data-timestamp="2026-06-12T14:25:51.379Z">2026-06-12T14:25:51.379Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Base directory for this skill: /workspaces/marv/.claude/skills/triage-issues</p>
+<h1>Triage GitHub Issues</h1>
+<p>Reconcile open GitHub issues with the local codebase by reviewing,
+discussing, and — when accepted — converting them into change specifications.</p>
+<h2>When to use</h2>
+<p>Invoke with <code>/triage-issues</code> when you want to process open GitHub issues.</p>
+<h2>Workflow</h2>
+<h3>1. Fetch open issues</h3>
+<p>Run:</p>
+<pre><code>gh issue list --repo predakanga/marv --state open --json number,title,body,labels,comments --limit 50
+</code></pre>
+<p>Filter out issues that already have a label <code>triaged</code> or <code>rejected</code>.</p>
+<h3>2. For each untriaged issue</h3>
+<h4>2a. If the issue has NO prior bot analysis comment</h4>
+<p>Read the issue body and any comments. Analyse the suggestion against the
+current codebase:</p>
+<ul>
+<li>Is it feasible?</li>
+<li>Does it overlap with an existing change spec or completed work?</li>
+<li>What is the estimated scope/complexity?</li>
+<li>Are there any design concerns or open questions?</li>
+</ul>
+<p>Post a comment on the issue with your analysis using this template:</p>
+<pre><code>## Triage Analysis
+
+**Feasibility:** &lt;High / Medium / Low&gt;
+**Scope:** &lt;Core / Host / Plugin API / Docs / CI/CD / New package&gt;
+**Complexity:** &lt;Trivial / Small / Medium / Large&gt;
+**Overlaps:** &lt;None / CS-NNN — description&gt;
+
+### Summary
+
+&lt;2-4 sentence summary of what the issue proposes and how it fits the project&gt;
+
+### Design Notes
+
+&lt;Bullet points covering key design considerations, potential approaches,
+and any concerns or trade-offs&gt;
+
+### Open Questions
+
+&lt;Numbered list of questions for the issue author, if any&gt;
+
+---
+*Automated triage by Claude Code. Reply to discuss, or comment
+`/accept` to approve or `/reject` to decline.*
+</code></pre>
+<p>Report to the user what you posted and move to the next issue.</p>
+<h4>2b. If the issue already has a bot analysis comment</h4>
+<p>Read ALL comments after the analysis. Look for:</p>
+<ul>
+<li><strong><code>/accept</code></strong> — the issue author has approved the change. Proceed to
+  step 3.</li>
+<li><strong><code>/reject</code></strong> — the issue author has declined the change. Add the
+  <code>rejected</code> label and post a short acknowledgement comment. Move on.</li>
+<li><strong>Other comments</strong> — these are discussion/clarification. Post a
+  follow-up comment addressing the points raised, updating your analysis
+  if needed. Move on.</li>
+</ul>
+<h3>3. Create change specifications (on <code>/accept</code>)</h3>
+<p>When an issue is accepted:</p>
+<ol>
+<li>Determine the next change spec number by reading
+   <code>docs/change_specs/README.md</code>.</li>
+<li>Write one or more change spec <code>.md</code> files following the established
+   format (see existing specs in <code>docs/change_specs/</code> for the template).
+   The spec's <code>Source</code> metadata should reference the GitHub issue
+   (e.g. <code>**Source:** GitHub issue #42</code>).
+   Do NOT write any code — specs only.</li>
+<li>Update <code>docs/change_specs/README.md</code> to include the new spec(s) with
+   status <strong>Pending</strong>.</li>
+<li>Add the <code>triaged</code> label to the issue.</li>
+<li>Post a comment on the issue noting which change spec(s) were created.</li>
+<li>Follow the mandatory instructions in CLAUDE.md (commit, changelog if
+   user-visible, prompt log).</li>
+</ol>
+<h2>Important notes</h2>
+<ul>
+<li>This skill does NOT implement any code. It only creates change
+  specifications.</li>
+<li>When analysing feasibility, read relevant source files — don't guess.</li>
+<li>Keep issue comments concise and professional.</li>
+<li>If <code>gh</code> commands fail with auth errors, ask the user to run
+  <code>! gh auth login</code> in their terminal.</li>
+</ul></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-25-54-289Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-25-54-289Z" class="timestamp-link"><time datetime="2026-06-12T14:25:54.289Z" data-timestamp="2026-06-12T14:25:54.289Z">2026-06-12T14:25:54.289Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01WZ7kGgXsQUR8mKXVW8Qynz">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Fetch open GitHub issues</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">gh issue list --repo predakanga/marv --state open --json number,title,body,labels,comments --limit 50</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-25-55-002Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-25-55-002Z" class="timestamp-link"><time datetime="2026-06-12T14:25:55.002Z" data-timestamp="2026-06-12T14:25:55.002Z">2026-06-12T14:25:55.002Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>[{&quot;body&quot;:&quot;At the minute, plugins are implicitly scoped to each IRC connection ([source](/src/Marv.Core/Irc/MarvBotService.cs#L52), but plugins can only register singleton or transient services.\n\nWe should extend Marv to create a new IServiceScope on each connection and use that to explicitly scope plugins, while allowing them to also registered scoped plugins to fit the plugin lifecycle.&quot;,&quot;comments&quot;:[{&quot;id&quot;:&quot;IC_kwDOStVOK88AAAABF6sfAg&quot;,&quot;author&quot;:{&quot;login&quot;:&quot;predakanga&quot;},&quot;authorAssociation&quot;:&quot;OWNER&quot;,&quot;body&quot;:&quot;## Triage Analysis\n\n**Feasibility:** High\n**Scope:** Core (Plugin API, DI container setup)\n**Complexity:** Medium-Large\n**Overlaps:** None\n\n### Summary\n\nThis proposes introducing `IServiceScope` into the plugin lifecycle so that plugins are explicitly scoped to each IRC connection rather than being implicitly tied to it. Currently, all core services and plugins are registered as singletons, and plugin instances are created once per connection cycle in `MarvBotService.ExecuteAsync`. Plugins can only register singleton or transient services via `ConfigureServices`. This change would create a new DI scope per connection and allow plugins to register scoped services that follow the connection lifecycle.\n\n### Design Notes\n\n- Currently `MarvBotService` calls `PluginManager.InstantiatePlugins` at the top of each reconnect loop — plugins are recreated per connection, but DI services they register are singletons that survive reconnects. This mismatch is the core issue.\n- The `ConfigureServices` static method is called during `AddMarv` (at startup), long before any connection. A new scope would need to be created in `MarvBotService` at connection time and disposed on disconnect.\n- `IrcBot`, `ServerInfo`, `CapabilityManager`, and `IBotStatistics` are currently singletons but semantically belong to a single connection — they reset on reconnect. These would be natural candidates for scoped registration.\n- `PluginActivator` currently resolves from the root `IServiceProvider`. It would need to resolve from the connection-scoped `IServiceProvider` instead, so that plugins receive scoped dependencies.\n- This is a **breaking change to the plugin API**: plugin services registered as singletons today might need to become scoped, and plugins that inject `IServiceProvider` directly would get a scoped provider.\n- The `Marv.Testing` package would need updates to create appropriate scopes in test fixtures.\n\n### Open Questions\n\n1. Should plugins themselves be scoped services (created by the DI container per scope), or should they remain manually instantiated but receive scoped dependencies?\n2. Should `ConfigureServices` gain a way to register scoped services (e.g. `services.AddScoped&lt;T&gt;()`), or should a new registration point be introduced?\n3. How should plugin-provided services that genuinely need to be singletons (e.g. a shared cache across reconnects) coexist with connection-scoped services?\n\n---\n*Automated triage by Claude Code. Reply to discuss, or comment `/accept` to approve or `/reject` to decline.*&quot;,&quot;createdAt&quot;:&quot;2026-06-12T14:11:49Z&quot;,&quot;includesCreatedEdit&quot;:false,&quot;isMinimized&quot;:false,&quot;minimizedReason&quot;:&quot;&quot;,&quot;reactionGroups&quot;:[],&quot;url&quot;:&quot;https://github.com/predakanga/marv/issues/1#issuecomment-4692057858&quot;,&quot;viewerDidAuthor&quot;:true},{&quot;id&quot;:&quot;IC_kwDOStVOK88AAAABF6yaKg&quot;,&quot;author&quot;:{&quot;login&quot;:&quot;predakanga&quot;},&quot;authorAssociation&quot;:&quot;OWNER&quot;,&quot;body&quot;:&quot;&gt; Currently, all core services and plugins are registered as singletons\n\nThis isn&#x27;t correct - at the minute, plugins aren&#x27;t registered at all.\n\n&gt; ### Open Questions\n&gt; \n&gt;     1. Should plugins themselves be scoped services (created by the DI container per scope), or should they remain manually instantiated but receive scoped dependencies?\nI think plugins should remain outside of the container - `PluginManager` currently instantiates them in a particular order, which the DI container could get in the way of.\n\n&gt;     2. Should `ConfigureServices` gain a way to register scoped services (e.g. `services.AddScoped&lt;T&gt;()`), or should a new registration point be introduced?\nThe `IServiceCollection` that is passed to `ConfigureServices` already contains `AddScoped&lt;T&gt;()`.\n\n&gt;     3. How should plugin-provided services that genuinely need to be singletons (e.g. a shared cache across reconnects) coexist with connection-scoped services?\nI don&#x27;t see any issue with them being able to register singletons when they need them. So long as no stateful Marv objects are stored there it should be fine.&quot;,&quot;createdAt&quot;:&quot;2026-06-12T14:23:56Z&quot;,&quot;includesCreatedEdit&quot;:false,&quot;isMinimized&quot;:false,&quot;minimizedReason&quot;:&quot;&quot;,&quot;reactionGroups&quot;:[],&quot;url&quot;:&quot;https://github.com/predakanga/marv/issues/1#issuecomment-4692154922&quot;,&quot;viewerDidAuthor&quot;:true},{&quot;id&quot;:&quot;IC_kwDOStVOK88AAAABF6ypdw&quot;,&quot;author&quot;:{&quot;login&quot;:&quot;predakanga&quot;},&quot;authorAssociation&quot;:&quot;OWNER&quot;,&quot;body&quot;:&quot;Thanks for the corrections — updated understanding:\n\n**On plugin registration:** You&#x27;re right, plugins are instantiated by `PluginManager` via `PluginActivator.CreateInstance`, not registered in the container themselves. The DI container only holds services that plugins *provide* via `ConfigureServices`. The change here is about creating a connection-scoped `IServiceProvider` so that scoped service registrations (which `IServiceCollection` already supports) actually resolve correctly.\n\n**On plugin instantiation:** Agreed — plugins should stay outside the container, with `PluginManager` controlling instantiation order. The key change is that `PluginActivator` should resolve constructor dependencies from the connection-scoped `IServiceProvider` rather than the root one, so plugins receive scoped services when available.\n\n**On singleton coexistence:** Makes sense — plugins can freely register singletons for cross-connection state. The core just needs to ensure connection-scoped Marv objects (like `IBot`, `IServerInfo`, `ICapabilityManager`) are registered as scoped so they don&#x27;t leak across reconnects.\n\n### Revised design sketch\n\n1. `MarvBotService` creates an `IServiceScope` at the start of each connection loop iteration and disposes it on disconnect.\n2. Connection-specific core services (`IrcBot`/`IBot`, `ServerInfo`/`IServerInfo`, `CapabilityManager`/`ICapabilityManager`, `IBotStatistics`) move from singleton to scoped registration.\n3. `PluginActivator` resolves from the scoped `IServiceProvider`.\n4. `ConfigureServices` continues to work as-is — plugins can use `AddScoped`, `AddSingleton`, or `AddTransient` freely.\n5. `Marv.Testing` fixtures create a scope to match the runtime behaviour.\n\nDoes this match your intent?\n\n---\n*Automated triage by Claude Code. Reply to discuss, or comment `/accept` to approve or `/reject` to decline.*&quot;,&quot;createdAt&quot;:&quot;2026-06-12T14:24:27Z&quot;,&quot;includesCreatedEdit&quot;:false,&quot;isMinimized&quot;:false,&quot;minimizedReason&quot;:&quot;&quot;,&quot;reactionGroups&quot;:[],&quot;url&quot;:&quot;https://github.com/predakanga/marv/issues/1#issuecomment-4692158839&quot;,&quot;viewerDidAuthor&quot;:true},{&quot;id&quot;:&quot;IC_kwDOStVOK88AAAABF6zSdg&quot;,&quot;author&quot;:{&quot;login&quot;:&quot;predakanga&quot;},&quot;authorAssociation&quot;:&quot;OWNER&quot;,&quot;body&quot;:&quot;/accept&quot;,&quot;createdAt&quot;:&quot;2026-06-12T14:25:49Z&quot;,&quot;includesCreatedEdit&quot;:false,&quot;isMinimized&quot;:false,&quot;minimizedReason&quot;:&quot;&quot;,&quot;reactionGroups&quot;:[],&quot;url&quot;:&quot;https://github.com/predakanga/marv/issues/1#issuecomment-4692169334&quot;,&quot;viewerDidAuthor&quot;:true}],&quot;labels&quot;:[],&quot;number&quot;:1,&quot;title&quot;:&quot;Add support for IServiceScopes&quot;}]</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-25-58-846Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-25-58-846Z" class="timestamp-link"><time datetime="2026-06-12T14:25:58.846Z" data-timestamp="2026-06-12T14:25:58.846Z">2026-06-12T14:25:58.846Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Issue #1 has been <code>/accept</code>ed. I'll create the change specification now. Let me review the existing spec format and current state.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-25-59-305Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-25-59-305Z" class="timestamp-link"><time datetime="2026-06-12T14:25:59.305Z" data-timestamp="2026-06-12T14:25:59.305Z">2026-06-12T14:25:59.305Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_013RiEPLDZaQARK1fP4ydxZ2"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/README.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-25-59-324Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-25-59-324Z" class="timestamp-link"><time datetime="2026-06-12T14:25:59.324Z" data-timestamp="2026-06-12T14:25:59.324Z">2026-06-12T14:25:59.324Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# Change Specifications
+2	
+3	Actionable change specifications derived from downstream plugin project
+4	feedback (`docs/downstream_suggestions/`). Each spec is a self-contained
+5	document describing a single change or closely related group of changes.
+6	
+7	Specs are numbered in recommended implementation order.
+8	
+9	## Index
+10	
+11	| # | Spec | Scope | Complexity | Dependencies | Status |
+12	|---|---|---|---|---|---|
+13	| 1 | [Command Prefix Configuration](001-command-prefix-config.md) | Core | Small | None | **Done** |
+14	| 2 | [IHttpClientFactory Registration](002-httpclient-registration.md) | Host | Trivial | None | **Done** |
+15	| 3 | [Handler Dispatch Filters](003-handler-dispatch-filters.md) | Core | Small | None | **Done** |
+16	| 4 | [Bulk Channel Join](004-bulk-channel-join.md) | Core | Small-Medium | None | **Done** |
+17	| 5 | [Handler Filter Pipeline](005-handler-filter-pipeline.md) | Core | Medium | #3 | **Done** |
+18	| 6 | [Test Infrastructure](006-test-infrastructure.md) | New package | Medium | None | **Done** |
+19	| 7 | [Plugin API Documentation](007-plugin-api-documentation.md) | Docs | Medium | None | **Done** |
+20	| 8 | [Example Plugin](008-example-plugin.md) | Examples | Medium | #3, #5 | **Done** |
+21	| 9 | [Bot Action Methods](009-bot-action-methods.md) | Core | Small-Medium | None | **Done** |
+22	| 10 | [Case Mapping for Plugins](010-casemapping-for-plugins.md) | Core | Small | None | **Done** |
+23	| 11 | [Plugin Loading Robustness](011-plugin-loading-robustness.md) | Core | Medium-Large | None | **Done** |
+24	
+25	| 12 | [Dockerfile Sample Plugin Inclusion](012-dockerfile-sample-plugins.md) | Dockerfile | Small | None | **Done** |
+26	| 13 | [Docker Action Build Caching](013-docker-action-caching.md) | CI/CD | Small | None | **Done** |
+27	| 14 | [Release Notes from CHANGELOG.md](014-release-notes-from-changelog.md) | CI/CD | Small | None | **Done** |
+28	| 15 | [Regex Options for OnRegex](015-onregex-options.md) | Core | Small | None | **Done** |
+29	| 16 | [Extract BatchChannels to Utility](016-batch-channels-utility.md) | Core | Trivial | None | **Done** |
+30	| 17 | [Common HandlerContext Base Class](017-common-handler-context.md) | Core | Small-Medium | None | **Done** |
+31	| 18 | [Remove PluginType from HandlerGroup](018-remove-handlergroup-plugintype.md) | Core | Small | None | **Done** |
+32	| 19 | [JSON5 Configuration Parser](019-json5-config-parser.md) | Host | Small-Medium | None | **Done** |
+33	
+34	| 20 | [Bot Statistics Property](020-bot-statistics.md) | Core | Medium | None | **Done** |
+35	| 21 | [Message Queue Management](021-message-queue-management.md) | Core | Small | None | **Done** |
+36	| 22 | [Live Config Reload &amp; IOptions Docs](022-plugin-api-ioptions-docs.md) | Host + Docs | Small | None | **Done** |
+37	| 23 | [CTCP VERSION Response Override](023-ctcp-version-override.md) | Core | Small | None | **Done** |
+38	| 24 | [SendAndAwaitAsync ENDOF* Fallback](024-sendandawait-endof-fallback.md) | Core | Medium | None | **Done** |
+39	| 25 | [Testcontainers Integration](025-testcontainers-integration.md) | Tests | Small-Medium | None | **Done** |
+40	
+41	Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
+42	Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
+43	Specs 12-14 are CI/CD and infrastructure changes. Specs 15-19 are code changes.
+44	Specs 20-24 are downstream feature requests (code and docs).
+45	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-25-59-830Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-25-59-830Z" class="timestamp-link"><time datetime="2026-06-12T14:25:59.830Z" data-timestamp="2026-06-12T14:25:59.830Z">2026-06-12T14:25:59.830Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01AA5nAHfmF8A9pAiDmx9Qqv"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/024-sendandawait-endof-fallback.md&#34;,
+  &#34;limit&#34;: 50
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-25-59-850Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-25-59-850Z" class="timestamp-link"><time datetime="2026-06-12T14:25:59.850Z" data-timestamp="2026-06-12T14:25:59.850Z">2026-06-12T14:25:59.850Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# CS-024: SendAndAwaitAsync ENDOF* Fallback — COMPLETED
+2	
+3	**Source:** Downstream feature request
+4	**Scope:** Core
+5	**Complexity:** Medium
+6	**Breaking changes:** None (behavioral improvement to existing method)
+7	**Status:** Completed
+8	
+9	---
+10	
+11	## Problem
+12	
+13	`SendAndAwaitAsync` currently relies on the `labeled-response` IRCv3
+14	capability to correlate requests with responses. When `labeled-response`
+15	is not available, the method falls back to sending the message and
+16	immediately returning an empty list — making it effectively useless:
+17	
+18	```csharp
+19	else
+20	{
+21	    // Fallback: just send and return empty (no correlation available)
+22	    await SendRawAsync(message, ct);
+23	    return [];
+24	}
+25	```
+26	
+27	Many IRC commands have well-defined response sequences terminated by an
+28	`ENDOF*` numeric. For example:
+29	
+30	| Command | Reply numerics | Terminator |
+31	|---|---|---|
+32	| `WHO` | `352` (RPL_WHOREPLY) | `315` (RPL_ENDOFWHO) |
+33	| `WHOIS` | `311`, `312`, `313`, `317`, `318`, `319`, etc. | `318` (RPL_ENDOFWHOIS) |
+34	| `WHOWAS` | `314` (RPL_WHOWASUSER) | `369` (RPL_ENDOFWHOWAS) |
+35	| `LIST` | `322` (RPL_LIST) | `323` (RPL_LISTEND) |
+36	| `NAMES` | `353` (RPL_NAMREPLY) | `366` (RPL_ENDOFNAMES) |
+37	| `BANLIST` (`MODE +b`) | `367` (RPL_BANLIST) | `368` (RPL_ENDOFBANLIST) |
+38	| `LINKS` | `364` (RPL_LINKS) | `365` (RPL_ENDOFLINKS) |
+39	| `INFO` | `371` (RPL_INFO) | `374` (RPL_ENDOFINFO) |
+40	
+41	When `labeled-response` is unavailable, the bot can still correlate these
+42	commands by watching for the corresponding terminator numeric and matching
+43	on the command parameter (e.g. the nick in `WHO nick` appears in the
+44	`315` reply).
+45	
+46	## Changes
+47	
+48	### 1. Define a command-to-terminator mapping
+49	
+50	```csharp</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-26-03-027Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-26-03-027Z" class="timestamp-link"><time datetime="2026-06-12T14:26:03.027Z" data-timestamp="2026-06-12T14:26:03.027Z">2026-06-12T14:26:03.027Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me read a complete spec to get the full template structure.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-26-03-300Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-26-03-300Z" class="timestamp-link"><time datetime="2026-06-12T14:26:03.300Z" data-timestamp="2026-06-12T14:26:03.300Z">2026-06-12T14:26:03.300Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_016LK6cmFHDn11vq8SqUyCWs"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/024-sendandawait-endof-fallback.md&#34;,
+  &#34;offset&#34;: 50
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-26-03-322Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-26-03-322Z" class="timestamp-link"><time datetime="2026-06-12T14:26:03.322Z" data-timestamp="2026-06-12T14:26:03.322Z">2026-06-12T14:26:03.322Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>50	```csharp
+51	/// &lt;summary&gt;
+52	/// Maps IRC commands to their ENDOF* terminator numerics for
+53	/// fallback response correlation.
+54	/// &lt;/summary&gt;
+55	private static readonly Dictionary&lt;string, string&gt; EndOfNumerics = new(StringComparer.OrdinalIgnoreCase)
+56	{
+57	    [&quot;WHO&quot;] = &quot;315&quot;,
+58	    [&quot;WHOIS&quot;] = &quot;318&quot;,
+59	    [&quot;WHOWAS&quot;] = &quot;369&quot;,
+60	    [&quot;LIST&quot;] = &quot;323&quot;,
+61	    [&quot;NAMES&quot;] = &quot;366&quot;,
+62	    [&quot;LINKS&quot;] = &quot;365&quot;,
+63	    [&quot;INFO&quot;] = &quot;374&quot;,
+64	};
+65	```
+66	
+67	### 2. Implement fallback correlation in `SendAndAwaitAsync`
+68	
+69	When `labeled-response` is not available **and** the command has a known
+70	terminator, install a temporary message tap that:
+71	
+72	1. Buffers all incoming numerics related to the command.
+73	2. Matches on the command parameter (e.g. channel or nick) to avoid
+74	   cross-talk with other pending requests.
+75	3. Completes when the terminator numeric is received.
+76	4. Times out after 30 seconds (same as labeled-response path).
+77	
+78	```csharp
+79	else if (EndOfNumerics.TryGetValue(message.Command, out var terminator))
+80	{
+81	    var matchParam = message.Parameters.Count &gt; 0 ? message.Parameters[0] : null;
+82	    var tcs = new TaskCompletionSource&lt;IReadOnlyList&lt;IrcMessage&gt;&gt;(
+83	        TaskCreationOptions.RunContinuationsAsynchronously);
+84	    var buffer = new List&lt;IrcMessage&gt;();
+85	    var key = $&quot;endof-{message.Command}-{matchParam}&quot;;
+86	
+87	    _pendingEndOf[key] = (tcs, buffer, terminator, matchParam);
+88	
+89	    await SendRawAsync(message, ct);
+90	
+91	    using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+92	    timeoutCts.CancelAfter(TimeSpan.FromSeconds(30));
+93	
+94	    try
+95	    {
+96	        return await tcs.Task.WaitAsync(timeoutCts.Token);
+97	    }
+98	    catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+99	    {
+100	        _pendingEndOf.TryRemove(key, out _);
+101	        throw new TimeoutException(
+102	            $&quot;Timed out waiting for {terminator} response to {message.Command}.&quot;);
+103	    }
+104	}
+105	else
+106	{
+107	    // Unknown command, no correlation possible — warn and throw
+108	    _logger.LogWarning(
+109	        &quot;SendAndAwaitAsync: no labeled-response support and no known ENDOF* &quot; +
+110	        &quot;terminator for command &#x27;{Command}&#x27;. Response correlation is not possible&quot;,
+111	        message.Command);
+112	    throw new NotSupportedException(
+113	        $&quot;Cannot correlate responses for &#x27;{message.Command}&#x27;: the server does not &quot; +
+114	        $&quot;support labeled-response and no ENDOF* fallback is defined for this command.&quot;);
+115	}
+116	```
+117	
+118	### 3. Hook into the message processing loop
+119	
+120	In the main message processing switch (or as a pre-dispatch check),
+121	check incoming numerics against `_pendingEndOf`:
+122	
+123	```csharp
+124	// Check for ENDOF* fallback correlation
+125	foreach (var (key, pending) in _pendingEndOf)
+126	{
+127	    var (tcs, buffer, terminator, matchParam) = pending;
+128	
+129	    // Match: the numeric&#x27;s parameter matches our expected param
+130	    if (matchParam is not null &amp;&amp; message.Parameters.Count &gt; 1
+131	        &amp;&amp; !CaseComparer.Equals(message.Parameters[1], matchParam))
+132	        continue;
+133	
+134	    if (message.Command == terminator)
+135	    {
+136	        buffer.Add(message);
+137	        _pendingEndOf.TryRemove(key, out _);
+138	        tcs.TrySetResult(buffer.AsReadOnly());
+139	    }
+140	    else
+141	    {
+142	        // Buffer intermediate numerics
+143	        buffer.Add(message);
+144	    }
+145	}
+146	```
+147	
+148	The numeric matching needs care: response numerics include the bot&#x27;s nick
+149	as the first parameter, with the queried target as the second. For
+150	example, `315 BotNick targetNick :End of WHO list`. So the match should
+151	compare `message.Parameters[1]` against the original command&#x27;s first
+152	parameter.
+153	
+154	### 4. Add `_pendingEndOf` dictionary to `IrcBot`
+155	
+156	```csharp
+157	private readonly ConcurrentDictionary&lt;string, (
+158	    TaskCompletionSource&lt;IReadOnlyList&lt;IrcMessage&gt;&gt; Tcs,
+159	    List&lt;IrcMessage&gt; Buffer,
+160	    string Terminator,
+161	    string? MatchParam)&gt; _pendingEndOf = new();
+162	```
+163	
+164	Clear it in `RunAsync` alongside `_pendingLabels`.
+165	
+166	## Design decisions
+167	
+168	**Why restrict to ENDOF\* commands even when labeled-response is available?**
+169	Consistency. If `SendAndAwaitAsync` accepted any command with labeled-response
+170	but only a subset without it, the method&#x27;s visible behaviour would change
+171	depending on the server — a plugin that works on one server would silently
+172	break on another. Restricting to the well-known ENDOF\* commands (WHO, WHOIS,
+173	WHOWAS, LIST, NAMES, LINKS, INFO) ensures the API contract is the same
+174	regardless of server capabilities. Plugins that need to send other commands
+175	and collect responses can use `SendRawAsync` + `[OnRawMessage]`.
+176	
+177	**Why match on the command parameter?** Without parameter matching, two
+178	concurrent `WHO #channel1` and `WHO #channel2` requests would
+179	cross-contaminate. Parameter matching isn&#x27;t perfect (servers may
+180	normalize the parameter), but it handles the common case.
+181	
+182	**What about commands not in the table?** `SendAndAwaitAsync` throws
+183	`NotSupportedException` upfront — before sending the command. This makes
+184	the error obvious and avoids silent misbehaviour. The table can be
+185	extended over time as new commands are identified.
+186	
+187	**Why not a general &quot;numeric sequence collector&quot;?** Over-engineering. The
+188	terminator pattern is well-established in the IRC protocol and covers all
+189	the common query commands.
+190	
+191	## Testing
+192	
+193	- **Unit test:** Send WHO with labeled-response available — verify the
+194	  labeled-response path is still used (existing behavior).
+195	- **Unit test:** Send WHO without labeled-response — verify responses are
+196	  collected up to and including `315`, then returned.
+197	- **Unit test:** Send WHO without labeled-response, server doesn&#x27;t respond
+198	  — verify TimeoutException after 30s.
+199	- **Unit test:** Two concurrent WHO requests for different targets —
+200	  verify responses are correctly separated.
+201	- **Unit test:** Send an unsupported command without labeled-response —
+202	  verify a warning is logged and `NotSupportedException` is thrown.
+203	- **Integration test:** Connect to ngircd (which does not support
+204	  labeled-response), send WHO, verify the reply list is non-empty.
+205	
+206	## Impact
+207	
+208	- **Plugin DX:** `SendAndAwaitAsync` becomes useful on servers that lack
+209	  `labeled-response` support, which includes most traditional IRC servers.
+210	  The Moderation example plugin&#x27;s `!who` command will work on these servers.
+211	- **API surface:** No changes to `IBot`. Behavioral improvement only.
+212	- **Risk:** Low — the labeled-response path is unchanged. The new fallback
+213	  only activates when labeled-response is unavailable.
+214	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-26-07-661Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-26-07-661Z" class="timestamp-link"><time datetime="2026-06-12T14:26:07.661Z" data-timestamp="2026-06-12T14:26:07.661Z">2026-06-12T14:26:07.661Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Good, I have the full template. Now let me write CS-026.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-26-07-722Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-26-07-722Z" class="timestamp-link"><time datetime="2026-06-12T14:26:07.722Z" data-timestamp="2026-06-12T14:26:07.722Z">2026-06-12T14:26:07.722Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01ELKND1LFocLdpcHBvouDf5"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Plugin/PluginManager.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-26-07-747Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-26-07-747Z" class="timestamp-link"><time datetime="2026-06-12T14:26:07.747Z" data-timestamp="2026-06-12T14:26:07.747Z">2026-06-12T14:26:07.747Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using System.Reflection;
+2	using System.Runtime.Loader;
+3	using System.Threading.Channels;
+4	using Marv.Core.Events;
+5	using Microsoft.Extensions.Configuration;
+6	using Microsoft.Extensions.DependencyInjection;
+7	using Microsoft.Extensions.Logging;
+8	
+9	namespace Marv.Core.Plugin;
+10	
+11	/// &lt;summary&gt;
+12	/// Manages the full plugin lifecycle: discovery, dependency sorting, DI registration,
+13	/// instantiation, event dispatch, and teardown. All plugin loading failures are fatal —
+14	/// the bot will not start if any requested plugin cannot be loaded.
+15	/// &lt;/summary&gt;
+16	public sealed class PluginManager
+17	{
+18	    private readonly ILogger&lt;PluginManager&gt; _logger;
+19	    private readonly IServiceProvider _serviceProvider;
+20	    private IReadOnlyList&lt;PluginDescriptor&gt; _descriptors = [];
+21	    private List&lt;PluginInstance&gt; _instances = [];
+22	
+23	    /// &lt;summary&gt;
+24	    /// Creates a new &lt;see cref=&quot;PluginManager&quot;/&gt;.
+25	    /// &lt;/summary&gt;
+26	    public PluginManager(ILogger&lt;PluginManager&gt; logger, IServiceProvider serviceProvider)
+27	    {
+28	        _logger = logger;
+29	        _serviceProvider = serviceProvider;
+30	    }
+31	
+32	    /// &lt;summary&gt;The loaded and sorted plugin descriptors.&lt;/summary&gt;
+33	    internal IReadOnlyList&lt;PluginDescriptor&gt; Descriptors =&gt; _descriptors;
+34	
+35	    /// &lt;summary&gt;
+36	    /// Phase 1: Discovers plugins from assemblies, sorts them by dependency,
+37	    /// and registers services and configurations into the service collection.
+38	    /// Called during &lt;c&gt;AddMarv&lt;/c&gt; before the container is built.
+39	    /// &lt;/summary&gt;
+40	    internal static IReadOnlyList&lt;PluginDescriptor&gt; DiscoverAndRegister(
+41	        IServiceCollection services,
+42	        IConfiguration configuration,
+43	        IReadOnlyList&lt;string&gt; pluginPaths,
+44	        ILogger? bootstrapLogger = null)
+45	    {
+46	        var loadContext = AssemblyLoadContext.Default;
+47	        var descriptors = new List&lt;PluginDescriptor&gt;();
+48	
+49	        foreach (var path in pluginPaths)
+50	        {
+51	            var fullPath = Path.GetFullPath(path);
+52	            if (!File.Exists(fullPath))
+53	                throw new InvalidOperationException(
+54	                    $&quot;Plugin assembly not found: {fullPath}&quot;);
+55	
+56	            try
+57	            {
+58	                var assembly = loadContext.LoadFromAssemblyPath(fullPath);
+59	                var descriptor = PluginDiscovery.DiscoverPlugin(assembly, services);
+60	                if (descriptor is not null)
+61	                {
+62	                    descriptors.Add(descriptor);
+63	                    bootstrapLogger?.LogDebug(&quot;Discovered plugin: {Name} from {Assembly}&quot;,
+64	                        descriptor.Name, assembly.GetName().Name);
+65	                }
+66	                else
+67	                {
+68	                    throw new InvalidOperationException(
+69	                        $&quot;Assembly {fullPath} was identified as a plugin during metadata &quot; +
+70	                        $&quot;scanning but contains no IPlugin implementation at runtime.&quot;);
+71	                }
+72	            }
+73	            catch (InvalidOperationException)
+74	            {
+75	                throw;
+76	            }
+77	            catch (Exception ex)
+78	            {
+79	                throw new InvalidOperationException(
+80	                    $&quot;Failed to load plugin assembly: {fullPath}. &quot; +
+81	                    $&quot;This usually means the plugin has a dependency that is not present &quot; +
+82	                    $&quot;in the plugin directories. Ensure all required DLLs are placed &quot; +
+83	                    $&quot;in one of the configured plugin directories.&quot;, ex);
+84	            }
+85	        }
+86	
+87	        // Sort by dependencies
+88	        var sorted = PluginDependencySorter.Sort(descriptors);
+89	
+90	        // Register plugin configurations
+91	        foreach (var descriptor in sorted)
+92	        {
+93	            foreach (var (configType, section) in descriptor.Configurations)
+94	            {
+95	                var configSection = configuration.GetSection(section);
+96	                var method = typeof(OptionsConfigurationServiceCollectionExtensions)
+97	                    .GetMethod(&quot;Configure&quot;, [typeof(IServiceCollection), typeof(IConfiguration)])!
+98	                    .MakeGenericMethod(configType);
+99	                method.Invoke(null, [services, configSection]);
+100	
+101	                bootstrapLogger?.LogDebug(&quot;Registered configuration {Type} for section {Section}&quot;,
+102	                    configType.Name, section);
+103	            }
+104	        }
+105	
+106	        // Call ConfigureServices on each plugin (in dependency order)
+107	        foreach (var descriptor in sorted)
+108	        {
+109	            var method = descriptor.PluginType.GetMethod(&quot;ConfigureServices&quot;,
+110	                BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+111	            if (method is not null)
+112	            {
+113	                method.Invoke(null, [services]);
+114	                bootstrapLogger?.LogDebug(&quot;Called ConfigureServices on {Plugin}&quot;, descriptor.Name);
+115	            }
+116	        }
+117	
+118	        return sorted;
+119	    }
+120	
+121	    /// &lt;summary&gt;
+122	    /// Phase 2: Instantiates all plugins and their handler groups using
+123	    /// ActivatorUtilities. Called after the DI container is built.
+124	    /// All failures are fatal.
+125	    /// &lt;/summary&gt;
+126	    internal void InstantiatePlugins(IReadOnlyList&lt;PluginDescriptor&gt; descriptors)
+127	    {
+128	        _descriptors = descriptors;
+129	        _instances = [];
+130	
+131	        foreach (var descriptor in descriptors)
+132	        {
+133	            try
+134	            {
+135	                var plugin = (IPlugin)ActivatorUtilities.CreateInstance(
+136	                    _serviceProvider, descriptor.PluginType);
+137	
+138	                _instances.Add(new PluginInstance(descriptor, plugin));
+139	                _logger.LogDebug(&quot;Instantiated plugin: {Name}&quot;, descriptor.Name);
+140	            }
+141	            catch (Exception ex)
+142	            {
+143	                throw new InvalidOperationException(
+144	                    $&quot;Failed to instantiate plugin &#x27;{descriptor.Name}&#x27; &quot; +
+145	                    $&quot;(type: {descriptor.PluginType.FullName}). &quot; +
+146	                    $&quot;Check that all required services are available.&quot;, ex);
+147	            }
+148	        }
+149	    }
+150	
+151	    /// &lt;summary&gt;
+152	    /// Calls OnLoadAsync on all plugins in dependency order.
+153	    /// All failures are fatal.
+154	    /// &lt;/summary&gt;
+155	    internal async Task LoadPluginsAsync(CancellationToken ct)
+156	    {
+157	        foreach (var instance in _instances)
+158	        {
+159	            try
+160	            {
+161	                await instance.Plugin.OnLoadAsync(ct);
+162	                _logger.LogDebug(&quot;Loaded plugin: {Name}&quot;, instance.Descriptor.Name);
+163	            }
+164	            catch (Exception ex)
+165	            {
+166	                throw new InvalidOperationException(
+167	                    $&quot;Plugin &#x27;{instance.Descriptor.Name}&#x27; failed during OnLoadAsync.&quot;, ex);
+168	            }
+169	        }
+170	    }
+171	
+172	    /// &lt;summary&gt;
+173	    /// Calls OnConnectedAsync on all plugins in dependency order.
+174	    /// &lt;/summary&gt;
+175	    internal async Task NotifyConnectedAsync(CancellationToken ct)
+176	    {
+177	        foreach (var instance in _instances)
+178	        {
+179	            try
+180	            {
+181	                await instance.Plugin.OnConnectedAsync(ct);
+182	            }
+183	            catch (Exception ex)
+184	            {
+185	                _logger.LogError(ex, &quot;Plugin {Name} failed during OnConnectedAsync&quot;, instance.Descriptor.Name);
+186	            }
+187	        }
+188	    }
+189	
+190	    /// &lt;summary&gt;
+191	    /// Calls OnDisconnectedAsync on all plugins in reverse dependency order.
+192	    /// &lt;/summary&gt;
+193	    internal async Task NotifyDisconnectedAsync()
+194	    {
+195	        for (var i = _instances.Count - 1; i &gt;= 0; i--)
+196	        {
+197	            try
+198	            {
+199	                await _instances[i].Plugin.OnDisconnectedAsync();
+200	            }
+201	            catch (Exception ex)
+202	            {
+203	                _logger.LogError(ex, &quot;Plugin {Name} failed during OnDisconnectedAsync&quot;,
+204	                    _instances[i].Descriptor.Name);
+205	            }
+206	        }
+207	    }
+208	
+209	    /// &lt;summary&gt;
+210	    /// Calls OnUnloadAsync on all plugins in reverse dependency order.
+211	    /// &lt;/summary&gt;
+212	    internal async Task UnloadPluginsAsync()
+213	    {
+214	        for (var i = _instances.Count - 1; i &gt;= 0; i--)
+215	        {
+216	            try
+217	            {
+218	                await _instances[i].Plugin.OnUnloadAsync();
+219	                _logger.LogDebug(&quot;Unloaded plugin: {Name}&quot;, _instances[i].Descriptor.Name);
+220	            }
+221	            catch (Exception ex)
+222	            {
+223	                _logger.LogError(ex, &quot;Plugin {Name} failed during OnUnloadAsync&quot;,
+224	                    _instances[i].Descriptor.Name);
+225	            }
+226	        }
+227	    }
+228	
+229	    /// &lt;summary&gt;
+230	    /// Creates per-plugin event channels and starts event dispatch tasks.
+231	    /// Returns the list of channels for the message processor to fan out to.
+232	    /// &lt;/summary&gt;
+233	    internal IReadOnlyList&lt;ChannelWriter&lt;MarvEvent&gt;&gt; StartEventDispatchers(CancellationToken ct)
+234	    {
+235	        var writers = new List&lt;ChannelWriter&lt;MarvEvent&gt;&gt;();
+236	
+237	        foreach (var instance in _instances)
+238	        {
+239	            var channel = Channel.CreateBounded&lt;MarvEvent&gt;(new BoundedChannelOptions(256)
+240	            {
+241	                FullMode = BoundedChannelFullMode.Wait,
+242	                SingleReader = true,
+243	                SingleWriter = false
+244	            });
+245	
+246	            writers.Add(channel.Writer);
+247	
+248	            var pluginName = instance.Descriptor.Name;
+249	            _ = Task.Run(async () =&gt;
+250	            {
+251	                try
+252	                {
+253	                    await foreach (var evt in channel.Reader.ReadAllAsync(ct))
+254	                    {
+255	                        try
+256	                        {
+257	                            await instance.Plugin.HandleEventAsync(evt, ct);
+258	                        }
+259	                        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+260	                        {
+261	                            break;
+262	                        }
+263	                        catch (Exception ex)
+264	                        {
+265	                            _logger.LogError(ex, &quot;Plugin {Name} threw in HandleEventAsync for {EventType}&quot;,
+266	                                pluginName, evt.GetType().Name);
+267	                        }
+268	                    }
+269	                }
+270	                catch (OperationCanceledException)
+271	                {
+272	                    // Normal shutdown
+273	                }
+274	            }, ct);
+275	        }
+276	
+277	        return writers;
+278	    }
+279	
+280	    /// &lt;summary&gt;
+281	    /// Fans out an event to all plugin channels.
+282	    /// &lt;/summary&gt;
+283	    internal async Task DispatchEventAsync(MarvEvent evt, IReadOnlyList&lt;ChannelWriter&lt;MarvEvent&gt;&gt; writers, CancellationToken ct)
+284	    {
+285	        foreach (var writer in writers)
+286	        {
+287	            try
+288	            {
+289	                await writer.WriteAsync(evt, ct);
+290	            }
+291	            catch (ChannelClosedException)
+292	            {
+293	                // Plugin task has ended
+294	            }
+295	        }
+296	    }
+297	
+298	    /// &lt;summary&gt;
+299	    /// Logs diagnostic information about loaded plugins, their services, and dependencies.
+300	    /// &lt;/summary&gt;
+301	    internal void LogDiagnostics()
+302	    {
+303	        foreach (var descriptor in _descriptors)
+304	        {
+305	            _logger.LogInformation(&quot;Plugin &#x27;{Name}&#x27; loaded&quot;, descriptor.Name);
+306	            foreach (var svc in descriptor.ProvidedServices)
+307	                _logger.LogDebug(&quot;  Plugin &#x27;{Name}&#x27; provides: {Service}&quot;, descriptor.Name, svc.FullName);
+308	            foreach (var svc in descriptor.RequiredServices)
+309	                _logger.LogDebug(&quot;  Plugin &#x27;{Name}&#x27; requires: {Service}&quot;, descriptor.Name, svc.FullName);
+310	            foreach (var svc in descriptor.OptionalServices)
+311	                _logger.LogDebug(&quot;  Plugin &#x27;{Name}&#x27; optional: {Service}&quot;, descriptor.Name, svc.FullName);
+312	        }
+313	    }
+314	}
+315	
+316	/// &lt;summary&gt;
+317	/// Pairs a plugin descriptor with its runtime instance.
+318	/// &lt;/summary&gt;
+319	internal sealed class PluginInstance(PluginDescriptor descriptor, IPlugin plugin)
+320	{
+321	    public PluginDescriptor Descriptor =&gt; descriptor;
+322	    public IPlugin Plugin =&gt; plugin;
+323	}
+324	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-26-10-986Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-26-10-986Z" class="timestamp-link"><time datetime="2026-06-12T14:26:10.986Z" data-timestamp="2026-06-12T14:26:10.986Z">2026-06-12T14:26:10.986Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me also check the testing infrastructure to understand what needs updating.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-26-12-244Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-26-12-244Z" class="timestamp-link"><time datetime="2026-06-12T14:26:12.244Z" data-timestamp="2026-06-12T14:26:12.244Z">2026-06-12T14:26:12.244Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01R7mn9Y1AFtTNW2rqRwtikR">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check testing infrastructure</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">find /workspaces/marv/src/Marv.Testing -name &#34;*.cs&#34; -type f | head -10; echo &#34;---&#34;; grep -rn &#34;IServiceProvider\|IServiceScope\|ServiceProvider&#34; /workspaces/marv/src/Marv.Testing/ --include=&#34;*.cs&#34; | head -15</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-26-12-356Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-26-12-356Z" class="timestamp-link"><time datetime="2026-06-12T14:26:12.356Z" data-timestamp="2026-06-12T14:26:12.356Z">2026-06-12T14:26:12.356Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/Marv.Testing/RegexMatchContextBuilder.cs
+/workspaces/marv/src/Marv.Testing/DummyIrcMessage.cs
+/workspaces/marv/src/Marv.Testing/PluginTestHarness.cs
+/workspaces/marv/src/Marv.Testing/CommandContextBuilder.cs
+/workspaces/marv/src/Marv.Testing/MockUser.cs
+/workspaces/marv/src/Marv.Testing/MockChannel.cs
+/workspaces/marv/src/Marv.Testing/MockBot.cs
+/workspaces/marv/src/Marv.Testing/EventBuilder.cs
+/workspaces/marv/src/Marv.Testing/obj/Release/net10.0/Marv.Testing.AssemblyInfo.cs
+/workspaces/marv/src/Marv.Testing/obj/Release/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+---
+/workspaces/marv/src/Marv.Testing/PluginTestHarness.cs:11:/// &lt;see cref=&quot;IPluginActivator&quot;/&gt; backed by a test &lt;see cref=&quot;IServiceProvider&quot;/&gt;,
+/workspaces/marv/src/Marv.Testing/PluginTestHarness.cs:35:    public IServiceProvider Services { get; }
+/workspaces/marv/src/Marv.Testing/PluginTestHarness.cs:37:    private PluginTestHarness(TPlugin plugin, IBot bot, IServiceProvider services)
+/workspaces/marv/src/Marv.Testing/PluginTestHarness.cs:68:        var provider = services.BuildServiceProvider();
+/workspaces/marv/src/Marv.Testing/PluginTestHarness.cs:99:    private sealed class TestPluginActivator(IServiceProvider serviceProvider) : IPluginActivator</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-26-15-104Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-26-15-104Z" class="timestamp-link"><time datetime="2026-06-12T14:26:15.104Z" data-timestamp="2026-06-12T14:26:15.104Z">2026-06-12T14:26:15.104Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>I have everything I need. Let me write the change spec.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-27-05-536Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-27-05-536Z" class="timestamp-link"><time datetime="2026-06-12T14:27:05.536Z" data-timestamp="2026-06-12T14:27:05.536Z">2026-06-12T14:27:05.536Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01PgkU1wemQopvBGm1TCw3QS">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">026-connection-scoped-services.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/026-connection-scoped-services.md</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content"># CS-026: Connection-Scoped DI Services
+
+**Source:** GitHub issue #1
+**Scope:** Core (Plugin API, DI container setup)
+**Complexity:** Medium-Large
+**Breaking changes:** Yes — core services move from singleton to scoped registration
+**Status:** Pending
+
+---
+
+## Problem
+
+Plugins are implicitly scoped to each IRC connection: `MarvBotService`
+calls `PluginManager.InstantiatePlugins` at the top of every reconnect
+loop, and `UnloadPluginsAsync` on disconnect. However, the DI services
+that plugins depend on — `IBot`, `IServerInfo`, `ICapabilityManager`,
+`IBotStatistics` — are registered as singletons via `AddMarv`. This
+means:
+
+1. **Stale state across reconnects.** Singleton services survive scope
+   boundaries that plugins don&#39;t. A plugin that caches a reference to
+   `IServerInfo` in `OnLoadAsync` silently holds the same instance across
+   reconnects, even though the bot calls `ResetState()` and the
+   underlying data is cleared. This works *today* because the object is
+   mutated in place, but it&#39;s fragile and semantically incorrect.
+
+2. **Scoped services are unusable.** Plugins can call
+   `services.AddScoped&lt;T&gt;()` in `ConfigureServices`, but because
+   `PluginActivator` resolves from the root `IServiceProvider`, the
+   scoped registration is never honoured — the container either throws
+   (`ValidateScopes`) or silently creates a singleton-lifetime instance.
+
+3. **No formal connection boundary.** There is no DI-level signal that
+   a new connection has begun. Plugins that need per-connection state
+   must manage it manually in `OnConnectedAsync`/`OnDisconnectedAsync`.
+
+## Changes
+
+### 1. Create an `IServiceScope` per connection in `MarvBotService`
+
+At the start of each iteration of the reconnect loop in
+`MarvBotService.ExecuteAsync`, create a new `IServiceScope` from the
+root `IServiceProvider`. Dispose it after disconnect cleanup completes.
+
+```csharp
+while (!stoppingToken.IsCancellationRequested)
+{
+    await using var connectionScope = _serviceScopeFactory.CreateAsyncScope();
+    var scopedProvider = connectionScope.ServiceProvider;
+
+    // Use scopedProvider for all resolution within this connection...
+}
+```
+
+`MarvBotService` should inject `IServiceScopeFactory` instead of (or in
+addition to) the services it currently resolves at construction time.
+Services that are now scoped (`IrcBot`, etc.) must be resolved from
+`scopedProvider` inside the loop rather than captured in the constructor.
+
+### 2. Move connection-specific core services to scoped registration
+
+In `MarvServiceExtensions.AddMarv`, change these registrations from
+`AddSingleton` to `AddScoped`:
+
+| Service | Interface(s) | Notes |
+|---|---|---|
+| `ServerInfo` | `IServerInfo`, concrete | Holds ISUPPORT/005 state |
+| `CapabilityManager` | `ICapabilityManager`, concrete | Holds negotiated caps |
+| `IrcBot` | `IBot`, concrete | Holds connection, message loop state |
+| `BotStatistics` | `IBotStatistics` | Derived from `IrcBot` |
+
+Services that are genuinely application-lifetime (`PluginManager`,
+`IPluginActivator`, `IReadOnlyList&lt;PluginDescriptor&gt;`,
+`IHttpClientFactory`, `IOptions&lt;MarvConfiguration&gt;`) remain singletons.
+
+The scoped `IrcBot` replaces the current pattern where a single
+singleton instance calls `ResetState()` between connections. Each scope
+gets a fresh `IrcBot`, eliminating the need for `ResetState()`.
+
+### 3. Update `PluginManager` to accept a scoped `IServiceProvider`
+
+`PluginManager` is a singleton, but `InstantiatePlugins` needs to
+resolve from the connection scope. Change `InstantiatePlugins` (and
+other per-connection methods) to accept the scoped `IServiceProvider` as
+a parameter rather than using the one captured at construction:
+
+```csharp
+internal void InstantiatePlugins(
+    IReadOnlyList&lt;PluginDescriptor&gt; descriptors,
+    IServiceProvider scopedProvider)
+{
+    // Use scopedProvider for ActivatorUtilities.CreateInstance
+}
+```
+
+This keeps `PluginManager` as a singleton (so it survives reconnects and
+maintains descriptor state) while ensuring plugins receive scoped
+dependencies.
+
+### 4. Update `PluginActivator` similarly
+
+`PluginActivator` currently captures `IServiceProvider` in its
+constructor. Since it&#39;s a singleton, it always holds the root provider.
+Either:
+
+- **(a)** Make `PluginActivator` scoped (so it naturally gets the scoped
+  provider), or
+- **(b)** Remove `PluginActivator` and inline `ActivatorUtilities` usage
+  in `PluginManager`, passing the scoped provider directly.
+
+Option (b) is simpler since `PluginActivator` is only used in one place
+and the `IPluginActivator` interface is an internal detail, not part of
+the plugin API.
+
+### 5. Update `MarvBotService` constructor and connection loop
+
+`MarvBotService` currently injects `IrcBot`, `PluginManager`, etc. as
+constructor parameters. After this change:
+
+- Remove `IrcBot` from the constructor — resolve it from the scoped
+  provider inside the loop.
+- Add `IServiceScopeFactory` to the constructor.
+- `IrcConnection` creation stays as-is (it&#39;s a local object, not
+  DI-managed).
+- Pass the scoped provider to `PluginManager.InstantiatePlugins`.
+
+### 6. Update `Marv.Testing` to create scoped test fixtures
+
+`PluginTestHarness` builds an `IServiceProvider` and resolves plugin
+dependencies from it. Update it to:
+
+1. Register `MockBot` and other test doubles as scoped services.
+2. Create an `IServiceScope` and expose the scoped provider.
+3. Ensure the scope is disposed when the harness is disposed.
+
+This ensures test plugins receive services with the same lifetime
+semantics as production.
+
+### 7. Update `docs/PLUGIN_API.md`
+
+Document:
+
+- That `IBot`, `IServerInfo`, `ICapabilityManager`, and `IBotStatistics`
+  are connection-scoped and receive a fresh instance per connection.
+- That plugins can register scoped services via `ConfigureServices` and
+  they will be correctly resolved per connection.
+- That singleton services survive reconnects while scoped services do
+  not.
+- Migration guidance for any plugins that stored these services in
+  static fields or long-lived caches.
+
+## Design decisions
+
+**Why not make plugins themselves scoped services?** `PluginManager`
+controls instantiation order based on the dependency graph. The DI
+container does not guarantee construction order, so letting it manage
+plugin lifetimes would break the dependency ordering contract.
+
+**Why not introduce a new registration point for scoped services?**
+`IServiceCollection` already supports `AddScoped&lt;T&gt;()`. The only reason
+it didn&#39;t work before was that `PluginActivator` resolved from the root
+provider. Fixing the provider is sufficient; no API change needed.
+
+**Why keep `PluginManager` as a singleton?** It holds the descriptor
+list and orchestrates the full lifecycle across reconnects. Making it
+scoped would mean re-discovering plugins on every reconnect, which is
+unnecessary and expensive.
+
+## Testing
+
+- **Unit test:** Verify that `IBot` resolved within a scope is a
+  different instance from one resolved in a second scope.
+- **Unit test:** Verify that a plugin registering a scoped service via
+  `ConfigureServices` receives a fresh instance per connection scope.
+- **Unit test:** Verify that a plugin registering a singleton service
+  receives the same instance across connection scopes.
+- **Unit test:** Verify that `PluginManager.InstantiatePlugins` uses the
+  provided scoped provider, not the root provider.
+- **Integration test:** Connect, disconnect, reconnect — verify plugins
+  receive fresh `IBot`/`IServerInfo` instances on the second connection
+  and that the previous instances are not referenced.
+- **Marv.Testing:** Verify `PluginTestHarness` creates a scope and that
+  `MockBot` is resolved as a scoped service.
+
+## Impact
+
+- **Plugin API:** Breaking change — plugins that stored `IBot` or
+  `IServerInfo` references in static fields or singleton services will
+  hold stale references after reconnect. This is already a latent bug
+  (since the objects are reset), so the fix makes the failure mode
+  explicit rather than silent.
+- **Plugin DX:** Scoped services now work correctly. Plugins can use the
+  standard .NET DI lifetime model without surprises.
+- **Core:** `IrcBot.ResetState()` can be removed since each connection
+  gets a new instance. This simplifies the bot&#39;s internal state
+  management.
+- **Risk:** Medium — touches the DI registration, the main service loop,
+  plugin instantiation, and the test harness. Thorough testing of the
+  reconnect path is essential.
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-27-05-657Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-27-05-657Z" class="timestamp-link"><time datetime="2026-06-12T14:27:05.657Z" data-timestamp="2026-06-12T14:27:05.657Z">2026-06-12T14:27:05.657Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /workspaces/marv/docs/change_specs/026-connection-scoped-services.md (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-27-09-033Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-27-09-033Z" class="timestamp-link"><time datetime="2026-06-12T14:27:09.033Z" data-timestamp="2026-06-12T14:27:09.033Z">2026-06-12T14:27:09.033Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the README index, label the issue, post a comment, and commit.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-27-13-851Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-27-13-851Z" class="timestamp-link"><time datetime="2026-06-12T14:27:13.851Z" data-timestamp="2026-06-12T14:27:13.851Z">2026-06-12T14:27:13.851Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01Y4uTfTVEZvdZgjwFPrzdov">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">README.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/README.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
+Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
+Specs 12-14 are CI/CD and infrastructure changes. Specs 15-19 are code changes.
+Specs 20-24 are downstream feature requests (code and docs).</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">| 26 | [Connection-Scoped DI Services](026-connection-scoped-services.md) | Core | Medium-Large | None | **Pending** |
+
+Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
+Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
+Specs 12-14 are CI/CD and infrastructure changes. Specs 15-19 are code changes.
+Specs 20-25 are downstream feature requests (code, docs, and tests).
+Spec 26 is a GitHub issue-driven architectural change.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-27-13-922Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-27-13-922Z" class="timestamp-link"><time datetime="2026-06-12T14:27:13.922Z" data-timestamp="2026-06-12T14:27:13.922Z">2026-06-12T14:27:13.922Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/README.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-27-18-563Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-27-18-563Z" class="timestamp-link"><time datetime="2026-06-12T14:27:18.563Z" data-timestamp="2026-06-12T14:27:18.563Z">2026-06-12T14:27:18.563Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_011D7e77F45DgBkALpa8zjzF">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Add triaged label to issue #1</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">gh issue edit 1 --repo predakanga/marv --add-label &#34;triaged&#34; 2&gt;&amp;1 || echo &#34;Label may not exist yet, creating...&#34;; gh label create triaged --repo predakanga/marv --description &#34;Issue has been triaged and converted to change spec(s)&#34; --color &#34;0E8A16&#34; 2&gt;&amp;1; gh issue edit 1 --repo predakanga/marv --add-label &#34;triaged&#34; 2&gt;&amp;1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-27-40-054Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-27-40-054Z" class="timestamp-link"><time datetime="2026-06-12T14:27:40.054Z" data-timestamp="2026-06-12T14:27:40.054Z">2026-06-12T14:27:40.054Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>failed to update https://github.com/predakanga/marv/issues/1: &#x27;triaged&#x27; not found
+failed to update 1 issue
+Label may not exist yet, creating...
+https://github.com/predakanga/marv/issues/1</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-27-45-860Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-27-45-860Z" class="timestamp-link"><time datetime="2026-06-12T14:27:45.860Z" data-timestamp="2026-06-12T14:27:45.860Z">2026-06-12T14:27:45.860Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_014erw7EQ5pZbPg5HcRaPVXb">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Post comment noting change spec creation</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">gh issue comment 1 --repo predakanga/marv --body &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Change specification created: **CS-026 — Connection-Scoped DI Services** (`docs/change_specs/026-connection-scoped-services.md`).
+
+Covers all 7 changes discussed:
+1. Create `IServiceScope` per connection in `MarvBotService`
+2. Move core services (`IrcBot`, `ServerInfo`, `CapabilityManager`, `IBotStatistics`) from singleton to scoped
+3. Update `PluginManager` to accept scoped provider
+4. Update/remove `PluginActivator`
+5. Restructure `MarvBotService` constructor and loop
+6. Update `Marv.Testing` fixtures
+7. Update `PLUGIN_API.md` documentation
+
+Labelled as `triaged`.
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-27-47-343Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-27-47-343Z" class="timestamp-link"><time datetime="2026-06-12T14:27:47.343Z" data-timestamp="2026-06-12T14:27:47.343Z">2026-06-12T14:27:47.343Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>https://github.com/predakanga/marv/issues/1#issuecomment-4692186193</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-27-50-407Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-27-50-407Z" class="timestamp-link"><time datetime="2026-06-12T14:27:50.407Z" data-timestamp="2026-06-12T14:27:50.407Z">2026-06-12T14:27:50.407Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now log the prompt and commit.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-27-55-122Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-27-55-122Z" class="timestamp-link"><time datetime="2026-06-12T14:27:55.122Z" data-timestamp="2026-06-12T14:27:55.122Z">2026-06-12T14:27:55.122Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01LPXgUcsQpiwcfbXTR1iU2X"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/prompts.md&#34;,
+  &#34;offset&#34;: 1438
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-27-55-163Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-27-55-163Z" class="timestamp-link"><time datetime="2026-06-12T14:27:55.163Z" data-timestamp="2026-06-12T14:27:55.163Z">2026-06-12T14:27:55.163Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1438	&gt; The Github CI workflow still launches a docker container for the integration tests, even though that&#x27;s done internally now
+1439	
+1440	## Create a GitHub issue triage skill for Claude Code
+1441	
+1442	**Date**: 2026-06-13T00:00:00Z
+1443	
+1444	&gt; I&#x27;d like to experiment with a more github-native workflow.
+1445	&gt; To start with, I&#x27;d like to be able to create issues in Marv&#x27;s repo and have you review those issues and respond with a summary analysis of the suggestion.
+1446	&gt; I&#x27;ll then either respond with clarifications and we continue this loop, or I&#x27;ll accept/reject the change in a comment.
+1447	&gt; When an issue is accepted, you should commit one or more change specifications to the codebase to fulfil that issue, but not add any code.
+1448	&gt; At this point, the loop doesn&#x27;t need to be automated - I&#x27;m happy to run a command in Claude Code when I want to iterate this reconciliation loop.
+1449	&gt; At this point, code reviews and other GitHub features are also out of scope.
+1450	&gt; Is there a pre-made skill that would fit my requirements, or if not can you create one for me?
+1451	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-28-00-754Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-28-00-754Z" class="timestamp-link"><time datetime="2026-06-12T14:28:00.754Z" data-timestamp="2026-06-12T14:28:00.754Z">2026-06-12T14:28:00.754Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_013qaijmDAEnBudaLCZb8cXU">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">prompts.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/prompts.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">&gt; Is there a pre-made skill that would fit my requirements, or if not can you create one for me?</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">&gt; Is there a pre-made skill that would fit my requirements, or if not can you create one for me?
+
+## Triage issues (skill invocations)
+
+**Date**: 2026-06-13T00:00:00Z
+
+&gt; /triage-issues (×3 — initial analysis, follow-up discussion, accept → CS-026)</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-28-00-868Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-28-00-868Z" class="timestamp-link"><time datetime="2026-06-12T14:28:00.868Z" data-timestamp="2026-06-12T14:28:00.868Z">2026-06-12T14:28:00.868Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/prompts.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-28-05-729Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-28-05-729Z" class="timestamp-link"><time datetime="2026-06-12T14:28:05.729Z" data-timestamp="2026-06-12T14:28:05.729Z">2026-06-12T14:28:05.729Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01MAFLMwEGeXKSY8wWLxYi1s">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit change spec and supporting files</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add docs/change_specs/026-connection-scoped-services.md docs/change_specs/README.md docs/prompts.md &amp;&amp; git commit -m &#39;Add CS-026: Connection-Scoped DI Services (GitHub issue #1)
+
+Create change specification for introducing IServiceScope per IRC
+connection, moving core services from singleton to scoped registration,
+and updating PluginManager/PluginActivator to resolve from the
+connection-scoped provider.
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;&#39;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-28-05-870Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-28-05-870Z" class="timestamp-link"><time datetime="2026-06-12T14:28:05.870Z" data-timestamp="2026-06-12T14:28:05.870Z">2026-06-12T14:28:05.870Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">2b49127</span> Add CS-026: Connection-Scoped DI Services (GitHub issue #1)</div><pre>3 files changed, 209 insertions(+), 1 deletion(-)
+ create mode 100644 docs/change_specs/026-connection-scoped-services.md</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-28-11-707Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-28-11-707Z" class="timestamp-link"><time datetime="2026-06-12T14:28:11.707Z" data-timestamp="2026-06-12T14:28:11.707Z">2026-06-12T14:28:11.707Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Done. Issue #1 has been fully processed:</p>
+<ul>
+<li><strong>Triaged</strong> with analysis and discussion (2 comment rounds)</li>
+<li><strong>Accepted</strong> via <code>/accept</code> comment</li>
+<li><strong>CS-026</strong> created covering 7 changes: scoped DI container per connection, core services moved to scoped lifetime, PluginManager/PluginActivator updates, testing harness updates, and PLUGIN_API docs</li>
+<li>Issue labelled <code>triaged</code> and notified with the spec reference</li>
+<li>Committed to <code>main</code></li>
+</ul></div></div></div>
+<div class="message user" id="msg-2026-06-12T14-29-47-460Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-12T14-29-47-460Z" class="timestamp-link"><time datetime="2026-06-12T14:29:47.460Z" data-timestamp="2026-06-12T14:29:47.460Z">2026-06-12T14:29:47.460Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Add a TODO item - when this triage loop is fully developed, after creating a change spec the skill should push it to main and add a link to it in the issue</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-29-50-836Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-29-50-836Z" class="timestamp-link"><time datetime="2026-06-12T14:29:50.836Z" data-timestamp="2026-06-12T14:29:50.836Z">2026-06-12T14:29:50.836Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_011PZKMp2XhHziPm4A4pjAw9">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check TODO.md format</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -n &#34;TODO&#34; /workspaces/marv/TODO.md 2&gt;/dev/null | head -5; echo &#34;---&#34;; head -20 /workspaces/marv/TODO.md 2&gt;/dev/null</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-29-50-985Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-29-50-985Z" class="timestamp-link"><time datetime="2026-06-12T14:29:50.985Z" data-timestamp="2026-06-12T14:29:50.985Z">2026-06-12T14:29:50.985Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1:# TODO
+---
+# TODO
+
+- [x] Decide whether the Dockerfile should include the sample plugins
+- [x] Check whether the docker action can be optimized/cached
+- [x] Generate release notes for the GitHub release from CHANGELOG.md
+- [x] Allow passing regex options to the OnRegex attribute
+- [ ] Provide a way for handler filters to pass information on to the underlying handler (i.e. authentication info)
+- [x] Consider moving IrcBot.BatchChannels to a utility class, so that plugins can reuse it
+- [x] Consider making CommandContext, RegexContext, etc share a common HandlerContext
+- [x] Potentially remove PluginType from HandlerGroup
+- [x] Switch the JSON config parser to one that supports JSON5
+- [x] Check whether the extra `AppContext.BaseDirectory` logic is actually required for dependency resolution with a `PublishSingleFile` assembly
+- [x] Check whether we can optimize the docker action further using cache mounts
+- [ ] Add integration tests for plugin loading
+- [ ] Make config loading more idiomatic (use default stack, but replace json provider with json5, add a config provider for CommandLine)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-29-53-845Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-29-53-845Z" class="timestamp-link"><time datetime="2026-06-12T14:29:53.845Z" data-timestamp="2026-06-12T14:29:53.845Z">2026-06-12T14:29:53.845Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01LNGw3rmXqn1zGubR9Uzdjj"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/TODO.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-29-53-880Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-29-53-880Z" class="timestamp-link"><time datetime="2026-06-12T14:29:53.880Z" data-timestamp="2026-06-12T14:29:53.880Z">2026-06-12T14:29:53.880Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# TODO
+2	
+3	- [x] Decide whether the Dockerfile should include the sample plugins
+4	- [x] Check whether the docker action can be optimized/cached
+5	- [x] Generate release notes for the GitHub release from CHANGELOG.md
+6	- [x] Allow passing regex options to the OnRegex attribute
+7	- [ ] Provide a way for handler filters to pass information on to the underlying handler (i.e. authentication info)
+8	- [x] Consider moving IrcBot.BatchChannels to a utility class, so that plugins can reuse it
+9	- [x] Consider making CommandContext, RegexContext, etc share a common HandlerContext
+10	- [x] Potentially remove PluginType from HandlerGroup
+11	- [x] Switch the JSON config parser to one that supports JSON5
+12	- [x] Check whether the extra `AppContext.BaseDirectory` logic is actually required for dependency resolution with a `PublishSingleFile` assembly
+13	- [x] Check whether we can optimize the docker action further using cache mounts
+14	- [ ] Add integration tests for plugin loading
+15	- [ ] Make config loading more idiomatic (use default stack, but replace json provider with json5, add a config provider for CommandLine)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-29-58-279Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-29-58-279Z" class="timestamp-link"><time datetime="2026-06-12T14:29:58.279Z" data-timestamp="2026-06-12T14:29:58.279Z">2026-06-12T14:29:58.279Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_015ZbfeEnFdaJ8dW1rK8Myad">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">TODO.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/TODO.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">- [ ] Make config loading more idiomatic (use default stack, but replace json provider with json5, add a config provider for CommandLine)</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">- [ ] Make config loading more idiomatic (use default stack, but replace json provider with json5, add a config provider for CommandLine)
+- [ ] Triage skill: after creating a change spec, push to main and add a permalink to the spec in the issue comment</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-29-58-407Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-29-58-407Z" class="timestamp-link"><time datetime="2026-06-12T14:29:58.407Z" data-timestamp="2026-06-12T14:29:58.407Z">2026-06-12T14:29:58.407Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/TODO.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-30-00-898Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-30-00-898Z" class="timestamp-link"><time datetime="2026-06-12T14:30:00.898Z" data-timestamp="2026-06-12T14:30:00.898Z">2026-06-12T14:30:00.898Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Added to TODO.md.</p></div></div></div>
+<div class="message user" id="msg-2026-06-12T14-43-51-525Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-12T14-43-51-525Z" class="timestamp-link"><time datetime="2026-06-12T14:43:51.525Z" data-timestamp="2026-06-12T14:43:51.525Z">2026-06-12T14:43:51.525Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Notes on CS-026:
+- The section "Stale state across reconnects" is incorrect - plugins are torn down across reconnects, so they cannot currently cache items from the singleton services.
+- If we're passing a scoped service provider to <code>InstantiatePlugins</code>, then we no longer need to inject the global container into <code>PluginManager</code>.
+- Regarding PluginActivator, this is actually a part of the plugin API; MarvPlugin takes an IPluginActivator and uses it to create HandlerGroups. It needs to be retained, just using the scoped service provider.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-43-58-945Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-43-58-945Z" class="timestamp-link"><time datetime="2026-06-12T14:43:58.945Z" data-timestamp="2026-06-12T14:43:58.945Z">2026-06-12T14:43:58.945Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-43-59-071Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-43-59-071Z" class="timestamp-link"><time datetime="2026-06-12T14:43:59.071Z" data-timestamp="2026-06-12T14:43:59.071Z">2026-06-12T14:43:59.071Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Updating CS-026 with all three corrections.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-43-59-179Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-43-59-179Z" class="timestamp-link"><time datetime="2026-06-12T14:43:59.179Z" data-timestamp="2026-06-12T14:43:59.179Z">2026-06-12T14:43:59.179Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01FKGVMZo8cHENA7KDcLCC4i"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/026-connection-scoped-services.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-43-59-264Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-43-59-264Z" class="timestamp-link"><time datetime="2026-06-12T14:43:59.264Z" data-timestamp="2026-06-12T14:43:59.264Z">2026-06-12T14:43:59.264Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# CS-026: Connection-Scoped DI Services
+2	
+3	**Source:** GitHub issue #1
+4	**Scope:** Core (Plugin API, DI container setup)
+5	**Complexity:** Medium-Large
+6	**Breaking changes:** Yes — core services move from singleton to scoped registration
+7	**Status:** Pending
+8	
+9	---
+10	
+11	## Problem
+12	
+13	Plugins are implicitly scoped to each IRC connection: `MarvBotService`
+14	calls `PluginManager.InstantiatePlugins` at the top of every reconnect
+15	loop, and `UnloadPluginsAsync` on disconnect. However, the DI services
+16	that plugins depend on — `IBot`, `IServerInfo`, `ICapabilityManager`,
+17	`IBotStatistics` — are registered as singletons via `AddMarv`. This
+18	means:
+19	
+20	1. **Stale state across reconnects.** Singleton services survive scope
+21	   boundaries that plugins don&#x27;t. A plugin that caches a reference to
+22	   `IServerInfo` in `OnLoadAsync` silently holds the same instance across
+23	   reconnects, even though the bot calls `ResetState()` and the
+24	   underlying data is cleared. This works *today* because the object is
+25	   mutated in place, but it&#x27;s fragile and semantically incorrect.
+26	
+27	2. **Scoped services are unusable.** Plugins can call
+28	   `services.AddScoped&lt;T&gt;()` in `ConfigureServices`, but because
+29	   `PluginActivator` resolves from the root `IServiceProvider`, the
+30	   scoped registration is never honoured — the container either throws
+31	   (`ValidateScopes`) or silently creates a singleton-lifetime instance.
+32	
+33	3. **No formal connection boundary.** There is no DI-level signal that
+34	   a new connection has begun. Plugins that need per-connection state
+35	   must manage it manually in `OnConnectedAsync`/`OnDisconnectedAsync`.
+36	
+37	## Changes
+38	
+39	### 1. Create an `IServiceScope` per connection in `MarvBotService`
+40	
+41	At the start of each iteration of the reconnect loop in
+42	`MarvBotService.ExecuteAsync`, create a new `IServiceScope` from the
+43	root `IServiceProvider`. Dispose it after disconnect cleanup completes.
+44	
+45	```csharp
+46	while (!stoppingToken.IsCancellationRequested)
+47	{
+48	    await using var connectionScope = _serviceScopeFactory.CreateAsyncScope();
+49	    var scopedProvider = connectionScope.ServiceProvider;
+50	
+51	    // Use scopedProvider for all resolution within this connection...
+52	}
+53	```
+54	
+55	`MarvBotService` should inject `IServiceScopeFactory` instead of (or in
+56	addition to) the services it currently resolves at construction time.
+57	Services that are now scoped (`IrcBot`, etc.) must be resolved from
+58	`scopedProvider` inside the loop rather than captured in the constructor.
+59	
+60	### 2. Move connection-specific core services to scoped registration
+61	
+62	In `MarvServiceExtensions.AddMarv`, change these registrations from
+63	`AddSingleton` to `AddScoped`:
+64	
+65	| Service | Interface(s) | Notes |
+66	|---|---|---|
+67	| `ServerInfo` | `IServerInfo`, concrete | Holds ISUPPORT/005 state |
+68	| `CapabilityManager` | `ICapabilityManager`, concrete | Holds negotiated caps |
+69	| `IrcBot` | `IBot`, concrete | Holds connection, message loop state |
+70	| `BotStatistics` | `IBotStatistics` | Derived from `IrcBot` |
+71	
+72	Services that are genuinely application-lifetime (`PluginManager`,
+73	`IPluginActivator`, `IReadOnlyList&lt;PluginDescriptor&gt;`,
+74	`IHttpClientFactory`, `IOptions&lt;MarvConfiguration&gt;`) remain singletons.
+75	
+76	The scoped `IrcBot` replaces the current pattern where a single
+77	singleton instance calls `ResetState()` between connections. Each scope
+78	gets a fresh `IrcBot`, eliminating the need for `ResetState()`.
+79	
+80	### 3. Update `PluginManager` to accept a scoped `IServiceProvider`
+81	
+82	`PluginManager` is a singleton, but `InstantiatePlugins` needs to
+83	resolve from the connection scope. Change `InstantiatePlugins` (and
+84	other per-connection methods) to accept the scoped `IServiceProvider` as
+85	a parameter rather than using the one captured at construction:
+86	
+87	```csharp
+88	internal void InstantiatePlugins(
+89	    IReadOnlyList&lt;PluginDescriptor&gt; descriptors,
+90	    IServiceProvider scopedProvider)
+91	{
+92	    // Use scopedProvider for ActivatorUtilities.CreateInstance
+93	}
+94	```
+95	
+96	This keeps `PluginManager` as a singleton (so it survives reconnects and
+97	maintains descriptor state) while ensuring plugins receive scoped
+98	dependencies.
+99	
+100	### 4. Update `PluginActivator` similarly
+101	
+102	`PluginActivator` currently captures `IServiceProvider` in its
+103	constructor. Since it&#x27;s a singleton, it always holds the root provider.
+104	Either:
+105	
+106	- **(a)** Make `PluginActivator` scoped (so it naturally gets the scoped
+107	  provider), or
+108	- **(b)** Remove `PluginActivator` and inline `ActivatorUtilities` usage
+109	  in `PluginManager`, passing the scoped provider directly.
+110	
+111	Option (b) is simpler since `PluginActivator` is only used in one place
+112	and the `IPluginActivator` interface is an internal detail, not part of
+113	the plugin API.
+114	
+115	### 5. Update `MarvBotService` constructor and connection loop
+116	
+117	`MarvBotService` currently injects `IrcBot`, `PluginManager`, etc. as
+118	constructor parameters. After this change:
+119	
+120	- Remove `IrcBot` from the constructor — resolve it from the scoped
+121	  provider inside the loop.
+122	- Add `IServiceScopeFactory` to the constructor.
+123	- `IrcConnection` creation stays as-is (it&#x27;s a local object, not
+124	  DI-managed).
+125	- Pass the scoped provider to `PluginManager.InstantiatePlugins`.
+126	
+127	### 6. Update `Marv.Testing` to create scoped test fixtures
+128	
+129	`PluginTestHarness` builds an `IServiceProvider` and resolves plugin
+130	dependencies from it. Update it to:
+131	
+132	1. Register `MockBot` and other test doubles as scoped services.
+133	2. Create an `IServiceScope` and expose the scoped provider.
+134	3. Ensure the scope is disposed when the harness is disposed.
+135	
+136	This ensures test plugins receive services with the same lifetime
+137	semantics as production.
+138	
+139	### 7. Update `docs/PLUGIN_API.md`
+140	
+141	Document:
+142	
+143	- That `IBot`, `IServerInfo`, `ICapabilityManager`, and `IBotStatistics`
+144	  are connection-scoped and receive a fresh instance per connection.
+145	- That plugins can register scoped services via `ConfigureServices` and
+146	  they will be correctly resolved per connection.
+147	- That singleton services survive reconnects while scoped services do
+148	  not.
+149	- Migration guidance for any plugins that stored these services in
+150	  static fields or long-lived caches.
+151	
+152	## Design decisions
+153	
+154	**Why not make plugins themselves scoped services?** `PluginManager`
+155	controls instantiation order based on the dependency graph. The DI
+156	container does not guarantee construction order, so letting it manage
+157	plugin lifetimes would break the dependency ordering contract.
+158	
+159	**Why not introduce a new registration point for scoped services?**
+160	`IServiceCollection` already supports `AddScoped&lt;T&gt;()`. The only reason
+161	it didn&#x27;t work before was that `PluginActivator` resolved from the root
+162	provider. Fixing the provider is sufficient; no API change needed.
+163	
+164	**Why keep `PluginManager` as a singleton?** It holds the descriptor
+165	list and orchestrates the full lifecycle across reconnects. Making it
+166	scoped would mean re-discovering plugins on every reconnect, which is
+167	unnecessary and expensive.
+168	
+169	## Testing
+170	
+171	- **Unit test:** Verify that `IBot` resolved within a scope is a
+172	  different instance from one resolved in a second scope.
+173	- **Unit test:** Verify that a plugin registering a scoped service via
+174	  `ConfigureServices` receives a fresh instance per connection scope.
+175	- **Unit test:** Verify that a plugin registering a singleton service
+176	  receives the same instance across connection scopes.
+177	- **Unit test:** Verify that `PluginManager.InstantiatePlugins` uses the
+178	  provided scoped provider, not the root provider.
+179	- **Integration test:** Connect, disconnect, reconnect — verify plugins
+180	  receive fresh `IBot`/`IServerInfo` instances on the second connection
+181	  and that the previous instances are not referenced.
+182	- **Marv.Testing:** Verify `PluginTestHarness` creates a scope and that
+183	  `MockBot` is resolved as a scoped service.
+184	
+185	## Impact
+186	
+187	- **Plugin API:** Breaking change — plugins that stored `IBot` or
+188	  `IServerInfo` references in static fields or singleton services will
+189	  hold stale references after reconnect. This is already a latent bug
+190	  (since the objects are reset), so the fix makes the failure mode
+191	  explicit rather than silent.
+192	- **Plugin DX:** Scoped services now work correctly. Plugins can use the
+193	  standard .NET DI lifetime model without surprises.
+194	- **Core:** `IrcBot.ResetState()` can be removed since each connection
+195	  gets a new instance. This simplifies the bot&#x27;s internal state
+196	  management.
+197	- **Risk:** Medium — touches the DI registration, the main service loop,
+198	  plugin instantiation, and the test harness. Thorough testing of the
+199	  reconnect path is essential.
+200	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-44-05-951Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-44-05-951Z" class="timestamp-link"><time datetime="2026-06-12T14:44:05.951Z" data-timestamp="2026-06-12T14:44:05.951Z">2026-06-12T14:44:05.951Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01P8Fbgq7rRhLJ46pxkRDXto">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">026-connection-scoped-services.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/026-connection-scoped-services.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">1. **Stale state across reconnects.** Singleton services survive scope
+   boundaries that plugins don&#39;t. A plugin that caches a reference to
+   `IServerInfo` in `OnLoadAsync` silently holds the same instance across
+   reconnects, even though the bot calls `ResetState()` and the
+   underlying data is cleared. This works *today* because the object is
+   mutated in place, but it&#39;s fragile and semantically incorrect.
+
+2. **Scoped services are unusable.** Plugins can call</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">1. **Semantic mismatch.** Core services like `IBot`, `IServerInfo`, and
+   `ICapabilityManager` are registered as singletons but conceptually
+   belong to a single connection — the bot calls `ResetState()` on them
+   between connections. Plugins are torn down and recreated each
+   connection, so they don&#39;t currently hold stale references, but the
+   singleton lifetime is misleading and prevents the DI container from
+   enforcing connection boundaries.
+
+2. **Scoped services are unusable.** Plugins can call</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-44-06-126Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-44-06-126Z" class="timestamp-link"><time datetime="2026-06-12T14:44:06.126Z" data-timestamp="2026-06-12T14:44:06.126Z">2026-06-12T14:44:06.126Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/026-connection-scoped-services.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-44-13-706Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-44-13-706Z" class="timestamp-link"><time datetime="2026-06-12T14:44:13.706Z" data-timestamp="2026-06-12T14:44:13.706Z">2026-06-12T14:44:13.706Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_015kXWc9p8eXT89Bg2JnTjKs">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">026-connection-scoped-services.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/026-connection-scoped-services.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">`PluginManager` is a singleton, but `InstantiatePlugins` needs to
+resolve from the connection scope. Change `InstantiatePlugins` (and
+other per-connection methods) to accept the scoped `IServiceProvider` as
+a parameter rather than using the one captured at construction:
+
+```csharp
+internal void InstantiatePlugins(
+    IReadOnlyList&lt;PluginDescriptor&gt; descriptors,
+    IServiceProvider scopedProvider)
+{
+    // Use scopedProvider for ActivatorUtilities.CreateInstance
+}
+```
+
+This keeps `PluginManager` as a singleton (so it survives reconnects and
+maintains descriptor state) while ensuring plugins receive scoped
+dependencies.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">`PluginManager` is a singleton, but `InstantiatePlugins` needs to
+resolve from the connection scope. Change `InstantiatePlugins` (and
+other per-connection methods) to accept the scoped `IServiceProvider` as
+a parameter rather than using the one captured at construction:
+
+```csharp
+internal void InstantiatePlugins(
+    IReadOnlyList&lt;PluginDescriptor&gt; descriptors,
+    IServiceProvider scopedProvider)
+{
+    // Use scopedProvider for ActivatorUtilities.CreateInstance
+}
+```
+
+This keeps `PluginManager` as a singleton (so it survives reconnects and
+maintains descriptor state) while ensuring plugins receive scoped
+dependencies. The `IServiceProvider` currently injected into
+`PluginManager`&#39;s constructor is no longer needed and should be removed.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-44-13-808Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-44-13-808Z" class="timestamp-link"><time datetime="2026-06-12T14:44:13.808Z" data-timestamp="2026-06-12T14:44:13.808Z">2026-06-12T14:44:13.808Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/026-connection-scoped-services.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-44-21-512Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-44-21-512Z" class="timestamp-link"><time datetime="2026-06-12T14:44:21.512Z" data-timestamp="2026-06-12T14:44:21.512Z">2026-06-12T14:44:21.512Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01FivtgF5i9kZ9o2ZNo64gth">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">026-connection-scoped-services.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/026-connection-scoped-services.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">### 4. Update `PluginActivator` similarly
+
+`PluginActivator` currently captures `IServiceProvider` in its
+constructor. Since it&#39;s a singleton, it always holds the root provider.
+Either:
+
+- **(a)** Make `PluginActivator` scoped (so it naturally gets the scoped
+  provider), or
+- **(b)** Remove `PluginActivator` and inline `ActivatorUtilities` usage
+  in `PluginManager`, passing the scoped provider directly.
+
+Option (b) is simpler since `PluginActivator` is only used in one place
+and the `IPluginActivator` interface is an internal detail, not part of
+the plugin API.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">### 4. Make `PluginActivator` scoped
+
+`PluginActivator` implements `IPluginActivator`, which is part of the
+plugin API — `MarvPlugin` injects it and uses it to create
+`HandlerGroup` instances. It currently captures `IServiceProvider` in
+its constructor, but since it&#39;s registered as a singleton it always
+holds the root provider.
+
+Change its registration from `AddSingleton` to `AddScoped` so that each
+connection scope gets a `PluginActivator` backed by the scoped provider.
+Plugins that inject `IPluginActivator` will then automatically create
+handler groups with correctly-scoped dependencies.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-44-21-578Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-44-21-578Z" class="timestamp-link"><time datetime="2026-06-12T14:44:21.578Z" data-timestamp="2026-06-12T14:44:21.578Z">2026-06-12T14:44:21.578Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/026-connection-scoped-services.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-44-24-856Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-44-24-856Z" class="timestamp-link"><time datetime="2026-06-12T14:44:24.856Z" data-timestamp="2026-06-12T14:44:24.856Z">2026-06-12T14:44:24.856Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the services table to reflect that <code>IPluginActivator</code> is also scoped, and fix the impact section.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-44-26-916Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-44-26-916Z" class="timestamp-link"><time datetime="2026-06-12T14:44:26.916Z" data-timestamp="2026-06-12T14:44:26.916Z">2026-06-12T14:44:26.916Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_013oou3aDgrWmbChbQxyD69D">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">026-connection-scoped-services.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/026-connection-scoped-services.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">Services that are genuinely application-lifetime (`PluginManager`,
+`IPluginActivator`, `IReadOnlyList&lt;PluginDescriptor&gt;`,
+`IHttpClientFactory`, `IOptions&lt;MarvConfiguration&gt;`) remain singletons.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">| `PluginActivator` | `IPluginActivator` | Used by `MarvPlugin` for handler groups |
+
+Services that are genuinely application-lifetime (`PluginManager`,
+`IReadOnlyList&lt;PluginDescriptor&gt;`, `IHttpClientFactory`,
+`IOptions&lt;MarvConfiguration&gt;`) remain singletons.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-44-26-941Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-44-26-941Z" class="timestamp-link"><time datetime="2026-06-12T14:44:26.941Z" data-timestamp="2026-06-12T14:44:26.941Z">2026-06-12T14:44:26.941Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/026-connection-scoped-services.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-44-33-206Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-44-33-206Z" class="timestamp-link"><time datetime="2026-06-12T14:44:33.206Z" data-timestamp="2026-06-12T14:44:33.206Z">2026-06-12T14:44:33.206Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01Qg27zDftqUmRSQafmDkQQp">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">026-connection-scoped-services.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/026-connection-scoped-services.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">- **Plugin API:** Breaking change — plugins that stored `IBot` or
+  `IServerInfo` references in static fields or singleton services will
+  hold stale references after reconnect. This is already a latent bug
+  (since the objects are reset), so the fix makes the failure mode
+  explicit rather than silent.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">- **Plugin API:** Breaking change for any plugin-provided singleton
+  services that inject `IBot`, `IServerInfo`, or other now-scoped
+  services — the DI container will reject resolving a scoped service
+  from a singleton. Plugins must change such services to scoped
+  registration, or use `IServiceScopeFactory` to create their own
+  scopes. Plugin instances themselves are unaffected since they are
+  already recreated per connection.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-44-33-257Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-44-33-257Z" class="timestamp-link"><time datetime="2026-06-12T14:44:33.257Z" data-timestamp="2026-06-12T14:44:33.257Z">2026-06-12T14:44:33.257Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/026-connection-scoped-services.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-44-39-320Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-44-39-320Z" class="timestamp-link"><time datetime="2026-06-12T14:44:39.320Z" data-timestamp="2026-06-12T14:44:39.320Z">2026-06-12T14:44:39.320Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01V876Xa7SPKqfYz7J4De1bK">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit CS-026 corrections</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add docs/change_specs/026-connection-scoped-services.md &amp;&amp; git commit -m &#39;Fix CS-026 per review feedback
+
+- Correct problem statement: plugins are torn down across reconnects,
+  no stale reference issue exists today. The real problem is the
+  semantic mismatch between singleton registration and per-connection
+  lifetime.
+- Remove IServiceProvider from PluginManager constructor since the
+  scoped provider is now passed to InstantiatePlugins directly.
+- Retain PluginActivator as scoped (not removed) since IPluginActivator
+  is part of the plugin API, used by MarvPlugin for HandlerGroup
+  creation.
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;&#39;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-44-39-467Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-44-39-467Z" class="timestamp-link"><time datetime="2026-06-12T14:44:39.467Z" data-timestamp="2026-06-12T14:44:39.467Z">2026-06-12T14:44:39.467Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">862b5ed</span> Fix CS-026 per review feedback</div><pre>1 file changed, 30 insertions(+), 26 deletions(-)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-44-44-777Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-44-44-777Z" class="timestamp-link"><time datetime="2026-06-12T14:44:44.777Z" data-timestamp="2026-06-12T14:44:44.777Z">2026-06-12T14:44:44.777Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Updated CS-026 with all three corrections:</p>
+<ol>
+<li><strong>Problem statement</strong> — replaced the incorrect "stale state" claim with the actual issue: semantic mismatch between singleton registration and per-connection lifetime (plugins are torn down, so no stale references today).</li>
+<li><strong>PluginManager</strong> — noted that the constructor-injected <code>IServiceProvider</code> should be removed since the scoped provider is now passed directly to <code>InstantiatePlugins</code>.</li>
+<li><strong>PluginActivator</strong> — changed from "remove it" to "make it scoped". <code>IPluginActivator</code> is part of the plugin API (used by <code>MarvPlugin</code> for <code>HandlerGroup</code> creation), so it's retained but registered as scoped to get the connection-scoped provider.</li>
+</ol></div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-003.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<span class="current">4</span>
+<a href="page-005.html">5</a>
+<a href="page-006.html">6</a>
+<a href="page-005.html">Next &rarr;</a>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

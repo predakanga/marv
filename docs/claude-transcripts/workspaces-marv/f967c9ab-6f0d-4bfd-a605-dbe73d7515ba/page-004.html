@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 4</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 4/4</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-003.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<span class="current">4</span>
+<span class="disabled">Next &rarr;</span>
+</div>
+
+        
+<div class="message user" id="msg-2026-05-30T12-21-13-543Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-05-30T12-21-13-543Z" class="timestamp-link"><time datetime="2026-05-30T12:21:13.543Z" data-timestamp="2026-05-30T12:21:13.543Z">2026-05-30T12:21:13.543Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Make ConfigureServices a static method on IPlugin, with an empty default implementation.
+Don't register the plugins or HandlerGroups themselves in the service provider. Instantiate them with ActivatorUtilities instead. Plugins can be reinstantiated when reconnecting to a server so that there's no chance of stale references.
+Update architecture.md to note that the core should not call handlers on HandlerGroups; MarvPlugin will do that.</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T12-21-18-788Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T12-21-18-788Z" class="timestamp-link"><time datetime="2026-05-30T12:21:18.788Z" data-timestamp="2026-05-30T12:21:18.788Z">2026-05-30T12:21:18.788Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_012bfqMx88Zke8dMYFj5mA2g">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Get current time</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">date -u &#39;+%Y-%m-%d %H:%M:%S UTC&#39;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T12-21-18-867Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T12-21-18-867Z" class="timestamp-link"><time datetime="2026-05-30T12:21:18.867Z" data-timestamp="2026-05-30T12:21:18.867Z">2026-05-30T12:21:18.867Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>2026-05-30 12:21:18 UTC</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T12-21-19-428Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T12-21-19-428Z" class="timestamp-link"><time datetime="2026-05-30T12:21:19.428Z" data-timestamp="2026-05-30T12:21:19.428Z">2026-05-30T12:21:19.428Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>You've hit your session limit · resets 1:30pm (UTC)</p></div></div></div>
+<div class="message user" id="msg-2026-05-30T13-38-40-455Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-05-30T13-38-40-455Z" class="timestamp-link"><time datetime="2026-05-30T13:38:40.455Z" data-timestamp="2026-05-30T13:38:40.455Z">2026-05-30T13:38:40.455Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Make ConfigureServices a static method on IPlugin, with an empty default implementation.
+Don't register the plugins or HandlerGroups themselves in the service provider. Instantiate them with ActivatorUtilities instead. Plugins can be reinstantiated when reconnecting to a server so that there's no chance of stale references.
+Update architecture.md to note that the core should not call handlers on HandlerGroups; MarvPlugin will do that.</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-38-50-371Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-38-50-371Z" class="timestamp-link"><time datetime="2026-05-30T13:38:50.371Z" data-timestamp="2026-05-30T13:38:50.371Z">2026-05-30T13:38:50.371Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_017tbCahyLvyaa9sNN6JzpFS">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">prompts.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/prompts.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">&gt; That looks good, except that the IPluginActivator should make CreateInstance generic, i.e. T CreateInstance&lt;T&gt;(params object[] params);</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">&gt; That looks good, except that the IPluginActivator should make CreateInstance generic, i.e. T CreateInstance&lt;T&gt;(params object[] params);
+
+## ConfigureServices on IPlugin, reinstantiate on reconnect
+
+**Date**: 2026-05-30T12:21:00Z
+
+**Prompt**:
+
+&gt; Make ConfigureServices a static method on IPlugin, with an empty default implementation.
+&gt; Don&#39;t register the plugins or HandlerGroups themselves in the service provider. Instantiate them with ActivatorUtilities instead. Plugins can be reinstantiated when reconnecting to a server so that there&#39;s no chance of stale references.
+&gt; Update architecture.md to note that the core should not call handlers on HandlerGroups; MarvPlugin will do that.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-38-50-472Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-38-50-472Z" class="timestamp-link"><time datetime="2026-05-30T13:38:50.472Z" data-timestamp="2026-05-30T13:38:50.472Z">2026-05-30T13:38:50.472Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/prompts.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-38-54-688Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-38-54-688Z" class="timestamp-link"><time datetime="2026-05-30T13:38:54.688Z" data-timestamp="2026-05-30T13:38:54.688Z">2026-05-30T13:38:54.688Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me update the IPlugin interface, then architecture.md, then plugin-api-draft.md.</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-38-55-255Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-38-55-255Z" class="timestamp-link"><time datetime="2026-05-30T13:38:55.255Z" data-timestamp="2026-05-30T13:38:55.255Z">2026-05-30T13:38:55.255Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_018V2dVVDyvzdqGfw2wnavdz"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/plugin-api-draft.md&#34;,
+  &#34;offset&#34;: 30,
+  &#34;limit&#34;: 30
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-38-55-291Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-38-55-291Z" class="timestamp-link"><time datetime="2026-05-30T13:38:55.291Z" data-timestamp="2026-05-30T13:38:55.291Z">2026-05-30T13:38:55.291Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>30	### IPlugin Interface
+31	
+32	The `IPlugin` interface defines the full plugin contract. All
+33	plugins must implement it — either directly or via the `MarvPlugin`
+34	convenience base class.
+35	
+36	```csharp
+37	public interface IPlugin
+38	{
+39	    /// Human-readable name for this plugin. Used in log messages,
+40	    /// configuration, and diagnostics. Enforced at compile time
+41	    /// via static abstract.
+42	    static abstract string PluginName { get; }
+43	
+44	    /// Called once after the plugin is constructed and all services
+45	    /// are available. Use for one-time initialization.
+46	    Task OnLoadAsync(CancellationToken ct);
+47	
+48	    /// Called each time the bot establishes an IRC connection.
+49	    Task OnConnectedAsync(CancellationToken ct);
+50	
+51	    /// Called when the IRC connection is lost. The bot may reconnect.
+52	    /// Any cached IChannel/IUser references are stale after this call.
+53	    Task OnDisconnectedAsync();
+54	
+55	    /// Called once during shutdown, before the DI container is disposed.
+56	    /// Use for cleanup (unsubscribe, flush, close handles).
+57	    Task OnUnloadAsync();
+58	
+59	    /// Called by the core&#x27;s per-plugin event loop to deliver an event.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-38-58-823Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-38-58-823Z" class="timestamp-link"><time datetime="2026-05-30T13:38:58.823Z" data-timestamp="2026-05-30T13:38:58.823Z">2026-05-30T13:38:58.823Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01RS8MJWY8dLXLo2n12rJojr"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/plugin-api-draft.md&#34;,
+  &#34;offset&#34;: 59,
+  &#34;limit&#34;: 15
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-38-58-856Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-38-58-856Z" class="timestamp-link"><time datetime="2026-05-30T13:38:58.856Z" data-timestamp="2026-05-30T13:38:58.856Z">2026-05-30T13:38:58.856Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>59	    /// Called by the core&#x27;s per-plugin event loop to deliver an event.
+60	    /// The core calls this method once per event, sequentially — never
+61	    /// concurrently with itself for the same plugin.
+62	    Task HandleEventAsync(MarvEvent evt, CancellationToken ct);
+63	}
+64	```
+65	
+66	The core&#x27;s per-plugin event loop reads from the plugin&#x27;s
+67	`Channel&lt;MarvEvent&gt;` and calls `HandleEventAsync` for each event.
+68	This is the single entry point for all event delivery — the core
+69	never calls handler methods directly.
+70	
+71	### IPluginActivator
+72	
+73	`MarvPlugin` needs to create handler group instances at runtime.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-39-05-438Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-39-05-438Z" class="timestamp-link"><time datetime="2026-05-30T13:39:05.438Z" data-timestamp="2026-05-30T13:39:05.438Z">2026-05-30T13:39:05.438Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01LjV6XYsCVRyYhqngmKk2tZ">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">plugin-api-draft.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/plugin-api-draft.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    /// Called by the core&#39;s per-plugin event loop to deliver an event.
+    /// The core calls this method once per event, sequentially — never
+    /// concurrently with itself for the same plugin.
+    Task HandleEventAsync(MarvEvent evt, CancellationToken ct);
+}</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    /// Called by the core&#39;s per-plugin event loop to deliver an event.
+    /// The core calls this method once per event, sequentially — never
+    /// concurrently with itself for the same plugin.
+    Task HandleEventAsync(MarvEvent evt, CancellationToken ct);
+
+    /// Called during DI container setup to register services this
+    /// plugin provides. Only plugins that provide services to other
+    /// plugins need to override this. Default implementation is a
+    /// no-op.
+    static virtual void ConfigureServices(IServiceCollection services) { }
+}</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-39-05-626Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-39-05-626Z" class="timestamp-link"><time datetime="2026-05-30T13:39:05.626Z" data-timestamp="2026-05-30T13:39:05.626Z">2026-05-30T13:39:05.626Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/plugin-api-draft.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-39-10-764Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-39-10-764Z" class="timestamp-link"><time datetime="2026-05-30T13:39:10.764Z" data-timestamp="2026-05-30T13:39:10.764Z">2026-05-30T13:39:10.764Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the service registration example to remove the separate <code>ConfigureServices</code> on the plugin class (it's now on IPlugin).</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-39-11-093Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-39-11-093Z" class="timestamp-link"><time datetime="2026-05-30T13:39:11.093Z" data-timestamp="2026-05-30T13:39:11.093Z">2026-05-30T13:39:11.093Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01EutjJM2d4wDDWN4QSfGetC"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/plugin-api-draft.md&#34;,
+  &#34;offset&#34;: 260,
+  &#34;limit&#34;: 25
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-39-11-116Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-39-11-116Z" class="timestamp-link"><time datetime="2026-05-30T13:39:11.116Z" data-timestamp="2026-05-30T13:39:11.116Z">2026-05-30T13:39:11.116Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>260	```
+261	
+262	The regex is matched against the full message text. If there are
+263	multiple matches, the handler is called once with the first match.
+264	Named capture groups are accessible via `ctx.Match.Groups[&quot;name&quot;]`.
+265	
+266	### `[OnRawMessage]` — Subscribe to raw IRC commands
+267	
+268	```csharp
+269	[OnRawMessage(&quot;INVITE&quot;)]
+270	public async Task HandleInvite(IrcMessage message, CancellationToken ct)
+271	{
+272	    // Direct access to the raw protocol message.
+273	}
+274	```
+275	
+276	This is for protocol-level handling that the typed events don&#x27;t cover.
+277	
+278	### `[OnInterval]` — Periodic tasks
+279	
+280	```csharp
+281	[OnInterval(minutes: 5)]
+282	public async Task CheckSomething(CancellationToken ct)
+283	{
+284	    // Runs every 5 minutes while connected.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-39-14-395Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-39-14-395Z" class="timestamp-link"><time datetime="2026-05-30T13:39:14.395Z" data-timestamp="2026-05-30T13:39:14.395Z">2026-05-30T13:39:14.395Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01JKSMapSf5b1mpKnJaAWVxM"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/plugin-api-draft.md&#34;,
+  &#34;offset&#34;: 288,
+  &#34;limit&#34;: 40
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-39-14-422Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-39-14-422Z" class="timestamp-link"><time datetime="2026-05-30T13:39:14.422Z" data-timestamp="2026-05-30T13:39:14.422Z">2026-05-30T13:39:14.422Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>288	Interval handlers run on the plugin&#x27;s own task.
+289	
+290	---
+291	
+292	## Handler Groups
+293	
+294	For plugins with many handlers, related handlers can be organized
+295	into separate classes using `[HandlerGroup]`. A handler group is a
+296	class whose methods are treated as if they were methods on the plugin
+297	itself.
+298	
+299	```csharp
+300	public class MyPlugin : MarvPlugin
+301	{
+302	    // Plugin-level lifecycle, minimal handler code here
+303	}
+304	
+305	[HandlerGroup(typeof(MyPlugin))]
+306	public class MyAdminHandlers
+307	{
+308	    private readonly IBot _bot;
+309	    private readonly IAuthorizationService _auth;
+310	
+311	    // Constructor-injected from the DI container, just like plugins
+312	    public MyAdminHandlers(IBot bot, IAuthorizationService auth)
+313	    {
+314	        _bot = bot;
+315	        _auth = auth;
+316	    }
+317	
+318	    [OnCommand(&quot;kick&quot;)]
+319	    public async Task HandleKick(CommandContext ctx, CancellationToken ct)
+320	    {
+321	        if (!await _auth.IsAuthorizedAsync(ctx.Sender, &quot;mod.kick&quot;, ct))
+322	        {
+323	            await ctx.ReplyAsync(&quot;Permission denied.&quot;);
+324	            return;
+325	        }
+326	        // ... perform the kick
+327	    }</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-39-22-376Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-39-22-376Z" class="timestamp-link"><time datetime="2026-05-30T13:39:22.376Z" data-timestamp="2026-05-30T13:39:22.376Z">2026-05-30T13:39:22.376Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01VscFqL9sAF11RjuygFHxDs"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/plugin-api-draft.md&#34;,
+  &#34;offset&#34;: 327,
+  &#34;limit&#34;: 30
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-39-22-406Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-39-22-406Z" class="timestamp-link"><time datetime="2026-05-30T13:39:22.406Z" data-timestamp="2026-05-30T13:39:22.406Z">2026-05-30T13:39:22.406Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>327	    }
+328	
+329	    [OnCommand(&quot;ban&quot;)]
+330	    public async Task HandleBan(CommandContext ctx, CancellationToken ct)
+331	    {
+332	        // ...
+333	    }
+334	}
+335	```
+336	
+337	Handler groups are:
+338	
+339	- Discovered automatically by scanning the plugin&#x27;s assembly for
+340	  classes with `[HandlerGroup(typeof(MyPlugin))]`
+341	- Constructed via DI — they can inject any service the plugin can
+342	- Registered as singletons in the container
+343	- Their event handlers run on the owning plugin&#x27;s task, sequentially
+344	  with the plugin&#x27;s own handlers (order between handlers from
+345	  different groups is undefined)
+346	- May define lifecycle methods (`OnLoadAsync`, `OnConnectedAsync`,
+347	  `OnDisconnectedAsync`, `OnUnloadAsync`) which are called alongside
+348	  the owning plugin&#x27;s lifecycle methods
+349	- Useful for separating concerns without creating multiple plugins
+350	  (which would each get their own task and independent event ordering)
+351	
+352	---
+353	
+354	## Registering a Service
+355	
+356	A plugin provides a service for other plugins by declaring</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-39-26-886Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-39-26-886Z" class="timestamp-link"><time datetime="2026-05-30T13:39:26.886Z" data-timestamp="2026-05-30T13:39:26.886Z">2026-05-30T13:39:26.886Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Update handler groups section — created via <code>IPluginActivator</code>, not registered in DI.</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-39-28-585Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-39-28-585Z" class="timestamp-link"><time datetime="2026-05-30T13:39:28.585Z" data-timestamp="2026-05-30T13:39:28.585Z">2026-05-30T13:39:28.585Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_017NanDYL9j2J6RQXn7LRgH1">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">plugin-api-draft.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/plugin-api-draft.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    // Constructor-injected from the DI container, just like plugins
+    public MyAdminHandlers(IBot bot, IAuthorizationService auth)</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    // Constructor-injected via IPluginActivator, just like plugins
+    public MyAdminHandlers(IBot bot, IAuthorizationService auth)</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-39-28-622Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-39-28-622Z" class="timestamp-link"><time datetime="2026-05-30T13:39:28.622Z" data-timestamp="2026-05-30T13:39:28.622Z">2026-05-30T13:39:28.622Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/plugin-api-draft.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-39-38-080Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-39-38-080Z" class="timestamp-link"><time datetime="2026-05-30T13:39:38.080Z" data-timestamp="2026-05-30T13:39:38.080Z">2026-05-30T13:39:38.080Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01XS4TVtaFFRqGJge3Eati3w">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">plugin-api-draft.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/plugin-api-draft.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">Handler groups are:
+
+- Discovered automatically by scanning the plugin&#39;s assembly for
+  classes with `[HandlerGroup(typeof(MyPlugin))]`
+- Constructed via DI — they can inject any service the plugin can
+- Registered as singletons in the container
+- Their event handlers run on the owning plugin&#39;s task, sequentially
+  with the plugin&#39;s own handlers (order between handlers from
+  different groups is undefined)
+- May define lifecycle methods (`OnLoadAsync`, `OnConnectedAsync`,
+  `OnDisconnectedAsync`, `OnUnloadAsync`) which are called alongside
+  the owning plugin&#39;s lifecycle methods
+- Useful for separating concerns without creating multiple plugins
+  (which would each get their own task and independent event ordering)</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">Handler groups are:
+
+- Discovered automatically by scanning the plugin&#39;s assembly for
+  classes with `[HandlerGroup(typeof(MyPlugin))]`
+- Created by `MarvPlugin` via `IPluginActivator` — they are not
+  registered in the DI container. Constructor parameters are resolved
+  from DI by `ActivatorUtilities`.
+- Their event handlers are dispatched by `MarvPlugin`, not by the
+  core — the core only calls `HandleEventAsync` on the plugin
+- Run on the owning plugin&#39;s task, sequentially with the plugin&#39;s
+  own handlers (order between handlers from different groups is
+  undefined)
+- May define lifecycle methods (`OnLoadAsync`, `OnConnectedAsync`,
+  `OnDisconnectedAsync`, `OnUnloadAsync`) which are called by
+  `MarvPlugin`&#39;s lifecycle methods
+- Useful for separating concerns without creating multiple plugins
+  (which would each get their own task and independent event ordering)</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-39-38-184Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-39-38-184Z" class="timestamp-link"><time datetime="2026-05-30T13:39:38.184Z" data-timestamp="2026-05-30T13:39:38.184Z">2026-05-30T13:39:38.184Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/plugin-api-draft.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-39-41-881Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-39-41-881Z" class="timestamp-link"><time datetime="2026-05-30T13:39:41.881Z" data-timestamp="2026-05-30T13:39:41.881Z">2026-05-30T13:39:41.881Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the "Registering a Service" section — ConfigureServices is now on IPlugin, not a separate static method.</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-39-42-507Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-39-42-507Z" class="timestamp-link"><time datetime="2026-05-30T13:39:42.507Z" data-timestamp="2026-05-30T13:39:42.507Z">2026-05-30T13:39:42.507Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01RHZzENwcxiRrY7y8PcMMi3"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/plugin-api-draft.md&#34;,
+  &#34;offset&#34;: 352,
+  &#34;limit&#34;: 30
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-39-42-542Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-39-42-542Z" class="timestamp-link"><time datetime="2026-05-30T13:39:42.542Z" data-timestamp="2026-05-30T13:39:42.542Z">2026-05-30T13:39:42.542Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>352	- Useful for separating concerns without creating multiple plugins
+353	  (which would each get their own task and independent event ordering)
+354	
+355	---
+356	
+357	## Registering a Service
+358	
+359	A plugin provides a service for other plugins by declaring
+360	`[ProvidesService]` on its class and registering the implementation
+361	in a static `ConfigureServices` method.
+362	
+363	### Example: Auth Service
+364	
+365	**Interface** (in the plugin assembly or a separate contracts assembly):
+366	
+367	```csharp
+368	public interface IAuthorizationService
+369	{
+370	    Task&lt;bool&gt; IsAuthorizedAsync(IUser user, string permission, CancellationToken ct);
+371	}
+372	```
+373	
+374	**Plugin class**:
+375	
+376	```csharp
+377	[ProvidesService(typeof(IAuthorizationService))]
+378	public class AuthPlugin : MarvPlugin
+379	{
+380	    public static string PluginName =&gt; &quot;Auth&quot;;
+381	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-39-46-914Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-39-46-914Z" class="timestamp-link"><time datetime="2026-05-30T13:39:46.914Z" data-timestamp="2026-05-30T13:39:46.914Z">2026-05-30T13:39:46.914Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01F6987mdiT5b8AULmz8dVeq">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">plugin-api-draft.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/plugin-api-draft.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">A plugin provides a service for other plugins by declaring
+`[ProvidesService]` on its class and registering the implementation
+in a static `ConfigureServices` method.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">A plugin provides a service for other plugins by declaring
+`[ProvidesService]` on its class and overriding the static
+`ConfigureServices` method from `IPlugin`.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-39-46-970Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-39-46-970Z" class="timestamp-link"><time datetime="2026-05-30T13:39:46.970Z" data-timestamp="2026-05-30T13:39:46.970Z">2026-05-30T13:39:46.970Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/plugin-api-draft.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-39-50-267Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-39-50-267Z" class="timestamp-link"><time datetime="2026-05-30T13:39:50.267Z" data-timestamp="2026-05-30T13:39:50.267Z">2026-05-30T13:39:50.267Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01QveJ88zLaJFzafPCrWHxpL"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/plugin-api-draft.md&#34;,
+  &#34;offset&#34;: 376,
+  &#34;limit&#34;: 20
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-39-50-306Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-39-50-306Z" class="timestamp-link"><time datetime="2026-05-30T13:39:50.306Z" data-timestamp="2026-05-30T13:39:50.306Z">2026-05-30T13:39:50.306Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>376	```csharp
+377	[ProvidesService(typeof(IAuthorizationService))]
+378	public class AuthPlugin : MarvPlugin
+379	{
+380	    public static string PluginName =&gt; &quot;Auth&quot;;
+381	
+382	    public AuthPlugin(IBot bot, IPluginActivator activator)
+383	        : base(bot, activator) { }
+384	
+385	    public static void ConfigureServices(IServiceCollection services)
+386	    {
+387	        services.AddSingleton&lt;IAuthorizationService, AccountBasedAuthService&gt;();
+388	    }
+389	}
+390	```
+391	
+392	The `[ProvidesService]` attribute tells the dependency sorter that
+393	`AuthPlugin` provides `IAuthorizationService`. Other plugins that
+394	inject `IAuthorizationService` via their constructor are automatically
+395	sorted to load after `AuthPlugin`.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-39-54-784Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-39-54-784Z" class="timestamp-link"><time datetime="2026-05-30T13:39:54.784Z" data-timestamp="2026-05-30T13:39:54.784Z">2026-05-30T13:39:54.784Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>That example already has <code>public static void ConfigureServices</code> — it matches the <code>static virtual</code> on <code>IPlugin</code>. Good. Now update architecture.md.</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-39-55-291Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-39-55-291Z" class="timestamp-link"><time datetime="2026-05-30T13:39:55.291Z" data-timestamp="2026-05-30T13:39:55.291Z">2026-05-30T13:39:55.291Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01WMAMXRFCisYYzVj69pobB2"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/architecture.md&#34;,
+  &#34;offset&#34;: 355,
+  &#34;limit&#34;: 30
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-39-55-314Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-39-55-314Z" class="timestamp-link"><time datetime="2026-05-30T13:39:55.314Z" data-timestamp="2026-05-30T13:39:55.314Z">2026-05-30T13:39:55.314Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>355	5. **Core service registration**: Register core services into the
+356	   `IServiceCollection`: logging, configuration, `IIrcConnection`,
+357	   `ICapabilityManager`, `IChannelStore`, `IUserStore`, `IBot`.
+358	
+359	6. **Plugin configuration registration**: For each configuration class
+360	   tagged with `[PluginConfig(Section = &quot;Name&quot;)]`, automatically
+361	   register `IOptions&lt;TConfig&gt;` bound to the `Plugins:{Section}`
+362	   configuration section. No boilerplate needed in the plugin —
+363	   plugins access configuration via constructor injection of
+364	   `IOptions&lt;TConfig&gt;`.
+365	
+366	7. **Plugin service registration**: For each plugin type (in
+367	   dependency order), if it has a static `ConfigureServices` method,
+368	   call it with the `IServiceCollection`. Plugins that provide
+369	   services to other plugins register their implementations here.
+370	   Plugins that only handle events and use configuration do not need
+371	   this method at all.
+372	
+373	8. **Plugin type registration**: Register each plugin type itself as
+374	   a singleton in the container.
+375	
+376	9. **Build container**: Call `BuildServiceProvider()` to create the
+377	   single `IServiceProvider`.
+378	
+379	10. **Resolve plugins**: Resolve each plugin type from the container.
+380	    Constructor injection provides configuration, services, and the
+381	    `IBot` facade.
+382	
+383	11. **Initialize plugins**: Call `OnLoadAsync()` on each plugin (and
+384	    its handler groups&#x27; lifecycle methods) in dependency order.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-40-04-920Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-40-04-920Z" class="timestamp-link"><time datetime="2026-05-30T13:40:04.920Z" data-timestamp="2026-05-30T13:40:04.920Z">2026-05-30T13:40:04.920Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01V9MftSfX2JYxcnwfjCvSR4">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">architecture.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/architecture.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">7. **Plugin service registration**: For each plugin type (in
+   dependency order), if it has a static `ConfigureServices` method,
+   call it with the `IServiceCollection`. Plugins that provide
+   services to other plugins register their implementations here.
+   Plugins that only handle events and use configuration do not need
+   this method at all.
+
+8. **Plugin type registration**: Register each plugin type itself as
+   a singleton in the container.
+
+9. **Build container**: Call `BuildServiceProvider()` to create the
+   single `IServiceProvider`.
+
+10. **Resolve plugins**: Resolve each plugin type from the container.
+    Constructor injection provides configuration, services, and the
+    `IBot` facade.
+
+11. **Initialize plugins**: Call `OnLoadAsync()` on each plugin (and
+    its handler groups&#39; lifecycle methods) in dependency order.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">7. **Plugin service registration**: For each plugin type (in
+   dependency order), call its static `ConfigureServices` method
+   (defined on `IPlugin` with an empty default implementation).
+   Plugins that provide services to other plugins register their
+   implementations here. Plugins that only handle events and use
+   configuration do not need to override this method.
+
+8. **Build container**: Call `BuildServiceProvider()` to create the
+   single `IServiceProvider`. Note that plugin types and handler
+   group types are **not** registered in the container — they are
+   created via `ActivatorUtilities` (through `IPluginActivator`).
+
+9. **Instantiate plugins**: Create each plugin instance via
+   `ActivatorUtilities.CreateInstance`. Constructor parameters
+   (configuration, services, `IBot`, `IPluginActivator`) are
+   resolved from the container. Handler groups are created by
+   `MarvPlugin` via `IPluginActivator` during construction.
+
+10. **Initialize plugins**: Call `OnLoadAsync()` on each plugin in
+    dependency order. `MarvPlugin`&#39;s default implementation forwards
+    to handler group lifecycle methods.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-40-05-028Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-40-05-028Z" class="timestamp-link"><time datetime="2026-05-30T13:40:05.028Z" data-timestamp="2026-05-30T13:40:05.028Z">2026-05-30T13:40:05.028Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/architecture.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-40-09-233Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-40-09-233Z" class="timestamp-link"><time datetime="2026-05-30T13:40:09.233Z" data-timestamp="2026-05-30T13:40:09.233Z">2026-05-30T13:40:09.233Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the reconnection section to mention plugin reinstantiation.</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-40-10-152Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-40-10-152Z" class="timestamp-link"><time datetime="2026-05-30T13:40:10.152Z" data-timestamp="2026-05-30T13:40:10.152Z">2026-05-30T13:40:10.152Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01GLmNk3PdS93iYgbgQX8rCP"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/architecture.md&#34;,
+  &#34;offset&#34;: 395,
+  &#34;limit&#34;: 30
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-40-10-199Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-40-10-199Z" class="timestamp-link"><time datetime="2026-05-30T13:40:10.199Z" data-timestamp="2026-05-30T13:40:10.199Z">2026-05-30T13:40:10.199Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>395	
+396	14. **Start plugin tasks**: Create a dedicated `Channel&lt;MarvEvent&gt;`
+397	    and async task for each plugin. The task reads events and calls
+398	    `plugin.HandleEventAsync(event, ct)` — the core never calls
+399	    handler methods directly.
+400	
+401	    For `MarvPlugin` subclasses, handler groups are created via
+402	    `IPluginActivator` during construction, and `HandleEventAsync`
+403	    uses reflection to find and call methods annotated with event
+404	    attributes (`[OnEvent]`, `[OnCommand]`, `[OnRegex]`,
+405	    `[OnRawMessage]`, `[OnInterval]`) on both the plugin class and
+406	    its handler groups. Handler methods on the plugin class do not
+407	    need to be public (dispatch is from within the base class);
+408	    handler methods on handler groups must be public. If multiple
+409	    handlers match the same event, they are called consecutively in
+410	    an undefined order.
+411	
+412	    Direct `IPlugin` implementations provide their own
+413	    `HandleEventAsync` logic.
+414	
+415	15. **Message loop**: Process messages, update state, fan out events
+416	    to plugin channels.
+417	
+418	16. **Reconnection**: On disconnection, all state is discarded:
+419	    pending `SendAndAwaitAsync` calls are cancelled, outbound message
+420	    queues are cleared, and channel/user state stores are reset.
+421	    Plugins are notified via `OnDisconnectedAsync`. The bot reconnects
+422	    with exponential backoff, then repeats from step 12. Plugins
+423	    should treat any cached `IChannel` or `IUser` references as stale
+424	    after `OnDisconnectedAsync`.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-40-17-639Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-40-17-639Z" class="timestamp-link"><time datetime="2026-05-30T13:40:17.639Z" data-timestamp="2026-05-30T13:40:17.639Z">2026-05-30T13:40:17.639Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01VebpY64AA6Zj9Xaajcagaj">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">architecture.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/architecture.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">16. **Reconnection**: On disconnection, all state is discarded:
+    pending `SendAndAwaitAsync` calls are cancelled, outbound message
+    queues are cleared, and channel/user state stores are reset.
+    Plugins are notified via `OnDisconnectedAsync`. The bot reconnects
+    with exponential backoff, then repeats from step 12. Plugins
+    should treat any cached `IChannel` or `IUser` references as stale
+    after `OnDisconnectedAsync`.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">16. **Reconnection**: On disconnection, all state is discarded:
+    pending `SendAndAwaitAsync` calls are cancelled, outbound message
+    queues are cleared, and channel/user state stores are reset.
+    Plugins are notified via `OnDisconnectedAsync`, then
+    `OnUnloadAsync`. Plugin and handler group instances are discarded.
+    The bot reconnects with exponential backoff, then reinstantiates
+    all plugins via `ActivatorUtilities` (step 9) and repeats from
+    step 10. This ensures no stale references survive a reconnection.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-40-17-739Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-40-17-739Z" class="timestamp-link"><time datetime="2026-05-30T13:40:17.739Z" data-timestamp="2026-05-30T13:40:17.739Z">2026-05-30T13:40:17.739Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/architecture.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-40-23-739Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-40-23-739Z" class="timestamp-link"><time datetime="2026-05-30T13:40:23.739Z" data-timestamp="2026-05-30T13:40:23.739Z">2026-05-30T13:40:23.739Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the handler group dispatch note — core only calls HandleEventAsync, MarvPlugin dispatches to handler groups.</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-40-25-818Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-40-25-818Z" class="timestamp-link"><time datetime="2026-05-30T13:40:25.818Z" data-timestamp="2026-05-30T13:40:25.818Z">2026-05-30T13:40:25.818Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01Q8QUWbnS3KYqyYTK16mCtX">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">architecture.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/architecture.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    For `MarvPlugin` subclasses, handler groups are created via
+    `IPluginActivator` during construction, and `HandleEventAsync`
+    uses reflection to find and call methods annotated with event
+    attributes (`[OnEvent]`, `[OnCommand]`, `[OnRegex]`,
+    `[OnRawMessage]`, `[OnInterval]`) on both the plugin class and
+    its handler groups. Handler methods on the plugin class do not
+    need to be public (dispatch is from within the base class);
+    handler methods on handler groups must be public. If multiple
+    handlers match the same event, they are called consecutively in
+    an undefined order.
+
+    Direct `IPlugin` implementations provide their own
+    `HandleEventAsync` logic.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    For `MarvPlugin` subclasses, `HandleEventAsync` uses reflection
+    to dispatch to attributed handler methods (`[OnEvent]`,
+    `[OnCommand]`, `[OnRegex]`, `[OnRawMessage]`, `[OnInterval]`)
+    on both the plugin class and its handler groups. The core does
+    not interact with handler groups at all — `MarvPlugin` owns
+    their creation (via `IPluginActivator`), lifecycle forwarding,
+    and event dispatch. Handler methods on the plugin class do not
+    need to be public (dispatch is from within the base class);
+    handler methods on handler groups must be public. If multiple
+    handlers match the same event, they are called consecutively in
+    an undefined order.
+
+    Direct `IPlugin` implementations provide their own
+    `HandleEventAsync` logic.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-40-25-861Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-40-25-861Z" class="timestamp-link"><time datetime="2026-05-30T13:40:25.861Z" data-timestamp="2026-05-30T13:40:25.861Z">2026-05-30T13:40:25.861Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/architecture.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-40-29-287Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-40-29-287Z" class="timestamp-link"><time datetime="2026-05-30T13:40:29.287Z" data-timestamp="2026-05-30T13:40:29.287Z">2026-05-30T13:40:29.287Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the inter-plugin services section to reference <code>ConfigureServices</code> on <code>IPlugin</code>.</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-40-29-935Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-40-29-935Z" class="timestamp-link"><time datetime="2026-05-30T13:40:29.935Z" data-timestamp="2026-05-30T13:40:29.935Z">2026-05-30T13:40:29.935Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01HsU5vSZreELYCcGknH5erw"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/architecture.md&#34;,
+  &#34;offset&#34;: 435,
+  &#34;limit&#34;: 15
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-40-29-969Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-40-29-969Z" class="timestamp-link"><time datetime="2026-05-30T13:40:29.969Z" data-timestamp="2026-05-30T13:40:29.969Z">2026-05-30T13:40:29.969Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>435	Each plugin assembly is loaded into a shared `AssemblyLoadContext`.
+436	Using a single shared context (rather than isolated contexts per
+437	plugin) avoids type identity issues — interfaces defined in
+438	`Marv.Core` or in a shared contracts assembly are the same `Type`
+439	across all plugins.
+440	
+441	If we later need assembly isolation (e.g., for hot-reloading or
+442	conflicting dependencies), we can revisit this, but the single-context
+443	approach is simpler and avoids a class of subtle bugs.
+444	
+445	---
+446	
+447	## Inter-Plugin Services
+448	
+449	### How It Works</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-40-33-007Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-40-33-007Z" class="timestamp-link"><time datetime="2026-05-30T13:40:33.007Z" data-timestamp="2026-05-30T13:40:33.007Z">2026-05-30T13:40:33.007Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01LwY1bCmJVqPj6SXFFVEaVk"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/architecture.md&#34;,
+  &#34;offset&#34;: 449,
+  &#34;limit&#34;: 10
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-40-33-016Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-40-33-016Z" class="timestamp-link"><time datetime="2026-05-30T13:40:33.016Z" data-timestamp="2026-05-30T13:40:33.016Z">2026-05-30T13:40:33.016Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>449	### How It Works
+450	
+451	**Providing a service**: A plugin declares `[ProvidesService]` on its
+452	class and registers the implementation in a static
+453	`ConfigureServices` method. The attribute tells the dependency sorter
+454	which plugin provides which service type; the method does the actual
+455	DI registration.
+456	
+457	**Consuming a service**: A plugin declares a constructor parameter of
+458	the service type. The plugin loader inspects constructor parameters to</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-40-37-449Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-40-37-449Z" class="timestamp-link"><time datetime="2026-05-30T13:40:37.449Z" data-timestamp="2026-05-30T13:40:37.449Z">2026-05-30T13:40:37.449Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_016YixLEfWBaVBfGDsvJNRDV">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">architecture.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/architecture.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">**Providing a service**: A plugin declares `[ProvidesService]` on its
+class and registers the implementation in a static
+`ConfigureServices` method. The attribute tells the dependency sorter
+which plugin provides which service type; the method does the actual
+DI registration.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">**Providing a service**: A plugin declares `[ProvidesService]` on its
+class and overrides the static `ConfigureServices` method from
+`IPlugin`. The attribute tells the dependency sorter which plugin
+provides which service type; the method does the actual DI
+registration.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-40-37-496Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-40-37-496Z" class="timestamp-link"><time datetime="2026-05-30T13:40:37.496Z" data-timestamp="2026-05-30T13:40:37.496Z">2026-05-30T13:40:37.496Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/architecture.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-40-40-095Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-40-40-095Z" class="timestamp-link"><time datetime="2026-05-30T13:40:40.095Z" data-timestamp="2026-05-30T13:40:40.095Z">2026-05-30T13:40:40.095Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the auth plugin example in architecture.md.</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-40-40-812Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-40-40-812Z" class="timestamp-link"><time datetime="2026-05-30T13:40:40.812Z" data-timestamp="2026-05-30T13:40:40.812Z">2026-05-30T13:40:40.812Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01Xbw5FMQU89SMSFxwXsv1Fb"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/architecture.md&#34;,
+  &#34;offset&#34;: 467,
+  &#34;limit&#34;: 25
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-40-40-833Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-40-40-833Z" class="timestamp-link"><time datetime="2026-05-30T13:40:40.833Z" data-timestamp="2026-05-30T13:40:40.833Z">2026-05-30T13:40:40.833Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>467	
+468	```csharp
+469	// Auth plugin provides IAuthorizationService
+470	[ProvidesService(typeof(IAuthorizationService))]
+471	public class AuthPlugin : MarvPlugin
+472	{
+473	    public static string PluginName =&gt; &quot;Auth&quot;;
+474	    public AuthPlugin(IBot bot, IPluginActivator activator)
+475	        : base(bot, activator) { }
+476	
+477	    public static void ConfigureServices(IServiceCollection services)
+478	    {
+479	        services.AddSingleton&lt;IAuthorizationService, AccountBasedAuthService&gt;();
+480	    }
+481	}
+482	
+483	// Moderation plugin consumes IAuthorizationService (required)
+484	public class ModerationPlugin : MarvPlugin
+485	{
+486	    public static string PluginName =&gt; &quot;Moderation&quot;;
+487	    public ModerationPlugin(IBot bot, IPluginActivator activator,
+488	        IAuthorizationService auth) : base(bot, activator) { ... }
+489	}
+490	
+491	// Greet plugin consumes IAuthorizationService (optional)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-40-44-542Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-40-44-542Z" class="timestamp-link"><time datetime="2026-05-30T13:40:44.542Z" data-timestamp="2026-05-30T13:40:44.542Z">2026-05-30T13:40:44.542Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>That example is fine — the static <code>ConfigureServices</code> matches the <code>static virtual</code> on <code>IPlugin</code>. Now update ADR-003 to reflect ConfigureServices moving to IPlugin.</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-40-45-408Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-40-45-408Z" class="timestamp-link"><time datetime="2026-05-30T13:40:45.408Z" data-timestamp="2026-05-30T13:40:45.408Z">2026-05-30T13:40:45.408Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01PqB4z99pow7N9rNzkVHmkZ"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/adr/003-plugin-service-registry.md&#34;,
+  &#34;offset&#34;: 36,
+  &#34;limit&#34;: 25
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-40-45-427Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-40-45-427Z" class="timestamp-link"><time datetime="2026-05-30T13:40:45.427Z" data-timestamp="2026-05-30T13:40:45.427Z">2026-05-30T13:40:45.427Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>36	
+37	**Provided services** are declared explicitly with a
+38	`[ProvidesService(typeof(IFoo))]` attribute on the plugin class. The
+39	plugin also provides a static `ConfigureServices(IServiceCollection)`
+40	method to perform the actual DI registration. The attribute tells the
+41	dependency sorter which plugin provides which service; the method does
+42	the wiring.
+43	
+44	**Consumed services** are discovered automatically by inspecting the
+45	plugin&#x27;s constructor parameters. Any parameter whose type is not a
+46	core service (not `IBot`, `IOptions&lt;T&gt;`, `ILogger&lt;T&gt;`, etc.) is
+47	assumed to be a plugin-provided service dependency:
+48	
+49	- **Required**: Non-nullable parameter → the service must be
+50	  registered by another plugin, or startup fails.
+51	- **Optional**: Nullable parameter with a default of `null` → the
+52	  service is used if available but does not block startup.
+53	
+54	Only the providing side needs an attribute. The consuming side is
+55	inferred entirely from constructor signatures — nullability and
+56	default values express optionality naturally. This keeps the common
+57	case (consuming a service) completely boilerplate-free, while keeping
+58	the uncommon case (providing a service) explicit and unambiguous.
+59	
+60	### Explicit Ordering</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-40-51-387Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-40-51-387Z" class="timestamp-link"><time datetime="2026-05-30T13:40:51.387Z" data-timestamp="2026-05-30T13:40:51.387Z">2026-05-30T13:40:51.387Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_017TTdjDtSETzPtxBzaXXB7s">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">003-plugin-service-registry.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/adr/003-plugin-service-registry.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">**Provided services** are declared explicitly with a
+`[ProvidesService(typeof(IFoo))]` attribute on the plugin class. The
+plugin also provides a static `ConfigureServices(IServiceCollection)`
+method to perform the actual DI registration. The attribute tells the
+dependency sorter which plugin provides which service; the method does
+the wiring.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">**Provided services** are declared explicitly with a
+`[ProvidesService(typeof(IFoo))]` attribute on the plugin class. The
+plugin overrides the static `ConfigureServices(IServiceCollection)`
+method defined on `IPlugin` (which has an empty default
+implementation) to perform the actual DI registration. The attribute
+tells the dependency sorter which plugin provides which service; the
+method does the wiring.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-40-51-444Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-40-51-444Z" class="timestamp-link"><time datetime="2026-05-30T13:40:51.444Z" data-timestamp="2026-05-30T13:40:51.444Z">2026-05-30T13:40:51.444Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/adr/003-plugin-service-registry.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-40-54-494Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-40-54-494Z" class="timestamp-link"><time datetime="2026-05-30T13:40:54.494Z" data-timestamp="2026-05-30T13:40:54.494Z">2026-05-30T13:40:54.494Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01KEw8dav1dVi4WLGQvmQy3R"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/adr/003-plugin-service-registry.md&#34;,
+  &#34;offset&#34;: 115,
+  &#34;limit&#34;: 20
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-40-54-524Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-40-54-524Z" class="timestamp-link"><time datetime="2026-05-30T13:40:54.524Z" data-timestamp="2026-05-30T13:40:54.524Z">2026-05-30T13:40:54.524Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>115	
+116	## Consequences
+117	
+118	- Plugin authors use familiar .NET DI patterns for most things.
+119	- Most plugins (consumers) need zero Marv-specific attributes — just
+120	  constructor parameters with standard C# nullability.
+121	- Plugins providing services need `[ProvidesService]` and a
+122	  `ConfigureServices` method — explicit but only for the uncommon
+123	  case.
+124	- The `ConfigureServices` method is static and runs before plugin
+125	  instances exist, which means service registration cannot depend on
+126	  runtime state. This is intentional — services should be
+127	  deterministic based on configuration.
+128	- The single-container approach means plugin assemblies must not have
+129	  conflicting type definitions. This is enforced by using a shared
+130	  `AssemblyLoadContext`.
+131	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-40-58-606Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-40-58-606Z" class="timestamp-link"><time datetime="2026-05-30T13:40:58.606Z" data-timestamp="2026-05-30T13:40:58.606Z">2026-05-30T13:40:58.606Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Good, that's fine as-is. Now update the ADR-004 reconnection consequence.</p></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-40-59-142Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-40-59-142Z" class="timestamp-link"><time datetime="2026-05-30T13:40:59.142Z" data-timestamp="2026-05-30T13:40:59.142Z">2026-05-30T13:40:59.142Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>175	  `Marv.Core`, not a plugin concern — plugins just read properties
+176	  normally.
+177	
+178	- The rate limiter prevents any plugin (or combination of plugins)
+179	  from flooding the server, even if multiple plugins send messages
+180	  concurrently.
+181	
+182	- Reconnection is handled by tearing down all tasks and restarting
+183	  them. Plugins are notified via `OnDisconnectedAsync` /
+184	  `OnConnectedAsync`. On disconnection, all state is discarded:
+185	  pending `SendAndAwaitAsync` calls are cancelled (their
+186	  `TaskCompletionSource` is faulted with a disconnection exception),
+187	  outbound message queues are cleared, and channel/user state stores
+188	  are reset. Plugins should treat `OnDisconnectedAsync` as a signal
+189	  that any cached state references (`IChannel`, `IUser`) are stale.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-40-59-095Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-40-59-095Z" class="timestamp-link"><time datetime="2026-05-30T13:40:59.095Z" data-timestamp="2026-05-30T13:40:59.095Z">2026-05-30T13:40:59.095Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01B5c8wmcwpiC9uts7j1Qv1X"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/adr/004-async-model.md&#34;,
+  &#34;offset&#34;: 175,
+  &#34;limit&#34;: 15
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-41-05-949Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-41-05-949Z" class="timestamp-link"><time datetime="2026-05-30T13:41:05.949Z" data-timestamp="2026-05-30T13:41:05.949Z">2026-05-30T13:41:05.949Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01Hsvc2CGN4kh85fiyksP2Mm">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">004-async-model.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/adr/004-async-model.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">- Reconnection is handled by tearing down all tasks and restarting
+  them. Plugins are notified via `OnDisconnectedAsync` /
+  `OnConnectedAsync`. On disconnection, all state is discarded:
+  pending `SendAndAwaitAsync` calls are cancelled (their
+  `TaskCompletionSource` is faulted with a disconnection exception),
+  outbound message queues are cleared, and channel/user state stores
+  are reset. Plugins should treat `OnDisconnectedAsync` as a signal
+  that any cached state references (`IChannel`, `IUser`) are stale.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">- Reconnection is handled by tearing down all tasks and
+  reinstantiating all plugins. On disconnection, plugins receive
+  `OnDisconnectedAsync` then `OnUnloadAsync`, and all state is
+  discarded: pending `SendAndAwaitAsync` calls are cancelled (their
+  `TaskCompletionSource` is faulted with a disconnection exception),
+  outbound message queues are cleared, and channel/user state stores
+  are reset. Plugin and handler group instances are discarded and
+  fresh instances are created via `ActivatorUtilities`. This
+  eliminates any possibility of stale references surviving a
+  reconnection.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-41-05-973Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-41-05-973Z" class="timestamp-link"><time datetime="2026-05-30T13:41:05.973Z" data-timestamp="2026-05-30T13:41:05.973Z">2026-05-30T13:41:05.973Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/adr/004-async-model.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-41-09-243Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-41-09-243Z" class="timestamp-link"><time datetime="2026-05-30T13:41:09.243Z" data-timestamp="2026-05-30T13:41:09.243Z">2026-05-30T13:41:09.243Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now commit.</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-41-15-302Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-41-15-302Z" class="timestamp-link"><time datetime="2026-05-30T13:41:15.302Z" data-timestamp="2026-05-30T13:41:15.302Z">2026-05-30T13:41:15.302Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01XqQyiXdx8mZKoc5nzjWznn">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit ConfigureServices and reinstantiation changes</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add docs/adr/003-plugin-service-registry.md docs/adr/004-async-model.md docs/architecture.md docs/plugin-api-draft.md docs/prompts.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Move ConfigureServices to IPlugin, reinstantiate plugins on reconnect
+
+- ConfigureServices is now a static virtual method on IPlugin with an
+  empty default implementation. Plugins override it to register services.
+- Plugins and handler groups are NOT registered in the DI container.
+  They are created via ActivatorUtilities (through IPluginActivator).
+- On reconnection, plugin instances are discarded and reinstantiated,
+  eliminating any possibility of stale references.
+- Core only calls HandleEventAsync on plugins, never on handler groups.
+  MarvPlugin owns handler group creation, lifecycle, and dispatch.
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-30T13-44-13-843Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-30T13-44-13-843Z" class="timestamp-link"><time datetime="2026-05-30T13:44:13.843Z" data-timestamp="2026-05-30T13:44:13.843Z">2026-05-30T13:44:13.843Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">6e904ea</span> Move ConfigureServices to IPlugin, reinstantiate plugins on reconnect</div><pre>5 files changed, 78 insertions(+), 52 deletions(-)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-30T13-44-22-315Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-30T13-44-22-315Z" class="timestamp-link"><time datetime="2026-05-30T13:44:22.315Z" data-timestamp="2026-05-30T13:44:22.315Z">2026-05-30T13:44:22.315Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Done. Three changes:</p>
+<ol>
+<li>
+<p><strong><code>ConfigureServices</code></strong> — now a <code>static virtual</code> method on <code>IPlugin</code> with an empty default. Plugins providing services override it; others don't touch it.</p>
+</li>
+<li>
+<p><strong>No DI registration for plugins/handler groups</strong> — created via <code>ActivatorUtilities</code> instead. On reconnection, instances are discarded and recreated fresh, so no stale references can survive.</p>
+</li>
+<li>
+<p><strong>Core doesn't touch handler groups</strong> — the core only calls <code>HandleEventAsync</code> on the <code>IPlugin</code>. <code>MarvPlugin</code> owns handler group creation, lifecycle forwarding, and event dispatch internally.</p>
+</li>
+</ol></div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-003.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<span class="current">4</span>
+<span class="disabled">Next &rarr;</span>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,2638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 1</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 1/1</h1>
+        
+
+<div class="pagination"><a href="index.html" class="index-link">Index</a></div>
+
+        
+<div class="message user" id="msg-2026-06-10T09-28-49-050Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-10T09-28-49-050Z" class="timestamp-link"><time datetime="2026-06-10T09:28:49.050Z" data-timestamp="2026-06-10T09:28:49.050Z">2026-06-10T09:28:49.050Z</time></a></div><div class="message-content">
+<div class="user-content"><p>I've collected a few feature requests from downstream; I'd like you to create change specifications for each of them:
+- Add a statistics property on the bot (gather uptime, bytes/lines sent/received, commands executed, etc)
+- Add support for managing the bot's message queue (check how many items are in the queue, clear the queue)
+- Update the plugin API documentation to note that the full IOptions API is available, including IOptionsMonitor
+- Allow user to override the CTCP version response (should this be done by a config option, writing a property on IBot, subclassing IrcBot, etc?)
+- Implement SendAndAwaitAsync fallback support for messages like WHO which have an ENDOF* message</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-28-52-571Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-28-52-571Z" class="timestamp-link"><time datetime="2026-06-10T09:28:52.571Z" data-timestamp="2026-06-10T09:28:52.571Z">2026-06-10T09:28:52.571Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>I'll start by reading the existing change specs to understand the format and current numbering.</p></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-28-53-285Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-28-53-285Z" class="timestamp-link"><time datetime="2026-06-10T09:28:53.285Z" data-timestamp="2026-06-10T09:28:53.285Z">2026-06-10T09:28:53.285Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre># Change Specifications
+
+Actionable change specifications derived from downstream plugin project
+feedback (`docs/downstream_suggestions/`). Each spec is a self-contained
+document describing a single change or closely related group of changes.
+
+Specs are numbered in recommended implementation order.
+
+## Index
+
+| # | Spec | Scope | Complexity | Dependencies | Status |
+|---|---|---|---|---|---|
+| 1 | [Command Prefix Configuration](001-command-prefix-config.md) | Core | Small | None | **Done** |
+| 2 | [IHttpClientFactory Registration](002-httpclient-registration.md) | Host | Trivial | None | **Done** |
+| 3 | [Handler Dispatch Filters](003-handler-dispatch-filters.md) | Core | Small | None | **Done** |
+| 4 | [Bulk Channel Join](004-bulk-channel-join.md) | Core | Small-Medium | None | **Done** |
+| 5 | [Handler Filter Pipeline](005-handler-filter-pipeline.md) | Core | Medium | #3 | **Done** |
+| 6 | [Test Infrastructure](006-test-infrastructure.md) | New package | Medium | None | **Done** |
+| 7 | [Plugin API Documentation](007-plugin-api-documentation.md) | Docs | Medium | None | **Done** |
+| 8 | [Example Plugin](008-example-plugin.md) | Examples | Medium | #3, #5 | **Done** |
+| 9 | [Bot Action Methods](009-bot-action-methods.md) | Core | Small-Medium | None | **Done** |
+| 10 | [Case Mapping for Plugins](010-casemapping-for-plugins.md) | Core | Small | None | **Done** |
+| 11 | [Plugin Loading Robustness](011-plugin-loading-robustness.md) | Core | Medium-Large | None | **Done** |
+
+| 12 | [Dockerfile Sample Plugin Inclusion](012-dockerfile-sample-plugins.md) | Dockerfile | Small | None | **Done** |
+| 13 | [Docker Action Build Caching](013-docker-action-caching.md) | CI/CD | Small | None | **Done** |
+| 14 | [Release Notes from CHANGELOG.md](014-release-notes-from-changelog.md) | CI/CD | Small | None | **Done** |
+| 15 | [Regex Options for OnRegex](015-onregex-options.md) | Core | Small | None | **Done** |
+| 16 | [Extract BatchChannels to Utility](016-batch-channels-utility.md) | Core | Trivial | None | **Done** |
+| 17 | [Common HandlerContext Base Class](017-common-handler-context.md) | Core | Small-Medium | None | **Done** |
+| 18 | [Remove PluginType from HandlerGroup](018-remove-handlergroup-plugintype.md) | Core | Small | None | **Done** |
+| 19 | [JSON5 Configuration Parser](019-json5-config-parser.md) | Host | Small-Medium | None | **Done** |
+
+Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
+Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
+Specs 12-14 are CI/CD and infrastructure changes. Specs 15-19 are code changes.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-28-53-049Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-28-53-049Z" class="timestamp-link"><time datetime="2026-06-10T09:28:53.049Z" data-timestamp="2026-06-10T09:28:53.049Z">2026-06-10T09:28:53.049Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_013YPgUeMB51FSPBzqKfYGU7">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">ls /workspaces/marv/docs/change_specs/</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-28-53-115Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-28-53-115Z" class="timestamp-link"><time datetime="2026-06-10T09:28:53.115Z" data-timestamp="2026-06-10T09:28:53.115Z">2026-06-10T09:28:53.115Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01CJ9jKm6Apdr5EmE66dftsK">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cat /workspaces/marv/docs/change_specs/README.md</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-28-53-266Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-28-53-266Z" class="timestamp-link"><time datetime="2026-06-10T09:28:53.266Z" data-timestamp="2026-06-10T09:28:53.266Z">2026-06-10T09:28:53.266Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>001-command-prefix-config.md
+002-httpclient-registration.md
+003-handler-dispatch-filters.md
+004-bulk-channel-join.md
+005-handler-filter-pipeline.md
+006-test-infrastructure.md
+007-plugin-api-documentation.md
+008-example-plugin.md
+009-bot-action-methods.md
+010-casemapping-for-plugins.md
+011-plugin-loading-robustness.md
+012-dockerfile-sample-plugins.md
+013-docker-action-caching.md
+014-release-notes-from-changelog.md
+015-onregex-options.md
+016-batch-channels-utility.md
+017-common-handler-context.md
+018-remove-handlergroup-plugintype.md
+019-json5-config-parser.md
+README.md</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-28-56-777Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-28-56-777Z" class="timestamp-link"><time datetime="2026-06-10T09:28:56.777Z" data-timestamp="2026-06-10T09:28:56.777Z">2026-06-10T09:28:56.777Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01XG4M2WD7euH3mXuuimj1om"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/019-json5-config-parser.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-28-56-787Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-28-56-787Z" class="timestamp-link"><time datetime="2026-06-10T09:28:56.787Z" data-timestamp="2026-06-10T09:28:56.787Z">2026-06-10T09:28:56.787Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01Kovy4tjQSzXG132YDVJ2th"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/009-bot-action-methods.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-28-56-808Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-28-56-808Z" class="timestamp-link"><time datetime="2026-06-10T09:28:56.808Z" data-timestamp="2026-06-10T09:28:56.808Z">2026-06-10T09:28:56.808Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# CS-019: JSON5 Configuration Parser — COMPLETED
+2	
+3	**Source:** `TODO.md` item 9
+4	**Scope:** Marv (host application)
+5	**Complexity:** Trivial
+6	**Breaking changes:** None
+7	**Status:** Completed
+8	
+9	---
+10	
+11	## Problem
+12	
+13	The JSON configuration parser uses `Microsoft.Extensions.Configuration`&#x27;s
+14	built-in `AddJsonFile`, which only supports strict JSON (RFC 8259). This
+15	means configuration files cannot contain:
+16	
+17	- Comments (single-line `//` or block `/* */`)
+18	- Trailing commas after the last element in arrays/objects
+19	- Unquoted keys
+20	- Single-quoted strings
+21	- Multiline strings
+22	
+23	Comments are the most impactful limitation. Operators commonly want to
+24	annotate their configuration files with explanations, comment out
+25	sections for debugging, or leave notes about non-obvious settings. YAML
+26	configuration already supports comments, but JSON is the default format
+27	(the example config is `marv.example.json` and the default is
+28	`marv.json`).
+29	
+30	## Decisions
+31	
+32	- Use the [`Json5.Configuration`](https://www.nuget.org/packages/Json5.Configuration)
+33	  NuGet package, which provides `AddJson5File` — a drop-in replacement
+34	  for `AddJsonFile` with full JSON5 support.
+35	- Handle both `.json` and `.json5` extensions via `AddJson5File`, since
+36	  JSON5 is a strict superset of JSON. Existing valid JSON files continue
+37	  to work unchanged.
+38	- The default configuration filename remains `marv.json`.
+39	
+40	## Changes
+41	
+42	### 1. Add the `Json5.Configuration` NuGet package to `Marv.csproj`
+43	
+44	```xml
+45	&lt;PackageReference Include=&quot;Json5.Configuration&quot; Version=&quot;1.0.4&quot; /&gt;
+46	```
+47	
+48	### 2. Update `AddConfigFile` in `Program.cs`
+49	
+50	Replace `AddJsonFile` with `AddJson5File` for JSON files, and add
+51	`.json5` as a supported extension:
+52	
+53	```csharp
+54	using Json5;
+55	
+56	static void AddConfigFile(IConfigurationBuilder config, string path, bool required)
+57	{
+58	    var extension = Path.GetExtension(path).ToLowerInvariant();
+59	
+60	    switch (extension)
+61	    {
+62	        case &quot;.json&quot; or &quot;.json5&quot;:
+63	            config.AddJson5File(path, optional: !required, reloadOnChange: false);
+64	            break;
+65	        case &quot;.yaml&quot; or &quot;.yml&quot;:
+66	            config.AddYamlFile(path, optional: !required, reloadOnChange: false);
+67	            break;
+68	        case &quot;.xml&quot;:
+69	            config.AddXmlFile(path, optional: !required, reloadOnChange: false);
+70	            break;
+71	        default:
+72	            throw new InvalidOperationException(
+73	                $&quot;Unsupported configuration file format: &#x27;{extension}&#x27;. &quot; +
+74	                &quot;Supported formats: .json, .json5, .yaml, .yml, .xml&quot;);
+75	    }
+76	}
+77	```
+78	
+79	### 3. Update `marv.example.json`
+80	
+81	Add comments to the example configuration to demonstrate the feature:
+82	
+83	```json
+84	{
+85	    // Connection settings
+86	    &quot;Server&quot;: &quot;irc.example.com&quot;,
+87	    &quot;Port&quot;: 6697,
+88	    &quot;UseTls&quot;: true,
+89	
+90	    // Bot identity
+91	    &quot;Nick&quot;: &quot;Marv&quot;,
+92	
+93	    // Channels to join on connect
+94	    &quot;Channels&quot;: [
+95	        &quot;#general&quot;,
+96	        &quot;#dev&quot;,
+97	    ],
+98	
+99	    &quot;CommandPrefix&quot;: &quot;!&quot;,
+100	    &quot;PluginDirectories&quot;: [&quot;plugins&quot;],
+101	    &quot;Plugins&quot;: [&quot;Greet&quot;],
+102	}
+103	```
+104	
+105	## Design decisions
+106	
+107	**Why `Json5.Configuration` instead of a custom provider?** The package
+108	provides exactly what we need — `AddJson5File` as a drop-in `AddJsonFile`
+109	replacement with full JSON5 support (comments, trailing commas, unquoted
+110	keys, single-quoted strings, etc.). Implementing our own provider would
+111	duplicate work that&#x27;s already been done and tested. The package is from
+112	[devlooped](https://github.com/devlooped/json5), a reputable open-source
+113	maintainer, targets .NET 8+ and is compatible with .NET 10.
+114	
+115	**Why not just recommend YAML?** YAML is already supported and handles
+116	comments natively. However, JSON is the default format, the example config
+117	is JSON, and many operators prefer JSON&#x27;s explicit syntax. Telling users
+118	&quot;switch to YAML for comments&quot; is a workaround, not a solution.
+119	
+120	**Why support `.json5` as an extension?** Some users may prefer to use the
+121	`.json5` extension to signal that the file uses JSON5 features, and some
+122	editors provide better syntax highlighting for `.json5` files. Supporting
+123	both costs nothing since the parser handles both.
+124	
+125	## Testing
+126	
+127	- **Regression test:** Verify that existing `marv.example.json` continues
+128	  to load correctly through `AddJson5File`.
+129	- **Integration test:** Load a configuration file containing comments and
+130	  trailing commas and verify the resulting `MarvConfiguration` properties
+131	  are correct.
+132	
+133	## Impact
+134	
+135	- **Configuration:** JSON config files now support all JSON5 features.
+136	  Existing valid JSON files work without changes.
+137	- **Dependencies:** Adds `Json5.Configuration` (which depends on `Json5`
+138	  and `Microsoft.Extensions.Configuration.FileExtensions`).
+139	- **Plugin API:** No changes.
+140	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-28-56-811Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-28-56-811Z" class="timestamp-link"><time datetime="2026-06-10T09:28:56.811Z" data-timestamp="2026-06-10T09:28:56.811Z">2026-06-10T09:28:56.811Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# CS-009: Bot Action Convenience Methods — COMPLETED
+2	
+3	**Source:** Plugin DX feedback
+4	**Scope:** Core (IBot interface)
+5	**Complexity:** Small-Medium
+6	**Breaking changes:** Additive only (new interface members with default
+7	implementations)
+8	**Status:** Completed
+9	
+10	---
+11	
+12	## Problem
+13	
+14	Plugins that need to perform common IRC actions beyond messaging — kicking
+15	users, setting modes, changing topics, sending invites — must construct raw
+16	`IrcMessage` objects and call `SendRawAsync`:
+17	
+18	```csharp
+19	await Bot.SendRawAsync(new IrcMessage(&quot;KICK&quot;, [channel, nick, reason]), ct);
+20	await Bot.SendRawAsync(new IrcMessage(&quot;MODE&quot;, [channel, &quot;+o&quot;, nick]), ct);
+21	await Bot.SendRawAsync(new IrcMessage(&quot;TOPIC&quot;, [channel, newTopic]), ct);
+22	await Bot.SendRawAsync(new IrcMessage(&quot;INVITE&quot;, [nick, channel]), ct);
+23	```
+24	
+25	This is error-prone (parameter ordering varies by command, easy to forget
+26	trailing parameters) and forces plugin authors to know IRC protocol details
+27	that the bot should abstract away. The existing `JoinAsync`, `PartAsync`,
+28	`SendMessageAsync` etc. demonstrate the expected abstraction level — these
+29	actions are simply missing from it.
+30	
+31	## Changes
+32	
+33	### 1. Add action methods to `IBot`
+34	
+35	```csharp
+36	// Channel management
+37	Task SetTopicAsync(string channel, string topic, CancellationToken ct);
+38	Task InviteAsync(string nick, string channel, CancellationToken ct);
+39	
+40	// Moderation
+41	Task KickAsync(string channel, string nick, string? reason, CancellationToken ct);
+42	Task SetModeAsync(string target, string modeString, CancellationToken ct);
+43	Task SetModeAsync(string target, string modeString, string parameter, CancellationToken ct);
+44	
+45	// Prefix-mode shortcuts (op, voice, etc.)
+46	Task GiveOpAsync(string channel, string nick, CancellationToken ct);
+47	Task RemoveOpAsync(string channel, string nick, CancellationToken ct);
+48	Task GiveVoiceAsync(string channel, string nick, CancellationToken ct);
+49	Task RemoveVoiceAsync(string channel, string nick, CancellationToken ct);
+50	
+51	// Nick
+52	Task ChangeNickAsync(string newNick, CancellationToken ct);
+53	```
+54	
+55	Each method constructs the correct `IrcMessage` internally and sends it
+56	through the existing write pipeline (throttle-aware, thread-safe).
+57	
+58	### 2. Implement in `IrcBot`
+59	
+60	All methods delegate to the existing `SendRawAsync` path. No new protocol
+61	handling or state tracking required — the inbound message processor already
+62	handles the server&#x27;s responses to these commands (TOPIC replies update
+63	`IChannel.Topic`, MODE replies update `IChannel.Modes`, etc.).
+64	
+65	`SetModeAsync` takes a target (channel name or nick) and a mode string
+66	like `&quot;+b&quot;` or `&quot;-i&quot;` plus an optional parameter. Works for both channel
+67	modes and user modes (e.g. `Bot.Self.Nick, &quot;+i&quot;`). For multi-mode
+68	changes (`&quot;+bb mask1 mask2&quot;`), plugins can use the single-parameter
+69	overload with the full mode string, or call `SendRawAsync` directly.
+70	
+71	`GiveOpAsync` / `RemoveOpAsync` / `GiveVoiceAsync` / `RemoveVoiceAsync`
+72	are thin wrappers around `SetModeAsync` that look up the correct
+73	mode character from `IServerInfo.Prefix`. Most servers use `o` for op and
+74	`v` for voice, but the PREFIX ISUPPORT token is authoritative — some
+75	servers use additional prefix modes like `a` (admin), `h` (halfop), or
+76	`q` (owner). These four methods cover the two universally-supported
+77	prefix modes. Plugins needing other prefix modes (halfop, etc.) can use
+78	`SetModeAsync` directly with the mode character from
+79	`Bot.ServerInfo.Prefix`.
+80	
+81	### 3. Update MockBot (Marv.Testing)
+82	
+83	`MockBot.Create()` already returns an NSubstitute mock of `IBot`, so the
+84	new methods are automatically stubbed. No changes needed unless we want
+85	to add verification helpers.
+86	
+87	### 4. Update PLUGIN_API.md
+88	
+89	Add the new methods to the IBot table in §5.
+90	
+91	## Design decisions
+92	
+93	**Why not a fluent builder or ModeBuilder?** The raw
+94	`SetModeAsync(channel, modeString, param)` covers the common
+95	single-mode case cleanly. Multi-mode changes are uncommon enough that
+96	`SendRawAsync` is acceptable. A builder would add API surface without
+97	proportional value.
+98	
+99	**Why only op/voice shortcuts, not halfop/admin/owner?** Op (`o`) and
+100	voice (`v`) are present in every server&#x27;s PREFIX. Other prefix modes are
+101	server-specific and less commonly needed. Plugins targeting those can use
+102	`SetModeAsync` with the mode character looked up from
+103	`Bot.ServerInfo.Prefix`.
+104	
+105	**Why not WHOIS/WHO?** These are query commands that return multi-line
+106	responses. They&#x27;re better served by `SendAndAwaitAsync` which already
+107	handles labeled-response correlation. Adding typed wrappers for queries
+108	is a separate concern.
+109	
+110	**Default interface implementations?** No — `IBot` has a single
+111	implementation (`IrcBot`), and default implementations would just call
+112	`SendRawAsync` which is already on the interface. Implementing directly
+113	in `IrcBot` is simpler and avoids the DIM complexity.
+114	
+115	## Impact
+116	
+117	- **Plugin DX:** Common moderation and channel management actions become
+118	  single method calls instead of raw protocol construction.
+119	- **Safety:** Correct parameter ordering is enforced by the method
+120	  signature rather than relying on the plugin author to remember it.
+121	- **API surface:** 10 new methods on `IBot`. All are thin wrappers.
+122	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-28-59-764Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-28-59-764Z" class="timestamp-link"><time datetime="2026-06-10T09:28:59.764Z" data-timestamp="2026-06-10T09:28:59.764Z">2026-06-10T09:28:59.764Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-00-356Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-00-356Z" class="timestamp-link"><time datetime="2026-06-10T09:29:00.356Z" data-timestamp="2026-06-10T09:29:00.356Z">2026-06-10T09:29:00.356Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Let me explore the relevant code to write informed specs.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-01-278Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-01-278Z" class="timestamp-link"><time datetime="2026-06-10T09:29:01.278Z" data-timestamp="2026-06-10T09:29:01.278Z">2026-06-10T09:29:01.278Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01MqPzmhSxRTkqCc4TSNNpnT">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;SendAndAwaitAsync&#34; /workspaces/marv/src/ --include=&#34;*.cs&#34; | head -30</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-01-619Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-01-619Z" class="timestamp-link"><time datetime="2026-06-10T09:29:01.619Z" data-timestamp="2026-06-10T09:29:01.619Z">2026-06-10T09:29:01.619Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/plugins/Marv.Plugins.Moderation/ModerationAdminCommands.cs:10:/// classes, DM-only commands, raw message handling, and &lt;see cref=&quot;IBot.SendAndAwaitAsync&quot;/&gt;.
+/workspaces/marv/src/plugins/Marv.Plugins.Moderation/ModerationAdminCommands.cs:51:    /// Queries WHO information for a nick. Demonstrates &lt;see cref=&quot;IBot.SendAndAwaitAsync&quot;/&gt;
+/workspaces/marv/src/plugins/Marv.Plugins.Moderation/ModerationAdminCommands.cs:64:        var replies = await _bot.SendAndAwaitAsync(
+/workspaces/marv/src/Marv.Core/Platform/IBot.cs:110:    Task&lt;IReadOnlyList&lt;IrcMessage&gt;&gt; SendAndAwaitAsync(IrcMessage message, CancellationToken ct);
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:241:    public async Task&lt;IReadOnlyList&lt;IrcMessage&gt;&gt; SendAndAwaitAsync(IrcMessage message, CancellationToken ct)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-02-276Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-02-276Z" class="timestamp-link"><time datetime="2026-06-10T09:29:02.276Z" data-timestamp="2026-06-10T09:29:02.276Z">2026-06-10T09:29:02.276Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01FFteQiGKB9rvEJhuQFmdgV">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;IBot&#34; /workspaces/marv/src/Marv.Core/IBot.cs | head -5; echo &#34;---&#34;; cat /workspaces/marv/src/Marv.Core/IBot.cs</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-02-317Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-02-317Z" class="timestamp-link"><time datetime="2026-06-10T09:29:02.317Z" data-timestamp="2026-06-10T09:29:02.317Z">2026-06-10T09:29:02.317Z</time></a></div><div class="message-content"><div class="tool-result tool-error"><div class="truncatable"><div class="truncatable-content"><pre>Exit code 1
+ugrep: warning: /workspaces/marv/src/Marv.Core/IBot.cs: No such file or directory
+---
+cat: /workspaces/marv/src/Marv.Core/IBot.cs: No such file or directory</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-02-822Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-02-822Z" class="timestamp-link"><time datetime="2026-06-10T09:29:02.822Z" data-timestamp="2026-06-10T09:29:02.822Z">2026-06-10T09:29:02.822Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01JR4xMhSgAJZRU1iu8JRrMB">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;CTCP\|CtcpVersion\|VERSION&#34; /workspaces/marv/src/ --include=&#34;*.cs&#34; | head -20</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-03-021Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-03-021Z" class="timestamp-link"><time datetime="2026-06-10T09:29:03.021Z" data-timestamp="2026-06-10T09:29:03.021Z">2026-06-10T09:29:03.021Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/Marv.Core/Platform/IBot.cs:24:    /// &lt;summary&gt;Sends a CTCP ACTION to the specified target.&lt;/summary&gt;
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:852:        // Check for CTCP
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:903:            case &quot;VERSION&quot;:
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:905:                    $&quot;\x01VERSION Marv IRC Bot {MarvVersion.Current}\x01&quot;]), ct);
+/workspaces/marv/src/Marv.Core/Events/MessageEvents.cs:43:/// &lt;summary&gt;Raised when a CTCP ACTION (/me) is received.&lt;/summary&gt;
+/workspaces/marv/src/Marv.Core/Events/MessageEvents.cs:60:/// Raised for CTCP queries not handled by the core (VERSION, PING, TIME are handled internally).
+/workspaces/marv/src/Marv.Core/Events/MessageEvents.cs:65:    /// &lt;summary&gt;The user who sent the CTCP query.&lt;/summary&gt;
+/workspaces/marv/src/Marv.Core/Events/MessageEvents.cs:68:    /// &lt;summary&gt;The CTCP command name (e.g. &quot;SOURCE&quot;).&lt;/summary&gt;
+/workspaces/marv/src/Marv.Core/Events/MessageEvents.cs:71:    /// &lt;summary&gt;Arguments after the CTCP command, if any.&lt;/summary&gt;</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-03-990Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-03-990Z" class="timestamp-link"><time datetime="2026-06-10T09:29:03.990Z" data-timestamp="2026-06-10T09:29:03.990Z">2026-06-10T09:29:03.990Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01Awk8yquPiGi53azxCKNKPQ">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;MessageQueue\|_writeQueue\|_sendQueue\|_outgoing\|WriteChannel\|SendQueue&#34; /workspaces/marv/src/ --include=&#34;*.cs&#34; | head -20</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-04-345Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-04-345Z" class="timestamp-link"><time datetime="2026-06-10T09:29:04.345Z" data-timestamp="2026-06-10T09:29:04.345Z">2026-06-10T09:29:04.345Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>(Bash completed with no output)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-14-604Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-14-604Z" class="timestamp-link"><time datetime="2026-06-10T09:29:14.604Z" data-timestamp="2026-06-10T09:29:14.604Z">2026-06-10T09:29:14.604Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01XTCDwEoXniyCn3CANgfitk"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Platform/IBot.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-14-653Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-14-653Z" class="timestamp-link"><time datetime="2026-06-10T09:29:14.653Z" data-timestamp="2026-06-10T09:29:14.653Z">2026-06-10T09:29:14.653Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using Marv.Core.Protocol;
+2	
+3	namespace Marv.Core.Platform;
+4	
+5	/// &lt;summary&gt;
+6	/// The primary interface plugins interact with. Provides methods for sending messages,
+7	/// querying channel/user state, and checking capability availability.
+8	/// All Send*Async methods are thread-safe and can be called from any context.
+9	/// &lt;/summary&gt;
+10	public interface IBot
+11	{
+12	    /// &lt;summary&gt;The bot&#x27;s own user identity.&lt;/summary&gt;
+13	    IUser Self { get; }
+14	
+15	    /// &lt;summary&gt;The configured command prefix (e.g. &quot;!&quot;).&lt;/summary&gt;
+16	    string CommandPrefix { get; }
+17	
+18	    /// &lt;summary&gt;Sends a PRIVMSG to the specified target (channel or nick).&lt;/summary&gt;
+19	    Task SendMessageAsync(string target, string text, CancellationToken ct);
+20	
+21	    /// &lt;summary&gt;Sends a NOTICE to the specified target (channel or nick).&lt;/summary&gt;
+22	    Task SendNoticeAsync(string target, string text, CancellationToken ct);
+23	
+24	    /// &lt;summary&gt;Sends a CTCP ACTION to the specified target.&lt;/summary&gt;
+25	    Task SendActionAsync(string target, string text, CancellationToken ct);
+26	
+27	    /// &lt;summary&gt;Sends a raw IRC message through the connection.&lt;/summary&gt;
+28	    Task SendRawAsync(IrcMessage message, CancellationToken ct);
+29	
+30	    /// &lt;summary&gt;Joins a channel, optionally with a key.&lt;/summary&gt;
+31	    Task JoinAsync(string channel, string? key, CancellationToken ct);
+32	
+33	    /// &lt;summary&gt;
+34	    /// Joins multiple channels in a single IRC JOIN command.
+35	    /// Channel names are comma-separated per RFC 2812. Automatically
+36	    /// batches into multiple commands if the channel list exceeds the
+37	    /// 512-byte IRC line length limit. Channels with keys should use
+38	    /// &lt;see cref=&quot;JoinAsync&quot;/&gt; individually.
+39	    /// &lt;/summary&gt;
+40	    Task JoinMultipleAsync(IReadOnlyList&lt;string&gt; channels, CancellationToken ct);
+41	
+42	    /// &lt;summary&gt;Parts (leaves) a channel, optionally with a reason.&lt;/summary&gt;
+43	    Task PartAsync(string channel, string? reason, CancellationToken ct);
+44	
+45	    /// &lt;summary&gt;Kicks a user from a channel, optionally with a reason.&lt;/summary&gt;
+46	    Task KickAsync(string channel, string nick, string? reason, CancellationToken ct);
+47	
+48	    /// &lt;summary&gt;Sets or changes the topic of a channel.&lt;/summary&gt;
+49	    Task SetTopicAsync(string channel, string topic, CancellationToken ct);
+50	
+51	    /// &lt;summary&gt;Invites a user to a channel.&lt;/summary&gt;
+52	    Task InviteAsync(string nick, string channel, CancellationToken ct);
+53	
+54	    /// &lt;summary&gt;
+55	    /// Sets a mode on a channel or user. The mode string should include the
+56	    /// +/- prefix (e.g. &quot;+i&quot;, &quot;-b&quot;). For user modes, pass the bot&#x27;s own nick
+57	    /// as the target.
+58	    /// &lt;/summary&gt;
+59	    Task SetModeAsync(string target, string modeString, CancellationToken ct);
+60	
+61	    /// &lt;summary&gt;
+62	    /// Sets a mode on a channel or user with a parameter (e.g. &quot;+b&quot;, &quot;nick!*@*&quot;).
+63	    /// &lt;/summary&gt;
+64	    Task SetModeAsync(string target, string modeString, string parameter, CancellationToken ct);
+65	
+66	    /// &lt;summary&gt;Gives operator status (+o) to a user in a channel.&lt;/summary&gt;
+67	    Task GiveOpAsync(string channel, string nick, CancellationToken ct);
+68	
+69	    /// &lt;summary&gt;Removes operator status (-o) from a user in a channel.&lt;/summary&gt;
+70	    Task RemoveOpAsync(string channel, string nick, CancellationToken ct);
+71	
+72	    /// &lt;summary&gt;Gives voice status (+v) to a user in a channel.&lt;/summary&gt;
+73	    Task GiveVoiceAsync(string channel, string nick, CancellationToken ct);
+74	
+75	    /// &lt;summary&gt;Removes voice status (-v) from a user in a channel.&lt;/summary&gt;
+76	    Task RemoveVoiceAsync(string channel, string nick, CancellationToken ct);
+77	
+78	    /// &lt;summary&gt;Changes the bot&#x27;s nickname.&lt;/summary&gt;
+79	    Task ChangeNickAsync(string newNick, CancellationToken ct);
+80	
+81	    /// &lt;summary&gt;
+82	    /// Dictionary of channels the bot is in, keyed by case-mapped channel name.
+83	    /// &lt;/summary&gt;
+84	    IReadOnlyDictionary&lt;string, IChannel&gt; Channels { get; }
+85	
+86	    /// &lt;summary&gt;
+87	    /// Dictionary of known users, keyed by case-mapped nick.
+88	    /// &lt;/summary&gt;
+89	    IReadOnlyDictionary&lt;string, IUser&gt; Users { get; }
+90	
+91	    /// &lt;summary&gt;
+92	    /// String comparer that uses the server&#x27;s case mapping rules (rfc1459, ascii, etc.)
+93	    /// for comparing nicks and channel names. Defaults to rfc1459 before connection.
+94	    /// Plugins should treat collections built with this comparer as connection-scoped
+95	    /// state — rebuild them in &lt;see cref=&quot;Plugin.IPlugin.OnConnectedAsync&quot;/&gt; since the
+96	    /// comparer instance may change between connections.
+97	    /// &lt;/summary&gt;
+98	    IEqualityComparer&lt;string&gt; CaseComparer { get; }
+99	
+100	    /// &lt;summary&gt;Server configuration from ISUPPORT.&lt;/summary&gt;
+101	    IServerInfo ServerInfo { get; }
+102	
+103	    /// &lt;summary&gt;IRCv3 capability negotiation state.&lt;/summary&gt;
+104	    ICapabilityManager Capabilities { get; }
+105	
+106	    /// &lt;summary&gt;
+107	    /// Sends an IRC command and waits for the server&#x27;s correlated response.
+108	    /// Uses labeled-response to correlate, or falls back to timeout-based correlation.
+109	    /// &lt;/summary&gt;
+110	    Task&lt;IReadOnlyList&lt;IrcMessage&gt;&gt; SendAndAwaitAsync(IrcMessage message, CancellationToken ct);
+111	}
+112	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-15-006Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-15-006Z" class="timestamp-link"><time datetime="2026-06-10T09:29:15.006Z" data-timestamp="2026-06-10T09:29:15.006Z">2026-06-10T09:29:15.006Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01NPNcMoZbPa935Xi3WNVCHK"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs&#34;,
+  &#34;offset&#34;: 230,
+  &#34;limit&#34;: 80
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-15-020Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-15-020Z" class="timestamp-link"><time datetime="2026-06-10T09:29:15.020Z" data-timestamp="2026-06-10T09:29:15.020Z">2026-06-10T09:29:15.020Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>230	    /// &lt;inheritdoc /&gt;
+231	    public async Task ChangeNickAsync(string newNick, CancellationToken ct)
+232	    {
+233	        await SendRawAsync(new IrcMessage(&quot;NICK&quot;, [newNick]), ct);
+234	    }
+235	
+236	    /// &lt;inheritdoc /&gt;
+237	    public IEqualityComparer&lt;string&gt; CaseComparer =&gt;
+238	        CaseMapping.GetComparer(_serverInfo.CaseMapping);
+239	
+240	    /// &lt;inheritdoc /&gt;
+241	    public async Task&lt;IReadOnlyList&lt;IrcMessage&gt;&gt; SendAndAwaitAsync(IrcMessage message, CancellationToken ct)
+242	    {
+243	        if (_capabilityManager.IsNegotiated(Platform.Capabilities.LabeledResponse))
+244	        {
+245	            var label = $&quot;marv-{Interlocked.Increment(ref _labelCounter)}&quot;;
+246	            var tags = new Dictionary&lt;string, string?&gt;(message.Tags) { [&quot;label&quot;] = label };
+247	            var labeled = new IrcMessage(tags.AsReadOnly(), message.Source, message.Command, message.Parameters);
+248	
+249	            var tcs = new TaskCompletionSource&lt;IReadOnlyList&lt;IrcMessage&gt;&gt;(TaskCreationOptions.RunContinuationsAsynchronously);
+250	            _pendingLabels[label] = tcs;
+251	            _labelBuffers[label] = [];
+252	
+253	            await SendRawAsync(labeled, ct);
+254	
+255	            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+256	            timeoutCts.CancelAfter(TimeSpan.FromSeconds(30));
+257	
+258	            try
+259	            {
+260	                return await tcs.Task.WaitAsync(timeoutCts.Token);
+261	            }
+262	            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+263	            {
+264	                _pendingLabels.TryRemove(label, out _);
+265	                _labelBuffers.TryRemove(label, out _);
+266	                throw new TimeoutException($&quot;Timed out waiting for labeled response &#x27;{label}&#x27;.&quot;);
+267	            }
+268	        }
+269	        else
+270	        {
+271	            // Fallback: just send and return empty (no correlation available)
+272	            await SendRawAsync(message, ct);
+273	            return [];
+274	        }
+275	    }
+276	
+277	    // --- Connection lifecycle ---
+278	
+279	    /// &lt;summary&gt;
+280	    /// Connects to the IRC server, performs registration (CAP, NICK, USER),
+281	    /// and runs the message processor until disconnected or cancelled.
+282	    /// &lt;/summary&gt;
+283	    public async Task RunAsync(IrcConnection connection, MarvConfiguration config,
+284	        IReadOnlyList&lt;ChannelWriter&lt;MarvEvent&gt;&gt; eventWriters, CancellationToken ct)
+285	    {
+286	        _connection = connection;
+287	        _config = config;
+288	        _eventWriters = eventWriters;
+289	        _currentNick = config.Nick;
+290	        _saslInProgress = false;
+291	        _pendingCaps.Clear();
+292	
+293	        var comparer = CaseMapping.GetComparer(_serverInfo.CaseMapping);
+294	        _self = new IrcUser(_currentNick, comparer);
+295	        _users.Clear();
+296	        _channels.Clear();
+297	
+298	        _registrationTcs = new TaskCompletionSource&lt;bool&gt;(TaskCreationOptions.RunContinuationsAsynchronously);
+299	        _readyTcs = new TaskCompletionSource&lt;bool&gt;(TaskCreationOptions.RunContinuationsAsynchronously);
+300	        _nickServPending = false;
+301	        _operPending = false;
+302	
+303	        // Send server password before anything else
+304	        if (!string.IsNullOrEmpty(config.ServerPassword))
+305	        {
+306	            await SendRawAsync(new IrcMessage(&quot;PASS&quot;, [config.ServerPassword]), ct);
+307	        }
+308	
+309	        // Begin CAP negotiation and registration</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-15-605Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-15-605Z" class="timestamp-link"><time datetime="2026-06-10T09:29:15.605Z" data-timestamp="2026-06-10T09:29:15.605Z">2026-06-10T09:29:15.605Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01E3Mgfaff7TKUySQTeWD9Co"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs&#34;,
+  &#34;offset&#34;: 840,
+  &#34;limit&#34;: 80
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-15-612Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-15-612Z" class="timestamp-link"><time datetime="2026-06-10T09:29:15.612Z" data-timestamp="2026-06-10T09:29:15.612Z">2026-06-10T09:29:15.612Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>840	
+841	    private async Task HandlePrivmsg(IrcMessage message, CancellationToken ct)
+842	    {
+843	        if (message.Parameters.Count &lt; 2 || message.Source?.Nick is null) return;
+844	
+845	        // Ignore our own messages echoed back via echo-message
+846	        if (_users.Comparer.Equals(message.Source.Nick, _currentNick)) return;
+847	
+848	        var target = message.Parameters[0];
+849	        var text = message.Parameters[1];
+850	        var sender = GetOrCreateUser(message.Source);
+851	
+852	        // Check for CTCP
+853	        if (text.StartsWith(&#x27;\x01&#x27;) &amp;&amp; text.EndsWith(&#x27;\x01&#x27;))
+854	        {
+855	            var ctcpContent = text[1..^1];
+856	            await HandleCtcp(message, sender, target, ctcpContent, ct);
+857	            return;
+858	        }
+859	
+860	        var isChannel = IsChannelName(target);
+861	        IrcChannel? channel = isChannel ? GetChannel(target) : null;
+862	
+863	        var evt = new MessageEvent
+864	        {
+865	            Timestamp = GetTimestamp(message),
+866	            RawMessage = message,
+867	            MessageId = message.Tags.GetValueOrDefault(&quot;msgid&quot;),
+868	            BatchId = message.Tags.GetValueOrDefault(&quot;batch&quot;),
+869	            Channel = channel,
+870	            Sender = sender,
+871	            Text = text,
+872	            ReplyTo = message.Tags.GetValueOrDefault(&quot;+reply&quot;)
+873	        };
+874	
+875	        await FanOutEventAsync(evt, ct);
+876	    }
+877	
+878	    private async Task HandleCtcp(IrcMessage message, IrcUser sender, string target, string ctcpContent, CancellationToken ct)
+879	    {
+880	        var spaceIdx = ctcpContent.IndexOf(&#x27; &#x27;);
+881	        var command = spaceIdx &gt;= 0 ? ctcpContent[..spaceIdx].ToUpperInvariant() : ctcpContent.ToUpperInvariant();
+882	        var args = spaceIdx &gt;= 0 ? ctcpContent[(spaceIdx + 1)..] : null;
+883	
+884	        switch (command)
+885	        {
+886	            case &quot;ACTION&quot;:
+887	                {
+888	                    var isChannel = IsChannelName(target);
+889	                    var channel = isChannel ? GetChannel(target) : null;
+890	                    var evt = new ActionEvent
+891	                    {
+892	                        Timestamp = GetTimestamp(message),
+893	                        RawMessage = message,
+894	                        MessageId = message.Tags.GetValueOrDefault(&quot;msgid&quot;),
+895	                        BatchId = message.Tags.GetValueOrDefault(&quot;batch&quot;),
+896	                        Channel = channel,
+897	                        Sender = sender,
+898	                        Text = args ?? &quot;&quot;
+899	                    };
+900	                    await FanOutEventAsync(evt, ct);
+901	                    break;
+902	                }
+903	            case &quot;VERSION&quot;:
+904	                await SendRawAsync(new IrcMessage(&quot;NOTICE&quot;, [sender.Nick,
+905	                    $&quot;\x01VERSION Marv IRC Bot {MarvVersion.Current}\x01&quot;]), ct);
+906	                break;
+907	            case &quot;PING&quot;:
+908	                await SendRawAsync(new IrcMessage(&quot;NOTICE&quot;, [sender.Nick,
+909	                    $&quot;\x01PING {args ?? &quot;&quot;}\x01&quot;]), ct);
+910	                break;
+911	            case &quot;TIME&quot;:
+912	                await SendRawAsync(new IrcMessage(&quot;NOTICE&quot;, [sender.Nick,
+913	                    $&quot;\x01TIME {DateTimeOffset.UtcNow:R}\x01&quot;]), ct);
+914	                break;
+915	            default:
+916	                {
+917	                    var evt = new CtcpEvent
+918	                    {
+919	                        Timestamp = GetTimestamp(message),</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-19-913Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-19-913Z" class="timestamp-link"><time datetime="2026-06-10T09:29:19.913Z" data-timestamp="2026-06-10T09:29:19.913Z">2026-06-10T09:29:19.913Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_019PNS1SWeR1h3xE6gVXGEXA">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;_writeChannel\|_outbound\|_sendChannel\|WriteAsync.*IrcMessage\|Channel&lt;IrcMessage&gt;&#34; /workspaces/marv/src/Marv.Core/ --include=&#34;*.cs&#34; | head -20</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-20-030Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-20-030Z" class="timestamp-link"><time datetime="2026-06-10T09:29:20.030Z" data-timestamp="2026-06-10T09:29:20.030Z">2026-06-10T09:29:20.030Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/Marv.Core/Irc/IrcConnection.cs:25:    private Channel&lt;IrcMessage&gt;? _inboundChannel;
+/workspaces/marv/src/Marv.Core/Irc/IrcConnection.cs:26:    private Channel&lt;IrcMessage&gt;? _outboundChannel;
+/workspaces/marv/src/Marv.Core/Irc/IrcConnection.cs:46:    public ChannelWriter&lt;IrcMessage&gt; Outbound =&gt; _outboundChannel?.Writer
+/workspaces/marv/src/Marv.Core/Irc/IrcConnection.cs:114:        _outboundChannel = Channel.CreateBounded&lt;IrcMessage&gt;(new BoundedChannelOptions(512)
+/workspaces/marv/src/Marv.Core/Irc/IrcConnection.cs:140:        _outboundChannel?.Writer.TryComplete();
+/workspaces/marv/src/Marv.Core/Irc/IrcConnection.cs:230:        var reader = _outboundChannel!.Reader;</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-21-038Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-21-038Z" class="timestamp-link"><time datetime="2026-06-10T09:29:21.038Z" data-timestamp="2026-06-10T09:29:21.038Z">2026-06-10T09:29:21.038Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01GUQxvxrJr5fMXXmvFJJPzn">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;IOptionsMonitor\|IOptionsSnapshot\|IOptions&lt;&#34; /workspaces/marv/src/ --include=&#34;*.cs&#34; | head -10</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-21-235Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-21-235Z" class="timestamp-link"><time datetime="2026-06-10T09:29:21.235Z" data-timestamp="2026-06-10T09:29:21.235Z">2026-06-10T09:29:21.235Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/plugins/Marv.Plugins.Greet/GreetPlugin.cs:21:        IOptions&lt;GreetPluginConfig&gt; config)
+/workspaces/marv/src/plugins/Marv.Plugins.Moderation/ModerationPlugin.cs:26:        IOptions&lt;ModerationConfig&gt; config)
+/workspaces/marv/src/plugins/Marv.Plugins.Auth/AccountBasedAuthService.cs:10:public class AccountBasedAuthService(IOptions&lt;AuthPluginConfig&gt; config) : IAuthorizationService
+/workspaces/marv/src/Marv.Core/Irc/MarvBotService.cs:32:        IOptions&lt;MarvConfiguration&gt; config,</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-21-347Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-21-347Z" class="timestamp-link"><time datetime="2026-06-10T09:29:21.347Z" data-timestamp="2026-06-10T09:29:21.347Z">2026-06-10T09:29:21.347Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_016wXgNqfcYSsyAkTGFDNgGp"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/PLUGIN_API.md&#34;,
+  &#34;offset&#34;: 1,
+  &#34;limit&#34;: 30
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-21-355Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-21-355Z" class="timestamp-link"><time datetime="2026-06-10T09:29:21.355Z" data-timestamp="2026-06-10T09:29:21.355Z">2026-06-10T09:29:21.355Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# Marv Plugin API Reference
+2	
+3	Quick reference for building Marv plugins. All types are in the `Marv.Core`
+4	namespace unless noted otherwise.
+5	
+6	---
+7	
+8	## 1. Minimal Plugin
+9	
+10	```csharp
+11	using Marv.Core.Platform;
+12	using Marv.Core.Plugin;
+13	using Microsoft.Extensions.Logging;
+14	
+15	public class HelloPlugin : MarvPlugin
+16	{
+17	    public HelloPlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory)
+18	        : base(bot, activator, loggerFactory) { }
+19	
+20	    [OnCommand(&quot;hello&quot;)]
+21	    private async Task HandleHello(CommandContext ctx, CancellationToken ct)
+22	    {
+23	        await ctx.ReplyAsync($&quot;Hi, {ctx.Sender.Nick}!&quot;, ct);
+24	    }
+25	}
+26	```
+27	
+28	The three-parameter constructor (`IBot`, `IPluginActivator`, `ILoggerFactory`)
+29	is the minimum. Add more DI parameters after `ILoggerFactory` as needed (see
+30	§8 and §9).</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-24-467Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-24-467Z" class="timestamp-link"><time datetime="2026-06-10T09:29:24.467Z" data-timestamp="2026-06-10T09:29:24.467Z">2026-06-10T09:29:24.467Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01UzTbgbzbRs3rM2GnbT7Hmx"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Irc/IrcConnection.cs&#34;,
+  &#34;offset&#34;: 100,
+  &#34;limit&#34;: 50
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-24-477Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-24-477Z" class="timestamp-link"><time datetime="2026-06-10T09:29:24.477Z" data-timestamp="2026-06-10T09:29:24.477Z">2026-06-10T09:29:24.477Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>100	            var sslStream = new SslStream(stream, leaveInnerStreamOpen: false);
+101	            await sslStream.AuthenticateAsClientAsync(sslOptions, ct);
+102	            stream = sslStream;
+103	        }
+104	
+105	        _stream = stream;
+106	        _connectionCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+107	
+108	        _inboundChannel = Channel.CreateUnbounded&lt;IrcMessage&gt;(new UnboundedChannelOptions
+109	        {
+110	            SingleReader = true,
+111	            SingleWriter = true
+112	        });
+113	
+114	        _outboundChannel = Channel.CreateBounded&lt;IrcMessage&gt;(new BoundedChannelOptions(512)
+115	        {
+116	            SingleReader = true,
+117	            SingleWriter = false,
+118	            FullMode = BoundedChannelFullMode.Wait
+119	        });
+120	
+121	        _rateLimiter.Reset();
+122	
+123	        var loopCt = _connectionCts.Token;
+124	        _readTask = Task.Run(() =&gt; ReadLoopAsync(loopCt), loopCt);
+125	        _writeTask = Task.Run(() =&gt; WriteLoopAsync(loopCt), loopCt);
+126	
+127	        _logger.LogInformation(&quot;Connected to {Host}:{Port} (TLS: {UseTls})&quot;, host, port, useTls);
+128	    }
+129	
+130	    /// &lt;summary&gt;
+131	    /// Closes the connection and stops the read/write loops.
+132	    /// &lt;/summary&gt;
+133	    public async Task DisconnectAsync()
+134	    {
+135	        if (_connectionCts is not null)
+136	        {
+137	            await _connectionCts.CancelAsync();
+138	        }
+139	
+140	        _outboundChannel?.Writer.TryComplete();
+141	        _inboundChannel?.Writer.TryComplete();
+142	
+143	        if (_readTask is not null)
+144	        {
+145	            try { await _readTask; } catch (OperationCanceledException) { }
+146	        }
+147	
+148	        if (_writeTask is not null)
+149	        {</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-25-452Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-25-452Z" class="timestamp-link"><time datetime="2026-06-10T09:29:25.452Z" data-timestamp="2026-06-10T09:29:25.452Z">2026-06-10T09:29:25.452Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_0151Mur2fUHxnYzpMEx4kumW">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -n &#34;§\|## &#34; /workspaces/marv/docs/PLUGIN_API.md | head -30</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-25-519Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-25-519Z" class="timestamp-link"><time datetime="2026-06-10T09:29:25.519Z" data-timestamp="2026-06-10T09:29:25.519Z">2026-06-10T09:29:25.519Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>8:## 1. Minimal Plugin
+30:§8 and §9).
+34:## 2. Constructor &amp; Base Class
+55:## 3. Handler Attributes
+57:### `[OnCommand(&quot;name&quot;)]` → `Task Handler(CommandContext ctx, CancellationToken ct)`
+69:### `[OnRegex(&quot;pattern&quot;)]` → `Task Handler(RegexMatchContext ctx, CancellationToken ct)`
+78:### `[OnEvent]` → `Task Handler(TEvent evt, CancellationToken ct)`
+82:### `[OnRawMessage(&quot;COMMAND&quot;)]` → `Task Handler(IrcMessage msg, CancellationToken ct)`
+88:### `[OnInterval(Seconds = 30)]` or `[OnInterval(Minutes = 5)]`
+98:## 4. Context Types
+100:### HandlerContext (`Marv.Core.Plugin`) — abstract base
+119:### CommandContext (`Marv.Core.Plugin`) extends HandlerContext
+127:### RegexMatchContext (`Marv.Core.Plugin`) extends HandlerContext
+135:## 5. IBot
+172:## 6. Event Types
+177:### Connection
+186:### Message
+195:### User
+208:### Channel
+218:### Batch
+225:### Raw
+233:## 7. IrcColor &amp; IrcFormat
+258:## 8. Configuration
+286:## 9. Services
+317:## 10. Handler Groups
+344:## 11. Handler Filters
+381:## 12. Testing (Marv.Testing)
+419:## 13. Available Services
+436:are available to dependent plugins in load order (see §9).
+440:## 14. Platform Types Quick Reference</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-25-828Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-25-828Z" class="timestamp-link"><time datetime="2026-06-10T09:29:25.828Z" data-timestamp="2026-06-10T09:29:25.828Z">2026-06-10T09:29:25.828Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_017C6JrssGaKtY1ZnKEM52Ve">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -n &#34;IOptions\|options\|configuration&#34; /workspaces/marv/docs/PLUGIN_API.md</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-25-851Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-25-851Z" class="timestamp-link"><time datetime="2026-06-10T09:29:25.851Z" data-timestamp="2026-06-10T09:29:25.851Z">2026-06-10T09:29:25.851Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>76:| `Options` | `RegexOptions` | `None` | Additional regex options (`Compiled` is always added) |
+167:| `ServerInfo` | `IServerInfo` | ISUPPORT configuration |
+271:2. Inject `IOptions&lt;T&gt;` in your plugin constructor:
+275:    IOptions&lt;GreetConfig&gt; config)
+282:Config binds to a root-level section in the configuration file (e.g. `&quot;Greet&quot;`).
+414:Pass `configureServices:` to register `IOptions&lt;T&gt;` or inter-plugin service
+428:| `IOptions&lt;T&gt;` | Config for `[PluginConfig]` types |
+429:| `IServerInfo` | ISUPPORT configuration |
+433:| `IConfiguration` | Raw configuration access |</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-26-773Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-26-773Z" class="timestamp-link"><time datetime="2026-06-10T09:29:26.773Z" data-timestamp="2026-06-10T09:29:26.773Z">2026-06-10T09:29:26.773Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01Nmt9zuKAJnZ4KbqHnfqUQX"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/007-plugin-api-documentation.md&#34;,
+  &#34;limit&#34;: 20
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-26-783Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-26-783Z" class="timestamp-link"><time datetime="2026-06-10T09:29:26.783Z" data-timestamp="2026-06-10T09:29:26.783Z">2026-06-10T09:29:26.783Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# CS-007: Plugin API Documentation — COMPLETED
+2	
+3	**Source:** `downstream_suggestions/ai_enablers.md` §1, §2, §5, §7, §8
+4	**Scope:** Documentation
+5	**Complexity:** Medium
+6	**Breaking changes:** N/A
+7	**Status:** Completed
+8	
+9	---
+10	
+11	## Problem
+12	
+13	Plugin authors (human and AI) must currently piece together the API from
+14	multiple sources: `plugin-api-draft.md` (partially stale), `architecture.md`
+15	(internal-focused), source code XML docs (scattered), and example plugins
+16	(incomplete coverage). The draft doc has known inaccuracies (missing
+17	`ILoggerFactory` in constructor, nonexistent test fakes, incorrect attribute
+18	syntax).
+19	
+20	The downstream project estimates ~2843 lines of reading to build a plugin</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-31-074Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-31-074Z" class="timestamp-link"><time datetime="2026-06-10T09:29:31.074Z" data-timestamp="2026-06-10T09:29:31.074Z">2026-06-10T09:29:31.074Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me read the relevant section of the PLUGIN_API.md for configuration and check the TODO.md.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-31-994Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-31-994Z" class="timestamp-link"><time datetime="2026-06-10T09:29:31.994Z" data-timestamp="2026-06-10T09:29:31.994Z">2026-06-10T09:29:31.994Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01Uho6xNsrauhzbBheKKqCL3"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/PLUGIN_API.md&#34;,
+  &#34;offset&#34;: 258,
+  &#34;limit&#34;: 40
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-31-996Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-31-996Z" class="timestamp-link"><time datetime="2026-06-10T09:29:31.996Z" data-timestamp="2026-06-10T09:29:31.996Z">2026-06-10T09:29:31.996Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01YV8cdCkzrmTwQ3SNRJvy1J"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/TODO.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-32-006Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-32-006Z" class="timestamp-link"><time datetime="2026-06-10T09:29:32.006Z" data-timestamp="2026-06-10T09:29:32.006Z">2026-06-10T09:29:32.006Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>258	## 8. Configuration
+259	
+260	1. Create a config class with `[PluginConfig]`:
+261	
+262	```csharp
+263	[PluginConfig(Section = &quot;Greet&quot;)]
+264	public record GreetConfig
+265	{
+266	    public string Message { get; init; } = &quot;Welcome, {nick}!&quot;;
+267	    public bool Enabled { get; init; } = true;
+268	}
+269	```
+270	
+271	2. Inject `IOptions&lt;T&gt;` in your plugin constructor:
+272	
+273	```csharp
+274	public GreetExamplePlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory,
+275	    IOptions&lt;GreetConfig&gt; config)
+276	    : base(bot, activator, loggerFactory)
+277	{
+278	    _config = config.Value;
+279	}
+280	```
+281	
+282	Config binds to a root-level section in the configuration file (e.g. `&quot;Greet&quot;`).
+283	
+284	---
+285	
+286	## 9. Services
+287	
+288	**Providing a service:**
+289	
+290	```csharp
+291	[ProvidesService(typeof(IMyService))]
+292	public class MyServicePlugin : MarvPlugin
+293	{
+294	    public MyServicePlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory)
+295	        : base(bot, activator, loggerFactory) { }
+296	
+297	    public static void ConfigureServices(IServiceCollection services)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-32-007Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-32-007Z" class="timestamp-link"><time datetime="2026-06-10T09:29:32.007Z" data-timestamp="2026-06-10T09:29:32.007Z">2026-06-10T09:29:32.007Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# TODO
+2	
+3	- [x] Decide whether the Dockerfile should include the sample plugins
+4	- [x] Check whether the docker action can be optimized/cached
+5	- [x] Generate release notes for the GitHub release from CHANGELOG.md
+6	- [x] Allow passing regex options to the OnRegex attribute
+7	- [ ] Provide a way for handler filters to pass information on to the underlying handler (i.e. authentication info)
+8	- [x] Consider moving IrcBot.BatchChannels to a utility class, so that plugins can reuse it
+9	- [x] Consider making CommandContext, RegexContext, etc share a common HandlerContext
+10	- [x] Potentially remove PluginType from HandlerGroup
+11	- [x] Switch the JSON config parser to one that supports JSON5
+12	- [x] Check whether the extra `AppContext.BaseDirectory` logic is actually required for dependency resolution with a `PublishSingleFile` assembly
+13	- [x] Check whether we can optimize the docker action further using cache mounts
+14	- [ ] Add integration tests for plugin loading
+15	- [ ] Make config loading more idiomatic (use default stack, but replace json provider with json5, add a config provider for CommandLine)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-33-206Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-33-206Z" class="timestamp-link"><time datetime="2026-06-10T09:29:33.206Z" data-timestamp="2026-06-10T09:29:33.206Z">2026-06-10T09:29:33.206Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01891pG5NGhNTzMV1Sqgn9HR">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;MarvVersion\|Uptime\|StartTime\|_startTime\|_connectedAt&#34; /workspaces/marv/src/Marv.Core/ --include=&#34;*.cs&#34; | head -10</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-33-253Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-33-253Z" class="timestamp-link"><time datetime="2026-06-10T09:29:33.253Z" data-timestamp="2026-06-10T09:29:33.253Z">2026-06-10T09:29:33.253Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/Marv.Core/MarvVersion.cs:8:public static class MarvVersion
+/workspaces/marv/src/Marv.Core/MarvVersion.cs:18:        var assembly = typeof(MarvVersion).Assembly;
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:905:                    $&quot;\x01VERSION Marv IRC Bot {MarvVersion.Current}\x01&quot;]), ct);</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-37-504Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-37-504Z" class="timestamp-link"><time datetime="2026-06-10T09:29:37.504Z" data-timestamp="2026-06-10T09:29:37.504Z">2026-06-10T09:29:37.504Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me check the existing <code>SendAndAwaitAsync</code> fallback and how END-OF messages work.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-38-923Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-38-923Z" class="timestamp-link"><time datetime="2026-06-10T09:29:38.923Z" data-timestamp="2026-06-10T09:29:38.923Z">2026-06-10T09:29:38.923Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01K26PErPCKypYwHqDdwSgKL">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;ENDOF\|RPL_END\|315\|366\|318\|369\|374\|394&#34; /workspaces/marv/src/Marv.Core/ --include=&#34;*.cs&#34; | head -15</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-38-982Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-38-982Z" class="timestamp-link"><time datetime="2026-06-10T09:29:38.982Z" data-timestamp="2026-06-10T09:29:38.982Z">2026-06-10T09:29:38.982Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:425:            case &quot;376&quot;: // RPL_ENDOFMOTD
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:493:            case &quot;366&quot;: // RPL_ENDOFNAMES</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-39-392Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-39-392Z" class="timestamp-link"><time datetime="2026-06-10T09:29:39.392Z" data-timestamp="2026-06-10T09:29:39.392Z">2026-06-10T09:29:39.392Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_013HAC7X4tQCQVknZFv7E3Lc">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;IrcConnection&#34; /workspaces/marv/src/Marv.Core/Irc/IrcBot.cs | head -5</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-39-416Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-39-416Z" class="timestamp-link"><time datetime="2026-06-10T09:29:39.416Z" data-timestamp="2026-06-10T09:29:39.416Z">2026-06-10T09:29:39.416Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:21:    private IrcConnection? _connection;
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:283:    public async Task RunAsync(IrcConnection connection, MarvConfiguration config,</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-40-088Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-40-088Z" class="timestamp-link"><time datetime="2026-06-10T09:29:40.088Z" data-timestamp="2026-06-10T09:29:40.088Z">2026-06-10T09:29:40.088Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_018TXaPz7HKQP23ws9shNXWF"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Irc/IrcConnection.cs&#34;,
+  &#34;offset&#34;: 1,
+  &#34;limit&#34;: 50
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-40-098Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-40-098Z" class="timestamp-link"><time datetime="2026-06-10T09:29:40.098Z" data-timestamp="2026-06-10T09:29:40.098Z">2026-06-10T09:29:40.098Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using System.Net.Security;
+2	using System.Net.Sockets;
+3	using System.Security.Cryptography.X509Certificates;
+4	using System.Text;
+5	using System.Threading.Channels;
+6	using Marv.Core.Protocol;
+7	using Microsoft.Extensions.Logging;
+8	
+9	namespace Marv.Core.Irc;
+10	
+11	/// &lt;summary&gt;
+12	/// Manages the TCP/TLS connection to an IRC server. Provides inbound and outbound
+13	/// channels for parsed IRC messages, with a rate limiter on outbound sends.
+14	/// &lt;/summary&gt;
+15	internal sealed class IrcConnection : IAsyncDisposable
+16	{
+17	    private readonly ILogger _logger;
+18	    private readonly TokenBucketRateLimiter _rateLimiter;
+19	    private TcpClient? _tcpClient;
+20	    private Stream? _stream;
+21	    private CancellationTokenSource? _connectionCts;
+22	    private Task? _readTask;
+23	    private Task? _writeTask;
+24	
+25	    private Channel&lt;IrcMessage&gt;? _inboundChannel;
+26	    private Channel&lt;IrcMessage&gt;? _outboundChannel;
+27	
+28	    /// &lt;summary&gt;
+29	    /// Creates a new IRC connection with the specified rate limiting settings.
+30	    /// &lt;/summary&gt;
+31	    /// &lt;param name=&quot;logger&quot;&gt;Logger instance.&lt;/param&gt;
+32	    /// &lt;param name=&quot;rateLimitEnabled&quot;&gt;Whether to enable outbound rate limiting.&lt;/param&gt;
+33	    /// &lt;param name=&quot;burstLimit&quot;&gt;Maximum messages in a burst before throttling.&lt;/param&gt;
+34	    /// &lt;param name=&quot;refillRatePerSecond&quot;&gt;Tokens replenished per second.&lt;/param&gt;
+35	    public IrcConnection(ILogger logger, bool rateLimitEnabled = true, int burstLimit = 5, double refillRatePerSecond = 0.5)
+36	    {
+37	        _logger = logger;
+38	        _rateLimiter = new TokenBucketRateLimiter(rateLimitEnabled, burstLimit, refillRatePerSecond);
+39	    }
+40	
+41	    /// &lt;summary&gt;Reader for inbound parsed IRC messages from the server.&lt;/summary&gt;
+42	    public ChannelReader&lt;IrcMessage&gt; Inbound =&gt; _inboundChannel?.Reader
+43	        ?? throw new InvalidOperationException(&quot;Not connected.&quot;);
+44	
+45	    /// &lt;summary&gt;Writer for outbound IRC messages to the server.&lt;/summary&gt;
+46	    public ChannelWriter&lt;IrcMessage&gt; Outbound =&gt; _outboundChannel?.Writer
+47	        ?? throw new InvalidOperationException(&quot;Not connected.&quot;);
+48	
+49	    /// &lt;summary&gt;True if the connection is currently established.&lt;/summary&gt;
+50	    public bool IsConnected =&gt; _tcpClient?.Connected == true;</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-43-055Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-43-055Z" class="timestamp-link"><time datetime="2026-06-10T09:29:43.055Z" data-timestamp="2026-06-10T09:29:43.055Z">2026-06-10T09:29:43.055Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now I have enough context. Let me also check the prompts log format.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-43-067Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-43-067Z" class="timestamp-link"><time datetime="2026-06-10T09:29:43.067Z" data-timestamp="2026-06-10T09:29:43.067Z">2026-06-10T09:29:43.067Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01UhFWybMQURX6gkdPZ3BRUn">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">tail -20 /workspaces/marv/docs/prompts.md</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-29-43-107Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-29-43-107Z" class="timestamp-link"><time datetime="2026-06-10T09:29:43.107Z" data-timestamp="2026-06-10T09:29:43.107Z">2026-06-10T09:29:43.107Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>## Fix prepare-release script for macOS
+
+**Date**: 2026-06-07T00:00:00Z
+
+&gt; The prepare-release script doesn&#x27;t run on macOS - grep doesn&#x27;t support `-P`
+
+&gt; Still erroring:
+&gt; &gt; sed: 1: &quot;/^\[0.3.1\]:/ i\[0.4.0] ...&quot;: extra characters after \ at the end of i command
+&gt;
+&gt; Also, the inline sed workaround doesn&#x27;t seem to be working, it left a file called `CHANGELOG.md-e` behind
+
+## Fix prepare-release picking wrong origin tag
+
+**Date**: 2026-06-07T00:00:00Z
+
+&gt; We&#x27;re almost there - I just ran the tool and it picked the wrong origin tag. See this diff:
+&gt;
+&gt;      [0.3.2]: https://github.com/predakanga/marv/compare/v0.3.1...v0.3.2
+&gt;     +[0.4.0]: https://github.com/predakanga/marv/compare/v0.3.1...v0.4.0
+&gt;      [0.3.1]: https://github.com/predakanga/marv/compare/v0.3.0...v0.3.1</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-29-46-103Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-29-46-103Z" class="timestamp-link"><time datetime="2026-06-10T09:29:46.103Z" data-timestamp="2026-06-10T09:29:46.103Z">2026-06-10T09:29:46.103Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now I'll create all five change specs. Let me write them all.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-30-16-760Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-30-16-760Z" class="timestamp-link"><time datetime="2026-06-10T09:30:16.760Z" data-timestamp="2026-06-10T09:30:16.760Z">2026-06-10T09:30:16.760Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01QV3TzJNnF9UtaPR4iCQaHG">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">020-bot-statistics.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/020-bot-statistics.md</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content"># CS-020: Bot Statistics Property
+
+**Source:** Downstream feature request
+**Scope:** Core (IBot interface)
+**Complexity:** Medium
+**Breaking changes:** Additive only (new interface member)
+**Status:** Pending
+
+---
+
+## Problem
+
+There is no way for plugins to inspect operational statistics about the bot.
+Common needs include:
+
+- Uptime (time since connection was established)
+- Bytes and lines sent/received
+- Commands executed (handler invocations)
+
+Operators want dashboards, status commands, and monitoring plugins. Today
+each plugin would have to track its own subset of these numbers independently,
+and most (bytes/lines on the wire) aren&#39;t even observable from plugin code.
+
+## Changes
+
+### 1. Define `IBotStatistics` in `Marv.Core.Platform`
+
+```csharp
+/// &lt;summary&gt;
+/// Read-only snapshot of operational statistics for the current connection.
+/// All counters reset when the bot reconnects.
+/// &lt;/summary&gt;
+public interface IBotStatistics
+{
+    /// &lt;summary&gt;When the current connection was established (UTC).&lt;/summary&gt;
+    DateTimeOffset ConnectedAt { get; }
+
+    /// &lt;summary&gt;Time elapsed since the connection was established.&lt;/summary&gt;
+    TimeSpan Uptime { get; }
+
+    /// &lt;summary&gt;Total bytes received from the server.&lt;/summary&gt;
+    long BytesReceived { get; }
+
+    /// &lt;summary&gt;Total bytes sent to the server.&lt;/summary&gt;
+    long BytesSent { get; }
+
+    /// &lt;summary&gt;Total IRC lines received from the server.&lt;/summary&gt;
+    long LinesReceived { get; }
+
+    /// &lt;summary&gt;Total IRC lines sent to the server.&lt;/summary&gt;
+    long LinesSent { get; }
+
+    /// &lt;summary&gt;Total handler invocations (commands, events, regex matches, etc.).&lt;/summary&gt;
+    long HandlersInvoked { get; }
+}
+```
+
+### 2. Add `Statistics` property to `IBot`
+
+```csharp
+/// &lt;summary&gt;Operational statistics for the current connection.&lt;/summary&gt;
+IBotStatistics Statistics { get; }
+```
+
+### 3. Implement `BotStatistics` in `Marv.Core.Irc`
+
+An internal mutable class that `IrcBot` owns. Uses `Interlocked` for
+thread-safe counter increments. Reset in `RunAsync` when a new connection
+starts.
+
+Wire up counters:
+- **BytesReceived / BytesSent**: Increment in `IrcConnection`&#39;s read/write
+  loops, where the raw byte buffer length is known. Either expose mutable
+  counters on `IrcConnection` that `IrcBot` reads, or pass the statistics
+  object into `IrcConnection`.
+- **LinesReceived**: Increment when a parsed `IrcMessage` is written to the
+  inbound channel.
+- **LinesSent**: Increment when an `IrcMessage` is written to the outbound
+  channel (in `SendRawAsync`).
+- **HandlersInvoked**: Increment in the handler dispatch loop (where
+  `HandlerGroup.InvokeAsync` is called).
+- **ConnectedAt**: Set once at connection establishment in `RunAsync`.
+- **Uptime**: Computed as `DateTimeOffset.UtcNow - ConnectedAt`.
+
+### 4. Register in DI
+
+`IBotStatistics` is accessible via `IBot.Statistics`, so no separate DI
+registration is needed. However, if plugins want to inject it directly
+(e.g. services that don&#39;t have an `IBot` reference), register the
+singleton in the service collection.
+
+### 5. Update `MockBot` (Marv.Testing)
+
+Ensure `MockBot.Create()` stubs `Statistics` to return a sensible default
+(zeroed counters, `ConnectedAt` = `DateTimeOffset.UtcNow`).
+
+### 6. Update PLUGIN_API.md
+
+Add `Statistics` to the `IBot` property table in §5 and document
+`IBotStatistics` in §14 (Platform Types).
+
+## Design decisions
+
+**Why a dedicated interface rather than individual properties on IBot?**
+Grouping statistics into their own interface keeps `IBot` focused on actions
+and state. It also makes it easy to snapshot, serialize (for a stats endpoint),
+or mock independently.
+
+**Why reset on reconnect?** Per-connection statistics are simpler and more
+useful than cumulative totals. Operators who want historical data can
+persist snapshots from a plugin using `[OnInterval]`.
+
+**Why not include per-command or per-plugin breakdowns?** That&#39;s a concern
+for a future metrics/observability plugin. The core stats should be
+connection-level aggregates that are cheap to maintain.
+
+## Testing
+
+- **Unit test:** Verify counter increments after sends/receives using
+  `MockBot` or a test `IrcConnection`.
+- **Unit test:** Verify counters reset on new connection.
+- **Integration test:** Connect to ngircd, exchange messages, check that
+  `Statistics.LinesReceived &gt; 0` and `Statistics.LinesSent &gt; 0`.
+
+## Impact
+
+- **Plugin DX:** Plugins can build status commands, dashboards, and
+  monitoring with zero protocol knowledge.
+- **API surface:** One new property on `IBot`, one new interface.
+- **Performance:** Counter increments use `Interlocked`; negligible cost.
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-30-29-869Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-30-29-869Z" class="timestamp-link"><time datetime="2026-06-10T09:30:29.869Z" data-timestamp="2026-06-10T09:30:29.869Z">2026-06-10T09:30:29.869Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /workspaces/marv/docs/change_specs/020-bot-statistics.md (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-30-38-633Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-30-38-633Z" class="timestamp-link"><time datetime="2026-06-10T09:30:38.633Z" data-timestamp="2026-06-10T09:30:38.633Z">2026-06-10T09:30:38.633Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01KUq2sx6e5ZkqoeMnELZovE">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">021-message-queue-management.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/021-message-queue-management.md</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content"># CS-021: Message Queue Management
+
+**Source:** Downstream feature request
+**Scope:** Core (IBot interface)
+**Complexity:** Small
+**Breaking changes:** Additive only (new interface members)
+**Status:** Pending
+
+---
+
+## Problem
+
+The bot&#39;s outbound message queue (`IrcConnection._outboundChannel`) is a
+bounded `Channel&lt;IrcMessage&gt;` with a capacity of 512. Plugins have no
+visibility into or control over this queue. Two common needs:
+
+1. **Inspect queue depth** — a monitoring plugin or status command wants to
+   show how backed up the outbound queue is (e.g. after a flood of messages).
+2. **Clear the queue** — an operator or admin plugin wants to abort a
+   large batch of pending messages (e.g. a plugin accidentally enqueued
+   hundreds of messages, or the bot is being shut down gracefully).
+
+Today there is no way to do either without reaching into `IrcConnection`
+internals.
+
+## Changes
+
+### 1. Add queue inspection/management to `IBot`
+
+```csharp
+/// &lt;summary&gt;
+/// Number of messages currently waiting in the outbound send queue.
+/// &lt;/summary&gt;
+int OutboundQueueCount { get; }
+
+/// &lt;summary&gt;
+/// Discards all messages currently waiting in the outbound send queue.
+/// Messages already handed to the rate limiter or TCP write are not affected.
+/// &lt;/summary&gt;
+Task ClearOutboundQueueAsync(CancellationToken ct);
+```
+
+### 2. Expose queue state on `IrcConnection`
+
+`IrcConnection` already holds the `_outboundChannel`. Add:
+
+```csharp
+/// &lt;summary&gt;Number of items waiting in the outbound channel.&lt;/summary&gt;
+public int OutboundQueueCount =&gt;
+    _outboundChannel?.Reader.Count ?? 0;
+```
+
+For clearing, the simplest approach is to drain the channel by reading and
+discarding all currently available items:
+
+```csharp
+/// &lt;summary&gt;Drains all pending messages from the outbound channel.&lt;/summary&gt;
+public int DrainOutboundQueue()
+{
+    if (_outboundChannel is null) return 0;
+    var drained = 0;
+    while (_outboundChannel.Reader.TryRead(out _))
+        drained++;
+    return drained;
+}
+```
+
+This is safe because `SingleWriter = false` on the outbound channel, so
+reads from any thread are valid as long as we respect the `SingleReader`
+constraint. Since the write loop is the single reader, we need to
+coordinate: either temporarily pause the write loop, or accept that a
+small number of messages may be sent between the drain and the next
+send. Given that this is an operator-initiated emergency action, the
+race is acceptable and documented.
+
+**Alternative:** Replace the channel entirely by creating a new
+`Channel&lt;IrcMessage&gt;` and swapping the reference. This guarantees no
+stragglers but adds complexity around the write loop&#39;s reader reference.
+The drain approach is simpler and sufficient.
+
+### 3. Implement in `IrcBot`
+
+```csharp
+public int OutboundQueueCount =&gt; _connection?.OutboundQueueCount ?? 0;
+
+public Task ClearOutboundQueueAsync(CancellationToken ct)
+{
+    var drained = _connection?.DrainOutboundQueue() ?? 0;
+    _logger.LogInformation(&#34;Drained {Count} messages from outbound queue&#34;, drained);
+    return Task.CompletedTask;
+}
+```
+
+### 4. Update MockBot (Marv.Testing)
+
+`MockBot.Create()` returns an NSubstitute mock, so the new members are
+automatically stubbed. `OutboundQueueCount` returns `0` by default.
+
+### 5. Update PLUGIN_API.md
+
+Add the new members to the IBot table in §5.
+
+## Design decisions
+
+**Why not expose the `ChannelWriter&lt;IrcMessage&gt;` directly?** That would
+let plugins bypass rate limiting, inject malformed messages, or complete
+the channel. The bot should remain the gatekeeper for outbound traffic.
+
+**Why `Task` return for clear instead of `void`?** Future implementations
+might need to coordinate with the write loop asynchronously (e.g. pausing
+it during the drain). The `Task` signature allows this without a breaking
+change.
+
+**Why not a priority queue or reordering API?** Over-engineering for the
+stated need. Inspection and clearing cover the real use cases. Plugins
+that need message prioritization can implement their own internal queue
+and feed messages to the bot one at a time.
+
+## Testing
+
+- **Unit test:** Enqueue several messages (via `SendMessageAsync` with a
+  blocked/slow connection mock), verify `OutboundQueueCount` reflects the
+  pending count.
+- **Unit test:** Enqueue messages, call `ClearOutboundQueueAsync`, verify
+  count drops to 0.
+- **Integration test:** Send a burst of messages, verify queue count is
+  observable and eventually drains to 0.
+
+## Impact
+
+- **Plugin DX:** Admin plugins and status commands can monitor and manage
+  the outbound queue.
+- **API surface:** One new property, one new method on `IBot`.
+- **Risk:** Low — read-only inspection has no side effects; clearing is
+  an explicit operator action.
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-30-38-697Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-30-38-697Z" class="timestamp-link"><time datetime="2026-06-10T09:30:38.697Z" data-timestamp="2026-06-10T09:30:38.697Z">2026-06-10T09:30:38.697Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /workspaces/marv/docs/change_specs/021-message-queue-management.md (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-30-58-564Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-30-58-564Z" class="timestamp-link"><time datetime="2026-06-10T09:30:58.564Z" data-timestamp="2026-06-10T09:30:58.564Z">2026-06-10T09:30:58.564Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01HrZysRQajakabaHRmH3EEj">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">022-plugin-api-ioptions-docs.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/022-plugin-api-ioptions-docs.md</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content"># CS-022: Document Full IOptions API Availability
+
+**Source:** Downstream feature request
+**Scope:** Documentation (PLUGIN_API.md)
+**Complexity:** Trivial
+**Breaking changes:** None
+**Status:** Pending
+
+---
+
+## Problem
+
+The Plugin API documentation (§8 Configuration) only shows `IOptions&lt;T&gt;` in
+the constructor injection example. Plugin authors don&#39;t realize they can also
+inject `IOptionsMonitor&lt;T&gt;` or `IOptionsSnapshot&lt;T&gt;` from the standard
+`Microsoft.Extensions.Options` package.
+
+Since Marv registers plugin configuration using the standard
+`services.Configure&lt;T&gt;(section)` pattern, the full `IOptions` API is
+available automatically through the DI container:
+
+- `IOptions&lt;T&gt;` — singleton, read once at startup
+- `IOptionsSnapshot&lt;T&gt;` — scoped, re-reads per scope (less useful for
+  long-lived plugins, but available)
+- `IOptionsMonitor&lt;T&gt;` — singleton, fires `OnChange` callbacks when the
+  underlying configuration source changes
+
+`IOptionsMonitor&lt;T&gt;` is particularly valuable: if the bot&#39;s configuration
+file is edited at runtime and the configuration provider supports reload
+(which the JSON5/YAML providers do when `reloadOnChange: true` is set),
+plugins can react to configuration changes without a restart.
+
+## Changes
+
+### 1. Update §8 (Configuration) in PLUGIN_API.md
+
+After the existing `IOptions&lt;T&gt;` example, add a note and example:
+
+```markdown
+### Options API variants
+
+The full `Microsoft.Extensions.Options` API is available for plugin
+configuration. In addition to `IOptions&lt;T&gt;`, you can inject:
+
+| Type | Lifetime | Use case |
+|---|---|---|
+| `IOptions&lt;T&gt;` | Singleton | Read config once at construction |
+| `IOptionsMonitor&lt;T&gt;` | Singleton | React to config changes at runtime via `OnChange` |
+| `IOptionsSnapshot&lt;T&gt;` | Scoped | Re-read config per scope (rarely needed for plugins) |
+
+Example using `IOptionsMonitor&lt;T&gt;` to react to config file edits:
+
+```csharp
+public class MyPlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory,
+    IOptionsMonitor&lt;MyConfig&gt; configMonitor)
+    : MarvPlugin(bot, activator, loggerFactory)
+{
+    private MyConfig _config = configMonitor.CurrentValue;
+
+    public override Task OnConnectedAsync(CancellationToken ct)
+    {
+        configMonitor.OnChange(updated =&gt; _config = updated);
+        return Task.CompletedTask;
+    }
+}
+```
+```
+
+### 2. Update §13 (Available Services) table
+
+Add `IOptionsMonitor&lt;T&gt;` and `IOptionsSnapshot&lt;T&gt;` alongside the existing
+`IOptions&lt;T&gt;` row:
+
+```markdown
+| `IOptions&lt;T&gt;` | Singleton config for `[PluginConfig]` types |
+| `IOptionsMonitor&lt;T&gt;` | Config with change notification support |
+| `IOptionsSnapshot&lt;T&gt;` | Scoped config (re-reads per scope) |
+```
+
+## Design decisions
+
+**Why not also update reloadOnChange in the host?** The current
+`AddJson5File` call uses `reloadOnChange: false`. Enabling it is a
+separate concern — this spec documents what&#39;s already possible through
+the DI container. A follow-up spec could enable `reloadOnChange` and
+document the full live-reload story.
+
+**Why mention IOptionsSnapshot at all?** For completeness. Plugin authors
+coming from ASP.NET Core expect to see all three variants documented.
+The note that it&#39;s &#34;rarely needed for plugins&#34; sets expectations.
+
+## Testing
+
+- **Review only:** Verify the documentation is accurate by confirming that
+  `services.Configure&lt;T&gt;()` is used in plugin config registration (which
+  makes all three `IOptions` variants available).
+
+## Impact
+
+- **Plugin DX:** Authors discover `IOptionsMonitor&lt;T&gt;` without reading
+  framework source code.
+- **API surface:** No code changes.
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-30-58-643Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-30-58-643Z" class="timestamp-link"><time datetime="2026-06-10T09:30:58.643Z" data-timestamp="2026-06-10T09:30:58.643Z">2026-06-10T09:30:58.643Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /workspaces/marv/docs/change_specs/022-plugin-api-ioptions-docs.md (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-31-22-654Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-31-22-654Z" class="timestamp-link"><time datetime="2026-06-10T09:31:22.654Z" data-timestamp="2026-06-10T09:31:22.654Z">2026-06-10T09:31:22.654Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_0154tSqjbRVME9MXU3hV5ma8">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">023-ctcp-version-override.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/023-ctcp-version-override.md</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content"># CS-023: CTCP VERSION Response Override
+
+**Source:** Downstream feature request
+**Scope:** Core
+**Complexity:** Small
+**Breaking changes:** None
+**Status:** Pending
+
+---
+
+## Problem
+
+The bot responds to CTCP VERSION queries with a hardcoded string:
+
+```csharp
+$&#34;\x01VERSION Marv IRC Bot {MarvVersion.Current}\x01&#34;
+```
+
+(`IrcBot.cs`, line ~904)
+
+Some operators want to customize this — to include plugin names, the host
+OS, or to obscure the bot&#39;s identity for security. There is currently no
+way to change this without modifying the bot&#39;s source code.
+
+## Approach options considered
+
+| Approach | Pros | Cons |
+|---|---|---|
+| **A. Configuration property** | Simple, discoverable, no code changes at runtime | Static — can&#39;t include dynamic info (plugin list, uptime) |
+| **B. Writable property on IBot** | Plugins can set it dynamically | Unclear ownership if multiple plugins set it; still just a string |
+| **C. Subclass IrcBot** | Maximum flexibility | Defeats the plugin model; IrcBot is internal |
+| **D. Configuration + format tokens** | Config-driven but with dynamic placeholders | Custom token system adds complexity |
+| **E. Event/delegate on IBot** | Plugin provides a callback; full dynamic control | Clean ownership, composable, maximum flexibility |
+
+**Recommendation: Configuration property (A) with a delegate fallback (E).**
+
+A simple `CtcpVersionResponse` config property covers the 90% case (operators
+who want a static string). For plugins that need dynamic responses, a
+delegate property on `IBot` allows full control.
+
+## Changes
+
+### 1. Add `CtcpVersionResponse` to `MarvConfiguration`
+
+```csharp
+/// &lt;summary&gt;
+/// Custom response to CTCP VERSION queries. If null, uses the default
+/// &#34;Marv IRC Bot {version}&#34; string. Set to empty string to suppress
+/// VERSION responses entirely.
+/// &lt;/summary&gt;
+public string? CtcpVersionResponse { get; set; }
+```
+
+### 2. Add a delegate property to `IBot`
+
+```csharp
+/// &lt;summary&gt;
+/// Optional callback that generates the CTCP VERSION response string.
+/// When set, takes precedence over the &lt;c&gt;CtcpVersionResponse&lt;/c&gt;
+/// configuration value. Return null to suppress the response.
+/// &lt;/summary&gt;
+Func&lt;string?&gt;? CtcpVersionProvider { get; set; }
+```
+
+### 3. Update `HandleCtcp` in `IrcBot`
+
+```csharp
+case &#34;VERSION&#34;:
+    var versionResponse = CtcpVersionProvider?.Invoke()
+        ?? _config.CtcpVersionResponse
+        ?? $&#34;Marv IRC Bot {MarvVersion.Current}&#34;;
+
+    if (!string.IsNullOrEmpty(versionResponse))
+    {
+        await SendRawAsync(new IrcMessage(&#34;NOTICE&#34;, [sender.Nick,
+            $&#34;\x01VERSION {versionResponse}\x01&#34;]), ct);
+    }
+    break;
+```
+
+### 4. Update PLUGIN_API.md
+
+Add `CtcpVersionProvider` to the IBot table in §5. Document the precedence
+order: delegate &gt; config &gt; default.
+
+## Design decisions
+
+**Why not just config?** A static string can&#39;t include runtime information
+like loaded plugins, uptime, or platform details. The delegate lets
+plugins like a system-info plugin provide rich version strings.
+
+**Why not just a delegate?** Operators who just want to set
+`&#34;CtcpVersionResponse&#34;: &#34;My Custom Bot&#34;` in their config file shouldn&#39;t
+need to write a plugin for it.
+
+**Why `Func&lt;string?&gt;` instead of an event?** Only one VERSION response
+can be sent. An event implies multiple subscribers, which doesn&#39;t make
+sense here. A single delegate with last-writer-wins semantics is clear.
+
+**Why allow suppressing the response?** Some operators don&#39;t want to
+reveal bot software information. Returning null or setting an empty
+string in config suppresses the NOTICE entirely.
+
+## Testing
+
+- **Unit test:** Default behavior — verify VERSION response contains
+  `MarvVersion.Current`.
+- **Unit test:** Set config value — verify it&#39;s used instead of the default.
+- **Unit test:** Set delegate — verify it takes precedence over config.
+- **Unit test:** Delegate returns null — verify no NOTICE is sent.
+- **Unit test:** Config set to empty string — verify no NOTICE is sent.
+
+## Impact
+
+- **Configuration:** One new optional property in `MarvConfiguration`.
+- **API surface:** One new property on `IBot`.
+- **Plugin DX:** Plugins can dynamically control VERSION responses.
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-31-22-821Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-31-22-821Z" class="timestamp-link"><time datetime="2026-06-10T09:31:22.821Z" data-timestamp="2026-06-10T09:31:22.821Z">2026-06-10T09:31:22.821Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /workspaces/marv/docs/change_specs/023-ctcp-version-override.md (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-32-01-460Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-32-01-460Z" class="timestamp-link"><time datetime="2026-06-10T09:32:01.460Z" data-timestamp="2026-06-10T09:32:01.460Z">2026-06-10T09:32:01.460Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01KyRPYx4wP5vBpZZfvDMscn">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">024-sendandawait-endof-fallback.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/024-sendandawait-endof-fallback.md</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content"># CS-024: SendAndAwaitAsync ENDOF* Fallback
+
+**Source:** Downstream feature request
+**Scope:** Core
+**Complexity:** Medium
+**Breaking changes:** None (behavioral improvement to existing method)
+**Status:** Pending
+
+---
+
+## Problem
+
+`SendAndAwaitAsync` currently relies on the `labeled-response` IRCv3
+capability to correlate requests with responses. When `labeled-response`
+is not available, the method falls back to sending the message and
+immediately returning an empty list — making it effectively useless:
+
+```csharp
+else
+{
+    // Fallback: just send and return empty (no correlation available)
+    await SendRawAsync(message, ct);
+    return [];
+}
+```
+
+Many IRC commands have well-defined response sequences terminated by an
+`ENDOF*` numeric. For example:
+
+| Command | Reply numerics | Terminator |
+|---|---|---|
+| `WHO` | `352` (RPL_WHOREPLY) | `315` (RPL_ENDOFWHO) |
+| `WHOIS` | `311`, `312`, `313`, `317`, `318`, `319`, etc. | `318` (RPL_ENDOFWHOIS) |
+| `WHOWAS` | `314` (RPL_WHOWASUSER) | `369` (RPL_ENDOFWHOWAS) |
+| `LIST` | `322` (RPL_LIST) | `323` (RPL_LISTEND) |
+| `NAMES` | `353` (RPL_NAMREPLY) | `366` (RPL_ENDOFNAMES) |
+| `BANLIST` (`MODE +b`) | `367` (RPL_BANLIST) | `368` (RPL_ENDOFBANLIST) |
+| `LINKS` | `364` (RPL_LINKS) | `365` (RPL_ENDOFLINKS) |
+| `INFO` | `371` (RPL_INFO) | `374` (RPL_ENDOFINFO) |
+
+When `labeled-response` is unavailable, the bot can still correlate these
+commands by watching for the corresponding terminator numeric and matching
+on the command parameter (e.g. the nick in `WHO nick` appears in the
+`315` reply).
+
+## Changes
+
+### 1. Define a command-to-terminator mapping
+
+```csharp
+/// &lt;summary&gt;
+/// Maps IRC commands to their ENDOF* terminator numerics for
+/// fallback response correlation.
+/// &lt;/summary&gt;
+private static readonly Dictionary&lt;string, string&gt; EndOfNumerics = new(StringComparer.OrdinalIgnoreCase)
+{
+    [&#34;WHO&#34;] = &#34;315&#34;,
+    [&#34;WHOIS&#34;] = &#34;318&#34;,
+    [&#34;WHOWAS&#34;] = &#34;369&#34;,
+    [&#34;LIST&#34;] = &#34;323&#34;,
+    [&#34;NAMES&#34;] = &#34;366&#34;,
+    [&#34;LINKS&#34;] = &#34;365&#34;,
+    [&#34;INFO&#34;] = &#34;374&#34;,
+};
+```
+
+### 2. Implement fallback correlation in `SendAndAwaitAsync`
+
+When `labeled-response` is not available **and** the command has a known
+terminator, install a temporary message tap that:
+
+1. Buffers all incoming numerics related to the command.
+2. Matches on the command parameter (e.g. channel or nick) to avoid
+   cross-talk with other pending requests.
+3. Completes when the terminator numeric is received.
+4. Times out after 30 seconds (same as labeled-response path).
+
+```csharp
+else if (EndOfNumerics.TryGetValue(message.Command, out var terminator))
+{
+    var matchParam = message.Parameters.Count &gt; 0 ? message.Parameters[0] : null;
+    var tcs = new TaskCompletionSource&lt;IReadOnlyList&lt;IrcMessage&gt;&gt;(
+        TaskCreationOptions.RunContinuationsAsynchronously);
+    var buffer = new List&lt;IrcMessage&gt;();
+    var key = $&#34;endof-{message.Command}-{matchParam}&#34;;
+
+    _pendingEndOf[key] = (tcs, buffer, terminator, matchParam);
+
+    await SendRawAsync(message, ct);
+
+    using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+    timeoutCts.CancelAfter(TimeSpan.FromSeconds(30));
+
+    try
+    {
+        return await tcs.Task.WaitAsync(timeoutCts.Token);
+    }
+    catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+    {
+        _pendingEndOf.TryRemove(key, out _);
+        throw new TimeoutException(
+            $&#34;Timed out waiting for {terminator} response to {message.Command}.&#34;);
+    }
+}
+else
+{
+    // Unknown command, no correlation possible
+    await SendRawAsync(message, ct);
+    return [];
+}
+```
+
+### 3. Hook into the message processing loop
+
+In the main message processing switch (or as a pre-dispatch check),
+check incoming numerics against `_pendingEndOf`:
+
+```csharp
+// Check for ENDOF* fallback correlation
+foreach (var (key, pending) in _pendingEndOf)
+{
+    var (tcs, buffer, terminator, matchParam) = pending;
+
+    // Match: the numeric&#39;s parameter matches our expected param
+    if (matchParam is not null &amp;&amp; message.Parameters.Count &gt; 1
+        &amp;&amp; !CaseComparer.Equals(message.Parameters[1], matchParam))
+        continue;
+
+    if (message.Command == terminator)
+    {
+        buffer.Add(message);
+        _pendingEndOf.TryRemove(key, out _);
+        tcs.TrySetResult(buffer.AsReadOnly());
+    }
+    else
+    {
+        // Buffer intermediate numerics
+        buffer.Add(message);
+    }
+}
+```
+
+The numeric matching needs care: response numerics include the bot&#39;s nick
+as the first parameter, with the queried target as the second. For
+example, `315 BotNick targetNick :End of WHO list`. So the match should
+compare `message.Parameters[1]` against the original command&#39;s first
+parameter.
+
+### 4. Add `_pendingEndOf` dictionary to `IrcBot`
+
+```csharp
+private readonly ConcurrentDictionary&lt;string, (
+    TaskCompletionSource&lt;IReadOnlyList&lt;IrcMessage&gt;&gt; Tcs,
+    List&lt;IrcMessage&gt; Buffer,
+    string Terminator,
+    string? MatchParam)&gt; _pendingEndOf = new();
+```
+
+Clear it in `RunAsync` alongside `_pendingLabels`.
+
+## Design decisions
+
+**Why not use the ENDOF* fallback always (even when labeled-response is
+available)?** Labeled-response is strictly superior — it correlates any
+command, not just ones with known terminators, and uses server-assigned
+labels for unambiguous matching. The ENDOF* approach is inherently racy
+when multiple requests for the same command/target are in flight.
+
+**Why match on the command parameter?** Without parameter matching, two
+concurrent `WHO #channel1` and `WHO #channel2` requests would
+cross-contaminate. Parameter matching isn&#39;t perfect (servers may
+normalize the parameter), but it handles the common case.
+
+**What about commands not in the table?** The fallback still returns `[]`
+for unknown commands. The table can be extended over time. Plugins with
+exotic needs can always parse raw messages via `[OnRawMessage]`.
+
+**Why not a general &#34;numeric sequence collector&#34;?** Over-engineering. The
+terminator pattern is well-established in the IRC protocol and covers all
+the common query commands.
+
+## Testing
+
+- **Unit test:** Send WHO with labeled-response available — verify the
+  labeled-response path is still used (existing behavior).
+- **Unit test:** Send WHO without labeled-response — verify responses are
+  collected up to and including `315`, then returned.
+- **Unit test:** Send WHO without labeled-response, server doesn&#39;t respond
+  — verify TimeoutException after 30s.
+- **Unit test:** Two concurrent WHO requests for different targets —
+  verify responses are correctly separated.
+- **Integration test:** Connect to ngircd (which does not support
+  labeled-response), send WHO, verify the reply list is non-empty.
+
+## Impact
+
+- **Plugin DX:** `SendAndAwaitAsync` becomes useful on servers that lack
+  `labeled-response` support, which includes most traditional IRC servers.
+  The Moderation example plugin&#39;s `!who` command will work on these servers.
+- **API surface:** No changes to `IBot`. Behavioral improvement only.
+- **Risk:** Low — the labeled-response path is unchanged. The new fallback
+  only activates when labeled-response is unavailable.
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-32-01-543Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-32-01-543Z" class="timestamp-link"><time datetime="2026-06-10T09:32:01.543Z" data-timestamp="2026-06-10T09:32:01.543Z">2026-06-10T09:32:01.543Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /workspaces/marv/docs/change_specs/024-sendandawait-endof-fallback.md (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-32-04-195Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-32-04-195Z" class="timestamp-link"><time datetime="2026-06-10T09:32:04.195Z" data-timestamp="2026-06-10T09:32:04.195Z">2026-06-10T09:32:04.195Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the README index and log the prompt.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-32-04-571Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-32-04-571Z" class="timestamp-link"><time datetime="2026-06-10T09:32:04.571Z" data-timestamp="2026-06-10T09:32:04.571Z">2026-06-10T09:32:04.571Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01RdnqppSNnAij8bLP45VaAg"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/README.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-32-04-584Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-32-04-584Z" class="timestamp-link"><time datetime="2026-06-10T09:32:04.584Z" data-timestamp="2026-06-10T09:32:04.584Z">2026-06-10T09:32:04.584Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# Change Specifications
+2	
+3	Actionable change specifications derived from downstream plugin project
+4	feedback (`docs/downstream_suggestions/`). Each spec is a self-contained
+5	document describing a single change or closely related group of changes.
+6	
+7	Specs are numbered in recommended implementation order.
+8	
+9	## Index
+10	
+11	| # | Spec | Scope | Complexity | Dependencies | Status |
+12	|---|---|---|---|---|---|
+13	| 1 | [Command Prefix Configuration](001-command-prefix-config.md) | Core | Small | None | **Done** |
+14	| 2 | [IHttpClientFactory Registration](002-httpclient-registration.md) | Host | Trivial | None | **Done** |
+15	| 3 | [Handler Dispatch Filters](003-handler-dispatch-filters.md) | Core | Small | None | **Done** |
+16	| 4 | [Bulk Channel Join](004-bulk-channel-join.md) | Core | Small-Medium | None | **Done** |
+17	| 5 | [Handler Filter Pipeline](005-handler-filter-pipeline.md) | Core | Medium | #3 | **Done** |
+18	| 6 | [Test Infrastructure](006-test-infrastructure.md) | New package | Medium | None | **Done** |
+19	| 7 | [Plugin API Documentation](007-plugin-api-documentation.md) | Docs | Medium | None | **Done** |
+20	| 8 | [Example Plugin](008-example-plugin.md) | Examples | Medium | #3, #5 | **Done** |
+21	| 9 | [Bot Action Methods](009-bot-action-methods.md) | Core | Small-Medium | None | **Done** |
+22	| 10 | [Case Mapping for Plugins](010-casemapping-for-plugins.md) | Core | Small | None | **Done** |
+23	| 11 | [Plugin Loading Robustness](011-plugin-loading-robustness.md) | Core | Medium-Large | None | **Done** |
+24	
+25	| 12 | [Dockerfile Sample Plugin Inclusion](012-dockerfile-sample-plugins.md) | Dockerfile | Small | None | **Done** |
+26	| 13 | [Docker Action Build Caching](013-docker-action-caching.md) | CI/CD | Small | None | **Done** |
+27	| 14 | [Release Notes from CHANGELOG.md](014-release-notes-from-changelog.md) | CI/CD | Small | None | **Done** |
+28	| 15 | [Regex Options for OnRegex](015-onregex-options.md) | Core | Small | None | **Done** |
+29	| 16 | [Extract BatchChannels to Utility](016-batch-channels-utility.md) | Core | Trivial | None | **Done** |
+30	| 17 | [Common HandlerContext Base Class](017-common-handler-context.md) | Core | Small-Medium | None | **Done** |
+31	| 18 | [Remove PluginType from HandlerGroup](018-remove-handlergroup-plugintype.md) | Core | Small | None | **Done** |
+32	| 19 | [JSON5 Configuration Parser](019-json5-config-parser.md) | Host | Small-Medium | None | **Done** |
+33	
+34	Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
+35	Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
+36	Specs 12-14 are CI/CD and infrastructure changes. Specs 15-19 are code changes.
+37	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-32-11-586Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-32-11-586Z" class="timestamp-link"><time datetime="2026-06-10T09:32:11.586Z" data-timestamp="2026-06-10T09:32:11.586Z">2026-06-10T09:32:11.586Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01Bf6jPnX47sgb1EJGwWuZxb">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">README.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/README.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">| 19 | [JSON5 Configuration Parser](019-json5-config-parser.md) | Host | Small-Medium | None | **Done** |
+
+Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
+Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
+Specs 12-14 are CI/CD and infrastructure changes. Specs 15-19 are code changes.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">| 19 | [JSON5 Configuration Parser](019-json5-config-parser.md) | Host | Small-Medium | None | **Done** |
+
+| 20 | [Bot Statistics Property](020-bot-statistics.md) | Core | Medium | None | **Pending** |
+| 21 | [Message Queue Management](021-message-queue-management.md) | Core | Small | None | **Pending** |
+| 22 | [Document IOptions API Variants](022-plugin-api-ioptions-docs.md) | Docs | Trivial | None | **Pending** |
+| 23 | [CTCP VERSION Response Override](023-ctcp-version-override.md) | Core | Small | None | **Pending** |
+| 24 | [SendAndAwaitAsync ENDOF* Fallback](024-sendandawait-endof-fallback.md) | Core | Medium | None | **Pending** |
+
+Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
+Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
+Specs 12-14 are CI/CD and infrastructure changes. Specs 15-19 are code changes.
+Specs 20-24 are downstream feature requests (code and docs).</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-32-11-655Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-32-11-655Z" class="timestamp-link"><time datetime="2026-06-10T09:32:11.655Z" data-timestamp="2026-06-10T09:32:11.655Z">2026-06-10T09:32:11.655Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/README.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-32-14-408Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-32-14-408Z" class="timestamp-link"><time datetime="2026-06-10T09:32:14.408Z" data-timestamp="2026-06-10T09:32:14.408Z">2026-06-10T09:32:14.408Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now log the prompt and commit.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-32-15-047Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-32-15-047Z" class="timestamp-link"><time datetime="2026-06-10T09:32:15.047Z" data-timestamp="2026-06-10T09:32:15.047Z">2026-06-10T09:32:15.047Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_017dY29n6YotnYmewG3dpUdq"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/prompts.md&#34;,
+  &#34;offset&#34;: 1,
+  &#34;limit&#34;: 5
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-32-15-067Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-32-15-067Z" class="timestamp-link"><time datetime="2026-06-10T09:32:15.067Z" data-timestamp="2026-06-10T09:32:15.067Z">2026-06-10T09:32:15.067Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# Prompt Log
+2	
+3	## Research the problem space before writing code
+4	
+5	**Date**: 2026-05-30T00:00:00Z</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-32-23-388Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-32-23-388Z" class="timestamp-link"><time datetime="2026-06-10T09:32:23.388Z" data-timestamp="2026-06-10T09:32:23.388Z">2026-06-10T09:32:23.388Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01B5miaHojJZJvQV5HyB3EYQ">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cat &gt;&gt; /workspaces/marv/docs/prompts.md &lt;&lt; &#39;PROMPT_EOF&#39;
+
+## Create change specifications for downstream feature requests
+
+**Date**: 2026-06-10T00:00:00Z
+
+&gt; I&#39;ve collected a few feature requests from downstream; I&#39;d like you to create change specifications for each of them:
+&gt; - Add a statistics property on the bot (gather uptime, bytes/lines sent/received, commands executed, etc)
+&gt; - Add support for managing the bot&#39;s message queue (check how many items are in the queue, clear the queue)
+&gt; - Update the plugin API documentation to note that the full IOptions API is available, including IOptionsMonitor
+&gt; - Allow user to override the CTCP version response (should this be done by a config option, writing a property on IBot, subclassing IrcBot, etc?)
+&gt; - Implement SendAndAwaitAsync fallback support for messages like WHO which have an ENDOF* message
+PROMPT_EOF</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-32-23-497Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-32-23-497Z" class="timestamp-link"><time datetime="2026-06-10T09:32:23.497Z" data-timestamp="2026-06-10T09:32:23.497Z">2026-06-10T09:32:23.497Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>(Bash completed with no output)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-32-26-770Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-32-26-770Z" class="timestamp-link"><time datetime="2026-06-10T09:32:26.770Z" data-timestamp="2026-06-10T09:32:26.770Z">2026-06-10T09:32:26.770Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01VjgM5SDdwwiSxDWsWHYSzG">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add docs/change_specs/020-bot-statistics.md docs/change_specs/021-message-queue-management.md docs/change_specs/022-plugin-api-ioptions-docs.md docs/change_specs/023-ctcp-version-override.md docs/change_specs/024-sendandawait-endof-fallback.md docs/change_specs/README.md docs/prompts.md &amp;&amp; git status</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-32-27-061Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-32-27-061Z" class="timestamp-link"><time datetime="2026-06-10T09:32:27.061Z" data-timestamp="2026-06-10T09:32:27.061Z">2026-06-10T09:32:27.061Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>On branch main
+Your branch is up to date with &#x27;origin/main&#x27;.
+
+Changes to be committed:
+  (use &quot;git restore --staged &lt;file&gt;...&quot; to unstage)
+	new file:   docs/change_specs/020-bot-statistics.md
+	new file:   docs/change_specs/021-message-queue-management.md
+	new file:   docs/change_specs/022-plugin-api-ioptions-docs.md
+	new file:   docs/change_specs/023-ctcp-version-override.md
+	new file:   docs/change_specs/024-sendandawait-endof-fallback.md
+	modified:   docs/change_specs/README.md
+	modified:   docs/prompts.md
+
+Changes not staged for commit:
+  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)
+  (use &quot;git restore &lt;file&gt;...&quot; to discard changes in working directory)
+	modified:   TODO.md</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-32-32-016Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-32-32-016Z" class="timestamp-link"><time datetime="2026-06-10T09:32:32.016Z" data-timestamp="2026-06-10T09:32:32.016Z">2026-06-10T09:32:32.016Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01NWKkZznaxy1BC9MvkFaxFz">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Add change specs CS-020 through CS-024 for downstream feature requests
+
+Five new change specifications from downstream feedback:
+- CS-020: Bot statistics property (uptime, bytes/lines, handler count)
+- CS-021: Message queue management (inspect count, clear queue)
+- CS-022: Document full IOptions API availability in PLUGIN_API.md
+- CS-023: CTCP VERSION response override (config + delegate)
+- CS-024: SendAndAwaitAsync ENDOF* fallback for servers without labeled-response
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-32-32-158Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-32-32-158Z" class="timestamp-link"><time datetime="2026-06-10T09:32:32.158Z" data-timestamp="2026-06-10T09:32:32.158Z">2026-06-10T09:32:32.158Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">08b60de</span> Add change specs CS-020 through CS-024 for downstream feature requests</div><pre>7 files changed, 704 insertions(+)
+ create mode 100644 docs/change_specs/020-bot-statistics.md
+ create mode 100644 docs/change_specs/021-message-queue-management.md
+ create mode 100644 docs/change_specs/022-plugin-api-ioptions-docs.md
+ create mode 100644 docs/change_specs/023-ctcp-version-override.md
+ create mode 100644 docs/change_specs/024-sendandawait-endof-fallback.md</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-32-42-693Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-32-42-693Z" class="timestamp-link"><time datetime="2026-06-10T09:32:42.693Z" data-timestamp="2026-06-10T09:32:42.693Z">2026-06-10T09:32:42.693Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Created five change specifications (CS-020 through CS-024):</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Spec</th>
+<th>Complexity</th>
+<th>Key decisions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>20</td>
+<td><strong>Bot Statistics Property</strong></td>
+<td>Medium</td>
+<td>New <code>IBotStatistics</code> interface on <code>IBot.Statistics</code> with <code>Interlocked</code> counters; resets per connection</td>
+</tr>
+<tr>
+<td>21</td>
+<td><strong>Message Queue Management</strong></td>
+<td>Small</td>
+<td><code>OutboundQueueCount</code> property + <code>ClearOutboundQueueAsync</code> method on <code>IBot</code>; drains the bounded channel</td>
+</tr>
+<tr>
+<td>22</td>
+<td><strong>Document IOptions API Variants</strong></td>
+<td>Trivial</td>
+<td>Docs-only — add <code>IOptionsMonitor&lt;T&gt;</code> and <code>IOptionsSnapshot&lt;T&gt;</code> to PLUGIN_API.md §8 and §13</td>
+</tr>
+<tr>
+<td>23</td>
+<td><strong>CTCP VERSION Override</strong></td>
+<td>Small</td>
+<td>Two-tier: <code>CtcpVersionResponse</code> config property for static strings + <code>CtcpVersionProvider</code> delegate on <code>IBot</code> for dynamic responses</td>
+</tr>
+<tr>
+<td>24</td>
+<td><strong>SendAndAwaitAsync ENDOF* Fallback</strong></td>
+<td>Medium</td>
+<td>Maps commands (WHO, WHOIS, LIST, etc.) to their terminator numerics; buffers replies and matches on target parameter when labeled-response is unavailable</td>
+</tr>
+</tbody>
+</table>
+<p>For CS-023, I recommended the config + delegate hybrid approach — config covers the simple "just set a string" case, while the delegate lets plugins provide dynamic version responses. No dependencies between any of the five specs.</p></div></div></div>
+<div class="message user" id="msg-2026-06-10T09-42-06-743Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-10T09-42-06-743Z" class="timestamp-link"><time datetime="2026-06-10T09:42:06.743Z" data-timestamp="2026-06-10T09:42:06.743Z">2026-06-10T09:42:06.743Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Regarding CS-024, when a command isn't supported we should at least log a warning; it may be worth throwing an exception as well.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-42-09-854Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-42-09-854Z" class="timestamp-link"><time datetime="2026-06-10T09:42:09.854Z" data-timestamp="2026-06-10T09:42:09.854Z">2026-06-10T09:42:09.854Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01M8oJmyDc8ktaq79ojnWngh"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/024-sendandawait-endof-fallback.md&#34;,
+  &#34;offset&#34;: 95,
+  &#34;limit&#34;: 30
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-42-09-876Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-42-09-876Z" class="timestamp-link"><time datetime="2026-06-10T09:42:09.876Z" data-timestamp="2026-06-10T09:42:09.876Z">2026-06-10T09:42:09.876Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>95	    {
+96	        return await tcs.Task.WaitAsync(timeoutCts.Token);
+97	    }
+98	    catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+99	    {
+100	        _pendingEndOf.TryRemove(key, out _);
+101	        throw new TimeoutException(
+102	            $&quot;Timed out waiting for {terminator} response to {message.Command}.&quot;);
+103	    }
+104	}
+105	else
+106	{
+107	    // Unknown command, no correlation possible
+108	    await SendRawAsync(message, ct);
+109	    return [];
+110	}
+111	```
+112	
+113	### 3. Hook into the message processing loop
+114	
+115	In the main message processing switch (or as a pre-dispatch check),
+116	check incoming numerics against `_pendingEndOf`:
+117	
+118	```csharp
+119	// Check for ENDOF* fallback correlation
+120	foreach (var (key, pending) in _pendingEndOf)
+121	{
+122	    var (tcs, buffer, terminator, matchParam) = pending;
+123	
+124	    // Match: the numeric&#x27;s parameter matches our expected param</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-42-12-921Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-42-12-921Z" class="timestamp-link"><time datetime="2026-06-10T09:42:12.921Z" data-timestamp="2026-06-10T09:42:12.921Z">2026-06-10T09:42:12.921Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01DTKiSc4yzwvdRj9NBGJQDs"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/024-sendandawait-endof-fallback.md&#34;,
+  &#34;offset&#34;: 145
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-42-12-933Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-42-12-933Z" class="timestamp-link"><time datetime="2026-06-10T09:42:12.933Z" data-timestamp="2026-06-10T09:42:12.933Z">2026-06-10T09:42:12.933Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>145	example, `315 BotNick targetNick :End of WHO list`. So the match should
+146	compare `message.Parameters[1]` against the original command&#x27;s first
+147	parameter.
+148	
+149	### 4. Add `_pendingEndOf` dictionary to `IrcBot`
+150	
+151	```csharp
+152	private readonly ConcurrentDictionary&lt;string, (
+153	    TaskCompletionSource&lt;IReadOnlyList&lt;IrcMessage&gt;&gt; Tcs,
+154	    List&lt;IrcMessage&gt; Buffer,
+155	    string Terminator,
+156	    string? MatchParam)&gt; _pendingEndOf = new();
+157	```
+158	
+159	Clear it in `RunAsync` alongside `_pendingLabels`.
+160	
+161	## Design decisions
+162	
+163	**Why not use the ENDOF* fallback always (even when labeled-response is
+164	available)?** Labeled-response is strictly superior — it correlates any
+165	command, not just ones with known terminators, and uses server-assigned
+166	labels for unambiguous matching. The ENDOF* approach is inherently racy
+167	when multiple requests for the same command/target are in flight.
+168	
+169	**Why match on the command parameter?** Without parameter matching, two
+170	concurrent `WHO #channel1` and `WHO #channel2` requests would
+171	cross-contaminate. Parameter matching isn&#x27;t perfect (servers may
+172	normalize the parameter), but it handles the common case.
+173	
+174	**What about commands not in the table?** The fallback still returns `[]`
+175	for unknown commands. The table can be extended over time. Plugins with
+176	exotic needs can always parse raw messages via `[OnRawMessage]`.
+177	
+178	**Why not a general &quot;numeric sequence collector&quot;?** Over-engineering. The
+179	terminator pattern is well-established in the IRC protocol and covers all
+180	the common query commands.
+181	
+182	## Testing
+183	
+184	- **Unit test:** Send WHO with labeled-response available — verify the
+185	  labeled-response path is still used (existing behavior).
+186	- **Unit test:** Send WHO without labeled-response — verify responses are
+187	  collected up to and including `315`, then returned.
+188	- **Unit test:** Send WHO without labeled-response, server doesn&#x27;t respond
+189	  — verify TimeoutException after 30s.
+190	- **Unit test:** Two concurrent WHO requests for different targets —
+191	  verify responses are correctly separated.
+192	- **Integration test:** Connect to ngircd (which does not support
+193	  labeled-response), send WHO, verify the reply list is non-empty.
+194	
+195	## Impact
+196	
+197	- **Plugin DX:** `SendAndAwaitAsync` becomes useful on servers that lack
+198	  `labeled-response` support, which includes most traditional IRC servers.
+199	  The Moderation example plugin&#x27;s `!who` command will work on these servers.
+200	- **API surface:** No changes to `IBot`. Behavioral improvement only.
+201	- **Risk:** Low — the labeled-response path is unchanged. The new fallback
+202	  only activates when labeled-response is unavailable.
+203	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-42-18-578Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-42-18-578Z" class="timestamp-link"><time datetime="2026-06-10T09:42:18.578Z" data-timestamp="2026-06-10T09:42:18.578Z">2026-06-10T09:42:18.578Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01GfR3a2LKa41SvsnfqPLYLo">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">024-sendandawait-endof-fallback.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/024-sendandawait-endof-fallback.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">else
+{
+    // Unknown command, no correlation possible
+    await SendRawAsync(message, ct);
+    return [];
+}</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">else
+{
+    // Unknown command, no correlation possible — warn and throw
+    _logger.LogWarning(
+        &#34;SendAndAwaitAsync: no labeled-response support and no known ENDOF* &#34; +
+        &#34;terminator for command &#39;{Command}&#39;. Response correlation is not possible&#34;,
+        message.Command);
+    throw new NotSupportedException(
+        $&#34;Cannot correlate responses for &#39;{message.Command}&#39;: the server does not &#34; +
+        $&#34;support labeled-response and no ENDOF* fallback is defined for this command.&#34;);
+}</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-42-18-678Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-42-18-678Z" class="timestamp-link"><time datetime="2026-06-10T09:42:18.678Z" data-timestamp="2026-06-10T09:42:18.678Z">2026-06-10T09:42:18.678Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/024-sendandawait-endof-fallback.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-42-21-800Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-42-21-800Z" class="timestamp-link"><time datetime="2026-06-10T09:42:21.800Z" data-timestamp="2026-06-10T09:42:21.800Z">2026-06-10T09:42:21.800Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the design decisions section and add a test case for this.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-42-25-362Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-42-25-362Z" class="timestamp-link"><time datetime="2026-06-10T09:42:25.362Z" data-timestamp="2026-06-10T09:42:25.362Z">2026-06-10T09:42:25.362Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01NBvSpFCqmm1Egc3aFWVg73">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">024-sendandawait-endof-fallback.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/024-sendandawait-endof-fallback.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">**What about commands not in the table?** The fallback still returns `[]`
+for unknown commands. The table can be extended over time. Plugins with
+exotic needs can always parse raw messages via `[OnRawMessage]`.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">**What about commands not in the table?** The fallback logs a warning and
+throws `NotSupportedException`. Silent empty returns would mask bugs —
+a plugin calling `SendAndAwaitAsync` expects responses, and getting an
+empty list with no indication that correlation failed is misleading.
+Throwing forces the caller to handle the unsupported case explicitly
+(e.g. falling back to `SendRawAsync` + `[OnRawMessage]`). The table
+can be extended over time as new commands are identified.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-42-25-455Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-42-25-455Z" class="timestamp-link"><time datetime="2026-06-10T09:42:25.455Z" data-timestamp="2026-06-10T09:42:25.455Z">2026-06-10T09:42:25.455Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/024-sendandawait-endof-fallback.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-42-29-712Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-42-29-712Z" class="timestamp-link"><time datetime="2026-06-10T09:42:29.712Z" data-timestamp="2026-06-10T09:42:29.712Z">2026-06-10T09:42:29.712Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01XmS8dCgTWCvtpxpFJGBWn8">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">024-sendandawait-endof-fallback.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/024-sendandawait-endof-fallback.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">- **Unit test:** Two concurrent WHO requests for different targets —
+  verify responses are correctly separated.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">- **Unit test:** Two concurrent WHO requests for different targets —
+  verify responses are correctly separated.
+- **Unit test:** Send an unsupported command without labeled-response —
+  verify a warning is logged and `NotSupportedException` is thrown.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-42-29-752Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-42-29-752Z" class="timestamp-link"><time datetime="2026-06-10T09:42:29.752Z" data-timestamp="2026-06-10T09:42:29.752Z">2026-06-10T09:42:29.752Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/024-sendandawait-endof-fallback.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-42-34-050Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-42-34-050Z" class="timestamp-link"><time datetime="2026-06-10T09:42:34.050Z" data-timestamp="2026-06-10T09:42:34.050Z">2026-06-10T09:42:34.050Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01DP9tFLmhsjzKkx6PskTk3r">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add docs/change_specs/024-sendandawait-endof-fallback.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+CS-024: throw NotSupportedException for unsupported commands in fallback
+
+When labeled-response is unavailable and the command has no known ENDOF*
+terminator, log a warning and throw instead of silently returning an
+empty list. Callers expect responses from SendAndAwaitAsync — a silent
+empty return masks bugs.
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-42-34-238Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-42-34-238Z" class="timestamp-link"><time datetime="2026-06-10T09:42:34.238Z" data-timestamp="2026-06-10T09:42:34.238Z">2026-06-10T09:42:34.238Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">8d04ed9</span> CS-024: throw NotSupportedException for unsupported commands in fallback</div><pre>1 file changed, 17 insertions(+), 6 deletions(-)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-42-37-539Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-42-37-539Z" class="timestamp-link"><time datetime="2026-06-10T09:42:37.539Z" data-timestamp="2026-06-10T09:42:37.539Z">2026-06-10T09:42:37.539Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Updated CS-024. The unsupported-command fallback now logs a warning and throws <code>NotSupportedException</code> instead of silently returning an empty list. The design decisions section explains the rationale (silent empty returns mask bugs), and there's a new test case for it.</p></div></div></div>
+<div class="message user" id="msg-2026-06-10T09-45-23-543Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-10T09-45-23-543Z" class="timestamp-link"><time datetime="2026-06-10T09:45:23.543Z" data-timestamp="2026-06-10T09:45:23.543Z">2026-06-10T09:45:23.543Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Regarding CS-020, one of the main consumers of such an interface would be a Prometheus/OpenTelemetry integration; would it be better to use one of them as the source of truth, and let plugins which need access to the stats read from them?</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-45-34-263Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-45-34-263Z" class="timestamp-link"><time datetime="2026-06-10T09:45:34.263Z" data-timestamp="2026-06-10T09:45:34.263Z">2026-06-10T09:45:34.263Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-45-40-232Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-45-40-232Z" class="timestamp-link"><time datetime="2026-06-10T09:45:40.232Z" data-timestamp="2026-06-10T09:45:40.232Z">2026-06-10T09:45:40.232Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Good question. The two serve different audiences, and <code>System.Diagnostics.Metrics</code> (the .NET OpenTelemetry-native API) could actually serve both.</p>
+<p>The tradeoff is <strong>ergonomics vs. duplication</strong>. An <code>IBotStatistics</code> with simple properties is easy for a <code>!stats</code> command to consume, but if you also wire up OTel meters you're maintaining two parallel sets of counters. Conversely, if OTel meters are the source of truth, reading current values back from them is awkward — <code>Meter</code>/<code>Counter&lt;T&gt;</code> is a write-only API by design; you need an <code>ObservableGauge</code> or a custom <code>MeterListener</code> to read values, which is clunky for a plugin that just wants <code>bot.Statistics.LinesSent</code>.</p>
+<p>My recommendation: <strong>instrument with <code>System.Diagnostics.Metrics</code>, but keep <code>IBotStatistics</code> as a thin read facade over the same backing fields.</strong> The <code>Interlocked</code> fields in <code>BotStatistics</code> are the single source of truth. The OTel meters observe them (via <code>ObservableCounter</code>/<code>ObservableGauge</code> callbacks), and <code>IBotStatistics</code> reads them directly. No duplication, both consumers are happy.</p>
+<p>Want me to update CS-020 with that approach?</p></div></div></div>
+<div class="message user" id="msg-2026-06-10T09-53-19-129Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-10T09-53-19-129Z" class="timestamp-link"><time datetime="2026-06-10T09:53:19.129Z" data-timestamp="2026-06-10T09:53:19.129Z">2026-06-10T09:53:19.129Z</time></a></div><div class="message-content">
+<div class="user-content"><p>What if I want to implement the metrics endpoint as a plugin? Can I use the ObservableCounter/ObservableGauge metrics without internal access to IBotStatistics?</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-53-29-929Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-53-29-929Z" class="timestamp-link"><time datetime="2026-06-10T09:53:29.929Z" data-timestamp="2026-06-10T09:53:29.929Z">2026-06-10T09:53:29.929Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Yes — if <code>IBotStatistics</code> exposes the values as public properties (which it does in the current spec), a plugin can create <code>ObservableCounter</code>/<code>ObservableGauge</code> instruments that read from <code>bot.Statistics.LinesSent</code> etc. in their callback. The plugin doesn't need internal access to the backing fields, just the public interface:</p>
+<pre><code class="language-csharp">var meter = new Meter(&quot;Marv.Metrics&quot;);
+meter.CreateObservableCounter(&quot;irc.lines.sent&quot;, () =&gt; bot.Statistics.LinesSent);
+meter.CreateObservableGauge(&quot;irc.uptime.seconds&quot;, () =&gt; bot.Statistics.Uptime.TotalSeconds);
+</code></pre>
+<p>So the current design actually works well for this: core owns the counters and exposes them via <code>IBotStatistics</code>, and a metrics plugin creates the OTel instruments on top. The core has zero dependency on <code>System.Diagnostics.Metrics</code> or any OTel packages — that's entirely the plugin's concern.</p>
+<p>The only thing worth adding to the spec is a note that the property values must be safe to read at any time from any thread (which the <code>Interlocked</code> backing already guarantees), since OTel collection callbacks run on arbitrary threads. Want me to update CS-020 with this plugin-based metrics story?</p></div></div></div>
+<div class="message user" id="msg-2026-06-10T09-53-45-789Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-10T09-53-45-789Z" class="timestamp-link"><time datetime="2026-06-10T09:53:45.789Z" data-timestamp="2026-06-10T09:53:45.789Z">2026-06-10T09:53:45.789Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Okay, go with that</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-53-49-132Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-53-49-132Z" class="timestamp-link"><time datetime="2026-06-10T09:53:49.132Z" data-timestamp="2026-06-10T09:53:49.132Z">2026-06-10T09:53:49.132Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_011fvhddkSCGn4cB5PgCqDAB"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/020-bot-statistics.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-53-49-196Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-53-49-196Z" class="timestamp-link"><time datetime="2026-06-10T09:53:49.196Z" data-timestamp="2026-06-10T09:53:49.196Z">2026-06-10T09:53:49.196Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# CS-020: Bot Statistics Property
+2	
+3	**Source:** Downstream feature request
+4	**Scope:** Core (IBot interface)
+5	**Complexity:** Medium
+6	**Breaking changes:** Additive only (new interface member)
+7	**Status:** Pending
+8	
+9	---
+10	
+11	## Problem
+12	
+13	There is no way for plugins to inspect operational statistics about the bot.
+14	Common needs include:
+15	
+16	- Uptime (time since connection was established)
+17	- Bytes and lines sent/received
+18	- Commands executed (handler invocations)
+19	
+20	Operators want dashboards, status commands, and monitoring plugins. Today
+21	each plugin would have to track its own subset of these numbers independently,
+22	and most (bytes/lines on the wire) aren&#x27;t even observable from plugin code.
+23	
+24	## Changes
+25	
+26	### 1. Define `IBotStatistics` in `Marv.Core.Platform`
+27	
+28	```csharp
+29	/// &lt;summary&gt;
+30	/// Read-only snapshot of operational statistics for the current connection.
+31	/// All counters reset when the bot reconnects.
+32	/// &lt;/summary&gt;
+33	public interface IBotStatistics
+34	{
+35	    /// &lt;summary&gt;When the current connection was established (UTC).&lt;/summary&gt;
+36	    DateTimeOffset ConnectedAt { get; }
+37	
+38	    /// &lt;summary&gt;Time elapsed since the connection was established.&lt;/summary&gt;
+39	    TimeSpan Uptime { get; }
+40	
+41	    /// &lt;summary&gt;Total bytes received from the server.&lt;/summary&gt;
+42	    long BytesReceived { get; }
+43	
+44	    /// &lt;summary&gt;Total bytes sent to the server.&lt;/summary&gt;
+45	    long BytesSent { get; }
+46	
+47	    /// &lt;summary&gt;Total IRC lines received from the server.&lt;/summary&gt;
+48	    long LinesReceived { get; }
+49	
+50	    /// &lt;summary&gt;Total IRC lines sent to the server.&lt;/summary&gt;
+51	    long LinesSent { get; }
+52	
+53	    /// &lt;summary&gt;Total handler invocations (commands, events, regex matches, etc.).&lt;/summary&gt;
+54	    long HandlersInvoked { get; }
+55	}
+56	```
+57	
+58	### 2. Add `Statistics` property to `IBot`
+59	
+60	```csharp
+61	/// &lt;summary&gt;Operational statistics for the current connection.&lt;/summary&gt;
+62	IBotStatistics Statistics { get; }
+63	```
+64	
+65	### 3. Implement `BotStatistics` in `Marv.Core.Irc`
+66	
+67	An internal mutable class that `IrcBot` owns. Uses `Interlocked` for
+68	thread-safe counter increments. Reset in `RunAsync` when a new connection
+69	starts.
+70	
+71	Wire up counters:
+72	- **BytesReceived / BytesSent**: Increment in `IrcConnection`&#x27;s read/write
+73	  loops, where the raw byte buffer length is known. Either expose mutable
+74	  counters on `IrcConnection` that `IrcBot` reads, or pass the statistics
+75	  object into `IrcConnection`.
+76	- **LinesReceived**: Increment when a parsed `IrcMessage` is written to the
+77	  inbound channel.
+78	- **LinesSent**: Increment when an `IrcMessage` is written to the outbound
+79	  channel (in `SendRawAsync`).
+80	- **HandlersInvoked**: Increment in the handler dispatch loop (where
+81	  `HandlerGroup.InvokeAsync` is called).
+82	- **ConnectedAt**: Set once at connection establishment in `RunAsync`.
+83	- **Uptime**: Computed as `DateTimeOffset.UtcNow - ConnectedAt`.
+84	
+85	### 4. Register in DI
+86	
+87	`IBotStatistics` is accessible via `IBot.Statistics`, so no separate DI
+88	registration is needed. However, if plugins want to inject it directly
+89	(e.g. services that don&#x27;t have an `IBot` reference), register the
+90	singleton in the service collection.
+91	
+92	### 5. Update `MockBot` (Marv.Testing)
+93	
+94	Ensure `MockBot.Create()` stubs `Statistics` to return a sensible default
+95	(zeroed counters, `ConnectedAt` = `DateTimeOffset.UtcNow`).
+96	
+97	### 6. Update PLUGIN_API.md
+98	
+99	Add `Statistics` to the `IBot` property table in §5 and document
+100	`IBotStatistics` in §14 (Platform Types).
+101	
+102	## Design decisions
+103	
+104	**Why a dedicated interface rather than individual properties on IBot?**
+105	Grouping statistics into their own interface keeps `IBot` focused on actions
+106	and state. It also makes it easy to snapshot, serialize (for a stats endpoint),
+107	or mock independently.
+108	
+109	**Why reset on reconnect?** Per-connection statistics are simpler and more
+110	useful than cumulative totals. Operators who want historical data can
+111	persist snapshots from a plugin using `[OnInterval]`.
+112	
+113	**Why not include per-command or per-plugin breakdowns?** That&#x27;s a concern
+114	for a future metrics/observability plugin. The core stats should be
+115	connection-level aggregates that are cheap to maintain.
+116	
+117	## Testing
+118	
+119	- **Unit test:** Verify counter increments after sends/receives using
+120	  `MockBot` or a test `IrcConnection`.
+121	- **Unit test:** Verify counters reset on new connection.
+122	- **Integration test:** Connect to ngircd, exchange messages, check that
+123	  `Statistics.LinesReceived &gt; 0` and `Statistics.LinesSent &gt; 0`.
+124	
+125	## Impact
+126	
+127	- **Plugin DX:** Plugins can build status commands, dashboards, and
+128	  monitoring with zero protocol knowledge.
+129	- **API surface:** One new property on `IBot`, one new interface.
+130	- **Performance:** Counter increments use `Interlocked`; negligible cost.
+131	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-53-56-645Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-53-56-645Z" class="timestamp-link"><time datetime="2026-06-10T09:53:56.645Z" data-timestamp="2026-06-10T09:53:56.645Z">2026-06-10T09:53:56.645Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01138h7ctHkpVi7FjJU5FpF2">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">020-bot-statistics.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/020-bot-statistics.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">/// &lt;summary&gt;
+/// Read-only snapshot of operational statistics for the current connection.
+/// All counters reset when the bot reconnects.
+/// &lt;/summary&gt;
+public interface IBotStatistics
+{
+    /// &lt;summary&gt;When the current connection was established (UTC).&lt;/summary&gt;
+    DateTimeOffset ConnectedAt { get; }
+
+    /// &lt;summary&gt;Time elapsed since the connection was established.&lt;/summary&gt;
+    TimeSpan Uptime { get; }
+
+    /// &lt;summary&gt;Total bytes received from the server.&lt;/summary&gt;
+    long BytesReceived { get; }
+
+    /// &lt;summary&gt;Total bytes sent to the server.&lt;/summary&gt;
+    long BytesSent { get; }
+
+    /// &lt;summary&gt;Total IRC lines received from the server.&lt;/summary&gt;
+    long LinesReceived { get; }
+
+    /// &lt;summary&gt;Total IRC lines sent to the server.&lt;/summary&gt;
+    long LinesSent { get; }
+
+    /// &lt;summary&gt;Total handler invocations (commands, events, regex matches, etc.).&lt;/summary&gt;
+    long HandlersInvoked { get; }
+}</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">/// &lt;summary&gt;
+/// Read-only view of operational statistics for the current connection.
+/// All counters reset when the bot reconnects. All properties are
+/// thread-safe and may be read from any thread at any time — this is
+/// important for OpenTelemetry observable instrument callbacks which
+/// run on arbitrary threads.
+/// &lt;/summary&gt;
+public interface IBotStatistics
+{
+    /// &lt;summary&gt;When the current connection was established (UTC).&lt;/summary&gt;
+    DateTimeOffset ConnectedAt { get; }
+
+    /// &lt;summary&gt;Time elapsed since the connection was established.&lt;/summary&gt;
+    TimeSpan Uptime { get; }
+
+    /// &lt;summary&gt;Total bytes received from the server.&lt;/summary&gt;
+    long BytesReceived { get; }
+
+    /// &lt;summary&gt;Total bytes sent to the server.&lt;/summary&gt;
+    long BytesSent { get; }
+
+    /// &lt;summary&gt;Total IRC lines received from the server.&lt;/summary&gt;
+    long LinesReceived { get; }
+
+    /// &lt;summary&gt;Total IRC lines sent to the server.&lt;/summary&gt;
+    long LinesSent { get; }
+
+    /// &lt;summary&gt;Total handler invocations (commands, events, regex matches, etc.).&lt;/summary&gt;
+    long HandlersInvoked { get; }
+}</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-53-56-698Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-53-56-698Z" class="timestamp-link"><time datetime="2026-06-10T09:53:56.698Z" data-timestamp="2026-06-10T09:53:56.698Z">2026-06-10T09:53:56.698Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/020-bot-statistics.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-54-14-520Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-54-14-520Z" class="timestamp-link"><time datetime="2026-06-10T09:54:14.520Z" data-timestamp="2026-06-10T09:54:14.520Z">2026-06-10T09:54:14.520Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01CQ4i2ui7nvJb87GF42oK2o">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">020-bot-statistics.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/020-bot-statistics.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">## Design decisions
+
+**Why a dedicated interface rather than individual properties on IBot?**
+Grouping statistics into their own interface keeps `IBot` focused on actions
+and state. It also makes it easy to snapshot, serialize (for a stats endpoint),
+or mock independently.
+
+**Why reset on reconnect?** Per-connection statistics are simpler and more
+useful than cumulative totals. Operators who want historical data can
+persist snapshots from a plugin using `[OnInterval]`.
+
+**Why not include per-command or per-plugin breakdowns?** That&#39;s a concern
+for a future metrics/observability plugin. The core stats should be
+connection-level aggregates that are cheap to maintain.
+
+## Testing
+
+- **Unit test:** Verify counter increments after sends/receives using
+  `MockBot` or a test `IrcConnection`.
+- **Unit test:** Verify counters reset on new connection.
+- **Integration test:** Connect to ngircd, exchange messages, check that
+  `Statistics.LinesReceived &gt; 0` and `Statistics.LinesSent &gt; 0`.
+
+## Impact
+
+- **Plugin DX:** Plugins can build status commands, dashboards, and
+  monitoring with zero protocol knowledge.
+- **API surface:** One new property on `IBot`, one new interface.
+- **Performance:** Counter increments use `Interlocked`; negligible cost.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">## Design decisions
+
+**Why a dedicated interface rather than individual properties on IBot?**
+Grouping statistics into their own interface keeps `IBot` focused on actions
+and state. It also makes it easy to snapshot, serialize (for a stats endpoint),
+or mock independently.
+
+**Why not use OpenTelemetry / `System.Diagnostics.Metrics` directly in
+core?** The core should have zero dependency on OTel packages. Instead,
+`IBotStatistics` exposes simple properties backed by `Interlocked` fields,
+and a metrics plugin can wrap them with `ObservableCounter` /
+`ObservableGauge` instruments:
+
+```csharp
+// In a metrics plugin — core has no OTel dependency
+var meter = new Meter(&#34;Marv.Metrics&#34;);
+meter.CreateObservableCounter(&#34;irc.lines.sent&#34;,
+    () =&gt; _bot.Statistics.LinesSent);
+meter.CreateObservableCounter(&#34;irc.lines.received&#34;,
+    () =&gt; _bot.Statistics.LinesReceived);
+meter.CreateObservableCounter(&#34;irc.bytes.sent&#34;,
+    () =&gt; _bot.Statistics.BytesSent);
+meter.CreateObservableCounter(&#34;irc.bytes.received&#34;,
+    () =&gt; _bot.Statistics.BytesReceived);
+meter.CreateObservableCounter(&#34;irc.handlers.invoked&#34;,
+    () =&gt; _bot.Statistics.HandlersInvoked);
+meter.CreateObservableGauge(&#34;irc.uptime.seconds&#34;,
+    () =&gt; _bot.Statistics.Uptime.TotalSeconds);
+```
+
+This keeps the layering clean: core owns the counters, `IBotStatistics`
+provides the read API, and any OTel/Prometheus export is a plugin concern.
+The same properties serve simple use cases (`!stats` command) and
+production observability (Prometheus scrape endpoint) without duplication.
+
+All `IBotStatistics` properties are safe to read from any thread because
+the backing fields use `Interlocked` — this matters because OTel
+observable instrument callbacks run on the collection thread, not the
+bot&#39;s event loop.
+
+**Why reset on reconnect?** Per-connection statistics are simpler and more
+useful than cumulative totals. Operators who want historical data can
+persist snapshots from a plugin using `[OnInterval]`.
+
+**Why not include per-command or per-plugin breakdowns?** That&#39;s a concern
+for a metrics plugin. A plugin can create its own `Meter` with additional
+instruments beyond what `IBotStatistics` provides. The core stats should
+be connection-level aggregates that are cheap to maintain.
+
+## Testing
+
+- **Unit test:** Verify counter increments after sends/receives using
+  `MockBot` or a test `IrcConnection`.
+- **Unit test:** Verify counters reset on new connection.
+- **Unit test:** Verify properties are readable from a non-bot thread
+  (simulates OTel collection callback).
+- **Integration test:** Connect to ngircd, exchange messages, check that
+  `Statistics.LinesReceived &gt; 0` and `Statistics.LinesSent &gt; 0`.
+
+## Impact
+
+- **Plugin DX:** Plugins can build status commands, dashboards, and
+  monitoring with zero protocol knowledge. A metrics plugin can expose
+  all counters as OTel instruments without internal access.
+- **API surface:** One new property on `IBot`, one new interface.
+- **Performance:** Counter increments use `Interlocked`; negligible cost.
+- **Dependencies:** No new dependencies in core. OTel packages are only
+  needed by a metrics plugin.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-54-14-655Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-54-14-655Z" class="timestamp-link"><time datetime="2026-06-10T09:54:14.655Z" data-timestamp="2026-06-10T09:54:14.655Z">2026-06-10T09:54:14.655Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/020-bot-statistics.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-54-19-769Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-54-19-769Z" class="timestamp-link"><time datetime="2026-06-10T09:54:19.769Z" data-timestamp="2026-06-10T09:54:19.769Z">2026-06-10T09:54:19.769Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_015LBfj5vH69mZfvmbZye7yd">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add docs/change_specs/020-bot-statistics.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+CS-020: document plugin-based OTel metrics story
+
+IBotStatistics is the read API backed by Interlocked fields; a metrics
+plugin wraps them with ObservableCounter/ObservableGauge instruments.
+Core has zero OTel dependency. Added thread-safety note for collection
+callbacks and a cross-thread read test case.
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-10T09-54-19-894Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-10T09-54-19-894Z" class="timestamp-link"><time datetime="2026-06-10T09:54:19.894Z" data-timestamp="2026-06-10T09:54:19.894Z">2026-06-10T09:54:19.894Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">5b8dfd1</span> CS-020: document plugin-based OTel metrics story</div><pre>1 file changed, 47 insertions(+), 5 deletions(-)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-10T09-54-25-346Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-10T09-54-25-346Z" class="timestamp-link"><time datetime="2026-06-10T09:54:25.346Z" data-timestamp="2026-06-10T09:54:25.346Z">2026-06-10T09:54:25.346Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Updated CS-020. Key changes:</p>
+<ul>
+<li><code>IBotStatistics</code> stays in core with no OTel dependency — it's the read facade over <code>Interlocked</code> backing fields</li>
+<li>Added a concrete example showing how a metrics plugin creates <code>ObservableCounter</code>/<code>ObservableGauge</code> instruments reading from <code>bot.Statistics.*</code></li>
+<li>Documented that all properties are thread-safe for OTel collection callbacks</li>
+<li>Added a cross-thread read test case</li>
+<li>Reframed the "per-command breakdowns" decision to point at plugin-owned <code>Meter</code> instances rather than a vague "future" concern</li>
+</ul></div></div></div>
+        
+
+<div class="pagination"><a href="index.html" class="index-link">Index</a></div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

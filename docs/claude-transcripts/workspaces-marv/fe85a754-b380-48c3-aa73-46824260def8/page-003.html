@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 3</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 3/6</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-002.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<span class="current">3</span>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<a href="page-006.html">6</a>
+<a href="page-004.html">Next &rarr;</a>
+</div>
+
+        
+<div class="message user" id="msg-2026-06-12T14-10-50-012Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-12T14-10-50-012Z" class="timestamp-link"><time datetime="2026-06-12T14:10:50.012Z" data-timestamp="2026-06-12T14:10:50.012Z">2026-06-12T14:10:50.012Z</time></a></div><div class="message-content">
+<div class="user-content"><p><local-command-caveat>Caveat: The messages below were generated by the user while running local commands. DO NOT respond to these messages or otherwise consider them in your response unless the user explicitly asks you to.</local-command-caveat></p></div></div></div>
+<div class="message user" id="msg-2026-06-12T14-10-49-976Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-12T14-10-49-976Z" class="timestamp-link"><time datetime="2026-06-12T14:10:49.976Z" data-timestamp="2026-06-12T14:10:49.976Z">2026-06-12T14:10:49.976Z</time></a></div><div class="message-content">
+<div class="user-content"><p><command-name>/reload-skills</command-name>
+            <command-message>reload-skills</command-message>
+            <command-args></command-args></p></div></div></div>
+<div class="message user" id="msg-2026-06-12T14-10-57-753Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-12T14-10-57-753Z" class="timestamp-link"><time datetime="2026-06-12T14:10:57.753Z" data-timestamp="2026-06-12T14:10:57.753Z">2026-06-12T14:10:57.753Z</time></a></div><div class="message-content">
+<div class="user-content"><p><command-message>triage-issues</command-message>
+<command-name>/triage-issues</command-name></p></div></div></div>
+<div class="message user" id="msg-2026-06-12T14-10-57-753Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-12T14-10-57-753Z" class="timestamp-link"><time datetime="2026-06-12T14:10:57.753Z" data-timestamp="2026-06-12T14:10:57.753Z">2026-06-12T14:10:57.753Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Base directory for this skill: /workspaces/marv/.claude/skills/triage-issues</p>
+<h1>Triage GitHub Issues</h1>
+<p>Reconcile open GitHub issues with the local codebase by reviewing,
+discussing, and — when accepted — converting them into change specifications.</p>
+<h2>When to use</h2>
+<p>Invoke with <code>/triage-issues</code> when you want to process open GitHub issues.</p>
+<h2>Workflow</h2>
+<h3>1. Fetch open issues</h3>
+<p>Run:</p>
+<pre><code>gh issue list --repo predakanga/marv --state open --json number,title,body,labels,comments --limit 50
+</code></pre>
+<p>Filter out issues that already have a label <code>triaged</code> or <code>rejected</code>.</p>
+<h3>2. For each untriaged issue</h3>
+<h4>2a. If the issue has NO prior bot analysis comment</h4>
+<p>Read the issue body and any comments. Analyse the suggestion against the
+current codebase:</p>
+<ul>
+<li>Is it feasible?</li>
+<li>Does it overlap with an existing change spec or completed work?</li>
+<li>What is the estimated scope/complexity?</li>
+<li>Are there any design concerns or open questions?</li>
+</ul>
+<p>Post a comment on the issue with your analysis using this template:</p>
+<pre><code>## Triage Analysis
+
+**Feasibility:** &lt;High / Medium / Low&gt;
+**Scope:** &lt;Core / Host / Plugin API / Docs / CI/CD / New package&gt;
+**Complexity:** &lt;Trivial / Small / Medium / Large&gt;
+**Overlaps:** &lt;None / CS-NNN — description&gt;
+
+### Summary
+
+&lt;2-4 sentence summary of what the issue proposes and how it fits the project&gt;
+
+### Design Notes
+
+&lt;Bullet points covering key design considerations, potential approaches,
+and any concerns or trade-offs&gt;
+
+### Open Questions
+
+&lt;Numbered list of questions for the issue author, if any&gt;
+
+---
+*Automated triage by Claude Code. Reply to discuss, or comment
+`/accept` to approve or `/reject` to decline.*
+</code></pre>
+<p>Report to the user what you posted and move to the next issue.</p>
+<h4>2b. If the issue already has a bot analysis comment</h4>
+<p>Read ALL comments after the analysis. Look for:</p>
+<ul>
+<li><strong><code>/accept</code></strong> — the issue author has approved the change. Proceed to
+  step 3.</li>
+<li><strong><code>/reject</code></strong> — the issue author has declined the change. Add the
+  <code>rejected</code> label and post a short acknowledgement comment. Move on.</li>
+<li><strong>Other comments</strong> — these are discussion/clarification. Post a
+  follow-up comment addressing the points raised, updating your analysis
+  if needed. Move on.</li>
+</ul>
+<h3>3. Create change specifications (on <code>/accept</code>)</h3>
+<p>When an issue is accepted:</p>
+<ol>
+<li>Determine the next change spec number by reading
+   <code>docs/change_specs/README.md</code>.</li>
+<li>Write one or more change spec <code>.md</code> files following the established
+   format (see existing specs in <code>docs/change_specs/</code> for the template).
+   The spec's <code>Source</code> metadata should reference the GitHub issue
+   (e.g. <code>**Source:** GitHub issue #42</code>).
+   Do NOT write any code — specs only.</li>
+<li>Update <code>docs/change_specs/README.md</code> to include the new spec(s) with
+   status <strong>Pending</strong>.</li>
+<li>Add the <code>triaged</code> label to the issue.</li>
+<li>Post a comment on the issue noting which change spec(s) were created.</li>
+<li>Follow the mandatory instructions in CLAUDE.md (commit, changelog if
+   user-visible, prompt log).</li>
+</ol>
+<h2>Important notes</h2>
+<ul>
+<li>This skill does NOT implement any code. It only creates change
+  specifications.</li>
+<li>When analysing feasibility, read relevant source files — don't guess.</li>
+<li>Keep issue comments concise and professional.</li>
+<li>If <code>gh</code> commands fail with auth errors, ask the user to run
+  <code>! gh auth login</code> in their terminal.</li>
+</ul></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-11-00-624Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-11-00-624Z" class="timestamp-link"><time datetime="2026-06-12T14:11:00.624Z" data-timestamp="2026-06-12T14:11:00.624Z">2026-06-12T14:11:00.624Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Fetching open issues from the repo.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-11-01-090Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-11-01-090Z" class="timestamp-link"><time datetime="2026-06-12T14:11:01.090Z" data-timestamp="2026-06-12T14:11:01.090Z">2026-06-12T14:11:01.090Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_017vki26uEWtQCgndFCU8CLM">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Fetch open GitHub issues</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">gh issue list --repo predakanga/marv --state open --json number,title,body,labels,comments --limit 50</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-11-01-678Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-11-01-678Z" class="timestamp-link"><time datetime="2026-06-12T14:11:01.678Z" data-timestamp="2026-06-12T14:11:01.678Z">2026-06-12T14:11:01.678Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>[{&quot;body&quot;:&quot;At the minute, plugins are implicitly scoped to each IRC connection ([source](/src/Marv.Core/Irc/MarvBotService.cs#L52), but plugins can only register singleton or transient services.\n\nWe should extend Marv to create a new IServiceScope on each connection and use that to explicitly scope plugins, while allowing them to also registered scoped plugins to fit the plugin lifecycle.&quot;,&quot;comments&quot;:[],&quot;labels&quot;:[],&quot;number&quot;:1,&quot;title&quot;:&quot;Add support for IServiceScopes&quot;}]</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-11-05-358Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-11-05-358Z" class="timestamp-link"><time datetime="2026-06-12T14:11:05.358Z" data-timestamp="2026-06-12T14:11:05.358Z">2026-06-12T14:11:05.358Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>One open issue: <strong>#1 — Add support for IServiceScopes</strong>. No labels, no prior comments. Let me analyse the codebase to provide a proper triage.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-11-05-854Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-11-05-854Z" class="timestamp-link"><time datetime="2026-06-12T14:11:05.854Z" data-timestamp="2026-06-12T14:11:05.854Z">2026-06-12T14:11:05.854Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01RnKTn69BxRMm2SHqiL3C34"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Irc/MarvBotService.cs&#34;,
+  &#34;limit&#34;: 80
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-11-05-883Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-11-05-883Z" class="timestamp-link"><time datetime="2026-06-12T14:11:05.883Z" data-timestamp="2026-06-12T14:11:05.883Z">2026-06-12T14:11:05.883Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using Marv.Core.Events;
+2	using Marv.Core.Plugin;
+3	using Marv.Core.Protocol;
+4	using Microsoft.Extensions.Hosting;
+5	using Microsoft.Extensions.Logging;
+6	using Microsoft.Extensions.Options;
+7	
+8	namespace Marv.Core.Irc;
+9	
+10	/// &lt;summary&gt;
+11	/// Hosted service that orchestrates the bot&#x27;s lifecycle: plugin loading,
+12	/// IRC connection, message processing, reconnection, and graceful shutdown.
+13	/// &lt;/summary&gt;
+14	internal sealed class MarvBotService : BackgroundService
+15	{
+16	    private readonly ILogger&lt;MarvBotService&gt; _logger;
+17	    private readonly IrcBot _bot;
+18	    private readonly PluginManager _pluginManager;
+19	    private readonly IReadOnlyList&lt;PluginDescriptor&gt; _descriptors;
+20	    private readonly MarvConfiguration _config;
+21	    private readonly ILoggerFactory _loggerFactory;
+22	
+23	    // Reconnection backoff
+24	    private const int InitialBackoffSeconds = 5;
+25	    private const int MaxBackoffSeconds = 300;
+26	
+27	    public MarvBotService(
+28	        ILogger&lt;MarvBotService&gt; logger,
+29	        IrcBot bot,
+30	        PluginManager pluginManager,
+31	        IReadOnlyList&lt;PluginDescriptor&gt; descriptors,
+32	        IOptions&lt;MarvConfiguration&gt; config,
+33	        ILoggerFactory loggerFactory)
+34	    {
+35	        _logger = logger;
+36	        _bot = bot;
+37	        _pluginManager = pluginManager;
+38	        _descriptors = descriptors;
+39	        _config = config.Value;
+40	        _loggerFactory = loggerFactory;
+41	    }
+42	
+43	    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+44	    {
+45	        var backoff = InitialBackoffSeconds;
+46	
+47	        while (!stoppingToken.IsCancellationRequested)
+48	        {
+49	            try
+50	            {
+51	                // Phase 1: Instantiate and load plugins
+52	                _pluginManager.InstantiatePlugins(_descriptors);
+53	                await _pluginManager.LoadPluginsAsync(stoppingToken);
+54	                _pluginManager.LogDiagnostics();
+55	
+56	                // Phase 2: Connect to IRC
+57	                var connection = new IrcConnection(
+58	                    _loggerFactory.CreateLogger&lt;IrcConnection&gt;(),
+59	                    _config.RateLimitEnabled,
+60	                    _config.RateLimitBurst,
+61	                    _config.RateLimitRefillRate);
+62	                await using (connection)
+63	                {
+64	                    await connection.ConnectAsync(
+65	                        _config.Server, _config.Port, _config.UseTls, stoppingToken,
+66	                        _config.TlsSkipCertificateValidation, _config.TlsCaCertFile);
+67	
+68	                    // Phase 3: Notify plugins and start event dispatchers
+69	                    await _pluginManager.NotifyConnectedAsync(stoppingToken);
+70	                    var eventWriters = _pluginManager.StartEventDispatchers(stoppingToken);
+71	
+72	                    // Phase 4: Run the message processor (blocks until disconnect)
+73	                    backoff = InitialBackoffSeconds; // Reset backoff on successful connection
+74	                    await _bot.RunAsync(connection, _config, eventWriters, stoppingToken);
+75	                }
+76	            }
+77	            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+78	            {
+79	                _logger.LogInformation(&quot;Bot shutdown requested&quot;);
+80	                break;</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-11-07-245Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-11-07-245Z" class="timestamp-link"><time datetime="2026-06-12T14:11:07.245Z" data-timestamp="2026-06-12T14:11:07.245Z">2026-06-12T14:11:07.245Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_013aZ9ciyqJFnA2Xw2aHbuXt">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Find service registration patterns</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;IServiceScope\|IServiceProvider\|ServiceLifetime\|AddScoped\|AddSingleton\|AddTransient&#34; /workspaces/marv/src/Marv.Core/ --include=&#34;*.cs&#34; | head -30</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-11-07-316Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-11-07-316Z" class="timestamp-link"><time datetime="2026-06-12T14:11:07.316Z" data-timestamp="2026-06-12T14:11:07.316Z">2026-06-12T14:11:07.316Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs:35:        services.AddSingleton&lt;IServerInfo&gt;(serverInfo);
+/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs:36:        services.AddSingleton(serverInfo);
+/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs:37:        services.AddSingleton&lt;ICapabilityManager&gt;(capabilityManager);
+/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs:38:        services.AddSingleton(capabilityManager);
+/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs:39:        services.AddSingleton&lt;IPluginActivator, PluginActivator&gt;();
+/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs:40:        services.AddSingleton&lt;PluginManager&gt;();
+/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs:46:        services.AddSingleton&lt;IrcBot&gt;();
+/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs:47:        services.AddSingleton&lt;IBot&gt;(sp =&gt; sp.GetRequiredService&lt;IrcBot&gt;());
+/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs:48:        services.AddSingleton&lt;IBotStatistics&gt;(sp =&gt; sp.GetRequiredService&lt;IrcBot&gt;().Statistics);
+/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs:86:        services.AddSingleton(sortedPlugins);
+/workspaces/marv/src/Marv.Core/Plugin/PluginActivator.cs:9:internal sealed class PluginActivator(IServiceProvider serviceProvider) : IPluginActivator
+/workspaces/marv/src/Marv.Core/Plugin/PluginManager.cs:19:    private readonly IServiceProvider _serviceProvider;
+/workspaces/marv/src/Marv.Core/Plugin/PluginManager.cs:26:    public PluginManager(ILogger&lt;PluginManager&gt; logger, IServiceProvider serviceProvider)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-11-08-005Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-11-08-005Z" class="timestamp-link"><time datetime="2026-06-12T14:11:08.005Z" data-timestamp="2026-06-12T14:11:08.005Z">2026-06-12T14:11:08.005Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01FrG6GvoP565H9YkZWr7aHh">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Find service registration in Host</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;IServiceScope\|IServiceProvider\|AddScoped\|AddSingleton\|AddTransient&#34; /workspaces/marv/src/Marv.Host/ --include=&#34;*.cs&#34; | head -20</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-11-08-029Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-11-08-029Z" class="timestamp-link"><time datetime="2026-06-12T14:11:08.029Z" data-timestamp="2026-06-12T14:11:08.029Z">2026-06-12T14:11:08.029Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>ugrep: warning: /workspaces/marv/src/Marv.Host/: No such file or directory</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-11-11-312Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-11-11-312Z" class="timestamp-link"><time datetime="2026-06-12T14:11:11.312Z" data-timestamp="2026-06-12T14:11:11.312Z">2026-06-12T14:11:11.312Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01MATZkwxNKH3qQCFj97P4o2"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Plugin/PluginActivator.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-11-11-340Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-11-11-340Z" class="timestamp-link"><time datetime="2026-06-12T14:11:11.340Z" data-timestamp="2026-06-12T14:11:11.340Z">2026-06-12T14:11:11.340Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using Microsoft.Extensions.DependencyInjection;
+2	
+3	namespace Marv.Core.Plugin;
+4	
+5	/// &lt;summary&gt;
+6	/// Default implementation of &lt;see cref=&quot;IPluginActivator&quot;/&gt; that delegates to
+7	/// &lt;see cref=&quot;ActivatorUtilities.CreateInstance{T}&quot;/&gt;.
+8	/// &lt;/summary&gt;
+9	internal sealed class PluginActivator(IServiceProvider serviceProvider) : IPluginActivator
+10	{
+11	    /// &lt;inheritdoc /&gt;
+12	    public T CreateInstance&lt;T&gt;(params object[] parameters) =&gt;
+13	        ActivatorUtilities.CreateInstance&lt;T&gt;(serviceProvider, parameters);
+14	}
+15	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-11-11-804Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-11-11-804Z" class="timestamp-link"><time datetime="2026-06-12T14:11:11.804Z" data-timestamp="2026-06-12T14:11:11.804Z">2026-06-12T14:11:11.804Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01Qe3FzRMqfRD8KE2u1SeNRK"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Plugin/PluginManager.cs&#34;,
+  &#34;limit&#34;: 60
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-11-11-842Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-11-11-842Z" class="timestamp-link"><time datetime="2026-06-12T14:11:11.842Z" data-timestamp="2026-06-12T14:11:11.842Z">2026-06-12T14:11:11.842Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using System.Reflection;
+2	using System.Runtime.Loader;
+3	using System.Threading.Channels;
+4	using Marv.Core.Events;
+5	using Microsoft.Extensions.Configuration;
+6	using Microsoft.Extensions.DependencyInjection;
+7	using Microsoft.Extensions.Logging;
+8	
+9	namespace Marv.Core.Plugin;
+10	
+11	/// &lt;summary&gt;
+12	/// Manages the full plugin lifecycle: discovery, dependency sorting, DI registration,
+13	/// instantiation, event dispatch, and teardown. All plugin loading failures are fatal —
+14	/// the bot will not start if any requested plugin cannot be loaded.
+15	/// &lt;/summary&gt;
+16	public sealed class PluginManager
+17	{
+18	    private readonly ILogger&lt;PluginManager&gt; _logger;
+19	    private readonly IServiceProvider _serviceProvider;
+20	    private IReadOnlyList&lt;PluginDescriptor&gt; _descriptors = [];
+21	    private List&lt;PluginInstance&gt; _instances = [];
+22	
+23	    /// &lt;summary&gt;
+24	    /// Creates a new &lt;see cref=&quot;PluginManager&quot;/&gt;.
+25	    /// &lt;/summary&gt;
+26	    public PluginManager(ILogger&lt;PluginManager&gt; logger, IServiceProvider serviceProvider)
+27	    {
+28	        _logger = logger;
+29	        _serviceProvider = serviceProvider;
+30	    }
+31	
+32	    /// &lt;summary&gt;The loaded and sorted plugin descriptors.&lt;/summary&gt;
+33	    internal IReadOnlyList&lt;PluginDescriptor&gt; Descriptors =&gt; _descriptors;
+34	
+35	    /// &lt;summary&gt;
+36	    /// Phase 1: Discovers plugins from assemblies, sorts them by dependency,
+37	    /// and registers services and configurations into the service collection.
+38	    /// Called during &lt;c&gt;AddMarv&lt;/c&gt; before the container is built.
+39	    /// &lt;/summary&gt;
+40	    internal static IReadOnlyList&lt;PluginDescriptor&gt; DiscoverAndRegister(
+41	        IServiceCollection services,
+42	        IConfiguration configuration,
+43	        IReadOnlyList&lt;string&gt; pluginPaths,
+44	        ILogger? bootstrapLogger = null)
+45	    {
+46	        var loadContext = AssemblyLoadContext.Default;
+47	        var descriptors = new List&lt;PluginDescriptor&gt;();
+48	
+49	        foreach (var path in pluginPaths)
+50	        {
+51	            var fullPath = Path.GetFullPath(path);
+52	            if (!File.Exists(fullPath))
+53	                throw new InvalidOperationException(
+54	                    $&quot;Plugin assembly not found: {fullPath}&quot;);
+55	
+56	            try
+57	            {
+58	                var assembly = loadContext.LoadFromAssemblyPath(fullPath);
+59	                var descriptor = PluginDiscovery.DiscoverPlugin(assembly, services);
+60	                if (descriptor is not null)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-11-12-871Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-11-12-871Z" class="timestamp-link"><time datetime="2026-06-12T14:11:12.871Z" data-timestamp="2026-06-12T14:11:12.871Z">2026-06-12T14:11:12.871Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_016htt4SQunYZciNufBAGayd">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Find plugin service registration API</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;RegisterService\|IServiceRegistry\|ServiceRegistry\|AddPluginService\|IPluginServiceRegistrar&#34; /workspaces/marv/src/ --include=&#34;*.cs&#34; | head -20</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-11-13-109Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-11-13-109Z" class="timestamp-link"><time datetime="2026-06-12T14:11:13.109Z" data-timestamp="2026-06-12T14:11:13.109Z">2026-06-12T14:11:13.109Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>(Bash completed with no output)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-11-17-580Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-11-17-580Z" class="timestamp-link"><time datetime="2026-06-12T14:11:17.580Z" data-timestamp="2026-06-12T14:11:17.580Z">2026-06-12T14:11:17.580Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01GBrVQZJJprjCJ1uPbqiW3e">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Find how plugins register services</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;RegisterServices\|IPluginServiceRegistrar\|ConfigureServices\|RegisterService&#34; /workspaces/marv/src/ --include=&#34;*.cs&#34; | head -20</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-11-17-740Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-11-17-740Z" class="timestamp-link"><time datetime="2026-06-12T14:11:17.740Z" data-timestamp="2026-06-12T14:11:17.740Z">2026-06-12T14:11:17.740Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/plugins/Marv.Plugins.Auth/AuthPlugin.cs:25:    public static void ConfigureServices(IServiceCollection services)
+/workspaces/marv/src/Marv.Core/Plugin/Attributes.cs:7:/// The plugin must also override &lt;see cref=&quot;IPlugin.ConfigureServices&quot;/&gt; to register the implementation.
+/workspaces/marv/src/Marv.Core/Plugin/IPlugin.cs:46:    static virtual void ConfigureServices(IServiceCollection services) { }
+/workspaces/marv/src/Marv.Core/Plugin/PluginManager.cs:106:        // Call ConfigureServices on each plugin (in dependency order)
+/workspaces/marv/src/Marv.Core/Plugin/PluginManager.cs:109:            var method = descriptor.PluginType.GetMethod(&quot;ConfigureServices&quot;,
+/workspaces/marv/src/Marv.Core/Plugin/PluginManager.cs:114:                bootstrapLogger?.LogDebug(&quot;Called ConfigureServices on {Plugin}&quot;, descriptor.Name);</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-11-18-464Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-11-18-464Z" class="timestamp-link"><time datetime="2026-06-12T14:11:18.464Z" data-timestamp="2026-06-12T14:11:18.464Z">2026-06-12T14:11:18.464Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01Tg1mUcDteE3wcst5t7EVZH">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Find plugin base class</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;class MarvPlugin\|interface IPlugin&#34; /workspaces/marv/src/ --include=&#34;*.cs&#34; | head -10</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-11-18-629Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-11-18-629Z" class="timestamp-link"><time datetime="2026-06-12T14:11:18.629Z" data-timestamp="2026-06-12T14:11:18.629Z">2026-06-12T14:11:18.629Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/Marv.Core/Plugin/IPluginActivator.cs:7:public interface IPluginActivator
+/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs:15:public abstract class MarvPlugin : IPlugin
+/workspaces/marv/src/Marv.Core/Plugin/IPlugin.cs:10:public interface IPlugin</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-11-21-696Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-11-21-696Z" class="timestamp-link"><time datetime="2026-06-12T14:11:21.696Z" data-timestamp="2026-06-12T14:11:21.696Z">2026-06-12T14:11:21.696Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01CqJLRaD3VsjqNVgQYe24yv"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Plugin/IPlugin.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-11-21-718Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-11-21-718Z" class="timestamp-link"><time datetime="2026-06-12T14:11:21.718Z" data-timestamp="2026-06-12T14:11:21.718Z">2026-06-12T14:11:21.718Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using Marv.Core.Events;
+2	using Microsoft.Extensions.DependencyInjection;
+3	
+4	namespace Marv.Core.Plugin;
+5	
+6	/// &lt;summary&gt;
+7	/// Interface defining the full plugin contract. All plugins must implement this,
+8	/// either directly or via the &lt;see cref=&quot;MarvPlugin&quot;/&gt; convenience base class.
+9	/// &lt;/summary&gt;
+10	public interface IPlugin
+11	{
+12	    /// &lt;summary&gt;
+13	    /// Called once after the plugin is constructed and all services are available.
+14	    /// Use for one-time initialization.
+15	    /// &lt;/summary&gt;
+16	    Task OnLoadAsync(CancellationToken ct);
+17	
+18	    /// &lt;summary&gt;
+19	    /// Called each time the bot establishes an IRC connection.
+20	    /// &lt;/summary&gt;
+21	    Task OnConnectedAsync(CancellationToken ct);
+22	
+23	    /// &lt;summary&gt;
+24	    /// Called when the IRC connection is lost. Any cached IChannel/IUser references
+25	    /// are stale after this call.
+26	    /// &lt;/summary&gt;
+27	    Task OnDisconnectedAsync();
+28	
+29	    /// &lt;summary&gt;
+30	    /// Called once during shutdown, before the DI container is disposed.
+31	    /// &lt;/summary&gt;
+32	    Task OnUnloadAsync();
+33	
+34	    /// &lt;summary&gt;
+35	    /// Called by the core&#x27;s per-plugin event loop to deliver an event.
+36	    /// The core calls this method once per event, sequentially — never
+37	    /// concurrently with itself for the same plugin.
+38	    /// &lt;/summary&gt;
+39	    Task HandleEventAsync(MarvEvent evt, CancellationToken ct);
+40	
+41	    /// &lt;summary&gt;
+42	    /// Called during DI container setup to register services this plugin provides.
+43	    /// Only plugins that provide services to other plugins need to override this.
+44	    /// Default implementation is a no-op.
+45	    /// &lt;/summary&gt;
+46	    static virtual void ConfigureServices(IServiceCollection services) { }
+47	}
+48	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-11-21-936Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-11-21-936Z" class="timestamp-link"><time datetime="2026-06-12T14:11:21.936Z" data-timestamp="2026-06-12T14:11:21.936Z">2026-06-12T14:11:21.936Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01FZuc8qUymPFjvYYsHKhTEP"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Irc/MarvBotService.cs&#34;,
+  &#34;offset&#34;: 80
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-11-21-953Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-11-21-953Z" class="timestamp-link"><time datetime="2026-06-12T14:11:21.953Z" data-timestamp="2026-06-12T14:11:21.953Z">2026-06-12T14:11:21.953Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>80	                break;
+81	            }
+82	            catch (Exception ex)
+83	            {
+84	                _logger.LogError(ex, &quot;Bot disconnected unexpectedly&quot;);
+85	            }
+86	
+87	            // Cleanup after disconnect
+88	            try
+89	            {
+90	                var disconnectMessage = new IrcMessage(null, null, &quot;DISCONNECT&quot;, []);
+91	                var disconnectedEvent = new DisconnectedEvent
+92	                {
+93	                    Timestamp = DateTimeOffset.UtcNow,
+94	                    RawMessage = disconnectMessage
+95	                };
+96	
+97	                await _pluginManager.NotifyDisconnectedAsync();
+98	                await _pluginManager.UnloadPluginsAsync();
+99	                _bot.ResetState();
+100	            }
+101	            catch (Exception ex)
+102	            {
+103	                _logger.LogError(ex, &quot;Error during disconnect cleanup&quot;);
+104	            }
+105	
+106	            if (stoppingToken.IsCancellationRequested) break;
+107	
+108	            // Exponential backoff before reconnection
+109	            _logger.LogInformation(&quot;Reconnecting in {Seconds} seconds...&quot;, backoff);
+110	            try
+111	            {
+112	                await Task.Delay(TimeSpan.FromSeconds(backoff), stoppingToken);
+113	            }
+114	            catch (OperationCanceledException)
+115	            {
+116	                break;
+117	            }
+118	
+119	            backoff = Math.Min(backoff * 2, MaxBackoffSeconds);
+120	        }
+121	
+122	        // Final cleanup
+123	        try
+124	        {
+125	            await _pluginManager.NotifyDisconnectedAsync();
+126	            await _pluginManager.UnloadPluginsAsync();
+127	        }
+128	        catch (Exception ex)
+129	        {
+130	            _logger.LogError(ex, &quot;Error during final shutdown cleanup&quot;);
+131	        }
+132	
+133	        _logger.LogInformation(&quot;Bot stopped&quot;);
+134	    }
+135	}
+136	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-11-24-917Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-11-24-917Z" class="timestamp-link"><time datetime="2026-06-12T14:11:24.917Z" data-timestamp="2026-06-12T14:11:24.917Z">2026-06-12T14:11:24.917Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_017AdAu47K6HG2vy7sKXkxvp"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-11-24-945Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-11-24-945Z" class="timestamp-link"><time datetime="2026-06-12T14:11:24.945Z" data-timestamp="2026-06-12T14:11:24.945Z">2026-06-12T14:11:24.945Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using System.Runtime.InteropServices;
+2	using System.Runtime.Loader;
+3	using Marv.Core.Irc;
+4	using Marv.Core.Platform;
+5	using Marv.Core.Plugin;
+6	using Microsoft.Extensions.Configuration;
+7	using Microsoft.Extensions.DependencyInjection;
+8	using Microsoft.Extensions.Logging;
+9	
+10	namespace Marv.Core;
+11	
+12	/// &lt;summary&gt;
+13	/// Extension methods for registering Marv services into an &lt;see cref=&quot;IServiceCollection&quot;/&gt;.
+14	/// &lt;/summary&gt;
+15	public static class MarvServiceExtensions
+16	{
+17	    /// &lt;summary&gt;
+18	    /// Registers all Marv core services, discovers and loads plugins, and configures
+19	    /// the DI container for the bot. This is the single entry point called by the host application.
+20	    /// &lt;/summary&gt;
+21	    /// &lt;param name=&quot;services&quot;&gt;The service collection to register into.&lt;/param&gt;
+22	    /// &lt;param name=&quot;configuration&quot;&gt;The application configuration.&lt;/param&gt;
+23	    /// &lt;returns&gt;The service collection for chaining.&lt;/returns&gt;
+24	    public static IServiceCollection AddMarv(
+25	        this IServiceCollection services,
+26	        IConfiguration configuration)
+27	    {
+28	        // Bind configuration from the root (flat layout)
+29	        services.Configure&lt;MarvConfiguration&gt;(configuration);
+30	
+31	        // Register core services
+32	        var serverInfo = new ServerInfo();
+33	        var capabilityManager = new CapabilityManager();
+34	
+35	        services.AddSingleton&lt;IServerInfo&gt;(serverInfo);
+36	        services.AddSingleton(serverInfo);
+37	        services.AddSingleton&lt;ICapabilityManager&gt;(capabilityManager);
+38	        services.AddSingleton(capabilityManager);
+39	        services.AddSingleton&lt;IPluginActivator, PluginActivator&gt;();
+40	        services.AddSingleton&lt;PluginManager&gt;();
+41	
+42	        // Register IHttpClientFactory so plugins can inject it without adding the package themselves
+43	        services.AddHttpClient();
+44	
+45	        // Register the bot and hosted service
+46	        services.AddSingleton&lt;IrcBot&gt;();
+47	        services.AddSingleton&lt;IBot&gt;(sp =&gt; sp.GetRequiredService&lt;IrcBot&gt;());
+48	        services.AddSingleton&lt;IBotStatistics&gt;(sp =&gt; sp.GetRequiredService&lt;IrcBot&gt;().Statistics);
+49	        services.AddHostedService&lt;MarvBotService&gt;();
+50	
+51	        // Discover plugins from configured directories, filtered by name
+52	        var config = configuration.Get&lt;MarvConfiguration&gt;() ?? new MarvConfiguration();
+53	
+54	        // Deduplicate plugin directories
+55	        var pluginDirs = DeduplicateDirectories(config.PluginDirectories);
+56	
+57	        // Register assembly resolving handlers so plugin transitive dependencies
+58	        // are found by probing the plugin directories and the app base directory.
+59	        RegisterAssemblyResolvers(pluginDirs);
+60	
+61	        IReadOnlyList&lt;PluginDescriptor&gt; sortedPlugins = [];
+62	        if (config.Plugins.Length &gt; 0)
+63	        {
+64	            var configuredLogLevel = configuration.GetValue&lt;LogLevel?&gt;(&quot;LogLevel&quot;);
+65	            using var bootstrapLoggerFactory = LoggerFactory.Create(b =&gt;
+66	            {
+67	                b.AddConsole();
+68	                if (configuredLogLevel.HasValue)
+69	                    b.SetMinimumLevel(configuredLogLevel.Value);
+70	            });
+71	            var bootstrapLogger = bootstrapLoggerFactory.CreateLogger(&quot;Marv.Bootstrap&quot;);
+72	
+73	            // Phase 1: Metadata scan — identify plugins without loading assemblies
+74	            var allPluginMetadata = PluginMetadataScanner.ScanDirectories(pluginDirs, bootstrapLogger);
+75	
+76	            // Phase 2: Resolve requested plugin names to assembly paths
+77	            var resolvedPaths = ResolveRequestedPlugins(
+78	                config.Plugins, allPluginMetadata, bootstrapLogger);
+79	
+80	            // Phase 3: Load and register
+81	            sortedPlugins = PluginManager.DiscoverAndRegister(
+82	                services, configuration, resolvedPaths, bootstrapLogger);
+83	        }
+84	
+85	        // Store the sorted descriptors for later use during instantiation
+86	        services.AddSingleton(sortedPlugins);
+87	
+88	        return services;
+89	    }
+90	
+91	    /// &lt;summary&gt;
+92	    /// Deduplicates plugin directories by normalizing to absolute paths.
+93	    /// &lt;/summary&gt;
+94	    internal static IReadOnlyList&lt;string&gt; DeduplicateDirectories(IReadOnlyList&lt;string&gt; directories)
+95	    {
+96	        var seen = new HashSet&lt;string&gt;(StringComparer.OrdinalIgnoreCase);
+97	        var result = new List&lt;string&gt;();
+98	
+99	        foreach (var dir in directories)
+100	        {
+101	            var fullPath = Path.GetFullPath(dir);
+102	            if (seen.Add(fullPath))
+103	                result.Add(fullPath);
+104	        }
+105	
+106	        return result;
+107	    }
+108	
+109	    /// &lt;summary&gt;
+110	    /// Resolves each requested plugin name to an assembly path using the metadata
+111	    /// scan results. Matching order:
+112	    /// 1. Exact plugin name match (case-insensitive).
+113	    /// 2. Assembly filename convention match (e.g., &quot;CannedResponses&quot; matches
+114	    ///    Marv.Plugins.CannedResponses.dll) — logs a warning.
+115	    /// 3. No match — fatal error with suggestions.
+116	    /// &lt;/summary&gt;
+117	    internal static IReadOnlyList&lt;string&gt; ResolveRequestedPlugins(
+118	        IReadOnlyList&lt;string&gt; requestedPlugins,
+119	        IReadOnlyList&lt;PluginMetadata&gt; allMetadata,
+120	        ILogger? logger = null)
+121	    {
+122	        var resolvedPaths = new List&lt;string&gt;();
+123	        var resolvedSet = new HashSet&lt;string&gt;(StringComparer.OrdinalIgnoreCase);
+124	
+125	        foreach (var requested in requestedPlugins)
+126	        {
+127	            // 1. Exact plugin name match
+128	            var exact = allMetadata.FirstOrDefault(
+129	                m =&gt; string.Equals(m.Name, requested, StringComparison.OrdinalIgnoreCase));
+130	
+131	            if (exact is not null)
+132	            {
+133	                if (resolvedSet.Add(exact.AssemblyPath))
+134	                    resolvedPaths.Add(exact.AssemblyPath);
+135	                else
+136	                    logger?.LogWarning(
+137	                        &quot;Plugin &#x27;{Name}&#x27; (from {Path}) was already resolved. &quot; +
+138	                        &quot;Skipping duplicate. Check your Plugins config for repeated entries&quot;,
+139	                        exact.Name, exact.AssemblyPath);
+140	                continue;
+141	            }
+142	
+143	            // 2. Assembly filename convention match
+144	            var conventionMatch = allMetadata.FirstOrDefault(m =&gt;
+145	                string.Equals(
+146	                    PluginMetadataScanner.DeriveNameFromAssemblyFile(m.AssemblyFileName),
+147	                    requested,
+148	                    StringComparison.OrdinalIgnoreCase));
+149	
+150	            if (conventionMatch is not null)
+151	            {
+152	                logger?.LogWarning(
+153	                    &quot;Plugin &#x27;{Requested}&#x27; matched by assembly filename convention to &quot; +
+154	                    &quot;plugin &#x27;{ActualName}&#x27; (from {Path}). Consider updating your config &quot; +
+155	                    &quot;to use the canonical plugin name &#x27;{ActualName}&#x27;&quot;,
+156	                    requested, conventionMatch.Name, conventionMatch.AssemblyPath,
+157	                    conventionMatch.Name);
+158	
+159	                if (resolvedSet.Add(conventionMatch.AssemblyPath))
+160	                    resolvedPaths.Add(conventionMatch.AssemblyPath);
+161	                continue;
+162	            }
+163	
+164	            // 3. No match — fatal error with suggestions
+165	            var availableNames = allMetadata
+166	                .Select(m =&gt; $&quot;  - &#x27;{m.Name}&#x27; (from {m.AssemblyFileName})&quot;)
+167	                .ToList();
+168	
+169	            var suggestion = FindClosestMatch(requested, allMetadata);
+170	            var suggestionText = suggestion is not null
+171	                ? $&quot;\n\n  Did you mean &#x27;{suggestion}&#x27;?&quot;
+172	                : &quot;&quot;;
+173	
+174	            var availableList = availableNames.Count &gt; 0
+175	                ? &quot;\n\n  Available plugins in configured directories:\n&quot; +
+176	                  string.Join(&quot;\n&quot;, availableNames)
+177	                : &quot;\n\n  No plugins were found in the configured directories.&quot;;
+178	
+179	            throw new InvalidOperationException(
+180	                $&quot;Plugin &#x27;{requested}&#x27; was requested in config but no plugin with &quot; +
+181	                $&quot;that name was found.{availableList}{suggestionText}&quot;);
+182	        }
+183	
+184	        return resolvedPaths;
+185	    }
+186	
+187	    /// &lt;summary&gt;
+188	    /// Finds the closest matching plugin name for a &quot;did you mean?&quot; suggestion.
+189	    /// Uses case-insensitive substring matching and Levenshtein distance.
+190	    /// &lt;/summary&gt;
+191	    private static string? FindClosestMatch(
+192	        string requested, IReadOnlyList&lt;PluginMetadata&gt; allMetadata)
+193	    {
+194	        var requestedLower = requested.ToLowerInvariant();
+195	        string? bestMatch = null;
+196	        var bestDistance = int.MaxValue;
+197	
+198	        foreach (var meta in allMetadata)
+199	        {
+200	            // Check plugin name
+201	            var distance = LevenshteinDistance(requestedLower, meta.Name.ToLowerInvariant());
+202	            if (distance &lt; bestDistance)
+203	            {
+204	                bestDistance = distance;
+205	                bestMatch = meta.Name;
+206	            }
+207	
+208	            // Check assembly-derived name
+209	            var assemblyName = PluginMetadataScanner.DeriveNameFromAssemblyFile(meta.AssemblyFileName);
+210	            distance = LevenshteinDistance(requestedLower, assemblyName.ToLowerInvariant());
+211	            if (distance &lt; bestDistance)
+212	            {
+213	                bestDistance = distance;
+214	                bestMatch = meta.Name;
+215	            }
+216	        }
+217	
+218	        // Only suggest if the distance is reasonable (less than half the length)
+219	        if (bestMatch is not null &amp;&amp; bestDistance &lt;= Math.Max(requested.Length, bestMatch.Length) / 2)
+220	            return bestMatch;
+221	
+222	        return null;
+223	    }
+224	
+225	    /// &lt;summary&gt;
+226	    /// Computes the Levenshtein edit distance between two strings.
+227	    /// &lt;/summary&gt;
+228	    private static int LevenshteinDistance(string a, string b)
+229	    {
+230	        if (a.Length == 0) return b.Length;
+231	        if (b.Length == 0) return a.Length;
+232	
+233	        var prev = new int[b.Length + 1];
+234	        var curr = new int[b.Length + 1];
+235	
+236	        for (var j = 0; j &lt;= b.Length; j++)
+237	            prev[j] = j;
+238	
+239	        for (var i = 1; i &lt;= a.Length; i++)
+240	        {
+241	            curr[0] = i;
+242	            for (var j = 1; j &lt;= b.Length; j++)
+243	            {
+244	                var cost = a[i - 1] == b[j - 1] ? 0 : 1;
+245	                curr[j] = Math.Min(
+246	                    Math.Min(curr[j - 1] + 1, prev[j] + 1),
+247	                    prev[j - 1] + cost);
+248	            }
+249	
+250	            (prev, curr) = (curr, prev);
+251	        }
+252	
+253	        return prev[b.Length];
+254	    }
+255	
+256	    /// &lt;summary&gt;
+257	    /// Registers handlers on the default &lt;see cref=&quot;AssemblyLoadContext&quot;/&gt; to probe
+258	    /// plugin directories and the application base directory for managed and native
+259	    /// assemblies that are not in the host&#x27;s dependency graph.
+260	    /// &lt;/summary&gt;
+261	    private static void RegisterAssemblyResolvers(IReadOnlyList&lt;string&gt; pluginDirectories)
+262	    {
+263	        // Probe plugin directories + app base directory (for PublishSingleFile support)
+264	        var probeDirs = pluginDirectories
+265	            .Select(Path.GetFullPath)
+266	            .Distinct(StringComparer.OrdinalIgnoreCase)
+267	            .ToList();
+268	
+269	        AssemblyLoadContext.Default.Resolving += (_, assemblyName) =&gt;
+270	        {
+271	            foreach (var dir in probeDirs)
+272	            {
+273	                if (!Directory.Exists(dir))
+274	                    continue;
+275	
+276	                var candidate = Path.Combine(dir, assemblyName.Name + &quot;.dll&quot;);
+277	                if (File.Exists(candidate))
+278	                    return AssemblyLoadContext.Default.LoadFromAssemblyPath(candidate);
+279	            }
+280	
+281	            return null;
+282	        };
+283	
+284	        AssemblyLoadContext.Default.ResolvingUnmanagedDll += (_, unmanagedDllName) =&gt;
+285	        {
+286	            foreach (var dir in probeDirs)
+287	            {
+288	                if (!Directory.Exists(dir))
+289	                    continue;
+290	
+291	                var candidate = Path.Combine(dir, unmanagedDllName);
+292	                if (File.Exists(candidate))
+293	                    return NativeLibrary.Load(candidate);
+294	            }
+295	
+296	            return IntPtr.Zero;
+297	        };
+298	    }
+299	}
+300	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-11-28-279Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-11-28-279Z" class="timestamp-link"><time datetime="2026-06-12T14:11:28.279Z" data-timestamp="2026-06-12T14:11:28.279Z">2026-06-12T14:11:28.279Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now I have a clear picture. Let me check for any existing change specs that overlap with this.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-11-29-434Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-11-29-434Z" class="timestamp-link"><time datetime="2026-06-12T14:11:29.434Z" data-timestamp="2026-06-12T14:11:29.434Z">2026-06-12T14:11:29.434Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01VsByvEEAkeMerkRgKopbJF">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check for overlapping change specs</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -ri &#34;scope\|scoped\|IServiceScope&#34; /workspaces/marv/docs/change_specs/ 2&gt;/dev/null | head -10</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-11-29-486Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-11-29-486Z" class="timestamp-link"><time datetime="2026-06-12T14:11:29.486Z" data-timestamp="2026-06-12T14:11:29.486Z">2026-06-12T14:11:29.486Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/docs/change_specs/023-ctcp-version-override.md:**Scope:** Core
+/workspaces/marv/docs/change_specs/012-dockerfile-sample-plugins.md:**Scope:** Dockerfile, CI/CD
+/workspaces/marv/docs/change_specs/001-command-prefix-config.md:**Scope:** Marv.Core
+/workspaces/marv/docs/change_specs/017-common-handler-context.md:**Scope:** Marv.Core.Plugin
+/workspaces/marv/docs/change_specs/004-bulk-channel-join.md:**Scope:** Marv.Core
+/workspaces/marv/docs/change_specs/003-handler-dispatch-filters.md:**Scope:** Marv.Core
+/workspaces/marv/docs/change_specs/007-plugin-api-documentation.md:**Scope:** Documentation
+/workspaces/marv/docs/change_specs/022-plugin-api-ioptions-docs.md:**Scope:** Host + Documentation (Program.cs, PLUGIN_API.md)
+/workspaces/marv/docs/change_specs/022-plugin-api-ioptions-docs.md:- `IOptionsSnapshot&lt;T&gt;` — scoped, re-reads per scope (less useful for
+/workspaces/marv/docs/change_specs/022-plugin-api-ioptions-docs.md:| `IOptionsSnapshot&lt;T&gt;` | Scoped | Re-read config per scope (rarely needed for plugins) |</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-11-32-650Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-11-32-650Z" class="timestamp-link"><time datetime="2026-06-12T14:11:32.650Z" data-timestamp="2026-06-12T14:11:32.650Z">2026-06-12T14:11:32.650Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>No overlap. Now let me post the triage analysis comment.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-11-48-497Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-11-48-497Z" class="timestamp-link"><time datetime="2026-06-12T14:11:48.497Z" data-timestamp="2026-06-12T14:11:48.497Z">2026-06-12T14:11:48.497Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01PeLJqYXJ7uSSGBP1ZwZJza">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Post triage analysis comment on issue #1</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">gh issue comment 1 --repo predakanga/marv --body &#34;$(cat &lt;&lt;&#39;EOF&#39;
+## Triage Analysis
+
+**Feasibility:** High
+**Scope:** Core (Plugin API, DI container setup)
+**Complexity:** Medium-Large
+**Overlaps:** None
+
+### Summary
+
+This proposes introducing `IServiceScope` into the plugin lifecycle so that plugins are explicitly scoped to each IRC connection rather than being implicitly tied to it. Currently, all core services and plugins are registered as singletons, and plugin instances are created once per connection cycle in `MarvBotService.ExecuteAsync`. Plugins can only register singleton or transient services via `ConfigureServices`. This change would create a new DI scope per connection and allow plugins to register scoped services that follow the connection lifecycle.
+
+### Design Notes
+
+- Currently `MarvBotService` calls `PluginManager.InstantiatePlugins` at the top of each reconnect loop — plugins are recreated per connection, but DI services they register are singletons that survive reconnects. This mismatch is the core issue.
+- The `ConfigureServices` static method is called during `AddMarv` (at startup), long before any connection. A new scope would need to be created in `MarvBotService` at connection time and disposed on disconnect.
+- `IrcBot`, `ServerInfo`, `CapabilityManager`, and `IBotStatistics` are currently singletons but semantically belong to a single connection — they reset on reconnect. These would be natural candidates for scoped registration.
+- `PluginActivator` currently resolves from the root `IServiceProvider`. It would need to resolve from the connection-scoped `IServiceProvider` instead, so that plugins receive scoped dependencies.
+- This is a **breaking change to the plugin API**: plugin services registered as singletons today might need to become scoped, and plugins that inject `IServiceProvider` directly would get a scoped provider.
+- The `Marv.Testing` package would need updates to create appropriate scopes in test fixtures.
+
+### Open Questions
+
+1. Should plugins themselves be scoped services (created by the DI container per scope), or should they remain manually instantiated but receive scoped dependencies?
+2. Should `ConfigureServices` gain a way to register scoped services (e.g. `services.AddScoped&lt;T&gt;()`), or should a new registration point be introduced?
+3. How should plugin-provided services that genuinely need to be singletons (e.g. a shared cache across reconnects) coexist with connection-scoped services?
+
+---
+*Automated triage by Claude Code. Reply to discuss, or comment `/accept` to approve or `/reject` to decline.*
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-11-50-269Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-11-50-269Z" class="timestamp-link"><time datetime="2026-06-12T14:11:50.269Z" data-timestamp="2026-06-12T14:11:50.269Z">2026-06-12T14:11:50.269Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>https://github.com/predakanga/marv/issues/1#issuecomment-4692057858</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-11-56-951Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-11-56-951Z" class="timestamp-link"><time datetime="2026-06-12T14:11:56.951Z" data-timestamp="2026-06-12T14:11:56.951Z">2026-06-12T14:11:56.951Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Posted triage analysis on <strong>issue #1 — Add support for IServiceScopes</strong>. Key findings:</p>
+<ul>
+<li><strong>Feasible</strong> — the current architecture already recreates plugins per connection, but the DI registrations are all singletons, creating a mismatch.</li>
+<li><strong>Medium-Large complexity</strong> — touches <code>MarvBotService</code>, <code>MarvServiceExtensions</code>, <code>PluginActivator</code>, <code>PluginManager</code>, and likely <code>Marv.Testing</code>. This is a plugin API breaking change.</li>
+<li>Raised 3 open questions about whether plugins should themselves be scoped, how to register scoped vs singleton services, and coexistence of both lifetimes.</li>
+</ul>
+<p>No other open issues to process. Run <code>/triage-issues</code> again after you've responded on the issue.</p></div></div></div>
+<div class="message user" id="msg-2026-06-12T14-24-06-222Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-12T14-24-06-222Z" class="timestamp-link"><time datetime="2026-06-12T14:24:06.222Z" data-timestamp="2026-06-12T14:24:06.222Z">2026-06-12T14:24:06.222Z</time></a></div><div class="message-content">
+<div class="user-content"><p><command-message>triage-issues</command-message>
+<command-name>/triage-issues</command-name></p></div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-002.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<span class="current">3</span>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<a href="page-006.html">6</a>
+<a href="page-004.html">Next &rarr;</a>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

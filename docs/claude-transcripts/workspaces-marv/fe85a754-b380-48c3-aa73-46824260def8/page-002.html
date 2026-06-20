@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 2</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 2/6</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-001.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<span class="current">2</span>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<a href="page-006.html">6</a>
+<a href="page-003.html">Next &rarr;</a>
+</div>
+
+        
+<div class="message user" id="msg-2026-06-12T14-06-43-362Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-12T14-06-43-362Z" class="timestamp-link"><time datetime="2026-06-12T14:06:43.362Z" data-timestamp="2026-06-12T14:06:43.362Z">2026-06-12T14:06:43.362Z</time></a></div><div class="message-content">
+<div class="user-content"><p>I've just tried to use the skill but I'm getting "Unknown command: /triage-issues". I've also tried reloading skills with "/reload-skills", but that reports "Reloaded skills: 13 skills available (no changes)".</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-06-46-287Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-06-46-287Z" class="timestamp-link"><time datetime="2026-06-12T14:06:46.287Z" data-timestamp="2026-06-12T14:06:46.287Z">2026-06-12T14:06:46.287Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Let me check how custom skills need to be registered.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-06-47-389Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-06-47-389Z" class="timestamp-link"><time datetime="2026-06-12T14:06:47.389Z" data-timestamp="2026-06-12T14:06:47.389Z">2026-06-12T14:06:47.389Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01Q3BEoRcAyxRHUKpCsoi58o">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check skill file locations</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">find /workspaces/marv/.claude -type f -name &#34;*.md&#34; | head -20; echo &#34;---&#34;; find ~/.claude -type f -name &#34;*.md&#34; -path &#34;*/skills/*&#34; 2&gt;/dev/null | head -20</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-06-51-043Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-06-51-043Z" class="timestamp-link"><time datetime="2026-06-12T14:06:51.043Z" data-timestamp="2026-06-12T14:06:51.043Z">2026-06-12T14:06:51.043Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/.claude/skills/triage-issues.md
+---
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/claude-md-management/skills/claude-md-improver/SKILL.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/claude-md-management/skills/claude-md-improver/references/quality-criteria.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/claude-md-management/skills/claude-md-improver/references/templates.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/claude-md-management/skills/claude-md-improver/references/update-guidelines.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/playground/skills/playground/SKILL.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/frontend-design/skills/frontend-design/SKILL.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/claude-code-setup/skills/claude-automation-recommender/SKILL.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/skill-creator/skills/skill-creator/SKILL.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/playground/skills/playground/templates/diff-review.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/playground/skills/playground/templates/design-playground.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/playground/skills/playground/templates/document-critique.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/playground/skills/playground/templates/concept-map.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/playground/skills/playground/templates/code-map.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/playground/skills/playground/templates/data-explorer.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/claude-code-setup/skills/claude-automation-recommender/references/mcp-servers.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/claude-code-setup/skills/claude-automation-recommender/references/skills-reference.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/claude-code-setup/skills/claude-automation-recommender/references/subagent-templates.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/claude-code-setup/skills/claude-automation-recommender/references/plugins-reference.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/claude-code-setup/skills/claude-automation-recommender/references/hooks-patterns.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/skill-creator/skills/skill-creator/agents/analyzer.md</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-06-55-200Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-06-55-200Z" class="timestamp-link"><time datetime="2026-06-12T14:06:55.200Z" data-timestamp="2026-06-12T14:06:55.200Z">2026-06-12T14:06:55.200Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>I see — custom skills need to follow a specific directory structure with a <code>SKILL.md</code> file. Let me look at how the official skills are structured.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-06-56-104Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-06-56-104Z" class="timestamp-link"><time datetime="2026-06-12T14:06:56.104Z" data-timestamp="2026-06-12T14:06:56.104Z">2026-06-12T14:06:56.104Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01XvrhtsPFNNXHtxVtv9tAEm"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/skill-creator/skills/skill-creator/SKILL.md&#34;,
+  &#34;limit&#34;: 60
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-06-56-501Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-06-56-501Z" class="timestamp-link"><time datetime="2026-06-12T14:06:56.501Z" data-timestamp="2026-06-12T14:06:56.501Z">2026-06-12T14:06:56.501Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01Kod86tUGpUh3ojGMSEL9jf"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/claude-code-setup/skills/claude-automation-recommender/SKILL.md&#34;,
+  &#34;limit&#34;: 60
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-07-01-780Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-07-01-780Z" class="timestamp-link"><time datetime="2026-06-12T14:07:01.780Z" data-timestamp="2026-06-12T14:07:01.780Z">2026-06-12T14:07:01.780Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	---
+2	name: claude-automation-recommender
+3	description: Analyze a codebase and recommend Claude Code automations (hooks, subagents, skills, plugins, MCP servers). Use when user asks for automation recommendations, wants to optimize their Claude Code setup, mentions improving Claude Code workflows, asks how to first set up Claude Code for a project, or wants to know what Claude Code features they should use.
+4	tools: Read, Glob, Grep, Bash
+5	---
+6	
+7	# Claude Automation Recommender
+8	
+9	Analyze codebase patterns to recommend tailored Claude Code automations across all extensibility options.
+10	
+11	**This skill is read-only.** It analyzes the codebase and outputs recommendations. It does NOT create or modify any files. Users implement the recommendations themselves or ask Claude separately to help build them.
+12	
+13	## Output Guidelines
+14	
+15	- **Recommend 1-2 of each type**: Don&#x27;t overwhelm - surface the top 1-2 most valuable automations per category
+16	- **If user asks for a specific type**: Focus only on that type and provide more options (3-5 recommendations)
+17	- **Go beyond the reference lists**: The reference files contain common patterns, but use web search to find recommendations specific to the codebase&#x27;s tools, frameworks, and libraries
+18	- **Tell users they can ask for more**: End by noting they can request more recommendations for any specific category
+19	
+20	## Automation Types Overview
+21	
+22	| Type | Best For |
+23	|------|----------|
+24	| **Hooks** | Automatic actions on tool events (format on save, lint, block edits) |
+25	| **Subagents** | Specialized reviewers/analyzers that run in parallel |
+26	| **Skills** | Packaged expertise, workflows, and repeatable tasks (invoked by Claude or user via `/skill-name`) |
+27	| **Plugins** | Collections of skills that can be installed |
+28	| **MCP Servers** | External tool integrations (databases, APIs, browsers, docs) |
+29	
+30	## Workflow
+31	
+32	### Phase 1: Codebase Analysis
+33	
+34	Gather project context:
+35	
+36	```bash
+37	# Detect project type and tools
+38	ls -la package.json pyproject.toml Cargo.toml go.mod pom.xml 2&gt;/dev/null
+39	cat package.json 2&gt;/dev/null | head -50
+40	
+41	# Check dependencies for MCP server recommendations
+42	cat package.json 2&gt;/dev/null | grep -E &#x27;&quot;(react|vue|angular|next|express|fastapi|django|prisma|supabase|convex|stripe)&quot;&#x27;
+43	
+44	# Check for existing Claude Code config
+45	ls -la .claude/ CLAUDE.md 2&gt;/dev/null
+46	
+47	# Analyze project structure
+48	ls -la src/ app/ lib/ tests/ components/ pages/ api/ 2&gt;/dev/null
+49	```
+50	
+51	**Key Indicators to Capture:**
+52	
+53	| Category | What to Look For | Informs Recommendations For |
+54	|----------|------------------|----------------------------|
+55	| Language/Framework | package.json, pyproject.toml, import patterns | Hooks, MCP servers |
+56	| Frontend stack | React, Vue, Angular, Next.js | Playwright MCP, frontend skills |
+57	| Backend stack | Express, FastAPI, Django | API documentation tools |
+58	| Database | Prisma, Supabase, Convex, raw SQL | Database / backend MCP servers |
+59	| External APIs | Stripe, OpenAI, AWS SDKs | context7 MCP for docs |
+60	| Testing | Jest, pytest, Playwright configs | Testing hooks, subagents |</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-07-04-595Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-07-04-595Z" class="timestamp-link"><time datetime="2026-06-12T14:07:04.595Z" data-timestamp="2026-06-12T14:07:04.595Z">2026-06-12T14:07:04.595Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	---
+2	name: skill-creator
+3	description: Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill&#x27;s description for better triggering accuracy.
+4	---
+5	
+6	# Skill Creator
+7	
+8	A skill for creating new skills and iteratively improving them.
+9	
+10	At a high level, the process of creating a skill goes like this:
+11	
+12	- Decide what you want the skill to do and roughly how it should do it
+13	- Write a draft of the skill
+14	- Create a few test prompts and run claude-with-access-to-the-skill on them
+15	- Help the user evaluate the results both qualitatively and quantitatively
+16	  - While the runs happen in the background, draft some quantitative evals if there aren&#x27;t any (if there are some, you can either use as is or modify if you feel something needs to change about them). Then explain them to the user (or if they already existed, explain the ones that already exist)
+17	  - Use the `eval-viewer/generate_review.py` script to show the user the results for them to look at, and also let them look at the quantitative metrics
+18	- Rewrite the skill based on feedback from the user&#x27;s evaluation of the results (and also if there are any glaring flaws that become apparent from the quantitative benchmarks)
+19	- Repeat until you&#x27;re satisfied
+20	- Expand the test set and try again at larger scale
+21	
+22	Your job when using this skill is to figure out where the user is in this process and then jump in and help them progress through these stages. So for instance, maybe they&#x27;re like &quot;I want to make a skill for X&quot;. You can help narrow down what they mean, write a draft, write the test cases, figure out how they want to evaluate, run all the prompts, and repeat.
+23	
+24	On the other hand, maybe they already have a draft of the skill. In this case you can go straight to the eval/iterate part of the loop.
+25	
+26	Of course, you should always be flexible and if the user is like &quot;I don&#x27;t need to run a bunch of evaluations, just vibe with me&quot;, you can do that instead.
+27	
+28	Then after the skill is done (but again, the order is flexible), you can also run the skill description improver, which we have a whole separate script for, to optimize the triggering of the skill.
+29	
+30	Cool? Cool.
+31	
+32	## Communicating with the user
+33	
+34	The skill creator is liable to be used by people across a wide range of familiarity with coding jargon. If you haven&#x27;t heard (and how could you, it&#x27;s only very recently that it started), there&#x27;s a trend now where the power of Claude is inspiring plumbers to open up their terminals, parents and grandparents to google &quot;how to install npm&quot;. On the other hand, the bulk of users are probably fairly computer-literate.
+35	
+36	So please pay attention to context cues to understand how to phrase your communication! In the default case, just to give you some idea:
+37	
+38	- &quot;evaluation&quot; and &quot;benchmark&quot; are borderline, but OK
+39	- for &quot;JSON&quot; and &quot;assertion&quot; you want to see serious cues from the user that they know what those things are before using them without explaining them
+40	
+41	It&#x27;s OK to briefly explain terms if you&#x27;re in doubt, and feel free to clarify terms with a short definition if you&#x27;re unsure if the user will get it.
+42	
+43	---
+44	
+45	## Creating a skill
+46	
+47	### Capture Intent
+48	
+49	Start by understanding the user&#x27;s intent. The current conversation might already contain a workflow the user wants to capture (e.g., they say &quot;turn this into a skill&quot;). If so, extract answers from the conversation history first — the tools used, the sequence of steps, corrections the user made, input/output formats observed. The user may need to fill the gaps, and should confirm before proceeding to the next step.
+50	
+51	1. What should this skill enable Claude to do?
+52	2. When should this skill trigger? (what user phrases/contexts)
+53	3. What&#x27;s the expected output format?
+54	4. Should we set up test cases to verify the skill works? Skills with objectively verifiable outputs (file transforms, data extraction, code generation, fixed workflow steps) benefit from test cases. Skills with subjective outputs (writing style, art) often don&#x27;t need them. Suggest the appropriate default based on the skill type, but let the user decide.
+55	
+56	### Interview and Research
+57	
+58	Proactively ask questions about edge cases, input/output formats, example files, success criteria, and dependencies. Wait to write test prompts until you&#x27;ve got this part ironed out.
+59	
+60	Check available MCPs - if useful for research (searching docs, finding similar skills, looking up best practices), research in parallel via subagents if available, otherwise inline. Come prepared with context to reduce burden on the user.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-07-09-060Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-07-09-060Z" class="timestamp-link"><time datetime="2026-06-12T14:07:09.060Z" data-timestamp="2026-06-12T14:07:09.060Z">2026-06-12T14:07:09.060Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-07-09-992Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-07-09-992Z" class="timestamp-link"><time datetime="2026-06-12T14:07:09.992Z" data-timestamp="2026-06-12T14:07:09.992Z">2026-06-12T14:07:09.992Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>I see — skills need to be named <code>SKILL.md</code> with proper frontmatter, and likely need to be inside a plugin or use the correct directory structure. Let me use the skill-creator to do this properly.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-07-11-254Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-07-11-254Z" class="timestamp-link"><time datetime="2026-06-12T14:07:11.254Z" data-timestamp="2026-06-12T14:07:11.254Z">2026-06-12T14:07:11.254Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_013sopVGqaRBB2WKdq36uxzy">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check plugin directory structure</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">find /home/vscode/.claude/plugins -type d -name &#34;skills&#34; | head -10; echo &#34;===&#34;; ls /home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/ 2&gt;/dev/null</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-07-18-581Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-07-18-581Z" class="timestamp-link"><time datetime="2026-06-12T14:07:18.581Z" data-timestamp="2026-06-12T14:07:18.581Z">2026-06-12T14:07:18.581Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/telegram/skills
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/imessage/skills
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/external_plugins/discord/skills
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/session-report/skills
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/plugin-dev/skills
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/cwc-makers/skills
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/example-plugin/skills
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/mcp-server-dev/skills
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/playground/skills
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/frontend-design/skills
+===
+agent-sdk-dev
+clangd-lsp
+claude-code-setup
+claude-md-management
+code-modernization
+code-review
+code-simplifier
+commit-commands
+csharp-lsp
+cwc-makers
+example-plugin
+explanatory-output-style
+feature-dev
+frontend-design
+gopls-lsp
+hookify
+jdtls-lsp
+kotlin-lsp
+learning-output-style
+lua-lsp
+math-olympiad
+mcp-server-dev
+mcp-tunnels
+php-lsp
+playground
+plugin-dev
+pr-review-toolkit
+pyright-lsp
+ralph-loop
+ruby-lsp
+rust-analyzer-lsp
+security-guidance
+session-report
+skill-creator
+swift-lsp
+typescript-lsp</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-07-23-713Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-07-23-713Z" class="timestamp-link"><time datetime="2026-06-12T14:07:23.713Z" data-timestamp="2026-06-12T14:07:23.713Z">2026-06-12T14:07:23.713Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01NJ5z1TJ9UfqWEDjh54kUjd">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check example plugin structure</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">ls /home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/example-plugin/; echo &#34;===&#34;; cat /home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/example-plugin/plugin.json 2&gt;/dev/null</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-07-25-573Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-07-25-573Z" class="timestamp-link"><time datetime="2026-06-12T14:07:25.573Z" data-timestamp="2026-06-12T14:07:25.573Z">2026-06-12T14:07:25.573Z</time></a></div><div class="message-content"><div class="tool-result tool-error"><div class="truncatable"><div class="truncatable-content"><pre>Exit code 1
+LICENSE
+README.md
+commands
+skills
+===</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-07-28-542Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-07-28-542Z" class="timestamp-link"><time datetime="2026-06-12T14:07:28.542Z" data-timestamp="2026-06-12T14:07:28.542Z">2026-06-12T14:07:28.542Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_016Y6GMsukeox1RpzqMpbGjB">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Full example plugin structure</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">find /home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/example-plugin -type f | sort</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-07-32-731Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-07-32-731Z" class="timestamp-link"><time datetime="2026-06-12T14:07:32.731Z" data-timestamp="2026-06-12T14:07:32.731Z">2026-06-12T14:07:32.731Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/example-plugin/.claude-plugin/plugin.json
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/example-plugin/commands/example-command.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/example-plugin/LICENSE
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/example-plugin/.mcp.json
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/example-plugin/README.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/example-plugin/skills/example-command/SKILL.md
+/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/example-plugin/skills/example-skill/SKILL.md</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-07-36-199Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-07-36-199Z" class="timestamp-link"><time datetime="2026-06-12T14:07:36.199Z" data-timestamp="2026-06-12T14:07:36.199Z">2026-06-12T14:07:36.199Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_0118MUuEUViwsVAG1gMoZ4rC"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/example-plugin/.claude-plugin/plugin.json&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-07-36-764Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-07-36-764Z" class="timestamp-link"><time datetime="2026-06-12T14:07:36.764Z" data-timestamp="2026-06-12T14:07:36.764Z">2026-06-12T14:07:36.764Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_017ERhNbhdbfEpYhFL6yDJ4e"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/example-plugin/skills/example-skill/SKILL.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-07-36-942Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-07-36-942Z" class="timestamp-link"><time datetime="2026-06-12T14:07:36.942Z" data-timestamp="2026-06-12T14:07:36.942Z">2026-06-12T14:07:36.942Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01MS1E96JyB3oSZsJYp3pLWa"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/home/vscode/.claude/plugins/marketplaces/claude-plugins-official/plugins/example-plugin/commands/example-command.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-07-40-402Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-07-40-402Z" class="timestamp-link"><time datetime="2026-06-12T14:07:40.402Z" data-timestamp="2026-06-12T14:07:40.402Z">2026-06-12T14:07:40.402Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	---
+2	description: An example slash command that demonstrates command frontmatter options (legacy format)
+3	argument-hint: &lt;required-arg&gt; [optional-arg]
+4	allowed-tools: [Read, Glob, Grep, Bash]
+5	---
+6	
+7	# Example Command (Legacy `commands/` Format)
+8	
+9	&gt; **Note:** This demonstrates the legacy `commands/*.md` layout. For new plugins, prefer the `skills/&lt;name&gt;/SKILL.md` directory format (see `skills/example-command/SKILL.md` in this plugin). Both are loaded identically — the only difference is file layout.
+10	
+11	This command demonstrates slash command structure and frontmatter options.
+12	
+13	## Arguments
+14	
+15	The user invoked this command with: $ARGUMENTS
+16	
+17	## Instructions
+18	
+19	When this command is invoked:
+20	
+21	1. Parse the arguments provided by the user
+22	2. Perform the requested action using allowed tools
+23	3. Report results back to the user
+24	
+25	## Frontmatter Options Reference
+26	
+27	Commands support these frontmatter fields:
+28	
+29	- **description**: Short description shown in /help
+30	- **argument-hint**: Hints for command arguments shown to user
+31	- **allowed-tools**: Pre-approved tools for this command (reduces permission prompts)
+32	- **model**: Override the model (e.g., &quot;haiku&quot;, &quot;sonnet&quot;, &quot;opus&quot;)
+33	
+34	## Example Usage
+35	
+36	```
+37	/example-command my-argument
+38	/example-command arg1 arg2
+39	```
+40	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-07-41-562Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-07-41-562Z" class="timestamp-link"><time datetime="2026-06-12T14:07:41.562Z" data-timestamp="2026-06-12T14:07:41.562Z">2026-06-12T14:07:41.562Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	---
+2	name: example-skill
+3	description: This skill should be used when the user asks to &quot;demonstrate skills&quot;, &quot;show skill format&quot;, &quot;create a skill template&quot;, or discusses skill development patterns. Provides a reference template for creating Claude Code plugin skills.
+4	version: 1.0.0
+5	---
+6	
+7	# Example Skill
+8	
+9	This skill demonstrates the structure and format for Claude Code plugin skills.
+10	
+11	## Overview
+12	
+13	Skills are model-invoked capabilities that Claude autonomously uses based on task context. Unlike commands (user-invoked) or agents (spawned by Claude), skills provide contextual guidance that Claude incorporates into its responses.
+14	
+15	## When This Skill Applies
+16	
+17	This skill activates when the user&#x27;s request involves:
+18	- Creating or understanding plugin skills
+19	- Skill template or reference needs
+20	- Skill development patterns
+21	
+22	## Skill Structure
+23	
+24	### Required Files
+25	
+26	```
+27	skills/
+28	└── skill-name/
+29	    └── SKILL.md          # Main skill definition (required)
+30	```
+31	
+32	### Optional Supporting Files
+33	
+34	```
+35	skills/
+36	└── skill-name/
+37	    ├── SKILL.md          # Main skill definition
+38	    ├── README.md         # Additional documentation
+39	    ├── references/       # Reference materials
+40	    │   └── patterns.md
+41	    ├── examples/         # Example files
+42	    │   └── sample.md
+43	    └── scripts/          # Helper scripts
+44	        └── helper.sh
+45	```
+46	
+47	## Frontmatter Options
+48	
+49	Skills support these frontmatter fields:
+50	
+51	- **name** (required): Skill identifier
+52	- **description** (required): Trigger conditions - describe when Claude should use this skill
+53	- **version** (optional): Semantic version number
+54	- **license** (optional): License information or reference
+55	
+56	## Writing Effective Descriptions
+57	
+58	The description field is crucial - it tells Claude when to invoke the skill.
+59	
+60	**Good description patterns:**
+61	```yaml
+62	description: This skill should be used when the user asks to &quot;specific phrase&quot;, &quot;another phrase&quot;, mentions &quot;keyword&quot;, or discusses topic-area.
+63	```
+64	
+65	**Include:**
+66	- Specific trigger phrases users might say
+67	- Keywords that indicate relevance
+68	- Topic areas the skill covers
+69	
+70	## Skill Content Guidelines
+71	
+72	1. **Clear purpose**: State what the skill helps with
+73	2. **When to use**: Define activation conditions
+74	3. **Structured guidance**: Organize information logically
+75	4. **Actionable instructions**: Provide concrete steps
+76	5. **Examples**: Include practical examples when helpful
+77	
+78	## Best Practices
+79	
+80	- Keep skills focused on a single domain
+81	- Write descriptions that clearly indicate when to activate
+82	- Include reference materials in subdirectories for complex skills
+83	- Test that the skill activates for expected queries
+84	- Avoid overlap with other skills&#x27; trigger conditions
+85	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-07-42-694Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-07-42-694Z" class="timestamp-link"><time datetime="2026-06-12T14:07:42.694Z" data-timestamp="2026-06-12T14:07:42.694Z">2026-06-12T14:07:42.694Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	{
+2	  &quot;name&quot;: &quot;example-plugin&quot;,
+3	  &quot;description&quot;: &quot;A comprehensive example plugin demonstrating all Claude Code extension options including commands, agents, skills, hooks, and MCP servers&quot;,
+4	  &quot;author&quot;: {
+5	    &quot;name&quot;: &quot;Anthropic&quot;,
+6	    &quot;email&quot;: &quot;support@anthropic.com&quot;
+7	  }
+8	}
+9	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-07-48-953Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-07-48-953Z" class="timestamp-link"><time datetime="2026-06-12T14:07:48.953Z" data-timestamp="2026-06-12T14:07:48.953Z">2026-06-12T14:07:48.953Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-07-49-902Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-07-49-902Z" class="timestamp-link"><time datetime="2026-06-12T14:07:49.902Z" data-timestamp="2026-06-12T14:07:49.902Z">2026-06-12T14:07:49.902Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>I think the issue is that <code>.claude/skills/</code> is a plugin-level concept. For project-local slash commands, they should go in <code>.claude/commands/</code>. Let me restructure this.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-07-51-573Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-07-51-573Z" class="timestamp-link"><time datetime="2026-06-12T14:07:51.573Z" data-timestamp="2026-06-12T14:07:51.573Z">2026-06-12T14:07:51.573Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_018XsNSqo5kRC2cvJctxitjf">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check for existing commands directory</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">ls /workspaces/marv/.claude/commands/ 2&gt;/dev/null; echo &#34;---&#34;; find /home/vscode/.claude -path &#34;*/commands/*.md&#34; -not -path &#34;*/plugins/*&#34; 2&gt;/dev/null | head -10</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-08-17-600Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-08-17-600Z" class="timestamp-link"><time datetime="2026-06-12T14:08:17.600Z" data-timestamp="2026-06-12T14:08:17.600Z">2026-06-12T14:08:17.600Z</time></a></div><div class="message-content"><div class="tool-result tool-error"><div class="truncatable"><div class="truncatable-content"><pre>The user doesn&#x27;t want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). STOP what you are doing and wait for the user to tell you how to proceed.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message user" id="msg-2026-06-12T14-08-17-606Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-12T14-08-17-606Z" class="timestamp-link"><time datetime="2026-06-12T14:08:17.606Z" data-timestamp="2026-06-12T14:08:17.606Z">2026-06-12T14:08:17.606Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>[Request interrupted by user for tool use]</p></div></div></div>
+<div class="message user" id="msg-2026-06-12T14-08-34-845Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-12T14-08-34-845Z" class="timestamp-link"><time datetime="2026-06-12T14:08:34.845Z" data-timestamp="2026-06-12T14:08:34.845Z">2026-06-12T14:08:34.845Z</time></a></div><div class="message-content">
+<div class="user-content"><p>This seems like a lot of guessing. You should just read https://code.claude.com/docs/en/skills#getting-started instead</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-08-37-574Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-08-37-574Z" class="timestamp-link"><time datetime="2026-06-12T14:08:37.574Z" data-timestamp="2026-06-12T14:08:37.574Z">2026-06-12T14:08:37.574Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Good call. Let me read the docs.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-08-37-986Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-08-37-986Z" class="timestamp-link"><time datetime="2026-06-12T14:08:37.986Z" data-timestamp="2026-06-12T14:08:37.986Z">2026-06-12T14:08:37.986Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01UWUKc8AH8ZEn25e3tepsYd"><div class="tool-header"><span class="tool-icon">⚙</span> ToolSearch</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;query&#34;: &#34;select:WebFetch&#34;,
+  &#34;max_results&#34;: 1
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-08-37-994Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-08-37-994Z" class="timestamp-link"><time datetime="2026-06-12T14:08:37.994Z" data-timestamp="2026-06-12T14:08:37.994Z">2026-06-12T14:08:37.994Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &quot;type&quot;: &quot;tool_reference&quot;,
+  &quot;tool_name&quot;: &quot;WebFetch&quot;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-08-42-149Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-08-42-149Z" class="timestamp-link"><time datetime="2026-06-12T14:08:42.149Z" data-timestamp="2026-06-12T14:08:42.149Z">2026-06-12T14:08:42.149Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01GKaw6J4xwkZdWfTB7V2B5D"><div class="tool-header"><span class="tool-icon">⚙</span> WebFetch</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;url&#34;: &#34;https://code.claude.com/docs/en/skills&#34;,
+  &#34;prompt&#34;: &#34;Extract the complete documentation about how to create custom skills in Claude Code. I need: the directory structure, file naming conventions, frontmatter format, how skills are discovered/registered, the difference between project-local skills and plugin skills, and how slash commands relate to skills. Include all details about the \&#34;getting started\&#34; section.&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-08-44-051Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-08-44-051Z" class="timestamp-link"><time datetime="2026-06-12T14:08:44.051Z" data-timestamp="2026-06-12T14:08:44.051Z">2026-06-12T14:08:44.051Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>&lt;persisted-output&gt;
+Output too large (52.2KB). Full output saved to: /home/vscode/.claude/projects/-workspaces-marv/fe85a754-b380-48c3-aa73-46824260def8/tool-results/toolu_01GKaw6J4xwkZdWfTB7V2B5D.txt
+
+Preview (first 2KB):
+&gt; ## Documentation Index
+&gt; Fetch the complete documentation index at: https://code.claude.com/docs/llms.txt
+&gt; Use this file to discover all available pages before exploring further.
+
+# Extend Claude with skills
+
+&gt; Create, manage, and share skills to extend Claude&#x27;s capabilities in Claude Code. Includes custom commands and bundled skills.
+
+Skills extend what Claude can do. Create a `SKILL.md` file with instructions, and Claude adds it to its toolkit. Claude uses skills when relevant, or you can invoke one directly with `/skill-name`.
+
+Create a skill when you keep pasting the same instructions, checklist, or multi-step procedure into chat, or when a section of CLAUDE.md has grown into a procedure rather than a fact. Unlike CLAUDE.md content, a skill&#x27;s body loads only when it&#x27;s used, so long reference material costs almost nothing until you need it.
+
+&lt;Note&gt;
+  For built-in commands like `/help` and `/compact`, and bundled skills like `/debug` and `/code-review`, see the [commands reference](/en/commands).
+
+  **Custom commands have been merged into skills.** A file at `.claude/commands/deploy.md` and a skill at `.claude/skills/deploy/SKILL.md` both create `/deploy` and work the same way. Your existing `.claude/commands/` files keep working. Skills add optional features: a directory for supporting files, frontmatter to [control whether you or Claude invokes them](#control-who-invokes-a-skill), and the ability for Claude to load them automatically when relevant.
+&lt;/Note&gt;
+
+Claude Code skills follow the [Agent Skills](https://agentskills.io) open standard, which works across multiple AI tools. Claude Code extends the standard with additional features like [invocation control](#control-who-invokes-a-skill), [subagent execution](#run-skills-in-a-subagent), and [dynamic context injection](#inject-dynamic-context).
+
+## Bundled skills
+
+...
+&lt;/persisted-output&gt;</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-08-49-260Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-08-49-260Z" class="timestamp-link"><time datetime="2026-06-12T14:08:49.260Z" data-timestamp="2026-06-12T14:08:49.260Z">2026-06-12T14:08:49.260Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01XVFbANs4QMPLhFPhhjKDSq"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/home/vscode/.claude/projects/-workspaces-marv/fe85a754-b380-48c3-aa73-46824260def8/tool-results/toolu_01GKaw6J4xwkZdWfTB7V2B5D.txt&#34;,
+  &#34;limit&#34;: 200
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-08-49-294Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-08-49-294Z" class="timestamp-link"><time datetime="2026-06-12T14:08:49.294Z" data-timestamp="2026-06-12T14:08:49.294Z">2026-06-12T14:08:49.294Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	&gt; ## Documentation Index
+2	&gt; Fetch the complete documentation index at: https://code.claude.com/docs/llms.txt
+3	&gt; Use this file to discover all available pages before exploring further.
+4	
+5	# Extend Claude with skills
+6	
+7	&gt; Create, manage, and share skills to extend Claude&#x27;s capabilities in Claude Code. Includes custom commands and bundled skills.
+8	
+9	Skills extend what Claude can do. Create a `SKILL.md` file with instructions, and Claude adds it to its toolkit. Claude uses skills when relevant, or you can invoke one directly with `/skill-name`.
+10	
+11	Create a skill when you keep pasting the same instructions, checklist, or multi-step procedure into chat, or when a section of CLAUDE.md has grown into a procedure rather than a fact. Unlike CLAUDE.md content, a skill&#x27;s body loads only when it&#x27;s used, so long reference material costs almost nothing until you need it.
+12	
+13	&lt;Note&gt;
+14	  For built-in commands like `/help` and `/compact`, and bundled skills like `/debug` and `/code-review`, see the [commands reference](/en/commands).
+15	
+16	  **Custom commands have been merged into skills.** A file at `.claude/commands/deploy.md` and a skill at `.claude/skills/deploy/SKILL.md` both create `/deploy` and work the same way. Your existing `.claude/commands/` files keep working. Skills add optional features: a directory for supporting files, frontmatter to [control whether you or Claude invokes them](#control-who-invokes-a-skill), and the ability for Claude to load them automatically when relevant.
+17	&lt;/Note&gt;
+18	
+19	Claude Code skills follow the [Agent Skills](https://agentskills.io) open standard, which works across multiple AI tools. Claude Code extends the standard with additional features like [invocation control](#control-who-invokes-a-skill), [subagent execution](#run-skills-in-a-subagent), and [dynamic context injection](#inject-dynamic-context).
+20	
+21	## Bundled skills
+22	
+23	Claude Code includes a set of bundled skills that are available in every session unless disabled with the [`disableBundledSkills`](/en/settings#available-settings) setting, including `/code-review`, `/batch`, `/debug`, `/loop`, and `/claude-api`. Unlike most built-in commands, which execute fixed logic directly, bundled skills are prompt-based: they give Claude detailed instructions and let it orchestrate the work using its tools. You invoke them the same way as any other skill, by typing `/` followed by the skill name.
+24	
+25	Bundled skills are listed alongside built-in commands in the [commands reference](/en/commands), marked **Skill** in the Purpose column.
+26	
+27	### Run and verify your app
+28	
+29	Three bundled skills work together to launch your app and confirm changes against the running app instead of just tests:
+30	
+31	| Skill                  | Purpose                                                                                                           |
+32	| :--------------------- | :---------------------------------------------------------------------------------------------------------------- |
+33	| `/run`                 | Launch and drive your app to see a change working                                                                 |
+34	| `/verify`              | Build and run your app to confirm a code change does what it should, without falling back to tests or type checks |
+35	| `/run-skill-generator` | Teach `/run` and `/verify` how to build and launch your project                                                   |
+36	
+37	{/* min-version: 2.1.145 */}All three skills require Claude Code v2.1.145 or later.
+38	
+39	`/run` and `/verify` work without setup. They infer the launch from your project type (CLI, server, TUI, browser-driven) and from what&#x27;s in your README, `package.json`, or `Makefile`. That inference gets unreliable for projects that need anything beyond a standard launch: a database, an env file, a graphical session, a multi-step build.
+40	
+41	`/run-skill-generator` records the recipe instead. It gets your app running from a clean environment, captures what worked (the install commands, the env vars, the launch script), and commits it as a per-project skill at `.claude/skills/run-&lt;name&gt;/`. After that, `/run`, `/verify`, and any other agent in the repo follow the recorded recipe instead of rediscovering it. Run `/run-skill-generator` once per project, and again if the build or launch process changes.
+42	
+43	## Getting started
+44	
+45	### Create your first skill
+46	
+47	This example creates a skill that summarizes the uncommitted changes in your git repository and flags anything risky. It pulls the live diff into the prompt before Claude reads it, so the response is grounded in your actual working tree rather than what Claude can guess from open files. Claude loads the skill automatically when you ask about your changes, or you can invoke it directly with `/summarize-changes`.
+48	
+49	&lt;Steps&gt;
+50	  &lt;Step title=&quot;Create the skill directory&quot;&gt;
+51	    Create a directory for the skill in your personal skills folder. Personal skills are available across all your projects.
+52	
+53	    ```bash theme={null}
+54	    mkdir -p ~/.claude/skills/summarize-changes
+55	    ```
+56	  &lt;/Step&gt;
+57	
+58	  &lt;Step title=&quot;Write SKILL.md&quot;&gt;
+59	    Every skill needs a `SKILL.md` file with two parts: YAML frontmatter between `---` markers that tells Claude when to use the skill, and markdown content with the instructions Claude follows when the skill runs. The directory name becomes the command you type, and the `description` helps Claude decide when to load the skill automatically.
+60	
+61	    Save this to `~/.claude/skills/summarize-changes/SKILL.md`:
+62	
+63	    ```yaml theme={null}
+64	    ---
+65	    description: Summarizes uncommitted changes and flags anything risky. Use when the user asks what changed, wants a commit message, or asks to review their diff.
+66	    ---
+67	
+68	    ## Current changes
+69	
+70	    !`git diff HEAD`
+71	
+72	    ## Instructions
+73	
+74	    Summarize the changes above in two or three bullet points, then list any risks you notice such as missing error handling, hardcoded values, or tests that need updating. If the diff is empty, say there are no uncommitted changes.
+75	    ```
+76	
+77	    The `` !`git diff HEAD` `` line uses [dynamic context injection](#inject-dynamic-context): Claude Code runs the command and replaces the line with its output before Claude sees the skill content, so the instructions arrive with the current diff already inlined.
+78	  &lt;/Step&gt;
+79	
+80	  &lt;Step title=&quot;Test the skill&quot;&gt;
+81	    Open a git project, make a small edit to any file, and start Claude Code by running `claude`. You can test the skill two ways.
+82	
+83	    **Let Claude invoke it automatically** by asking something that matches the description:
+84	
+85	    ```text theme={null}
+86	    What did I change?
+87	    ```
+88	
+89	    **Or invoke it directly** with the skill name:
+90	
+91	    ```text theme={null}
+92	    /summarize-changes
+93	    ```
+94	
+95	    Either way, Claude should respond with a short summary of your edit and a list of risks.
+96	  &lt;/Step&gt;
+97	&lt;/Steps&gt;
+98	
+99	### Where skills live
+100	
+101	Where you store a skill determines who can use it:
+102	
+103	| Location   | Path                                                | Applies to                     |
+104	| :--------- | :-------------------------------------------------- | :----------------------------- |
+105	| Enterprise | See [managed settings](/en/settings#settings-files) | All users in your organization |
+106	| Personal   | `~/.claude/skills/&lt;skill-name&gt;/SKILL.md`            | All your projects              |
+107	| Project    | `.claude/skills/&lt;skill-name&gt;/SKILL.md`              | This project only              |
+108	| Plugin     | `&lt;plugin&gt;/skills/&lt;skill-name&gt;/SKILL.md`             | Where plugin is enabled        |
+109	
+110	When skills share the same name across levels, enterprise overrides personal, and personal overrides project. Plugin skills use a `plugin-name:skill-name` namespace, so they cannot conflict with other levels. If you have files in `.claude/commands/`, those work the same way, but if a skill and a command share the same name, the skill takes precedence.
+111	
+112	&lt;Note&gt;
+113	  Add a `.claude-plugin/plugin.json` to a skill folder and it loads as a [plugin](/en/plugins-reference#skills-directory-plugins) named `&lt;name&gt;@skills-dir`, so it can bundle agents, hooks, and MCP servers. In a project&#x27;s `.claude/skills/`, this requires accepting the workspace trust dialog first.
+114	&lt;/Note&gt;
+115	
+116	#### Live change detection
+117	
+118	Claude Code watches skill directories for file changes. Adding, editing, or removing a skill under `~/.claude/skills/`, the project `.claude/skills/`, or a `.claude/skills/` inside an `--add-dir` directory takes effect within the current session without restarting. Creating a top-level skills directory that did not exist when the session started requires restarting Claude Code so the new directory can be watched.
+119	
+120	&lt;Note&gt;
+121	  Live change detection covers `SKILL.md` text only. For a skill folder that is also a [plugin](/en/plugins-reference#skills-directory-plugins), changes to `hooks/`, `.mcp.json`, `agents/`, and `output-styles/` need `/reload-plugins` to take effect.
+122	&lt;/Note&gt;
+123	
+124	#### Automatic discovery from parent and nested directories
+125	
+126	Project skills load from `.claude/skills/` in your starting directory and in every parent directory up to the repository root, so starting Claude in a subdirectory still picks up skills defined at the root. When you work with files in subdirectories below your starting directory, Claude Code also discovers skills from nested `.claude/skills/` directories on demand. For example, if you&#x27;re editing a file in `packages/frontend/`, Claude Code also looks for skills in `packages/frontend/.claude/skills/`. This supports monorepo setups where packages have their own skills.
+127	
+128	Each skill is a directory with `SKILL.md` as the entrypoint:
+129	
+130	```text theme={null}
+131	my-skill/
+132	├── SKILL.md           # Main instructions (required)
+133	├── template.md        # Template for Claude to fill in
+134	├── examples/
+135	│   └── sample.md      # Example output showing expected format
+136	└── scripts/
+137	    └── validate.sh    # Script Claude can execute
+138	```
+139	
+140	The `SKILL.md` contains the main instructions and is required. Other files are optional and let you build more powerful skills: templates for Claude to fill in, example outputs showing the expected format, scripts Claude can execute, or detailed reference documentation. Reference these files from your `SKILL.md` so Claude knows what they contain and when to load them. See [Add supporting files](#add-supporting-files) for more details.
+141	
+142	&lt;Note&gt;
+143	  Files in `.claude/commands/` still work and support the same [frontmatter](#frontmatter-reference). Skills are recommended since they support additional features like supporting files.
+144	&lt;/Note&gt;
+145	
+146	#### Skills from additional directories
+147	
+148	The `--add-dir` flag and `/add-dir` command [grant file access](/en/permissions#additional-directories-grant-file-access-not-configuration) rather than configuration discovery, but skills are an exception: `.claude/skills/` within an added directory is loaded automatically. This exception applies only to `--add-dir` and `/add-dir`. The `permissions.additionalDirectories` setting in `settings.json` grants file access only and does not load skills. See [Live change detection](#live-change-detection) for how edits are picked up during a session.
+149	
+150	Other `.claude/` configuration such as subagents, commands, and output styles is not loaded from additional directories. See the [exceptions table](/en/permissions#additional-directories-grant-file-access-not-configuration) for the complete list of what is and isn&#x27;t loaded, and the recommended ways to share configuration across projects.
+151	
+152	&lt;Note&gt;
+153	  CLAUDE.md files from `--add-dir` directories are not loaded by default. To load them, set `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1`. See [Load from additional directories](/en/memory#load-from-additional-directories).
+154	&lt;/Note&gt;
+155	
+156	## Configure skills
+157	
+158	Skills are configured through YAML frontmatter at the top of `SKILL.md` and the markdown content that follows.
+159	
+160	### Types of skill content
+161	
+162	Skill files can contain any instructions, but thinking about how you want to invoke them helps guide what to include:
+163	
+164	**Reference content** adds knowledge Claude applies to your current work. Conventions, patterns, style guides, domain knowledge. This content runs inline so Claude can use it alongside your conversation context.
+165	
+166	```yaml theme={null}
+167	---
+168	name: api-conventions
+169	description: API design patterns for this codebase
+170	---
+171	
+172	When writing API endpoints:
+173	- Use RESTful naming conventions
+174	- Return consistent error formats
+175	- Include request validation
+176	```
+177	
+178	**Task content** gives Claude step-by-step instructions for a specific action, like deployments, commits, or code generation. These are often actions you want to invoke directly with `/skill-name` rather than letting Claude decide when to run them. Add `disable-model-invocation: true` to prevent Claude from triggering it automatically.
+179	
+180	```yaml theme={null}
+181	---
+182	name: deploy
+183	description: Deploy the application to production
+184	context: fork
+185	disable-model-invocation: true
+186	---
+187	
+188	Deploy the application:
+189	1. Run the test suite
+190	2. Build the application
+191	3. Push to the deployment target
+192	```
+193	
+194	Your `SKILL.md` can contain anything, but thinking through how you want the skill invoked (by you, by Claude, or both) and where you want it to run (inline or in a subagent) helps guide what to include. For complex skills, you can also [add supporting files](#add-supporting-files) to keep the main skill focused.
+195	
+196	Keep the body itself concise. Once a skill loads, its content [stays in context across turns](#skill-content-lifecycle), so every line is a recurring token cost. State what to do rather than narrating how or why, and apply the same conciseness test you would for [CLAUDE.md content](/en/best-practices#write-an-effective-claude-md).
+197	
+198	### Frontmatter reference
+199	
+200	Beyond the markdown content, you can configure skill behavior using YAML frontmatter fields between `---` markers at the top of your `SKILL.md` file:</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-08-53-866Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-08-53-866Z" class="timestamp-link"><time datetime="2026-06-12T14:08:53.866Z" data-timestamp="2026-06-12T14:08:53.866Z">2026-06-12T14:08:53.866Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now I have the answer. Project skills go in <code>.claude/skills/&lt;skill-name&gt;/SKILL.md</code> — it needs to be a directory with a <code>SKILL.md</code> file inside, not just a <code>.md</code> file. Let me fix the structure.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-08-54-792Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-08-54-792Z" class="timestamp-link"><time datetime="2026-06-12T14:08:54.792Z" data-timestamp="2026-06-12T14:08:54.792Z">2026-06-12T14:08:54.792Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01PRKicyxw2jVXS8FGzR5XYU">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Restructure skill into proper directory format</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">mkdir -p /workspaces/marv/.claude/skills/triage-issues &amp;&amp; mv /workspaces/marv/.claude/skills/triage-issues.md /workspaces/marv/.claude/skills/triage-issues/SKILL.md</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-09-00-693Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-09-00-693Z" class="timestamp-link"><time datetime="2026-06-12T14:09:00.693Z" data-timestamp="2026-06-12T14:09:00.693Z">2026-06-12T14:09:00.693Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>(Bash completed with no output)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-09-03-935Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-09-03-935Z" class="timestamp-link"><time datetime="2026-06-12T14:09:03.935Z" data-timestamp="2026-06-12T14:09:03.935Z">2026-06-12T14:09:03.935Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now I need to add proper frontmatter. Let me read the current file and update it.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-09-03-970Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-09-03-970Z" class="timestamp-link"><time datetime="2026-06-12T14:09:03.970Z" data-timestamp="2026-06-12T14:09:03.970Z">2026-06-12T14:09:03.970Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01573WvGbRbQh1PMPXqhfabV"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/.claude/skills/triage-issues/SKILL.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-09-04-003Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-09-04-003Z" class="timestamp-link"><time datetime="2026-06-12T14:09:04.003Z" data-timestamp="2026-06-12T14:09:04.003Z">2026-06-12T14:09:04.003Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# Triage GitHub Issues
+2	
+3	Reconcile open GitHub issues with the local codebase by reviewing,
+4	discussing, and — when accepted — converting them into change specifications.
+5	
+6	## When to use
+7	
+8	Invoke with `/triage-issues` when you want to process open GitHub issues.
+9	
+10	## Workflow
+11	
+12	### 1. Fetch open issues
+13	
+14	Run:
+15	
+16	```
+17	gh issue list --repo predakanga/marv --state open --json number,title,body,labels,comments --limit 50
+18	```
+19	
+20	Filter out issues that already have a label `triaged` or `rejected`.
+21	
+22	### 2. For each untriaged issue
+23	
+24	#### 2a. If the issue has NO prior bot analysis comment
+25	
+26	Read the issue body and any comments. Analyse the suggestion against the
+27	current codebase:
+28	
+29	- Is it feasible?
+30	- Does it overlap with an existing change spec or completed work?
+31	- What is the estimated scope/complexity?
+32	- Are there any design concerns or open questions?
+33	
+34	Post a comment on the issue with your analysis using this template:
+35	
+36	```
+37	## Triage Analysis
+38	
+39	**Feasibility:** &lt;High / Medium / Low&gt;
+40	**Scope:** &lt;Core / Host / Plugin API / Docs / CI/CD / New package&gt;
+41	**Complexity:** &lt;Trivial / Small / Medium / Large&gt;
+42	**Overlaps:** &lt;None / CS-NNN — description&gt;
+43	
+44	### Summary
+45	
+46	&lt;2-4 sentence summary of what the issue proposes and how it fits the project&gt;
+47	
+48	### Design Notes
+49	
+50	&lt;Bullet points covering key design considerations, potential approaches,
+51	and any concerns or trade-offs&gt;
+52	
+53	### Open Questions
+54	
+55	&lt;Numbered list of questions for the issue author, if any&gt;
+56	
+57	---
+58	*Automated triage by Claude Code. Reply to discuss, or comment
+59	`/accept` to approve or `/reject` to decline.*
+60	```
+61	
+62	Report to the user what you posted and move to the next issue.
+63	
+64	#### 2b. If the issue already has a bot analysis comment
+65	
+66	Read ALL comments after the analysis. Look for:
+67	
+68	- **`/accept`** — the issue author has approved the change. Proceed to
+69	  step 3.
+70	- **`/reject`** — the issue author has declined the change. Add the
+71	  `rejected` label and post a short acknowledgement comment. Move on.
+72	- **Other comments** — these are discussion/clarification. Post a
+73	  follow-up comment addressing the points raised, updating your analysis
+74	  if needed. Move on.
+75	
+76	### 3. Create change specifications (on `/accept`)
+77	
+78	When an issue is accepted:
+79	
+80	1. Determine the next change spec number by reading
+81	   `docs/change_specs/README.md`.
+82	2. Write one or more change spec `.md` files following the established
+83	   format (see existing specs in `docs/change_specs/` for the template).
+84	   The spec&#x27;s `Source` metadata should reference the GitHub issue
+85	   (e.g. `**Source:** GitHub issue #42`).
+86	   Do NOT write any code — specs only.
+87	3. Update `docs/change_specs/README.md` to include the new spec(s) with
+88	   status **Pending**.
+89	4. Add the `triaged` label to the issue.
+90	5. Post a comment on the issue noting which change spec(s) were created.
+91	6. Follow the mandatory instructions in CLAUDE.md (commit, changelog if
+92	   user-visible, prompt log).
+93	
+94	## Important notes
+95	
+96	- This skill does NOT implement any code. It only creates change
+97	  specifications.
+98	- When analysing feasibility, read relevant source files — don&#x27;t guess.
+99	- Keep issue comments concise and professional.
+100	- If `gh` commands fail with auth errors, ask the user to run
+101	  `! gh auth login` in their terminal.
+102	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-09-08-356Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-09-08-356Z" class="timestamp-link"><time datetime="2026-06-12T14:09:08.356Z" data-timestamp="2026-06-12T14:09:08.356Z">2026-06-12T14:09:08.356Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_011u33ePHNAmvAAMNqGUq8Qc">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">SKILL.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/.claude/skills/triage-issues/SKILL.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content"># Triage GitHub Issues</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">---
+description: Triage open GitHub issues — analyse suggestions, discuss in comments, and convert accepted issues into change specifications. Use when the user asks to triage issues, process issues, or check GitHub issues.
+disable-model-invocation: true
+---
+
+# Triage GitHub Issues</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-09-08-433Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-09-08-433Z" class="timestamp-link"><time datetime="2026-06-12T14:09:08.433Z" data-timestamp="2026-06-12T14:09:08.433Z">2026-06-12T14:09:08.433Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/.claude/skills/triage-issues/SKILL.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-09-13-372Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-09-13-372Z" class="timestamp-link"><time datetime="2026-06-12T14:09:13.372Z" data-timestamp="2026-06-12T14:09:13.372Z">2026-06-12T14:09:13.372Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_015diiZPL8Jza6k5ew3e8nVz">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit the restructured skill</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add .claude/skills/ &amp;&amp; git commit -m &#39;Fix skill structure: move to SKILL.md in directory with frontmatter
+
+Skills must be at .claude/skills/&lt;name&gt;/SKILL.md with YAML frontmatter,
+not bare .md files. Restructured triage-issues accordingly.
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;&#39;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-12T14-09-13-729Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-12T14-09-13-729Z" class="timestamp-link"><time datetime="2026-06-12T14:09:13.729Z" data-timestamp="2026-06-12T14:09:13.729Z">2026-06-12T14:09:13.729Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">f305e17</span> Fix skill structure: move to SKILL.md in directory with frontmatter</div><pre>1 file changed, 5 insertions(+)
+ rename .claude/skills/{triage-issues.md =&gt; triage-issues/SKILL.md} (92%)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-12T14-09-19-774Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-12T14-09-19-774Z" class="timestamp-link"><time datetime="2026-06-12T14:09:19.774Z" data-timestamp="2026-06-12T14:09:19.774Z">2026-06-12T14:09:19.774Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Restructured the skill to <code>.claude/skills/triage-issues/SKILL.md</code> with proper YAML frontmatter. The docs say live change detection should pick it up, but since the <code>skills/</code> directory was empty when the session started, you may need to restart Claude Code for <code>/triage-issues</code> to appear. Try <code>/reload-skills</code> first — if it still doesn't show, restart the session.</p></div></div></div>
+<div class="message user" id="msg-2026-06-12T14-09-27-517Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-12T14-09-27-517Z" class="timestamp-link"><time datetime="2026-06-12T14:09:27.517Z" data-timestamp="2026-06-12T14:09:27.517Z">2026-06-12T14:09:27.517Z</time></a></div><div class="message-content">
+<div class="user-content"><p><local-command-caveat>Caveat: The messages below were generated by the user while running local commands. DO NOT respond to these messages or otherwise consider them in your response unless the user explicitly asks you to.</local-command-caveat></p></div></div></div>
+<div class="message user" id="msg-2026-06-12T14-09-27-491Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-12T14-09-27-491Z" class="timestamp-link"><time datetime="2026-06-12T14:09:27.491Z" data-timestamp="2026-06-12T14:09:27.491Z">2026-06-12T14:09:27.491Z</time></a></div><div class="message-content">
+<div class="user-content"><p><command-name>/reload-skills</command-name>
+            <command-message>reload-skills</command-message>
+            <command-args></command-args></p></div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-001.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<span class="current">2</span>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<a href="page-006.html">6</a>
+<a href="page-003.html">Next &rarr;</a>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

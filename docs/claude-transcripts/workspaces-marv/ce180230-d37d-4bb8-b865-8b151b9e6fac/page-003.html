@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 3</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 3/3</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-002.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<span class="current">3</span>
+<span class="disabled">Next &rarr;</span>
+</div>
+
+        
+<div class="message user" id="msg-2026-05-31T12-52-35-064Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-05-31T12-52-35-064Z" class="timestamp-link"><time datetime="2026-05-31T12:52:35.064Z" data-timestamp="2026-05-31T12:52:35.064Z">2026-05-31T12:52:35.064Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Yes please, but I'm not sure the PluginManager is the right place for it. All other On* handlers are managed inside MarvPlugin, so it would be more consistent to do likewise.</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-52-38-341Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-52-38-341Z" class="timestamp-link"><time datetime="2026-05-31T12:52:38.341Z" data-timestamp="2026-05-31T12:52:38.341Z">2026-05-31T12:52:38.341Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_017j8ridBVEzhPk3fGYXLCfX"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs&#34;,
+  &#34;offset&#34;: 100,
+  &#34;limit&#34;: 65
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-52-38-373Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-52-38-373Z" class="timestamp-link"><time datetime="2026-05-31T12:52:38.373Z" data-timestamp="2026-05-31T12:52:38.373Z">2026-05-31T12:52:38.373Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>100	            }
+101	
+102	            // [OnRawMessage] handlers
+103	            foreach (var rawAttr in method.GetCustomAttributes&lt;OnRawMessageAttribute&gt;())
+104	            {
+105	                _rawMessageHandlers.Add(new RawMessageRegistration(
+106	                    target, method, rawAttr.Command.ToUpperInvariant()));
+107	            }
+108	
+109	            // [OnInterval] handlers
+110	            if (method.GetCustomAttribute&lt;OnIntervalAttribute&gt;() is { } intervalAttr)
+111	            {
+112	                var interval = intervalAttr.Seconds &gt; 0
+113	                    ? TimeSpan.FromSeconds(intervalAttr.Seconds)
+114	                    : TimeSpan.FromMinutes(intervalAttr.Minutes &gt; 0 ? intervalAttr.Minutes : 1);
+115	
+116	                _intervalHandlers.Add(new IntervalRegistration(
+117	                    target, method, interval, DateTimeOffset.MinValue));
+118	            }
+119	        }
+120	    }
+121	
+122	    /// &lt;inheritdoc /&gt;
+123	    public virtual async Task HandleEventAsync(MarvEvent evt, CancellationToken ct)
+124	    {
+125	        // Dispatch [OnEvent] handlers matching by event type
+126	        foreach (var handler in _eventHandlers)
+127	        {
+128	            if (handler.EventType.IsInstanceOfType(evt))
+129	                await InvokeHandler(handler.Target, handler.Method, evt, ct);
+130	        }
+131	
+132	        // Dispatch [OnRawMessage] handlers for RawMessageEvent
+133	        if (evt is RawMessageEvent rawEvt)
+134	        {
+135	            foreach (var handler in _rawMessageHandlers)
+136	            {
+137	                if (handler.Command == rawEvt.RawMessage.Command)
+138	                    await InvokeHandler(handler.Target, handler.Method, rawEvt.RawMessage, ct);
+139	            }
+140	        }
+141	
+142	        // Dispatch [OnCommand] and [OnRegex] handlers for MessageEvent
+143	        if (evt is MessageEvent msgEvt)
+144	        {
+145	            await DispatchCommandHandlers(msgEvt, ct);
+146	            await DispatchRegexHandlers(msgEvt, ct);
+147	        }
+148	
+149	        // Dispatch [OnInterval] handlers
+150	        var now = DateTimeOffset.UtcNow;
+151	        for (var i = 0; i &lt; _intervalHandlers.Count; i++)
+152	        {
+153	            var handler = _intervalHandlers[i];
+154	            if (now - handler.LastRun &gt;= handler.Interval)
+155	            {
+156	                _intervalHandlers[i] = handler with { LastRun = now };
+157	                await InvokeHandler(handler.Target, handler.Method, ct);
+158	            }
+159	        }
+160	    }
+161	
+162	    private async Task DispatchCommandHandlers(MessageEvent msgEvt, CancellationToken ct)
+163	    {
+164	        if (_commandHandlers.Count == 0)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-52-41-381Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-52-41-381Z" class="timestamp-link"><time datetime="2026-05-31T12:52:41.381Z" data-timestamp="2026-05-31T12:52:41.381Z">2026-05-31T12:52:41.381Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me look at the IPlugin interface and plugin lifecycle to understand when to start/stop the timer:</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-52-41-840Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-52-41-840Z" class="timestamp-link"><time datetime="2026-05-31T12:52:41.840Z" data-timestamp="2026-05-31T12:52:41.840Z">2026-05-31T12:52:41.840Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01JSNdGB8mNtDKmi2ggKTtMB"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Plugin/IPlugin.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-52-41-868Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-52-41-868Z" class="timestamp-link"><time datetime="2026-05-31T12:52:41.868Z" data-timestamp="2026-05-31T12:52:41.868Z">2026-05-31T12:52:41.868Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using Marv.Core.Events;
+2	using Microsoft.Extensions.DependencyInjection;
+3	
+4	namespace Marv.Core.Plugin;
+5	
+6	/// &lt;summary&gt;
+7	/// Interface defining the full plugin contract. All plugins must implement this,
+8	/// either directly or via the &lt;see cref=&quot;MarvPlugin&quot;/&gt; convenience base class.
+9	/// &lt;/summary&gt;
+10	public interface IPlugin
+11	{
+12	    /// &lt;summary&gt;
+13	    /// Called once after the plugin is constructed and all services are available.
+14	    /// Use for one-time initialization.
+15	    /// &lt;/summary&gt;
+16	    Task OnLoadAsync(CancellationToken ct);
+17	
+18	    /// &lt;summary&gt;
+19	    /// Called each time the bot establishes an IRC connection.
+20	    /// &lt;/summary&gt;
+21	    Task OnConnectedAsync(CancellationToken ct);
+22	
+23	    /// &lt;summary&gt;
+24	    /// Called when the IRC connection is lost. Any cached IChannel/IUser references
+25	    /// are stale after this call.
+26	    /// &lt;/summary&gt;
+27	    Task OnDisconnectedAsync();
+28	
+29	    /// &lt;summary&gt;
+30	    /// Called once during shutdown, before the DI container is disposed.
+31	    /// &lt;/summary&gt;
+32	    Task OnUnloadAsync();
+33	
+34	    /// &lt;summary&gt;
+35	    /// Called by the core&#x27;s per-plugin event loop to deliver an event.
+36	    /// The core calls this method once per event, sequentially — never
+37	    /// concurrently with itself for the same plugin.
+38	    /// &lt;/summary&gt;
+39	    Task HandleEventAsync(MarvEvent evt, CancellationToken ct);
+40	
+41	    /// &lt;summary&gt;
+42	    /// Called during DI container setup to register services this plugin provides.
+43	    /// Only plugins that provide services to other plugins need to override this.
+44	    /// Default implementation is a no-op.
+45	    /// &lt;/summary&gt;
+46	    static virtual void ConfigureServices(IServiceCollection services) { }
+47	}
+48	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-52-53-781Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-52-53-781Z" class="timestamp-link"><time datetime="2026-05-31T12:52:53.781Z" data-timestamp="2026-05-31T12:52:53.781Z">2026-05-31T12:52:53.781Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01MUuFzdDpC5GZsMjr7kGb9X"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Plugin/Attributes.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-52-53-810Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-52-53-810Z" class="timestamp-link"><time datetime="2026-05-31T12:52:53.810Z" data-timestamp="2026-05-31T12:52:53.810Z">2026-05-31T12:52:53.810Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	namespace Marv.Core.Plugin;
+2	
+3	/// &lt;summary&gt;
+4	/// Declares that a plugin provides the specified service type to other plugins.
+5	/// The plugin must also override &lt;see cref=&quot;IPlugin.ConfigureServices&quot;/&gt; to register the implementation.
+6	/// &lt;/summary&gt;
+7	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+8	public sealed class ProvidesServiceAttribute(Type serviceType) : Attribute
+9	{
+10	    /// &lt;summary&gt;The service interface type this plugin provides.&lt;/summary&gt;
+11	    public Type ServiceType { get; } = serviceType;
+12	}
+13	
+14	/// &lt;summary&gt;
+15	/// Declares that a plugin depends on another plugin for load ordering,
+16	/// without implying a service relationship.
+17	/// &lt;/summary&gt;
+18	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+19	public sealed class DependsOnAttribute(Type pluginType) : Attribute
+20	{
+21	    /// &lt;summary&gt;The plugin type that must load before this plugin.&lt;/summary&gt;
+22	    public Type PluginType { get; } = pluginType;
+23	}
+24	
+25	/// &lt;summary&gt;
+26	/// Overrides the default plugin name (derived by stripping the &quot;Plugin&quot; suffix from the class name).
+27	/// Applied to the plugin class itself.
+28	/// &lt;/summary&gt;
+29	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+30	public sealed class PluginNameAttribute(string name) : Attribute
+31	{
+32	    /// &lt;summary&gt;The human-readable plugin name.&lt;/summary&gt;
+33	    public string Name { get; } = name;
+34	}
+35	
+36	/// &lt;summary&gt;
+37	/// Tags a configuration class for automatic registration as IOptions&amp;lt;T&amp;gt;
+38	/// bound to the Plugins:{Section} configuration section.
+39	/// &lt;/summary&gt;
+40	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+41	public sealed class PluginConfigAttribute : Attribute
+42	{
+43	    /// &lt;summary&gt;
+44	    /// The configuration section name under &quot;Plugins&quot; (e.g. &quot;Greet&quot; maps to &quot;Plugins:Greet&quot;).
+45	    /// &lt;/summary&gt;
+46	    public required string Section { get; init; }
+47	}
+48	
+49	/// &lt;summary&gt;
+50	/// Marks a class as a handler group belonging to a specific plugin.
+51	/// Handler groups are discovered and instantiated by &lt;see cref=&quot;MarvPlugin&quot;/&gt;.
+52	/// &lt;/summary&gt;
+53	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+54	public sealed class HandlerGroupAttribute(Type pluginType) : Attribute
+55	{
+56	    /// &lt;summary&gt;The plugin type this handler group belongs to.&lt;/summary&gt;
+57	    public Type PluginType { get; } = pluginType;
+58	}
+59	
+60	/// &lt;summary&gt;
+61	/// Marks a method as an event handler. The event type is inferred from the method&#x27;s
+62	/// first parameter. The method must accept a single event parameter and a CancellationToken.
+63	/// &lt;/summary&gt;
+64	[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+65	public sealed class OnEventAttribute : Attribute;
+66	
+67	/// &lt;summary&gt;
+68	/// Marks a method as a command handler. Triggered when a message starts with the
+69	/// configured command prefix followed by the specified command name.
+70	/// &lt;/summary&gt;
+71	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+72	public sealed class OnCommandAttribute(string command) : Attribute
+73	{
+74	    /// &lt;summary&gt;The command name to match (without the prefix).&lt;/summary&gt;
+75	    public string Command { get; } = command;
+76	}
+77	
+78	/// &lt;summary&gt;
+79	/// Marks a method as a regex-matched handler. Triggered when a message matches
+80	/// the specified regular expression pattern.
+81	/// &lt;/summary&gt;
+82	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+83	public sealed class OnRegexAttribute(string pattern) : Attribute
+84	{
+85	    /// &lt;summary&gt;The regular expression pattern to match against message text.&lt;/summary&gt;
+86	    public string Pattern { get; } = pattern;
+87	}
+88	
+89	/// &lt;summary&gt;
+90	/// Marks a method as a raw IRC message handler for the specified IRC command.
+91	/// Useful for protocol-level handling not covered by typed events.
+92	/// &lt;/summary&gt;
+93	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+94	public sealed class OnRawMessageAttribute(string command) : Attribute
+95	{
+96	    /// &lt;summary&gt;The IRC command to match (e.g. &quot;INVITE&quot;).&lt;/summary&gt;
+97	    public string Command { get; } = command;
+98	}
+99	
+100	/// &lt;summary&gt;
+101	/// Marks a method as a periodic handler that runs at the specified interval while connected.
+102	/// &lt;/summary&gt;
+103	[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+104	public sealed class OnIntervalAttribute : Attribute
+105	{
+106	    /// &lt;summary&gt;The interval in minutes between invocations.&lt;/summary&gt;
+107	    public double Minutes { get; init; }
+108	
+109	    /// &lt;summary&gt;The interval in seconds between invocations.&lt;/summary&gt;
+110	    public double Seconds { get; init; }
+111	
+112	    /// &lt;summary&gt;
+113	    /// Creates an interval attribute. Specify either &lt;see cref=&quot;Minutes&quot;/&gt; or &lt;see cref=&quot;Seconds&quot;/&gt;.
+114	    /// &lt;/summary&gt;
+115	    public OnIntervalAttribute() { }
+116	}
+117	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-52-57-116Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-52-57-116Z" class="timestamp-link"><time datetime="2026-05-31T12:52:57.116Z" data-timestamp="2026-05-31T12:52:57.116Z">2026-05-31T12:52:57.116Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me check how <code>PluginManager</code> manages the event dispatchers to understand the lifecycle:</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-52-57-717Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-52-57-717Z" class="timestamp-link"><time datetime="2026-05-31T12:52:57.717Z" data-timestamp="2026-05-31T12:52:57.717Z">2026-05-31T12:52:57.717Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_0158WUiFNdd6v6mpVYEJUvYe"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Plugin/PluginManager.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-52-57-753Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-52-57-753Z" class="timestamp-link"><time datetime="2026-05-31T12:52:57.753Z" data-timestamp="2026-05-31T12:52:57.753Z">2026-05-31T12:52:57.753Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using System.Reflection;
+2	using System.Runtime.Loader;
+3	using System.Threading.Channels;
+4	using Marv.Core.Events;
+5	using Microsoft.Extensions.Configuration;
+6	using Microsoft.Extensions.DependencyInjection;
+7	using Microsoft.Extensions.Logging;
+8	
+9	namespace Marv.Core.Plugin;
+10	
+11	/// &lt;summary&gt;
+12	/// Manages the full plugin lifecycle: discovery, dependency sorting, DI registration,
+13	/// instantiation, event dispatch, and teardown.
+14	/// &lt;/summary&gt;
+15	public sealed class PluginManager
+16	{
+17	    private readonly ILogger&lt;PluginManager&gt; _logger;
+18	    private readonly IServiceProvider _serviceProvider;
+19	    private IReadOnlyList&lt;PluginDescriptor&gt; _descriptors = [];
+20	    private List&lt;PluginInstance&gt; _instances = [];
+21	
+22	    /// &lt;summary&gt;
+23	    /// Creates a new &lt;see cref=&quot;PluginManager&quot;/&gt;.
+24	    /// &lt;/summary&gt;
+25	    public PluginManager(ILogger&lt;PluginManager&gt; logger, IServiceProvider serviceProvider)
+26	    {
+27	        _logger = logger;
+28	        _serviceProvider = serviceProvider;
+29	    }
+30	
+31	    /// &lt;summary&gt;The loaded and sorted plugin descriptors.&lt;/summary&gt;
+32	    internal IReadOnlyList&lt;PluginDescriptor&gt; Descriptors =&gt; _descriptors;
+33	
+34	    /// &lt;summary&gt;
+35	    /// Phase 1: Discovers plugins from assemblies, sorts them by dependency,
+36	    /// and registers services and configurations into the service collection.
+37	    /// Called during &lt;c&gt;AddMarv&lt;/c&gt; before the container is built.
+38	    /// &lt;/summary&gt;
+39	    internal static IReadOnlyList&lt;PluginDescriptor&gt; DiscoverAndRegister(
+40	        IServiceCollection services,
+41	        IConfiguration configuration,
+42	        IReadOnlyList&lt;string&gt; pluginPaths,
+43	        IReadOnlyList&lt;string&gt; requestedPlugins,
+44	        ILogger? bootstrapLogger = null)
+45	    {
+46	        var loadContext = AssemblyLoadContext.Default;
+47	        var descriptors = new List&lt;PluginDescriptor&gt;();
+48	        var requestedSet = new HashSet&lt;string&gt;(requestedPlugins, StringComparer.OrdinalIgnoreCase);
+49	
+50	        foreach (var path in pluginPaths)
+51	        {
+52	            var fullPath = Path.GetFullPath(path);
+53	            if (!File.Exists(fullPath))
+54	            {
+55	                bootstrapLogger?.LogWarning(&quot;Plugin assembly not found: {Path}&quot;, fullPath);
+56	                continue;
+57	            }
+58	
+59	            try
+60	            {
+61	                var assembly = loadContext.LoadFromAssemblyPath(fullPath);
+62	                var descriptor = PluginDiscovery.DiscoverPlugin(assembly);
+63	                if (descriptor is not null)
+64	                {
+65	                    if (requestedSet.Count &gt; 0 &amp;&amp; !requestedSet.Contains(descriptor.Name))
+66	                    {
+67	                        bootstrapLogger?.LogDebug(&quot;Skipping plugin {Name} (not in requested list)&quot;,
+68	                            descriptor.Name);
+69	                        continue;
+70	                    }
+71	
+72	                    descriptors.Add(descriptor);
+73	                    bootstrapLogger?.LogDebug(&quot;Discovered plugin: {Name} from {Assembly}&quot;,
+74	                        descriptor.Name, assembly.GetName().Name);
+75	                }
+76	            }
+77	            catch (Exception ex)
+78	            {
+79	                bootstrapLogger?.LogError(ex, &quot;Failed to load plugin assembly: {Path}&quot;, fullPath);
+80	                throw;
+81	            }
+82	        }
+83	
+84	        // Sort by dependencies
+85	        var sorted = PluginDependencySorter.Sort(descriptors);
+86	
+87	        // Register plugin configurations
+88	        foreach (var descriptor in sorted)
+89	        {
+90	            foreach (var (configType, section) in descriptor.Configurations)
+91	            {
+92	                var configSection = configuration.GetSection($&quot;Plugins:{section}&quot;);
+93	                var method = typeof(OptionsConfigurationServiceCollectionExtensions)
+94	                    .GetMethod(&quot;Configure&quot;, [typeof(IServiceCollection), typeof(IConfiguration)])!
+95	                    .MakeGenericMethod(configType);
+96	                method.Invoke(null, [services, configSection]);
+97	
+98	                bootstrapLogger?.LogDebug(&quot;Registered configuration {Type} for section Plugins:{Section}&quot;,
+99	                    configType.Name, section);
+100	            }
+101	        }
+102	
+103	        // Call ConfigureServices on each plugin (in dependency order)
+104	        foreach (var descriptor in sorted)
+105	        {
+106	            var method = descriptor.PluginType.GetMethod(&quot;ConfigureServices&quot;,
+107	                BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+108	            if (method is not null)
+109	            {
+110	                method.Invoke(null, [services]);
+111	                bootstrapLogger?.LogDebug(&quot;Called ConfigureServices on {Plugin}&quot;, descriptor.Name);
+112	            }
+113	        }
+114	
+115	        return sorted;
+116	    }
+117	
+118	    /// &lt;summary&gt;
+119	    /// Phase 2: Instantiates all plugins and their handler groups using
+120	    /// ActivatorUtilities. Called after the DI container is built.
+121	    /// &lt;/summary&gt;
+122	    internal void InstantiatePlugins(IReadOnlyList&lt;PluginDescriptor&gt; descriptors)
+123	    {
+124	        _descriptors = descriptors;
+125	        _instances = [];
+126	
+127	        var activator = _serviceProvider.GetRequiredService&lt;IPluginActivator&gt;();
+128	
+129	        foreach (var descriptor in descriptors)
+130	        {
+131	            try
+132	            {
+133	                var plugin = (IPlugin)ActivatorUtilities.CreateInstance(
+134	                    _serviceProvider, descriptor.PluginType);
+135	
+136	                _instances.Add(new PluginInstance(descriptor, plugin));
+137	                _logger.LogDebug(&quot;Instantiated plugin: {Name}&quot;, descriptor.Name);
+138	            }
+139	            catch (Exception ex)
+140	            {
+141	                _logger.LogError(ex, &quot;Failed to instantiate plugin: {Name}&quot;, descriptor.Name);
+142	                throw;
+143	            }
+144	        }
+145	    }
+146	
+147	    /// &lt;summary&gt;
+148	    /// Calls OnLoadAsync on all plugins in dependency order.
+149	    /// &lt;/summary&gt;
+150	    internal async Task LoadPluginsAsync(CancellationToken ct)
+151	    {
+152	        foreach (var instance in _instances)
+153	        {
+154	            try
+155	            {
+156	                await instance.Plugin.OnLoadAsync(ct);
+157	                _logger.LogDebug(&quot;Loaded plugin: {Name}&quot;, instance.Descriptor.Name);
+158	            }
+159	            catch (Exception ex)
+160	            {
+161	                _logger.LogError(ex, &quot;Plugin {Name} failed during OnLoadAsync&quot;, instance.Descriptor.Name);
+162	                throw;
+163	            }
+164	        }
+165	    }
+166	
+167	    /// &lt;summary&gt;
+168	    /// Calls OnConnectedAsync on all plugins in dependency order.
+169	    /// &lt;/summary&gt;
+170	    internal async Task NotifyConnectedAsync(CancellationToken ct)
+171	    {
+172	        foreach (var instance in _instances)
+173	        {
+174	            try
+175	            {
+176	                await instance.Plugin.OnConnectedAsync(ct);
+177	            }
+178	            catch (Exception ex)
+179	            {
+180	                _logger.LogError(ex, &quot;Plugin {Name} failed during OnConnectedAsync&quot;, instance.Descriptor.Name);
+181	            }
+182	        }
+183	    }
+184	
+185	    /// &lt;summary&gt;
+186	    /// Calls OnDisconnectedAsync on all plugins in reverse dependency order.
+187	    /// &lt;/summary&gt;
+188	    internal async Task NotifyDisconnectedAsync()
+189	    {
+190	        for (var i = _instances.Count - 1; i &gt;= 0; i--)
+191	        {
+192	            try
+193	            {
+194	                await _instances[i].Plugin.OnDisconnectedAsync();
+195	            }
+196	            catch (Exception ex)
+197	            {
+198	                _logger.LogError(ex, &quot;Plugin {Name} failed during OnDisconnectedAsync&quot;,
+199	                    _instances[i].Descriptor.Name);
+200	            }
+201	        }
+202	    }
+203	
+204	    /// &lt;summary&gt;
+205	    /// Calls OnUnloadAsync on all plugins in reverse dependency order.
+206	    /// &lt;/summary&gt;
+207	    internal async Task UnloadPluginsAsync()
+208	    {
+209	        for (var i = _instances.Count - 1; i &gt;= 0; i--)
+210	        {
+211	            try
+212	            {
+213	                await _instances[i].Plugin.OnUnloadAsync();
+214	                _logger.LogDebug(&quot;Unloaded plugin: {Name}&quot;, _instances[i].Descriptor.Name);
+215	            }
+216	            catch (Exception ex)
+217	            {
+218	                _logger.LogError(ex, &quot;Plugin {Name} failed during OnUnloadAsync&quot;,
+219	                    _instances[i].Descriptor.Name);
+220	            }
+221	        }
+222	    }
+223	
+224	    /// &lt;summary&gt;
+225	    /// Creates per-plugin event channels and starts event dispatch tasks.
+226	    /// Returns the list of channels for the message processor to fan out to.
+227	    /// &lt;/summary&gt;
+228	    internal IReadOnlyList&lt;ChannelWriter&lt;MarvEvent&gt;&gt; StartEventDispatchers(CancellationToken ct)
+229	    {
+230	        var writers = new List&lt;ChannelWriter&lt;MarvEvent&gt;&gt;();
+231	
+232	        foreach (var instance in _instances)
+233	        {
+234	            var channel = Channel.CreateBounded&lt;MarvEvent&gt;(new BoundedChannelOptions(256)
+235	            {
+236	                FullMode = BoundedChannelFullMode.Wait,
+237	                SingleReader = true,
+238	                SingleWriter = false
+239	            });
+240	
+241	            writers.Add(channel.Writer);
+242	
+243	            var pluginName = instance.Descriptor.Name;
+244	            _ = Task.Run(async () =&gt;
+245	            {
+246	                try
+247	                {
+248	                    await foreach (var evt in channel.Reader.ReadAllAsync(ct))
+249	                    {
+250	                        try
+251	                        {
+252	                            await instance.Plugin.HandleEventAsync(evt, ct);
+253	                        }
+254	                        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+255	                        {
+256	                            break;
+257	                        }
+258	                        catch (Exception ex)
+259	                        {
+260	                            _logger.LogError(ex, &quot;Plugin {Name} threw in HandleEventAsync for {EventType}&quot;,
+261	                                pluginName, evt.GetType().Name);
+262	                        }
+263	                    }
+264	                }
+265	                catch (OperationCanceledException)
+266	                {
+267	                    // Normal shutdown
+268	                }
+269	            }, ct);
+270	        }
+271	
+272	        return writers;
+273	    }
+274	
+275	    /// &lt;summary&gt;
+276	    /// Fans out an event to all plugin channels.
+277	    /// &lt;/summary&gt;
+278	    internal async Task DispatchEventAsync(MarvEvent evt, IReadOnlyList&lt;ChannelWriter&lt;MarvEvent&gt;&gt; writers, CancellationToken ct)
+279	    {
+280	        foreach (var writer in writers)
+281	        {
+282	            try
+283	            {
+284	                await writer.WriteAsync(evt, ct);
+285	            }
+286	            catch (ChannelClosedException)
+287	            {
+288	                // Plugin task has ended
+289	            }
+290	        }
+291	    }
+292	
+293	    /// &lt;summary&gt;
+294	    /// Logs diagnostic information about loaded plugins, their services, and dependencies.
+295	    /// &lt;/summary&gt;
+296	    internal void LogDiagnostics()
+297	    {
+298	        foreach (var descriptor in _descriptors)
+299	        {
+300	            _logger.LogInformation(&quot;Plugin &#x27;{Name}&#x27; loaded&quot;, descriptor.Name);
+301	            foreach (var svc in descriptor.ProvidedServices)
+302	                _logger.LogDebug(&quot;  Plugin &#x27;{Name}&#x27; provides: {Service}&quot;, descriptor.Name, svc.FullName);
+303	            foreach (var svc in descriptor.RequiredServices)
+304	                _logger.LogDebug(&quot;  Plugin &#x27;{Name}&#x27; requires: {Service}&quot;, descriptor.Name, svc.FullName);
+305	            foreach (var svc in descriptor.OptionalServices)
+306	                _logger.LogDebug(&quot;  Plugin &#x27;{Name}&#x27; optional: {Service}&quot;, descriptor.Name, svc.FullName);
+307	        }
+308	    }
+309	}
+310	
+311	/// &lt;summary&gt;
+312	/// Pairs a plugin descriptor with its runtime instance.
+313	/// &lt;/summary&gt;
+314	internal sealed class PluginInstance(PluginDescriptor descriptor, IPlugin plugin)
+315	{
+316	    public PluginDescriptor Descriptor =&gt; descriptor;
+317	    public IPlugin Plugin =&gt; plugin;
+318	}
+319	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-53-02-503Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-53-02-503Z" class="timestamp-link"><time datetime="2026-05-31T12:53:02.503Z" data-timestamp="2026-05-31T12:53:02.503Z">2026-05-31T12:53:02.503Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Good, I have the full picture. The approach: <code>MarvPlugin</code> will start a background timer task during <code>OnConnectedAsync</code> and cancel it during <code>OnDisconnectedAsync</code>. The timer loop will invoke interval handlers on schedule, independent of the event stream.</p>
+<p>Let me also check if any existing plugins use <code>OnInterval</code>:</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-53-02-956Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-53-02-956Z" class="timestamp-link"><time datetime="2026-05-31T12:53:02.956Z" data-timestamp="2026-05-31T12:53:02.956Z">2026-05-31T12:53:02.956Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_012qKPvozSRYhmGLSAEqfeeT">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;OnInterval&#34; /workspaces/marv/src/ --include=&#34;*.cs&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-53-03-100Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-53-03-100Z" class="timestamp-link"><time datetime="2026-05-31T12:53:03.100Z" data-timestamp="2026-05-31T12:53:03.100Z">2026-05-31T12:53:03.100Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs:109:            // [OnInterval] handlers
+/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs:110:            if (method.GetCustomAttribute&lt;OnIntervalAttribute&gt;() is { } intervalAttr)
+/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs:149:        // Dispatch [OnInterval] handlers
+/workspaces/marv/src/Marv.Core/Plugin/Attributes.cs:104:public sealed class OnIntervalAttribute : Attribute
+/workspaces/marv/src/Marv.Core/Plugin/Attributes.cs:115:    public OnIntervalAttribute() { }</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-53-06-196Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-53-06-196Z" class="timestamp-link"><time datetime="2026-05-31T12:53:06.196Z" data-timestamp="2026-05-31T12:53:06.196Z">2026-05-31T12:53:06.196Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>No plugins use it yet — this is a good time to fix it before anyone depends on the buggy behavior. Now let me also check the test files:</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-53-06-931Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-53-06-931Z" class="timestamp-link"><time datetime="2026-05-31T12:53:06.931Z" data-timestamp="2026-05-31T12:53:06.931Z">2026-05-31T12:53:06.931Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_012DUdaev6H2VE4TBuh32cBo">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;OnInterval\|IntervalRegistration\|_intervalHandlers&#34; /workspaces/marv/ --include=&#34;*.cs&#34; | grep -v obj/</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-53-06-987Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-53-06-987Z" class="timestamp-link"><time datetime="2026-05-31T12:53:06.987Z" data-timestamp="2026-05-31T12:53:06.987Z">2026-05-31T12:53:06.987Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/Marv.Core/Plugin/Attributes.cs:104:public sealed class OnIntervalAttribute : Attribute
+/workspaces/marv/src/Marv.Core/Plugin/Attributes.cs:115:    public OnIntervalAttribute() { }
+/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs:25:    private readonly List&lt;IntervalRegistration&gt; _intervalHandlers = [];
+/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs:109:            // [OnInterval] handlers
+/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs:110:            if (method.GetCustomAttribute&lt;OnIntervalAttribute&gt;() is { } intervalAttr)
+/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs:116:                _intervalHandlers.Add(new IntervalRegistration(
+/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs:149:        // Dispatch [OnInterval] handlers
+/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs:151:        for (var i = 0; i &lt; _intervalHandlers.Count; i++)
+/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs:153:            var handler = _intervalHandlers[i];
+/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs:156:                _intervalHandlers[i] = handler with { LastRun = now };
+/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs:329:    private sealed record IntervalRegistration(object Target, MethodInfo Method, TimeSpan Interval, DateTimeOffset LastRun);</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-53-11-240Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-53-11-240Z" class="timestamp-link"><time datetime="2026-05-31T12:53:11.240Z" data-timestamp="2026-05-31T12:53:11.240Z">2026-05-31T12:53:11.240Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now I'll implement the fix. The plan:</p>
+<ol>
+<li>Remove interval dispatch from <code>HandleEventAsync</code></li>
+<li>Add a <code>CancellationTokenSource</code> for the interval timer task</li>
+<li>Start the timer task in <code>OnConnectedAsync</code>, stop it in <code>OnDisconnectedAsync</code></li>
+<li>The timer loop sleeps for the shortest remaining interval, then fires all due handlers</li>
+</ol></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-53-12-759Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-53-12-759Z" class="timestamp-link"><time datetime="2026-05-31T12:53:12.759Z" data-timestamp="2026-05-31T12:53:12.759Z">2026-05-31T12:53:12.759Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01VExwnTitnSqkGiK6XVsQKE">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">MarvPlugin.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    private readonly List&lt;IntervalRegistration&gt; _intervalHandlers = [];</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    private readonly List&lt;IntervalRegistration&gt; _intervalHandlers = [];
+    private CancellationTokenSource? _intervalCts;
+    private Task? _intervalTask;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-53-12-801Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-53-12-801Z" class="timestamp-link"><time datetime="2026-05-31T12:53:12.801Z" data-timestamp="2026-05-31T12:53:12.801Z">2026-05-31T12:53:12.801Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-53-14-988Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-53-14-988Z" class="timestamp-link"><time datetime="2026-05-31T12:53:14.988Z" data-timestamp="2026-05-31T12:53:14.988Z">2026-05-31T12:53:14.988Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now remove the interval dispatch from <code>HandleEventAsync</code>:</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-53-18-755Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-53-18-755Z" class="timestamp-link"><time datetime="2026-05-31T12:53:18.755Z" data-timestamp="2026-05-31T12:53:18.755Z">2026-05-31T12:53:18.755Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01J1QARHFX7NDTu2GqLzyYTC">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">MarvPlugin.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">        // Dispatch [OnCommand] and [OnRegex] handlers for MessageEvent
+        if (evt is MessageEvent msgEvt)
+        {
+            await DispatchCommandHandlers(msgEvt, ct);
+            await DispatchRegexHandlers(msgEvt, ct);
+        }
+
+        // Dispatch [OnInterval] handlers
+        var now = DateTimeOffset.UtcNow;
+        for (var i = 0; i &lt; _intervalHandlers.Count; i++)
+        {
+            var handler = _intervalHandlers[i];
+            if (now - handler.LastRun &gt;= handler.Interval)
+            {
+                _intervalHandlers[i] = handler with { LastRun = now };
+                await InvokeHandler(handler.Target, handler.Method, ct);
+            }
+        }
+    }</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">        // Dispatch [OnCommand] and [OnRegex] handlers for MessageEvent
+        if (evt is MessageEvent msgEvt)
+        {
+            await DispatchCommandHandlers(msgEvt, ct);
+            await DispatchRegexHandlers(msgEvt, ct);
+        }
+    }</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-53-18-805Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-53-18-805Z" class="timestamp-link"><time datetime="2026-05-31T12:53:18.805Z" data-timestamp="2026-05-31T12:53:18.805Z">2026-05-31T12:53:18.805Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-53-22-094Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-53-22-094Z" class="timestamp-link"><time datetime="2026-05-31T12:53:22.094Z" data-timestamp="2026-05-31T12:53:22.094Z">2026-05-31T12:53:22.094Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now add the timer loop and hook it into <code>OnConnectedAsync</code>/<code>OnDisconnectedAsync</code>:</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-53-35-831Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-53-35-831Z" class="timestamp-link"><time datetime="2026-05-31T12:53:35.831Z" data-timestamp="2026-05-31T12:53:35.831Z">2026-05-31T12:53:35.831Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01NthZKZKSWDazahozZDv8ny">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">MarvPlugin.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    /// &lt;inheritdoc /&gt;
+    public virtual async Task OnConnectedAsync(CancellationToken ct)
+    {
+        foreach (var group in _handlerGroups)
+        {
+            var method = group.GetType().GetMethod(&#34;OnConnectedAsync&#34;,
+                BindingFlags.Public | BindingFlags.Instance,
+                [typeof(CancellationToken)]);
+            if (method is not null)
+            {
+                var result = method.Invoke(group, [ct]);
+                if (result is Task task) await task;
+            }
+        }
+    }
+
+    /// &lt;inheritdoc /&gt;
+    public virtual async Task OnDisconnectedAsync()
+    {
+        foreach (var group in _handlerGroups)
+        {
+            var method = group.GetType().GetMethod(&#34;OnDisconnectedAsync&#34;,
+                BindingFlags.Public | BindingFlags.Instance,
+                Type.EmptyTypes);
+            if (method is not null)
+            {
+                var result = method.Invoke(group, []);
+                if (result is Task task) await task;
+            }
+        }
+    }</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    /// &lt;inheritdoc /&gt;
+    public virtual async Task OnConnectedAsync(CancellationToken ct)
+    {
+        foreach (var group in _handlerGroups)
+        {
+            var method = group.GetType().GetMethod(&#34;OnConnectedAsync&#34;,
+                BindingFlags.Public | BindingFlags.Instance,
+                [typeof(CancellationToken)]);
+            if (method is not null)
+            {
+                var result = method.Invoke(group, [ct]);
+                if (result is Task task) await task;
+            }
+        }
+
+        StartIntervalTimers();
+    }
+
+    /// &lt;inheritdoc /&gt;
+    public virtual async Task OnDisconnectedAsync()
+    {
+        await StopIntervalTimersAsync();
+
+        foreach (var group in _handlerGroups)
+        {
+            var method = group.GetType().GetMethod(&#34;OnDisconnectedAsync&#34;,
+                BindingFlags.Public | BindingFlags.Instance,
+                Type.EmptyTypes);
+            if (method is not null)
+            {
+                var result = method.Invoke(group, []);
+                if (result is Task task) await task;
+            }
+        }
+    }
+
+    /// &lt;summary&gt;
+    /// Starts a background task that fires [OnInterval] handlers on schedule,
+    /// independent of the event stream.
+    /// &lt;/summary&gt;
+    private void StartIntervalTimers()
+    {
+        if (_intervalHandlers.Count == 0) return;
+
+        // Reset last-run timestamps so intervals start fresh each connection
+        for (var i = 0; i &lt; _intervalHandlers.Count; i++)
+            _intervalHandlers[i] = _intervalHandlers[i] with { LastRun = DateTimeOffset.UtcNow };
+
+        _intervalCts = new CancellationTokenSource();
+        var ct = _intervalCts.Token;
+        _intervalTask = Task.Run(() =&gt; RunIntervalLoopAsync(ct), ct);
+    }
+
+    /// &lt;summary&gt;
+    /// Stops the background interval timer task and waits for it to complete.
+    /// &lt;/summary&gt;
+    private async Task StopIntervalTimersAsync()
+    {
+        if (_intervalCts is null) return;
+
+        await _intervalCts.CancelAsync();
+        if (_intervalTask is not null)
+        {
+            try { await _intervalTask; }
+            catch (OperationCanceledException) { }
+        }
+
+        _intervalCts.Dispose();
+        _intervalCts = null;
+        _intervalTask = null;
+    }
+
+    /// &lt;summary&gt;
+    /// Background loop that sleeps until the next interval handler is due,
+    /// then invokes all due handlers.
+    /// &lt;/summary&gt;
+    private async Task RunIntervalLoopAsync(CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested)
+        {
+            var now = DateTimeOffset.UtcNow;
+            var nextDue = TimeSpan.MaxValue;
+
+            for (var i = 0; i &lt; _intervalHandlers.Count; i++)
+            {
+                var handler = _intervalHandlers[i];
+                var elapsed = now - handler.LastRun;
+
+                if (elapsed &gt;= handler.Interval)
+                {
+                    _intervalHandlers[i] = handler with { LastRun = now };
+                    await InvokeHandler(handler.Target, handler.Method, ct);
+                }
+                else
+                {
+                    var remaining = handler.Interval - elapsed;
+                    if (remaining &lt; nextDue)
+                        nextDue = remaining;
+                }
+            }
+
+            // Recalculate next due time after invoking handlers (they may have taken time)
+            if (nextDue == TimeSpan.MaxValue)
+            {
+                nextDue = _intervalHandlers.Min(h =&gt; h.Interval);
+            }
+
+            await Task.Delay(nextDue, ct);
+        }
+    }</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-53-35-867Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-53-35-867Z" class="timestamp-link"><time datetime="2026-05-31T12:53:35.867Z" data-timestamp="2026-05-31T12:53:35.867Z">2026-05-31T12:53:35.867Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-53-38-126Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-53-38-126Z" class="timestamp-link"><time datetime="2026-05-31T12:53:38.126Z" data-timestamp="2026-05-31T12:53:38.126Z">2026-05-31T12:53:38.126Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now build and test:</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-53-38-403Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-53-38-403Z" class="timestamp-link"><time datetime="2026-05-31T12:53:38.403Z" data-timestamp="2026-05-31T12:53:38.403Z">2026-05-31T12:53:38.403Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01WU3Zs8pYDJ3YVGja6YJrJT">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">dotnet build -c Release 2&gt;&amp;1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-53-44-275Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-53-44-275Z" class="timestamp-link"><time datetime="2026-05-31T12:53:44.275Z" data-timestamp="2026-05-31T12:53:44.275Z">2026-05-31T12:53:44.275Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Marv.Core -&gt; /workspaces/marv/src/Marv.Core/bin/Release/net10.0/Marv.Core.dll
+  Marv.Plugins.Auth -&gt; /workspaces/marv/src/plugins/Marv.Plugins.Auth/bin/Release/net10.0/Marv.Plugins.Auth.dll
+  Marv.Plugins.Greet -&gt; /workspaces/marv/src/plugins/Marv.Plugins.Greet/bin/Release/net10.0/Marv.Plugins.Greet.dll
+  Marv.Plugins.CannedResponses -&gt; /workspaces/marv/src/plugins/Marv.Plugins.CannedResponses/bin/Release/net10.0/Marv.Plugins.CannedResponses.dll
+  Marv -&gt; /workspaces/marv/src/Marv/bin/Release/net10.0/Marv.dll
+  Marv.Plugins.AuthConsumer -&gt; /workspaces/marv/src/plugins/Marv.Plugins.AuthConsumer/bin/Release/net10.0/Marv.Plugins.AuthConsumer.dll
+  Marv.Core.Tests -&gt; /workspaces/marv/tests/Marv.Core.Tests/bin/Release/net10.0/Marv.Core.Tests.dll
+  Marv.Plugins.Tests -&gt; /workspaces/marv/tests/Marv.Plugins.Tests/bin/Release/net10.0/Marv.Plugins.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:05.62</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-53-47-585Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-53-47-585Z" class="timestamp-link"><time datetime="2026-05-31T12:53:47.585Z" data-timestamp="2026-05-31T12:53:47.585Z">2026-05-31T12:53:47.585Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01Sdv9oZZXb8pZaqGBdMrPc9">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">sudo service ngircd start &amp;&amp; dotnet test -c Release --no-build 2&gt;&amp;1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-54-14-831Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-54-14-831Z" class="timestamp-link"><time datetime="2026-05-31T12:54:14.831Z" data-timestamp="2026-05-31T12:54:14.831Z">2026-05-31T12:54:14.831Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Test run for /workspaces/marv/tests/Marv.Core.Tests/bin/Release/net10.0/Marv.Core.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /workspaces/marv/tests/Marv.Plugins.Tests/bin/Release/net10.0/Marv.Plugins.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    16, Skipped:     0, Total:    16, Duration: 80 ms - Marv.Plugins.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   148, Skipped:     0, Total:   148, Duration: 25 s - Marv.Core.Tests.dll (net10.0)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-54-18-520Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-54-18-520Z" class="timestamp-link"><time datetime="2026-05-31T12:54:18.520Z" data-timestamp="2026-05-31T12:54:18.520Z">2026-05-31T12:54:18.520Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>All tests pass. But the user wants interval timers to start in <code>OnLoadAsync</code> instead of <code>OnConnectedAsync</code> — intervals should be able to run even before the bot connects. Let me move it.</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-54-22-935Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-54-22-935Z" class="timestamp-link"><time datetime="2026-05-31T12:54:22.935Z" data-timestamp="2026-05-31T12:54:22.935Z">2026-05-31T12:54:22.935Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01LQRddB5kkGvuSLL1Pc34Gr">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">MarvPlugin.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">        StartIntervalTimers();
+    }
+
+    /// &lt;inheritdoc /&gt;
+    public virtual async Task OnDisconnectedAsync()
+    {
+        await StopIntervalTimersAsync();
+
+        foreach (var group in _handlerGroups)</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    }
+
+    /// &lt;inheritdoc /&gt;
+    public virtual async Task OnDisconnectedAsync()
+    {
+        foreach (var group in _handlerGroups)</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-54-22-988Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-54-22-988Z" class="timestamp-link"><time datetime="2026-05-31T12:54:22.988Z" data-timestamp="2026-05-31T12:54:22.988Z">2026-05-31T12:54:22.988Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-54-26-473Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-54-26-473Z" class="timestamp-link"><time datetime="2026-05-31T12:54:26.473Z" data-timestamp="2026-05-31T12:54:26.473Z">2026-05-31T12:54:26.473Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now add <code>StartIntervalTimers</code> to <code>OnLoadAsync</code> and <code>StopIntervalTimersAsync</code> to <code>OnUnloadAsync</code>:</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-54-29-895Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-54-29-895Z" class="timestamp-link"><time datetime="2026-05-31T12:54:29.895Z" data-timestamp="2026-05-31T12:54:29.895Z">2026-05-31T12:54:29.895Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_011mwXo6upJcdQoGFcHmdjs8">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">MarvPlugin.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    /// &lt;inheritdoc /&gt;
+    public virtual async Task OnLoadAsync(CancellationToken ct)
+    {
+        foreach (var group in _handlerGroups)
+        {
+            var method = group.GetType().GetMethod(&#34;OnLoadAsync&#34;,
+                BindingFlags.Public | BindingFlags.Instance,
+                [typeof(CancellationToken)]);
+            if (method is not null)
+            {
+                var result = method.Invoke(group, [ct]);
+                if (result is Task task) await task;
+            }
+        }
+    }</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    /// &lt;inheritdoc /&gt;
+    public virtual async Task OnLoadAsync(CancellationToken ct)
+    {
+        foreach (var group in _handlerGroups)
+        {
+            var method = group.GetType().GetMethod(&#34;OnLoadAsync&#34;,
+                BindingFlags.Public | BindingFlags.Instance,
+                [typeof(CancellationToken)]);
+            if (method is not null)
+            {
+                var result = method.Invoke(group, [ct]);
+                if (result is Task task) await task;
+            }
+        }
+
+        StartIntervalTimers();
+    }</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-54-29-927Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-54-29-927Z" class="timestamp-link"><time datetime="2026-05-31T12:54:29.927Z" data-timestamp="2026-05-31T12:54:29.927Z">2026-05-31T12:54:29.927Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-54-34-800Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-54-34-800Z" class="timestamp-link"><time datetime="2026-05-31T12:54:34.800Z" data-timestamp="2026-05-31T12:54:34.800Z">2026-05-31T12:54:34.800Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01BqNsmFiSPuP63KgteqJQSB">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">MarvPlugin.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    /// &lt;inheritdoc /&gt;
+    public virtual async Task OnUnloadAsync()
+    {
+        foreach (var group in _handlerGroups)
+        {
+            var method = group.GetType().GetMethod(&#34;OnUnloadAsync&#34;,
+                BindingFlags.Public | BindingFlags.Instance,
+                Type.EmptyTypes);
+            if (method is not null)
+            {
+                var result = method.Invoke(group, []);
+                if (result is Task task) await task;
+            }
+        }
+    }</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    /// &lt;inheritdoc /&gt;
+    public virtual async Task OnUnloadAsync()
+    {
+        await StopIntervalTimersAsync();
+
+        foreach (var group in _handlerGroups)
+        {
+            var method = group.GetType().GetMethod(&#34;OnUnloadAsync&#34;,
+                BindingFlags.Public | BindingFlags.Instance,
+                Type.EmptyTypes);
+            if (method is not null)
+            {
+                var result = method.Invoke(group, []);
+                if (result is Task task) await task;
+            }
+        }
+    }</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-54-34-841Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-54-34-841Z" class="timestamp-link"><time datetime="2026-05-31T12:54:34.841Z" data-timestamp="2026-05-31T12:54:34.841Z">2026-05-31T12:54:34.841Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-54-41-590Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-54-41-590Z" class="timestamp-link"><time datetime="2026-05-31T12:54:41.590Z" data-timestamp="2026-05-31T12:54:41.590Z">2026-05-31T12:54:41.590Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_017Qf7tVvESray2ciAtn4Ns5">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">dotnet build -c Release 2&gt;&amp;1 &amp;&amp; dotnet test -c Release --no-build 2&gt;&amp;1 | tail -6</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-55-12-202Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-55-12-202Z" class="timestamp-link"><time datetime="2026-05-31T12:55:12.202Z" data-timestamp="2026-05-31T12:55:12.202Z">2026-05-31T12:55:12.202Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Marv.Core -&gt; /workspaces/marv/src/Marv.Core/bin/Release/net10.0/Marv.Core.dll
+  Marv.Plugins.Auth -&gt; /workspaces/marv/src/plugins/Marv.Plugins.Auth/bin/Release/net10.0/Marv.Plugins.Auth.dll
+  Marv.Plugins.CannedResponses -&gt; /workspaces/marv/src/plugins/Marv.Plugins.CannedResponses/bin/Release/net10.0/Marv.Plugins.CannedResponses.dll
+  Marv.Plugins.Greet -&gt; /workspaces/marv/src/plugins/Marv.Plugins.Greet/bin/Release/net10.0/Marv.Plugins.Greet.dll
+  Marv.Plugins.AuthConsumer -&gt; /workspaces/marv/src/plugins/Marv.Plugins.AuthConsumer/bin/Release/net10.0/Marv.Plugins.AuthConsumer.dll
+  Marv -&gt; /workspaces/marv/src/Marv/bin/Release/net10.0/Marv.dll
+  Marv.Core.Tests -&gt; /workspaces/marv/tests/Marv.Core.Tests/bin/Release/net10.0/Marv.Core.Tests.dll
+  Marv.Plugins.Tests -&gt; /workspaces/marv/tests/Marv.Plugins.Tests/bin/Release/net10.0/Marv.Plugins.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.10
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    16, Skipped:     0, Total:    16, Duration: 97 ms - Marv.Plugins.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   148, Skipped:     0, Total:   148, Duration: 25 s - Marv.Core.Tests.dll (net10.0)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-55-15-628Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-55-15-628Z" class="timestamp-link"><time datetime="2026-05-31T12:55:15.628Z" data-timestamp="2026-05-31T12:55:15.628Z">2026-05-31T12:55:15.628Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>All 164 tests pass. Now let me stop the server, update the prompt log, and commit.</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-55-15-691Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-55-15-691Z" class="timestamp-link"><time datetime="2026-05-31T12:55:15.691Z" data-timestamp="2026-05-31T12:55:15.691Z">2026-05-31T12:55:15.691Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01MohJgkyz6gnuDH8BCxkAvw">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">sudo service ngircd stop</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-55-15-770Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-55-15-770Z" class="timestamp-link"><time datetime="2026-05-31T12:55:15.770Z" data-timestamp="2026-05-31T12:55:15.770Z">2026-05-31T12:55:15.770Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>(Bash completed with no output)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-55-18-749Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-55-18-749Z" class="timestamp-link"><time datetime="2026-05-31T12:55:18.749Z" data-timestamp="2026-05-31T12:55:18.749Z">2026-05-31T12:55:18.749Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01KzLaFueZ6BHgKPwkXx2j2u"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/prompts.md&#34;,
+  &#34;offset&#34;: 470
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-55-18-784Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-55-18-784Z" class="timestamp-link"><time datetime="2026-05-31T12:55:18.784Z" data-timestamp="2026-05-31T12:55:18.784Z">2026-05-31T12:55:18.784Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>470	
+471	&gt; Our next challenge is fleshing out the bot&#x27;s authentication to the server. There are three aspects that need improvement:
+472	&gt; - IRC server password (i.e. PASS command)
+473	&gt; - NickServ authentication (research the top services and decide whether we need different implementations and a NickservType config)
+474	&gt; - Oper authentication
+475	&gt;
+476	&gt; It may be worth adding an event to alert plugins when all required authentication has been completed, but that would be our first synthetic event so it needs careful thought.
+477	&gt;
+478	&gt; (Follow-up) Go ahead and implement them, but I have a quick note - it&#x27;s important to block channel joins until all the auth is completed, but the AuthenticationCompleteEvent name probably isn&#x27;t right; there should be a single event that plugins can wait on whether or not the bot is configured to authenticate. The timeout is unfortunate, but necessary.
+479	&gt;
+480	&gt; (Follow-up) I think it&#x27;s probably better to wait for the 900 numeric than wait for a notice
+481	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-55-25-771Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-55-25-771Z" class="timestamp-link"><time datetime="2026-05-31T12:55:25.771Z" data-timestamp="2026-05-31T12:55:25.771Z">2026-05-31T12:55:25.771Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01UtFeW4aVnnWmWuY9qWbTJD">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">prompts.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/prompts.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">&gt; (Follow-up) I think it&#39;s probably better to wait for the 900 numeric than wait for a notice</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">&gt; (Follow-up) I think it&#39;s probably better to wait for the 900 numeric than wait for a notice
+
+## Move OnInterval handlers to a background timer task
+
+**Date**: 2026-05-31T12:30:00Z
+
+**Prompt**:
+
+&gt; I noticed that the OnInterval handlers are only triggered when an event arrives - is there any reason not to use a background task to service those handlers instead?
+&gt;
+&gt; (Follow-up) I think it should use OnLoadAsync instead - could run while the bot isn&#39;t yet connected</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-55-25-808Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-55-25-808Z" class="timestamp-link"><time datetime="2026-05-31T12:55:25.808Z" data-timestamp="2026-05-31T12:55:25.808Z">2026-05-31T12:55:25.808Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/prompts.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-55-31-556Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-55-31-556Z" class="timestamp-link"><time datetime="2026-05-31T12:55:31.556Z" data-timestamp="2026-05-31T12:55:31.556Z">2026-05-31T12:55:31.556Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01KpFBM74mSSZ1qjf7jhdM59">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add src/Marv.Core/Plugin/MarvPlugin.cs docs/prompts.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Move OnInterval handlers to a background timer task
+
+Previously interval handlers only fired piggy-backed on incoming events,
+meaning they would stall in quiet channels. Now MarvPlugin starts a
+dedicated background task in OnLoadAsync that sleeps until the next
+handler is due, independent of the event stream. The task is stopped
+cleanly in OnUnloadAsync.
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-56-00-991Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-56-00-991Z" class="timestamp-link"><time datetime="2026-05-31T12:56:00.991Z" data-timestamp="2026-05-31T12:56:00.991Z">2026-05-31T12:56:00.991Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">8cfa975</span> Move OnInterval handlers to a background timer task</div><pre>2 files changed, 92 insertions(+), 12 deletions(-)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-56-05-059Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-56-05-059Z" class="timestamp-link"><time datetime="2026-05-31T12:56:05.059Z" data-timestamp="2026-05-31T12:56:05.059Z">2026-05-31T12:56:05.059Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Done. The interval handlers now run on a dedicated background timer started in <code>OnLoadAsync</code> and stopped in <code>OnUnloadAsync</code>. The timer sleeps until the next handler is due, so intervals fire on schedule even when the bot is idle or not yet connected.</p></div></div></div>
+<div class="message user" id="msg-2026-05-31T12-56-16-894Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-05-31T12-56-16-894Z" class="timestamp-link"><time datetime="2026-05-31T12:56:16.894Z" data-timestamp="2026-05-31T12:56:16.894Z">2026-05-31T12:56:16.894Z</time></a></div><div class="message-content">
+<div class="user-content"><p>can you also add a unit test for the interval timer behavior</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-56-19-507Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-56-19-507Z" class="timestamp-link"><time datetime="2026-05-31T12:56:19.507Z" data-timestamp="2026-05-31T12:56:19.507Z">2026-05-31T12:56:19.507Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_017gewZ3GoLFgPXUvE98xGpU">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">ls /workspaces/marv/tests/Marv.Plugins.Tests/</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-56-19-535Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-56-19-535Z" class="timestamp-link"><time datetime="2026-05-31T12:56:19.535Z" data-timestamp="2026-05-31T12:56:19.535Z">2026-05-31T12:56:19.535Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>AuthConsumerPluginTests.cs
+AuthPluginTests.cs
+CannedResponsesPluginTests.cs
+GreetPluginTests.cs
+Marv.Plugins.Tests.csproj
+bin
+obj</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-56-22-445Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-56-22-445Z" class="timestamp-link"><time datetime="2026-05-31T12:56:22.445Z" data-timestamp="2026-05-31T12:56:22.445Z">2026-05-31T12:56:22.445Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01VLgDrTo2dTqQBeMsoaQxsP"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/tests/Marv.Plugins.Tests/GreetPluginTests.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-56-22-479Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-56-22-479Z" class="timestamp-link"><time datetime="2026-05-31T12:56:22.479Z" data-timestamp="2026-05-31T12:56:22.479Z">2026-05-31T12:56:22.479Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using Xunit;
+2	using NSubstitute;
+3	using Microsoft.Extensions.Options;
+4	using Marv.Core.Events;
+5	using Marv.Core.Platform;
+6	using Marv.Core.Plugin;
+7	using Marv.Core.Protocol;
+8	using Marv.Plugins.Greet;
+9	
+10	namespace Marv.Plugins.Tests;
+11	
+12	/// &lt;summary&gt;
+13	/// Tests for the &lt;see cref=&quot;GreetPlugin&quot;/&gt; reference plugin.
+14	/// &lt;/summary&gt;
+15	public class GreetPluginTests
+16	{
+17	    private static readonly IrcMessage DummyMessage = new(&quot;PRIVMSG&quot;, [&quot;#test&quot;, &quot;hello&quot;]);
+18	
+19	    private static (GreetPlugin Plugin, IBot Bot) CreatePlugin(GreetPluginConfig? config = null)
+20	    {
+21	        var bot = Substitute.For&lt;IBot&gt;();
+22	        var selfUser = Substitute.For&lt;IUser&gt;();
+23	        selfUser.Nick.Returns(&quot;Marv&quot;);
+24	        bot.Self.Returns(selfUser);
+25	
+26	        var activator = Substitute.For&lt;IPluginActivator&gt;();
+27	        var options = Options.Create(config ?? new GreetPluginConfig());
+28	
+29	        var plugin = new GreetPlugin(bot, activator, options);
+30	        return (plugin, bot);
+31	    }
+32	
+33	    [Fact]
+34	    public async Task HandleJoin_SendsGreeting()
+35	    {
+36	        var (plugin, bot) = CreatePlugin();
+37	        var channel = Substitute.For&lt;IChannel&gt;();
+38	        channel.Name.Returns(&quot;#test&quot;);
+39	        var user = Substitute.For&lt;IUser&gt;();
+40	        user.Nick.Returns(&quot;testuser&quot;);
+41	
+42	        var evt = new UserJoinedEvent
+43	        {
+44	            Channel = channel,
+45	            User = user,
+46	            Timestamp = DateTimeOffset.UtcNow,
+47	            RawMessage = DummyMessage
+48	        };
+49	
+50	        await plugin.HandleEventAsync(evt, CancellationToken.None);
+51	        await bot.Received(1).SendMessageAsync(&quot;#test&quot;, &quot;Welcome, testuser!&quot;, Arg.Any&lt;CancellationToken&gt;());
+52	    }
+53	
+54	    [Fact]
+55	    public async Task HandleJoin_DoesNotGreetSelf()
+56	    {
+57	        var (plugin, bot) = CreatePlugin();
+58	        var channel = Substitute.For&lt;IChannel&gt;();
+59	        channel.Name.Returns(&quot;#test&quot;);
+60	        var user = Substitute.For&lt;IUser&gt;();
+61	        user.Nick.Returns(&quot;Marv&quot;);
+62	
+63	        var evt = new UserJoinedEvent
+64	        {
+65	            Channel = channel,
+66	            User = user,
+67	            Timestamp = DateTimeOffset.UtcNow,
+68	            RawMessage = DummyMessage
+69	        };
+70	
+71	        await plugin.HandleEventAsync(evt, CancellationToken.None);
+72	        await bot.DidNotReceive().SendMessageAsync(Arg.Any&lt;string&gt;(), Arg.Any&lt;string&gt;(), Arg.Any&lt;CancellationToken&gt;());
+73	    }
+74	
+75	    [Fact]
+76	    public async Task HandleJoin_DisabledByConfig()
+77	    {
+78	        var config = new GreetPluginConfig { GreetOnJoin = false };
+79	        var (plugin, bot) = CreatePlugin(config);
+80	        var channel = Substitute.For&lt;IChannel&gt;();
+81	        channel.Name.Returns(&quot;#test&quot;);
+82	        var user = Substitute.For&lt;IUser&gt;();
+83	        user.Nick.Returns(&quot;testuser&quot;);
+84	
+85	        var evt = new UserJoinedEvent
+86	        {
+87	            Channel = channel,
+88	            User = user,
+89	            Timestamp = DateTimeOffset.UtcNow,
+90	            RawMessage = DummyMessage
+91	        };
+92	
+93	        await plugin.HandleEventAsync(evt, CancellationToken.None);
+94	        await bot.DidNotReceive().SendMessageAsync(Arg.Any&lt;string&gt;(), Arg.Any&lt;string&gt;(), Arg.Any&lt;CancellationToken&gt;());
+95	    }
+96	
+97	    [Fact]
+98	    public async Task HandleJoin_CustomMessage()
+99	    {
+100	        var config = new GreetPluginConfig { GreetMessage = &quot;Hi {nick}, welcome aboard!&quot; };
+101	        var (plugin, bot) = CreatePlugin(config);
+102	        var channel = Substitute.For&lt;IChannel&gt;();
+103	        channel.Name.Returns(&quot;#test&quot;);
+104	        var user = Substitute.For&lt;IUser&gt;();
+105	        user.Nick.Returns(&quot;alice&quot;);
+106	
+107	        var evt = new UserJoinedEvent
+108	        {
+109	            Channel = channel,
+110	            User = user,
+111	            Timestamp = DateTimeOffset.UtcNow,
+112	            RawMessage = DummyMessage
+113	        };
+114	
+115	        await plugin.HandleEventAsync(evt, CancellationToken.None);
+116	        await bot.Received(1).SendMessageAsync(&quot;#test&quot;, &quot;Hi alice, welcome aboard!&quot;, Arg.Any&lt;CancellationToken&gt;());
+117	    }
+118	
+119	    [Fact]
+120	    public async Task HandleHello_RepliesWithGreeting()
+121	    {
+122	        var (plugin, bot) = CreatePlugin();
+123	        var channel = Substitute.For&lt;IChannel&gt;();
+124	        channel.Name.Returns(&quot;#test&quot;);
+125	        var user = Substitute.For&lt;IUser&gt;();
+126	        user.Nick.Returns(&quot;bob&quot;);
+127	
+128	        var evt = new MessageEvent
+129	        {
+130	            Channel = channel,
+131	            Sender = user,
+132	            Text = &quot;!hello&quot;,
+133	            Timestamp = DateTimeOffset.UtcNow,
+134	            RawMessage = DummyMessage
+135	        };
+136	
+137	        await plugin.HandleEventAsync(evt, CancellationToken.None);
+138	        await bot.Received(1).SendMessageAsync(&quot;#test&quot;, &quot;Hello, bob!&quot;, Arg.Any&lt;CancellationToken&gt;());
+139	    }
+140	}
+141	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-56-28-268Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-56-28-268Z" class="timestamp-link"><time datetime="2026-05-31T12:56:28.268Z" data-timestamp="2026-05-31T12:56:28.268Z">2026-05-31T12:56:28.268Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>The test belongs in <code>Marv.Core.Tests</code> since it tests <code>MarvPlugin</code> behavior. I need to create a minimal test plugin to exercise the interval timer. Let me check the test project's csproj for available packages:</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-56-29-037Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-56-29-037Z" class="timestamp-link"><time datetime="2026-05-31T12:56:29.037Z" data-timestamp="2026-05-31T12:56:29.037Z">2026-05-31T12:56:29.037Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01BJUwnMti6sRUbttFcgWwXK"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/tests/Marv.Core.Tests/Marv.Core.Tests.csproj&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-56-29-068Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-56-29-068Z" class="timestamp-link"><time datetime="2026-05-31T12:56:29.068Z" data-timestamp="2026-05-31T12:56:29.068Z">2026-05-31T12:56:29.068Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	&lt;Project Sdk=&quot;Microsoft.NET.Sdk&quot;&gt;
+2	
+3	  &lt;PropertyGroup&gt;
+4	    &lt;TargetFramework&gt;net10.0&lt;/TargetFramework&gt;
+5	    &lt;Nullable&gt;enable&lt;/Nullable&gt;
+6	    &lt;ImplicitUsings&gt;enable&lt;/ImplicitUsings&gt;
+7	    &lt;IsPackable&gt;false&lt;/IsPackable&gt;
+8	    &lt;IsTestProject&gt;true&lt;/IsTestProject&gt;
+9	    &lt;RootNamespace&gt;Marv.Core.Tests&lt;/RootNamespace&gt;
+10	  &lt;/PropertyGroup&gt;
+11	
+12	  &lt;ItemGroup&gt;
+13	    &lt;PackageReference Include=&quot;Microsoft.NET.Test.Sdk&quot; Version=&quot;17.14.0&quot; /&gt;
+14	    &lt;PackageReference Include=&quot;xunit&quot; Version=&quot;2.9.3&quot; /&gt;
+15	    &lt;PackageReference Include=&quot;xunit.runner.visualstudio&quot; Version=&quot;3.1.0&quot; /&gt;
+16	    &lt;PackageReference Include=&quot;NSubstitute&quot; Version=&quot;5.3.0&quot; /&gt;
+17	  &lt;/ItemGroup&gt;
+18	
+19	  &lt;ItemGroup&gt;
+20	    &lt;ProjectReference Include=&quot;..\..\src\Marv.Core\Marv.Core.csproj&quot; /&gt;
+21	  &lt;/ItemGroup&gt;
+22	
+23	&lt;/Project&gt;
+24	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-56-36-242Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-56-36-242Z" class="timestamp-link"><time datetime="2026-05-31T12:56:36.242Z" data-timestamp="2026-05-31T12:56:36.242Z">2026-05-31T12:56:36.242Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Good, NSubstitute is available. Let me read the full MarvPlugin to understand what's needed for a minimal test subclass:</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-56-36-911Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-56-36-911Z" class="timestamp-link"><time datetime="2026-05-31T12:56:36.911Z" data-timestamp="2026-05-31T12:56:36.911Z">2026-05-31T12:56:36.911Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01YG2Uqx1SeqD4GnjQpVxvhT"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs&#34;,
+  &#34;offset&#34;: 27,
+  &#34;limit&#34;: 15
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-56-36-952Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-56-36-952Z" class="timestamp-link"><time datetime="2026-05-31T12:56:36.952Z" data-timestamp="2026-05-31T12:56:36.952Z">2026-05-31T12:56:36.952Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>27	    private Task? _intervalTask;
+28	
+29	    /// &lt;summary&gt;
+30	    /// Derived plugins accept &lt;see cref=&quot;IBot&quot;/&gt; and &lt;see cref=&quot;IPluginActivator&quot;/&gt;,
+31	    /// and forward both via &lt;c&gt;: base(bot, activator)&lt;/c&gt;.
+32	    /// &lt;/summary&gt;
+33	    protected MarvPlugin(IBot bot, IPluginActivator activator)
+34	    {
+35	        Bot = bot;
+36	        DiscoverHandlers(this, GetType());
+37	        DiscoverHandlerGroups(activator);
+38	    }
+39	
+40	    /// &lt;summary&gt;
+41	    /// Discovers handler group classes for this plugin in the assembly and creates</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-56-52-321Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-56-52-321Z" class="timestamp-link"><time datetime="2026-05-31T12:56:52.321Z" data-timestamp="2026-05-31T12:56:52.321Z">2026-05-31T12:56:52.321Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01DgwiFvN3E7XBgwitJiqgEH">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">IntervalTimerTests.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/tests/Marv.Core.Tests/Plugin/IntervalTimerTests.cs</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content">using Marv.Core.Platform;
+using Marv.Core.Plugin;
+using NSubstitute;
+using Xunit;
+
+namespace Marv.Core.Tests.Plugin;
+
+/// &lt;summary&gt;
+/// Tests that [OnInterval] handlers run on a background timer,
+/// independent of the event stream.
+/// &lt;/summary&gt;
+public class IntervalTimerTests
+{
+    /// &lt;summary&gt;
+    /// Minimal plugin with a single [OnInterval] handler that records invocations.
+    /// &lt;/summary&gt;
+    private sealed class IntervalTestPlugin : MarvPlugin
+    {
+        public int InvocationCount;
+
+        public IntervalTestPlugin(IBot bot, IPluginActivator activator) : base(bot, activator) { }
+
+        [OnInterval(Seconds = 0.1)]
+        public void Tick()
+        {
+            Interlocked.Increment(ref InvocationCount);
+        }
+    }
+
+    private static IntervalTestPlugin CreatePlugin()
+    {
+        var bot = Substitute.For&lt;IBot&gt;();
+        var activator = Substitute.For&lt;IPluginActivator&gt;();
+        return new IntervalTestPlugin(bot, activator);
+    }
+
+    [Fact]
+    public async Task IntervalHandler_FiresWithoutEvents()
+    {
+        var plugin = CreatePlugin();
+
+        await plugin.OnLoadAsync(CancellationToken.None);
+
+        // Wait enough time for several ticks (100ms interval)
+        await Task.Delay(350);
+
+        await plugin.OnUnloadAsync();
+
+        // Should have fired at least twice in 350ms with a 100ms interval
+        Assert.True(plugin.InvocationCount &gt;= 2,
+            $&#34;Expected at least 2 invocations but got {plugin.InvocationCount}&#34;);
+    }
+
+    [Fact]
+    public async Task IntervalHandler_StopsOnUnload()
+    {
+        var plugin = CreatePlugin();
+
+        await plugin.OnLoadAsync(CancellationToken.None);
+        await Task.Delay(250);
+        await plugin.OnUnloadAsync();
+
+        var countAfterStop = plugin.InvocationCount;
+        Assert.True(countAfterStop &gt;= 1,
+            $&#34;Expected at least 1 invocation but got {countAfterStop}&#34;);
+
+        // Wait and verify no more ticks
+        await Task.Delay(250);
+        Assert.Equal(countAfterStop, plugin.InvocationCount);
+    }
+
+    [Fact]
+    public async Task IntervalHandler_ResetsOnReload()
+    {
+        var plugin = CreatePlugin();
+
+        await plugin.OnLoadAsync(CancellationToken.None);
+        await Task.Delay(250);
+        await plugin.OnUnloadAsync();
+
+        var firstRunCount = plugin.InvocationCount;
+        Assert.True(firstRunCount &gt;= 1);
+
+        // Reload — timers should start again
+        plugin.InvocationCount = 0;
+        await plugin.OnLoadAsync(CancellationToken.None);
+        await Task.Delay(250);
+        await plugin.OnUnloadAsync();
+
+        Assert.True(plugin.InvocationCount &gt;= 1,
+            $&#34;Expected ticks after reload but got {plugin.InvocationCount}&#34;);
+    }
+
+    /// &lt;summary&gt;
+    /// Plugin with no interval handlers — verifies no background task is started.
+    /// &lt;/summary&gt;
+    private sealed class NoIntervalPlugin : MarvPlugin
+    {
+        public NoIntervalPlugin(IBot bot, IPluginActivator activator) : base(bot, activator) { }
+    }
+
+    [Fact]
+    public async Task NoIntervalHandlers_DoesNotStartTimer()
+    {
+        var bot = Substitute.For&lt;IBot&gt;();
+        var activator = Substitute.For&lt;IPluginActivator&gt;();
+        var plugin = new NoIntervalPlugin(bot, activator);
+
+        // Should not throw or start any background task
+        await plugin.OnLoadAsync(CancellationToken.None);
+        await plugin.OnUnloadAsync();
+    }
+}
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-56-52-378Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-56-52-378Z" class="timestamp-link"><time datetime="2026-05-31T12:56:52.378Z" data-timestamp="2026-05-31T12:56:52.378Z">2026-05-31T12:56:52.378Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /workspaces/marv/tests/Marv.Core.Tests/Plugin/IntervalTimerTests.cs (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-56-56-762Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-56-56-762Z" class="timestamp-link"><time datetime="2026-05-31T12:56:56.762Z" data-timestamp="2026-05-31T12:56:56.762Z">2026-05-31T12:56:56.762Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01WLkYaq3Yo5PgE6GyWEb5Cb">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">dotnet build /workspaces/marv/tests/Marv.Core.Tests/Marv.Core.Tests.csproj -c Release 2&gt;&amp;1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-56-58-210Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-56-58-210Z" class="timestamp-link"><time datetime="2026-05-31T12:56:58.210Z" data-timestamp="2026-05-31T12:56:58.210Z">2026-05-31T12:56:58.210Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Marv.Core -&gt; /workspaces/marv/src/Marv.Core/bin/Release/net10.0/Marv.Core.dll
+  Marv.Core.Tests -&gt; /workspaces/marv/tests/Marv.Core.Tests/bin/Release/net10.0/Marv.Core.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.25</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-57-04-928Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-57-04-928Z" class="timestamp-link"><time datetime="2026-05-31T12:57:04.928Z" data-timestamp="2026-05-31T12:57:04.928Z">2026-05-31T12:57:04.928Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01VmrSeUkeTswUoieCkGd7u4">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">dotnet test /workspaces/marv/tests/Marv.Core.Tests/Marv.Core.Tests.csproj -c Release --no-build --filter &#34;Category!=Integration&#34; -v n 2&gt;&amp;1</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-57-07-323Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-57-07-323Z" class="timestamp-link"><time datetime="2026-05-31T12:57:07.323Z" data-timestamp="2026-05-31T12:57:07.323Z">2026-05-31T12:57:07.323Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Build started 5/31/2026 12:57:05 PM.
+Test run for /workspaces/marv/tests/Marv.Core.Tests/bin/Release/net10.0/Marv.Core.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.0+00ab0a9ec4 (64-bit .NET 10.0.8)
+[xUnit.net 00:00:00.05]   Discovering: Marv.Core.Tests
+[xUnit.net 00:00:00.09]   Discovered:  Marv.Core.Tests
+[xUnit.net 00:00:00.11]   Starting:    Marv.Core.Tests
+  Passed Marv.Core.Tests.Protocol.IrcSerializerTests.Serialize_SourceAndNoParams [6 ms]
+  Passed Marv.Core.Tests.Irc.IrcChannelTests.AddPrefix_TracksOpAndVoice [7 ms]
+  Passed Marv.Core.Tests.Plugin.PluginDependencySorterTests.Sort_DuplicateServiceProvider_Throws [8 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_DuplicateTagsWithVendor [7 ms]
+  Passed Marv.Core.Tests.Irc.IrcChannelTests.Topic_CanBeSetAndRead [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcSerializerTests.Serialize_SimpleVerbAndParams [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcSerializerTests.Serialize_SourceAndEmptyTrailing [&lt; 1 ms]
+  Passed Marv.Core.Tests.Plugin.PluginDependencySorterTests.Sort_MissingRequired_Throws [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcSerializerTests.Serialize_TrailingWithColon [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcSerializerTests.Serialize_EmptyTrailing [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_TagInvalidEscape [&lt; 1 ms]
+  Passed Marv.Core.Tests.Irc.ServerInfoTests.SetToken_CaseMapping_StrictRfc1459 [10 ms]
+  Passed Marv.Core.Tests.Protocol.IrcSerializerTests.Serialize_TagsWithEscaping [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_ComplexTagEscaping [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcSerializerTests.Serialize_CommandOnly [&lt; 1 ms]
+  Passed Marv.Core.Tests.Platform.PrefixMappingTests.Parse_StandardPrefix [10 ms]
+  Passed Marv.Core.Tests.Irc.IrcChannelTests.SetMode_TracksChannelModes [1 ms]
+  Passed Marv.Core.Tests.Platform.PrefixMappingTests.Parse_ExtendedPrefix [&lt; 1 ms]
+  Passed Marv.Core.Tests.Platform.PrefixMappingTests.Parse_Empty_ReturnsDefault [&lt; 1 ms]
+  Passed Marv.Core.Tests.Irc.IrcChannelTests.RemoveMember_RemovesUser [&lt; 1 ms]
+  Passed Marv.Core.Tests.Platform.PrefixMappingTests.GetPrefix_UnknownMode_ReturnsNull [&lt; 1 ms]
+  Passed Marv.Core.Tests.Irc.IrcChannelTests.HasMember_CaseInsensitive [&lt; 1 ms]
+  Passed Marv.Core.Tests.Platform.PrefixMappingTests.IsPrefix_ReturnsCorrectly [&lt; 1 ms]
+  Passed Marv.Core.Tests.Irc.IrcChannelTests.RemovePrefix_RemovesPrefix [&lt; 1 ms]
+  Passed Marv.Core.Tests.Plugin.PluginDependencySorterTests.Sort_NoDependencies_ReturnsAll [2 ms]
+  Passed Marv.Core.Tests.Irc.ServerInfoTests.SetToken_NickLen [2 ms]
+  Passed Marv.Core.Tests.Irc.ServerInfoTests.SetToken_ChanTypes [&lt; 1 ms]
+  Passed Marv.Core.Tests.Irc.ServerInfoTests.SetToken_Network [&lt; 1 ms]
+  Passed Marv.Core.Tests.Plugin.PluginDependencySorterTests.Sort_Cycle_Throws [&lt; 1 ms]
+  Passed Marv.Core.Tests.Irc.IrcChannelTests.UnsetMode_RemovesMode [&lt; 1 ms]
+  Passed Marv.Core.Tests.Irc.IrcChannelTests.RenameMember_PreservesState [&lt; 1 ms]
+  Passed Marv.Core.Tests.Irc.ServerInfoTests.Reset_ClearsAllState [&lt; 1 ms]
+  Passed Marv.Core.Tests.Irc.ServerInfoTests.SetToken_CaseMapping [&lt; 1 ms]
+  Passed Marv.Core.Tests.Irc.ServerInfoTests.SetToken_Prefix [&lt; 1 ms]
+  Passed Marv.Core.Tests.Irc.ServerInfoTests.Supports_ReturnsTrueForSetTokens [&lt; 1 ms]
+  Passed Marv.Core.Tests.Irc.ServerInfoTests.SetToken_ChanModes [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.CaseMappingTests.Fold_Rfc1459Mapping(input: &quot;Nick\\Test&quot;, expected: &quot;nick|test&quot;, mapping: Rfc1459) [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.CaseMappingTests.Fold_Rfc1459Mapping(input: &quot;Nick^Test&quot;, expected: &quot;nick^test&quot;, mapping: Rfc1459) [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.CaseMappingTests.Fold_Rfc1459Mapping(input: &quot;[Nick]&quot;, expected: &quot;{nick}&quot;, mapping: Rfc1459) [&lt; 1 ms]
+  Passed Marv.Core.Tests.Plugin.PluginDependencySorterTests.Sort_MissingOptional_DoesNotThrow [1 ms]
+  Passed Marv.Core.Tests.Plugin.PluginDependencySorterTests.Sort_ServiceDependency_OrdersProviderFirst [&lt; 1 ms]
+  Passed Marv.Core.Tests.Plugin.PluginDependencySorterTests.Sort_ExplicitDependency_OrdersCorrectly [&lt; 1 ms]
+  Passed Marv.Core.Tests.Irc.IrcChannelTests.AddMember_TracksUser [2 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.Monospace_WrapsWithToggle [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.CaseMappingTests.AreEqual_VariousMappings(a: &quot;abc&quot;, b: &quot;abd&quot;, mapping: Ascii, expected: False) [1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.Color_ForegroundOnly_WrapsWithColorReset [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.CaseMappingTests.AreEqual_VariousMappings(a: &quot;Nick&quot;, b: &quot;nick&quot;, mapping: Rfc1459, expected: True) [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.CaseMappingTests.AreEqual_VariousMappings(a: &quot;[test]&quot;, b: &quot;{test}&quot;, mapping: Rfc1459, expected: True) [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.CaseMappingTests.AreEqual_VariousMappings(a: &quot;[test]&quot;, b: &quot;{test}&quot;, mapping: Ascii, expected: False) [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.CaseMappingTests.AreEqual_VariousMappings(a: &quot;Nick&quot;, b: &quot;NICK&quot;, mapping: Ascii, expected: True) [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.CaseMappingTests.Fold_StrictRfc1459Mapping(input: &quot;[Nick]&quot;, expected: &quot;{nick}&quot;, mapping: StrictRfc1459) [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.CaseMappingTests.Fold_StrictRfc1459Mapping(input: &quot;Nick^Test&quot;, expected: &quot;nick~test&quot;, mapping: StrictRfc1459) [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.CaseMappingTests.Fold_AsciiMapping(input: &quot;NICK&quot;, expected: &quot;nick&quot;, mapping: Ascii) [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.CaseMappingTests.Fold_AsciiMapping(input: &quot;#Channel&quot;, expected: &quot;#channel&quot;, mapping: Ascii) [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.CaseMappingTests.Fold_AsciiMapping(input: &quot;Nick&quot;, expected: &quot;nick&quot;, mapping: Ascii) [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.CaseMappingTests.GetComparer_WorksInDictionary [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.CaseMappingTests.AreEqual_DifferentLengths_ReturnsFalse [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcColorTests.ToString_TwoDigitCode_NoExtraPadding [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcColorTests.Constructor_Over99_Throws [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_ModeWithTrailingSpace [7 ms]
+  Passed Marv.Core.Tests.Irc.CapabilityManagerTests.RemoveCapability_RemovesBothAvailableAndNegotiated [2 ms]
+  Passed Marv.Core.Tests.Protocol.IrcSerializerTests.Serialize_RoundTrip [7 ms]
+  Passed Marv.Core.Tests.Formatting.IrcColorTests.Constructor_NegativeCode_Throws [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_SourceAndEmptyTrailing [&lt; 1 ms]
+  Passed Marv.Core.Tests.Irc.CapabilityManagerTests.SetNegotiated_MakesCapNegotiated [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_TrailingWithColon [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcColorTests.On_BothSingleDigit_PadsBoth [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_CommandUppercased [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcSerializerTests.Serialize_TrailingWithSpaces [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_EmptyString_ReturnsNull [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_SourceJoinChannel [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_TrailingParameter [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcColorTests.StringInterpolation_EmitsColorCode [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcColorTests.Constructor_ExtendedColor_Accepted [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_SourceNickAndHost [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcColorTests.ToString_Default99_FormatsCorrectly [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcColorTests.ToString_SingleDigitCode_PadsToTwoDigits [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_TagValueEscaping [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_SourceNickOnly [&lt; 1 ms]
+  Passed Marv.Core.Tests.Irc.CapabilityManagerTests.AddNewCapability_FiresChangedEvent [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.Strip_RemovesBold [2 ms]
+  Passed Marv.Core.Tests.Irc.CapabilityManagerTests.RemoveCapability_FiresChangedEvent [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.Strikethrough_WrapsWithToggle [&lt; 1 ms]
+  Passed Marv.Core.Tests.Irc.CapabilityManagerTests.IsAvailable_CaseInsensitive [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_ModeMultipleSpaces [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.Strip_RemovesAllFormattingFromComplexMessage [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_Tags [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.StatefulPattern_ProducesExpectedOutput [&lt; 1 ms]
+  Passed Marv.Core.Tests.Irc.CapabilityManagerTests.SetAvailable_MakesCapAvailable [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.Strip_RemovesColorWithDigits [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatExtensionsTests.Color_WithBackground_Extension_MatchesStaticMethod [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.Italic_WrapsWithToggle [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_TagsWithEmptyValues [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.Bold_WrapsWithToggle [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_SourceServerName [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.Strip_RemovesTwoDigitColor [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.Strip_RemovesColorWithFgAndBg [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatExtensionsTests.Chaining_ProducesNestedFormatting [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_ComplexTagsAndSource [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatExtensionsTests.Bold_Extension_MatchesStaticMethod [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_DuplicateTagsLastWins [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatExtensionsTests.Color_Extension_MatchesStaticMethod [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.Underline_WrapsWithToggle [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_SourceWithTab [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.Strip_PlainText_ReturnsUnchanged [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_ModeMultipleParams [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.Strip_EmptyString_ReturnsEmpty [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_EmptyTrailingParameter [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.Strip_RemovesReset [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.Strip_Null_ReturnsNull [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_SourceAndParams [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_ModeTrailing [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.Strip_RemovesHexColor [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_TagTrailingBackslash [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.Color_ForegroundAndBackground_WrapsWithColorReset [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.Strip_RemovesHexColorWithBackground [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcFormatTests.Reverse_WrapsWithToggle [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcColorTests.Equality_SameCode_AreEqual [2 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_SourceAwayTrailingSpace [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcColorTests.On_EmitsForegroundCommaBackground [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_PrivmsgWithTrailingContainingColon [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_TagBackslashNotEscaping [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_TrailingOnlySpaces [&lt; 1 ms]
+  Passed Marv.Core.Tests.Irc.CapabilityManagerTests.Reset_ClearsAllState [1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_SourceAwayNoParams [&lt; 1 ms]
+  Passed Marv.Core.Tests.Irc.CapabilityManagerTests.AvailableCapabilities_IncludesValues [&lt; 1 ms]
+  Passed Marv.Core.Tests.Formatting.IrcColorTests.Equality_DifferentCode_AreNotEqual [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_SimpleVerbAndParams [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_FullSourcePrefix [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_MozillaErroneousNickname [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_CommandOnly [&lt; 1 ms]
+[xUnit.net 00:00:01.57]   Finished:    Marv.Core.Tests
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_SourceFull [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_SourceJoinChannelTrailing [&lt; 1 ms]
+  Passed Marv.Core.Tests.Protocol.IrcParserTests.Parse_SourceAndTrailingWithSpaces [&lt; 1 ms]
+  Passed Marv.Core.Tests.Plugin.IntervalTimerTests.IntervalHandler_StopsOnUnload [552 ms]
+  Passed Marv.Core.Tests.Plugin.IntervalTimerTests.NoIntervalHandlers_DoesNotStartTimer [1 ms]
+  Passed Marv.Core.Tests.Plugin.IntervalTimerTests.IntervalHandler_FiresWithoutEvents [353 ms]
+  Passed Marv.Core.Tests.Plugin.IntervalTimerTests.IntervalHandler_ResetsOnReload [503 ms]
+
+Test Run Successful.
+Total tests: 138
+     Passed: 138
+ Total time: 1.8592 Seconds
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.21</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-57-12-720Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-57-12-720Z" class="timestamp-link"><time datetime="2026-05-31T12:57:12.720Z" data-timestamp="2026-05-31T12:57:12.720Z">2026-05-31T12:57:12.720Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>All 138 unit tests pass, including the 4 new interval timer tests. Now log the prompt and commit.</p></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-57-16-567Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-57-16-567Z" class="timestamp-link"><time datetime="2026-05-31T12:57:16.567Z" data-timestamp="2026-05-31T12:57:16.567Z">2026-05-31T12:57:16.567Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01EhjrP94p1sBdEouTmYZ9Q7">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">prompts.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/prompts.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">&gt; (Follow-up) I think it should use OnLoadAsync instead - could run while the bot isn&#39;t yet connected</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">&gt; (Follow-up) I think it should use OnLoadAsync instead - could run while the bot isn&#39;t yet connected
+
+## Add unit tests for interval timer behavior
+
+**Date**: 2026-05-31T12:55:00Z
+
+**Prompt**:
+
+&gt; can you also add a unit test for the interval timer behavior</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-57-16-617Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-57-16-617Z" class="timestamp-link"><time datetime="2026-05-31T12:57:16.617Z" data-timestamp="2026-05-31T12:57:16.617Z">2026-05-31T12:57:16.617Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/prompts.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-57-22-748Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-57-22-748Z" class="timestamp-link"><time datetime="2026-05-31T12:57:22.748Z" data-timestamp="2026-05-31T12:57:22.748Z">2026-05-31T12:57:22.748Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01887gR3jyNH3LB9R6ew6LnS">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add tests/Marv.Core.Tests/Plugin/IntervalTimerTests.cs docs/prompts.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Add unit tests for background interval timer behavior
+
+Tests cover: handlers fire without events, timers stop on unload,
+timers restart on reload, and no timer is started when no handlers exist.
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-05-31T12-57-52-099Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-05-31T12-57-52-099Z" class="timestamp-link"><time datetime="2026-05-31T12:57:52.099Z" data-timestamp="2026-05-31T12:57:52.099Z">2026-05-31T12:57:52.099Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">b4439ba</span> Add unit tests for background interval timer behavior</div><pre>2 files changed, 121 insertions(+)
+ create mode 100644 tests/Marv.Core.Tests/Plugin/IntervalTimerTests.cs</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-05-31T12-58-00-431Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-05-31T12-58-00-431Z" class="timestamp-link"><time datetime="2026-05-31T12:58:00.431Z" data-timestamp="2026-05-31T12:58:00.431Z">2026-05-31T12:58:00.431Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Added 4 unit tests in <code>tests/Marv.Core.Tests/Plugin/IntervalTimerTests.cs</code>:</p>
+<ul>
+<li><strong>IntervalHandler_FiresWithoutEvents</strong> — verifies the handler fires at least twice in 350ms with a 100ms interval, with no events flowing</li>
+<li><strong>IntervalHandler_StopsOnUnload</strong> — confirms no more ticks after <code>OnUnloadAsync</code></li>
+<li><strong>IntervalHandler_ResetsOnReload</strong> — tests that timers restart fresh after unload/reload</li>
+<li><strong>NoIntervalHandlers_DoesNotStartTimer</strong> — ensures plugins without <code>[OnInterval]</code> don't spin up a background task</li>
+</ul></div></div></div>
+<div class="message user" id="msg-2026-05-31T13-41-51-341Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-05-31T13-41-51-341Z" class="timestamp-link"><time datetime="2026-05-31T13:41:51.341Z" data-timestamp="2026-05-31T13:41:51.341Z">2026-05-31T13:41:51.341Z</time></a></div><div class="message-content">
+<div class="user-content"><p>I'd like to make the rate limiter configurable - it should be possible to change the rate or to completely disable it.
+The timeout for Nickserv authentication should also be configurable.</p></div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-002.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<span class="current">3</span>
+<span class="disabled">Next &rarr;</span>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

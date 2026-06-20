@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 5</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 5/6</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-004.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<span class="current">5</span>
+<a href="page-006.html">6</a>
+<a href="page-006.html">Next &rarr;</a>
+</div>
+
+        
+<div class="message user" id="msg-2026-06-06T00-52-36-365Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-06T00-52-36-365Z" class="timestamp-link"><time datetime="2026-06-06T00:52:36.365Z" data-timestamp="2026-06-06T00:52:36.365Z">2026-06-06T00:52:36.365Z</time></a></div><div class="message-content">
+<div class="user-content"><p><local-command-stdout>Cancelled</local-command-stdout></p></div></div></div>
+<div class="message user" id="msg-2026-06-06T00-54-31-275Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-06T00-54-31-275Z" class="timestamp-link"><time datetime="2026-06-06T00:54:31.275Z" data-timestamp="2026-06-06T00:54:31.275Z">2026-06-06T00:54:31.275Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Before we implement CS-008, it should be updated with all the changes made since it was originally specced out.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-54-36-089Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-54-36-089Z" class="timestamp-link"><time datetime="2026-06-06T00:54:36.089Z" data-timestamp="2026-06-06T00:54:36.089Z">2026-06-06T00:54:36.089Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-54-36-488Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-54-36-488Z" class="timestamp-link"><time datetime="2026-06-06T00:54:36.488Z" data-timestamp="2026-06-06T00:54:36.488Z">2026-06-06T00:54:36.488Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01KqU9DhfwBG1y2dXr3omvm7"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/008-example-plugin.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-54-36-548Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-54-36-548Z" class="timestamp-link"><time datetime="2026-06-06T00:54:36.548Z" data-timestamp="2026-06-06T00:54:36.548Z">2026-06-06T00:54:36.548Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# CS-008: Non-Trivial Example Plugin
+2	
+3	**Source:** `downstream_suggestions/ai_enablers.md` §3
+4	**Scope:** Example plugins
+5	**Complexity:** Medium
+6	**Depends on:** CS-003 (handler filters), CS-005 (filter pipeline)
+7	**Breaking changes:** None (new plugin)
+8	
+9	---
+10	
+11	## Problem
+12	
+13	The bundled example plugins (Greet, CannedResponses) demonstrate basics but
+14	don&#x27;t cover patterns that real plugins need. Of 19 documented API patterns,
+15	the examples only cover 7. Plugin authors encountering uncovered patterns
+16	must read source code, which is expensive and error-prone.
+17	
+18	### Coverage gaps
+19	
+20	| Pattern | Covered? |
+21	|---|---|
+22	| `[OnEvent]` with part/kick/quit | No |
+23	| `[OnRawMessage]` | No |
+24	| `[OnInterval]` | No |
+25	| `[DependsOn]` | No |
+26	| Channel-specific logic | No |
+27	| Direct message handling (`ctx.IsDirect`) | No |
+28	| `Bot.SendRawAsync` with `IrcMessage` | No |
+29	| `Bot.SendNoticeAsync` | No |
+30	| `Bot.SendAndAwaitAsync` | No |
+31	| Multiple `[OnCommand]` on one method | No |
+32	| Handler dispatch filters (CS-003) | No (doesn&#x27;t exist yet) |
+33	| `IFilteringAttribute` usage (CS-005) | No (doesn&#x27;t exist yet) |
+34	| Testing with NSubstitute / Marv.Testing | Not in examples |
+35	
+36	## Changes
+37	
+38	### 1. Add `Marv.Plugins.Moderation` example plugin
+39	
+40	A moderation-themed plugin that demonstrates the gaps. Structure:
+41	
+42	**ModerationPlugin.cs** — main plugin class:
+43	- `[OnCommand(&quot;kick&quot;, ChannelOnly = true)]` — kick a user (uses
+44	  `Bot.SendRawAsync` with KICK command)
+45	- `[OnCommand(&quot;ban&quot;, &quot;b&quot;, ChannelOnly = true)]` — multiple aliases on one
+46	  method
+47	- `[OnCommand(&quot;mute&quot;, ChannelOnly = true)]` — set +q mode via
+48	  `Bot.SendRawAsync`
+49	- `[OnEvent]` for `UserJoinedEvent` — welcome message via
+50	  `Bot.SendNoticeAsync`
+51	- `[OnEvent]` for `UserKickedEvent` — audit log
+52	- `[OnInterval(Minutes = 5)]` — periodic cleanup of expired bans
+53	- `[DependsOn(typeof(AuthPlugin))]` — depends on auth plugin
+54	- Uses handler dispatch filters from CS-003 (`ChannelOnly = true`)
+55	- Uses `IFilteringAttribute` from CS-005 for authorization (if implemented)
+56	  or inline auth checks as fallback
+57	
+58	**ModerationAdminCommands.cs** — handler group:
+59	- `[HandlerGroup(typeof(ModerationPlugin))]`
+60	- `[OnCommand(&quot;modstats&quot;, DirectOnly = true)]` — DM-only stats command
+61	- Uses `Bot.SendAndAwaitAsync` to query WHO information
+62	
+63	**ModerationConfig.cs** — typed configuration:
+64	- `[PluginConfig(Section = &quot;Moderation&quot;)]`
+65	- `AllowedChannels` — list of channels the plugin operates in
+66	- `BanDurationMinutes` — default ban duration
+67	- `AuditChannel` — channel for audit messages
+68	
+69	**ModerationPluginTests.cs** — test file:
+70	- Demonstrates NSubstitute test pattern (or Marv.Testing builders if
+71	  CS-006 is available)
+72	- Tests for command handling, event handling, channel filtering
+73	- Tests for authorization (filter attribute or inline check)
+74	
+75	### 2. Update example project structure
+76	
+77	Ensure the moderation plugin is:
+78	- Listed in the solution file (`Marv.slnx`)
+79	- Included in the Makefile&#x27;s build/copy targets
+80	- Referenced in `PLUGIN_API.md` (CS-007) as the go-to example
+81	
+82	## Design notes
+83	
+84	- The plugin should be **realistic but self-contained** — no external
+85	  dependencies (no HTTP, no database). It demonstrates API patterns, not
+86	  production moderation logic.
+87	- Keep the total size under ~250 lines for the plugin + ~100 lines for
+88	  tests. Large enough to cover the gaps, small enough to read in one pass.
+89	- Inline comments should explain the &quot;why&quot; of pattern choices, since the
+90	  example serves as documentation.
+91	
+92	## Impact
+93	
+94	- **Pattern coverage:** Raises coverage from 7/19 to ~17/19. The remaining
+95	  gaps (service provision/consumption with DB/HTTP) are already partially
+96	  covered by Auth/AuthConsumer.
+97	- **AI context:** An LLM reading this one plugin + Greet covers nearly all
+98	  patterns needed for real-world plugin authoring.
+99	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-54-40-817Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-54-40-817Z" class="timestamp-link"><time datetime="2026-06-06T00:54:40.817Z" data-timestamp="2026-06-06T00:54:40.817Z">2026-06-06T00:54:40.817Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Let me check what's changed since this was written — specifically CS-005, CS-006, CS-007, CS-009, CS-010, and the current state of the example plugins and Makefile.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-54-42-496Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-54-42-496Z" class="timestamp-link"><time datetime="2026-06-06T00:54:42.496Z" data-timestamp="2026-06-06T00:54:42.496Z">2026-06-06T00:54:42.496Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01Dmg49tdmxGwnVGjK9j76jn">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check Makefile and solution for plugin references</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -n &#34;Moderation\|plugins/&#34; /workspaces/marv/Makefile 2&gt;/dev/null | head -20; echo &#34;---&#34;; grep -n &#34;Moderation\|Plugins&#34; /workspaces/marv/Marv.slnx 2&gt;/dev/null | head -20</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-54-42-550Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-54-42-550Z" class="timestamp-link"><time datetime="2026-06-06T00:54:42.550Z" data-timestamp="2026-06-06T00:54:42.550Z">2026-06-06T00:54:42.550Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>33:	@for plugin in src/plugins/*/; do \
+---
+8:    &lt;Project Path=&quot;src/plugins/Marv.Plugins.Auth/Marv.Plugins.Auth.csproj&quot; /&gt;
+9:    &lt;Project Path=&quot;src/plugins/Marv.Plugins.AuthConsumer/Marv.Plugins.AuthConsumer.csproj&quot; /&gt;
+10:    &lt;Project Path=&quot;src/plugins/Marv.Plugins.CannedResponses/Marv.Plugins.CannedResponses.csproj&quot; /&gt;
+11:    &lt;Project Path=&quot;src/plugins/Marv.Plugins.Greet/Marv.Plugins.Greet.csproj&quot; /&gt;
+15:    &lt;Project Path=&quot;tests/Marv.Plugins.Tests/Marv.Plugins.Tests.csproj&quot; /&gt;</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-54-46-196Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-54-46-196Z" class="timestamp-link"><time datetime="2026-06-06T00:54:46.196Z" data-timestamp="2026-06-06T00:54:46.196Z">2026-06-06T00:54:46.196Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now I have the full picture. Let me update the spec.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-55-14-038Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-55-14-038Z" class="timestamp-link"><time datetime="2026-06-06T00:55:14.038Z" data-timestamp="2026-06-06T00:55:14.038Z">2026-06-06T00:55:14.038Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01DKxdt2pjGhEGbaEGfjzDpX">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">008-example-plugin.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/008-example-plugin.md</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content"># CS-008: Non-Trivial Example Plugin
+
+**Source:** `downstream_suggestions/ai_enablers.md` §3
+**Scope:** Example plugins
+**Complexity:** Medium
+**Depends on:** CS-003 (handler filters), CS-005 (filter pipeline),
+CS-006 (test infrastructure), CS-009 (bot action methods),
+CS-010 (case mapping)
+**Breaking changes:** None (new plugin)
+
+---
+
+## Problem
+
+The bundled example plugins (Greet, CannedResponses) demonstrate basics but
+don&#39;t cover patterns that real plugins need. Of the documented API patterns,
+the examples only cover a subset. Plugin authors encountering uncovered
+patterns must read source code, which is expensive and error-prone.
+
+### Coverage gaps
+
+| Pattern | Covered? |
+|---|---|
+| `[OnEvent]` with part/kick/quit | No |
+| `[OnRawMessage]` | No |
+| `[OnInterval]` | No |
+| `[DependsOn]` | No |
+| Channel-specific logic | No |
+| Direct message handling (`ctx.IsDirect`) | No |
+| `Bot.SendNoticeAsync` | No |
+| `Bot.SendAndAwaitAsync` | No |
+| Multiple `[OnCommand]` on one method | No |
+| Handler dispatch filters (CS-003) | No |
+| `IFilteringAttribute` / `FilterEvaluator&lt;T&gt;` (CS-005) | No |
+| `Bot.KickAsync`, `SetModeAsync`, etc. (CS-009) | No |
+| `Bot.CaseComparer` (CS-010) | No |
+| Testing with `Marv.Testing` builders (CS-006) | Not in examples |
+
+## Changes
+
+### 1. Add `Marv.Plugins.Moderation` example plugin
+
+A moderation-themed plugin that demonstrates the gaps. Structure:
+
+**ModerationPlugin.cs** — main plugin class:
+- `[OnCommand(&#34;kick&#34;, ChannelOnly = true)]` — kick a user via
+  `Bot.KickAsync` (CS-009)
+- `[OnCommand(&#34;ban&#34;, &#34;b&#34;, ChannelOnly = true)]` — multiple aliases on one
+  method, uses `Bot.SetModeAsync` for +b (CS-009)
+- `[OnCommand(&#34;mute&#34;, ChannelOnly = true)]` — set +q mode via
+  `Bot.SetModeAsync` (CS-009)
+- `[OnEvent]` for `UserJoinedEvent` — welcome message via
+  `Bot.SendNoticeAsync`
+- `[OnEvent]` for `UserKickedEvent` — audit log
+- `[OnInterval(Minutes = 5)]` — periodic cleanup of expired bans
+- `[DependsOn(typeof(AuthPlugin))]` — depends on auth plugin for
+  authorization checks
+- Uses `Bot.CaseComparer` (CS-010) for nick comparisons in ban tracking
+- Uses handler dispatch filters from CS-003 (`ChannelOnly = true`,
+  `DirectOnly = true`)
+
+**RequireAuthAttribute.cs** — custom filter attribute (CS-005):
+- Implements `IFilteringAttribute` pointing to a `RequireAuthEvaluator`
+- `RequireAuthEvaluator` extends `FilterEvaluator&lt;RequireAuthAttribute&gt;`
+- Checks `IAuthorizationService` and sends a denial reply via `IBot`
+- Applied to kick/ban/mute commands declaratively
+
+**ModerationAdminCommands.cs** — handler group:
+- `[HandlerGroup(typeof(ModerationPlugin))]`
+- `[OnCommand(&#34;modstats&#34;, DirectOnly = true)]` — DM-only stats command
+- `[OnRawMessage(&#34;INVITE&#34;)]` — auto-join on invite (demonstrates raw
+  message handling)
+- Uses `Bot.SendAndAwaitAsync` to query WHO information
+
+**ModerationConfig.cs** — typed configuration:
+- `[PluginConfig(Section = &#34;Moderation&#34;)]`
+- `AllowedChannels` — list of channels the plugin operates in
+- `BanDurationMinutes` — default ban duration
+- `AuditChannel` — channel for audit messages
+
+**ModerationPluginTests.cs** — test file using `Marv.Testing` (CS-006):
+- Uses `PluginTestHarness&lt;ModerationPlugin&gt;` for setup
+- Uses `CommandContextBuilder` for command handler tests
+- Uses `EventBuilder&lt;T&gt;` for event handler tests
+- Uses `MockBot`, `MockUser`, `MockChannel` for mock objects
+- Tests for: command handling, event handling, channel filtering,
+  authorization filter (deny + allow), interval handler, case-insensitive
+  nick tracking via `CaseComparer`
+
+### 2. Update project structure
+
+- Add to `Marv.slnx`
+- The Makefile already discovers plugins via a `src/plugins/*/` glob, so
+  no Makefile changes needed
+- Add test project or tests within existing `Marv.Plugins.Tests`
+
+## Design notes
+
+- The plugin should be **realistic but self-contained** — no external
+  dependencies (no HTTP, no database). It demonstrates API patterns, not
+  production moderation logic.
+- Keep the total size under ~250 lines for the plugin + ~150 lines for
+  tests. Large enough to cover the gaps, small enough to read in one pass.
+- Inline comments should explain the &#34;why&#34; of pattern choices, since the
+  example serves as documentation.
+
+## Impact
+
+- **Pattern coverage:** Covers nearly all documented API patterns. The
+  remaining gaps (service provision/consumption) are already covered by
+  Auth/AuthConsumer.
+- **AI context:** An LLM reading this one plugin + Greet + the
+  `PLUGIN_API.md` reference covers all patterns needed for real-world
+  plugin authoring.
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-55-14-107Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-55-14-107Z" class="timestamp-link"><time datetime="2026-06-06T00:55:14.107Z" data-timestamp="2026-06-06T00:55:14.107Z">2026-06-06T00:55:14.107Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/008-example-plugin.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-55-17-055Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-55-17-055Z" class="timestamp-link"><time datetime="2026-06-06T00:55:17.055Z" data-timestamp="2026-06-06T00:55:17.055Z">2026-06-06T00:55:17.055Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now log and commit.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-55-17-810Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-55-17-810Z" class="timestamp-link"><time datetime="2026-06-06T00:55:17.810Z" data-timestamp="2026-06-06T00:55:17.810Z">2026-06-06T00:55:17.810Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01RzkAvszdsn4otVh7T3VdMA"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/prompts.md&#34;,
+  &#34;offset&#34;: 937,
+  &#34;limit&#34;: 10
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-55-17-836Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-55-17-836Z" class="timestamp-link"><time datetime="2026-06-06T00:55:17.836Z" data-timestamp="2026-06-06T00:55:17.836Z">2026-06-06T00:55:17.836Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>937	**Date**: 2026-06-06T00:00:00Z
+938	
+939	**Prompt**:
+940	
+941	&gt; Okay, go ahead and implement CS-009 and CS-010
+942	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-55-22-887Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-55-22-887Z" class="timestamp-link"><time datetime="2026-06-06T00:55:22.887Z" data-timestamp="2026-06-06T00:55:22.887Z">2026-06-06T00:55:22.887Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01EHGHkTvP8UZ1nihLEyn7zh">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">prompts.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/prompts.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">&gt; Okay, go ahead and implement CS-009 and CS-010</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">&gt; Okay, go ahead and implement CS-009 and CS-010
+
+## Update CS-008 to reflect recent changes
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+&gt; Before we implement CS-008, it should be updated with all the changes made since it was originally specced out.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-55-22-947Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-55-22-947Z" class="timestamp-link"><time datetime="2026-06-06T00:55:22.947Z" data-timestamp="2026-06-06T00:55:22.947Z">2026-06-06T00:55:22.947Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/prompts.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-55-30-037Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-55-30-037Z" class="timestamp-link"><time datetime="2026-06-06T00:55:30.037Z" data-timestamp="2026-06-06T00:55:30.037Z">2026-06-06T00:55:30.037Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_019ALdRFZDW4ivsbHy3wZb2K">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit CS-008 update</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add docs/change_specs/008-example-plugin.md docs/prompts.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Update CS-008 to reflect CS-005, CS-006, CS-009, CS-010
+
+Rewrite the example plugin spec to use bot action methods (KickAsync,
+SetModeAsync) instead of raw SendRawAsync, CaseComparer for nick
+tracking, FilterEvaluator&lt;T&gt; for declarative auth, and Marv.Testing
+builders for tests. Update dependency list and coverage table.
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-55-30-146Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-55-30-146Z" class="timestamp-link"><time datetime="2026-06-06T00:55:30.146Z" data-timestamp="2026-06-06T00:55:30.146Z">2026-06-06T00:55:30.146Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">86c08ca</span> Update CS-008 to reflect CS-005, CS-006, CS-009, CS-010</div><pre>2 files changed, 56 insertions(+), 32 deletions(-)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-55-39-565Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-55-39-565Z" class="timestamp-link"><time datetime="2026-06-06T00:55:39.565Z" data-timestamp="2026-06-06T00:55:39.565Z">2026-06-06T00:55:39.565Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Updated CS-008. Key changes from the original:</p>
+<ul>
+<li><strong>Dependencies</strong> now include CS-006, CS-009, CS-010 (not just CS-003/CS-005)</li>
+<li><strong>Kick/ban/mute</strong> use <code>Bot.KickAsync</code> / <code>Bot.SetModeAsync</code> instead of raw <code>SendRawAsync</code></li>
+<li><strong>New <code>RequireAuthAttribute.cs</code></strong> file demonstrating <code>IFilteringAttribute</code> + <code>FilterEvaluator&lt;T&gt;</code> from CS-005 (was a vague "if implemented" before)</li>
+<li><strong><code>Bot.CaseComparer</code></strong> used for case-insensitive nick tracking in ban state</li>
+<li><strong>Tests</strong> now specify <code>Marv.Testing</code> builders (<code>PluginTestHarness</code>, <code>CommandContextBuilder</code>, <code>EventBuilder</code>) instead of "NSubstitute or Marv.Testing if CS-006 is available"</li>
+<li><strong>Coverage table</strong> updated with the new API patterns from CS-009/CS-010</li>
+<li><strong>Makefile note</strong> clarified that no changes are needed (it already globs <code>src/plugins/*/</code>)</li>
+</ul></div></div></div>
+<div class="message user" id="msg-2026-06-06T01-05-34-319Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-06T01-05-34-319Z" class="timestamp-link"><time datetime="2026-06-06T01:05:34.319Z" data-timestamp="2026-06-06T01:05:34.319Z">2026-06-06T01:05:34.319Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Comments on CS-008:
+- Line 48 demonstrates an OnCommand with multiple commands, but as far as I'm aware that isn't supported. Should this case be supported, or should we remove it from the change spec?</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-05-37-077Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-05-37-077Z" class="timestamp-link"><time datetime="2026-06-06T01:05:37.077Z" data-timestamp="2026-06-06T01:05:37.077Z">2026-06-06T01:05:37.077Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Looking at the attribute definition:</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-05-37-788Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-05-37-788Z" class="timestamp-link"><time datetime="2026-06-06T01:05:37.788Z" data-timestamp="2026-06-06T01:05:37.788Z">2026-06-06T01:05:37.788Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01CuBMmst7SeWyTYNefaoVA1"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Plugin/Attributes.cs&#34;,
+  &#34;offset&#34;: 70,
+  &#34;limit&#34;: 10
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-05-37-860Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-05-37-860Z" class="timestamp-link"><time datetime="2026-06-06T01:05:37.860Z" data-timestamp="2026-06-06T01:05:37.860Z">2026-06-06T01:05:37.860Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>70	/// &lt;/summary&gt;
+71	[AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+72	public sealed class OnCommandAttribute(string command) : Attribute
+73	{
+74	    /// &lt;summary&gt;The command name to match (without the prefix).&lt;/summary&gt;
+75	    public string Command { get; } = command;
+76	
+77	    /// &lt;summary&gt;
+78	    /// Overrides the bot-wide command prefix for this handler.
+79	    /// When null, the bot&#x27;s configured &lt;see cref=&quot;IBot.CommandPrefix&quot;/&gt; is used.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-05-44-101Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-05-44-101Z" class="timestamp-link"><time datetime="2026-06-06T01:05:44.101Z" data-timestamp="2026-06-06T01:05:44.101Z">2026-06-06T01:05:44.101Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p><code>AllowMultiple = true</code> — so you can already do multiple aliases, just with two separate attributes:</p>
+<pre><code class="language-csharp">[OnCommand(&quot;ban&quot;)]
+[OnCommand(&quot;b&quot;)]
+private async Task HandleBan(CommandContext ctx, CancellationToken ct) { ... }
+</code></pre>
+<p>The spec's <code>[OnCommand("ban", "b")]</code> syntax (multiple names in one attribute) doesn't exist. I'd fix the spec to use the stacked-attribute pattern since it already works. No new feature needed.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-05-47-054Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-05-47-054Z" class="timestamp-link"><time datetime="2026-06-06T01:05:47.054Z" data-timestamp="2026-06-06T01:05:47.054Z">2026-06-06T01:05:47.054Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01HaeJQPJ4uoQoDp63zNuCX3">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">008-example-plugin.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/008-example-plugin.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">- `[OnCommand(&#34;ban&#34;, &#34;b&#34;, ChannelOnly = true)]` — multiple aliases on one
+  method, uses `Bot.SetModeAsync` for +b (CS-009)</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">- `[OnCommand(&#34;ban&#34;, ChannelOnly = true)]` + `[OnCommand(&#34;b&#34;, ChannelOnly = true)]`
+  on the same method — multiple aliases via stacked attributes, uses
+  `Bot.SetModeAsync` for +b (CS-009)</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-05-47-139Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-05-47-139Z" class="timestamp-link"><time datetime="2026-06-06T01:05:47.139Z" data-timestamp="2026-06-06T01:05:47.139Z">2026-06-06T01:05:47.139Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/008-example-plugin.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-05-50-399Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-05-50-399Z" class="timestamp-link"><time datetime="2026-06-06T01:05:50.399Z" data-timestamp="2026-06-06T01:05:50.399Z">2026-06-06T01:05:50.399Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01HGfykju1eB7kDV4MeV3VoP"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/prompts.md&#34;,
+  &#34;offset&#34;: 948,
+  &#34;limit&#34;: 5
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-05-50-434Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-05-50-434Z" class="timestamp-link"><time datetime="2026-06-06T01:05:50.434Z" data-timestamp="2026-06-06T01:05:50.434Z">2026-06-06T01:05:50.434Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>948	
+949	&gt; Before we implement CS-008, it should be updated with all the changes made since it was originally specced out.
+950	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-05-55-835Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-05-55-835Z" class="timestamp-link"><time datetime="2026-06-06T01:05:55.835Z" data-timestamp="2026-06-06T01:05:55.835Z">2026-06-06T01:05:55.835Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_016NLsvmY6kPjtYBNUWpFJxx">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">prompts.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/prompts.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">&gt; Before we implement CS-008, it should be updated with all the changes made since it was originally specced out.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">&gt; Before we implement CS-008, it should be updated with all the changes made since it was originally specced out.
+
+## Fix CS-008 stacked OnCommand syntax
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+&gt; Comments on CS-008:
+&gt; - Line 48 demonstrates an OnCommand with multiple commands, but as far as I&#39;m aware that isn&#39;t supported. Should this case be supported, or should we remove it from the change spec?</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-05-55-897Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-05-55-897Z" class="timestamp-link"><time datetime="2026-06-06T01:05:55.897Z" data-timestamp="2026-06-06T01:05:55.897Z">2026-06-06T01:05:55.897Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/prompts.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-06-01-791Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-06-01-791Z" class="timestamp-link"><time datetime="2026-06-06T01:06:01.791Z" data-timestamp="2026-06-06T01:06:01.791Z">2026-06-06T01:06:01.791Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_011GPLnzjND1G6UaMqFYi1RL">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit CS-008 fix</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add docs/change_specs/008-example-plugin.md docs/prompts.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Fix CS-008: use stacked [OnCommand] attributes for aliases
+
+The spec showed [OnCommand(&#34;ban&#34;, &#34;b&#34;)] which isn&#39;t valid syntax.
+The attribute already supports AllowMultiple, so stacking two
+[OnCommand] attributes on the same method is the correct pattern.
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-06-01-957Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-06-01-957Z" class="timestamp-link"><time datetime="2026-06-06T01:06:01.957Z" data-timestamp="2026-06-06T01:06:01.957Z">2026-06-06T01:06:01.957Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">ee80527</span> Fix CS-008: use stacked [OnCommand] attributes for aliases</div><pre>2 files changed, 12 insertions(+), 2 deletions(-)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-06-04-859Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-06-04-859Z" class="timestamp-link"><time datetime="2026-06-06T01:06:04.859Z" data-timestamp="2026-06-06T01:06:04.859Z">2026-06-06T01:06:04.859Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Fixed. <code>[OnCommand]</code> already has <code>AllowMultiple = true</code>, so the correct pattern for aliases is stacking two attributes on the same method. No new feature needed.</p></div></div></div>
+<div class="message user" id="msg-2026-06-06T01-06-22-426Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-06T01-06-22-426Z" class="timestamp-link"><time datetime="2026-06-06T01:06:22.426Z" data-timestamp="2026-06-06T01:06:22.426Z">2026-06-06T01:06:22.426Z</time></a></div><div class="message-content">
+<div class="user-content"><h2>Context Usage</h2>
+<p><strong>Model:</strong> claude-opus-4-6<br />
+<strong>Tokens:</strong> 147k / 200k (73%)</p>
+<h3>Estimated usage by category</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Tokens</th>
+<th>Percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>System prompt</td>
+<td>6.6k</td>
+<td>3.3%</td>
+</tr>
+<tr>
+<td>System tools</td>
+<td>9.3k</td>
+<td>4.7%</td>
+</tr>
+<tr>
+<td>MCP tools (deferred)</td>
+<td>290</td>
+<td>0.1%</td>
+</tr>
+<tr>
+<td>System tools (deferred)</td>
+<td>12.6k</td>
+<td>6.3%</td>
+</tr>
+<tr>
+<td>Memory files</td>
+<td>1.4k</td>
+<td>0.7%</td>
+</tr>
+<tr>
+<td>Skills</td>
+<td>1.1k</td>
+<td>0.5%</td>
+</tr>
+<tr>
+<td>Messages</td>
+<td>128.5k</td>
+<td>64.3%</td>
+</tr>
+<tr>
+<td>Free space</td>
+<td>20k</td>
+<td>10.0%</td>
+</tr>
+<tr>
+<td>Autocompact buffer</td>
+<td>33k</td>
+<td>16.5%</td>
+</tr>
+</tbody>
+</table>
+<h3>MCP Tools</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Server</th>
+<th>Tokens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mcp__ide__executeCode</td>
+<td>ide</td>
+<td>189</td>
+</tr>
+<tr>
+<td>mcp__ide__getDiagnostics</td>
+<td>ide</td>
+<td>101</td>
+</tr>
+</tbody>
+</table>
+<h3>Memory Files</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Path</th>
+<th>Tokens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Project</td>
+<td>/workspaces/marv/CLAUDE.md</td>
+<td>1.3k</td>
+</tr>
+<tr>
+<td>AutoMem</td>
+<td>/home/vscode/.claude/projects/-workspaces-marv/memory/MEMORY.md</td>
+<td>71</td>
+</tr>
+</tbody>
+</table>
+<h3>Skills</h3>
+<table>
+<thead>
+<tr>
+<th>Skill</th>
+<th>Source</th>
+<th>Tokens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>update-config</td>
+<td>Built-in</td>
+<td>~180</td>
+</tr>
+<tr>
+<td>keybindings-help</td>
+<td>Built-in</td>
+<td>~60</td>
+</tr>
+<tr>
+<td>verify</td>
+<td>Built-in</td>
+<td>~60</td>
+</tr>
+<tr>
+<td>code-review</td>
+<td>Built-in</td>
+<td>~100</td>
+</tr>
+<tr>
+<td>simplify</td>
+<td>Built-in</td>
+<td>~50</td>
+</tr>
+<tr>
+<td>fewer-permission-prompts</td>
+<td>Built-in</td>
+<td>~50</td>
+</tr>
+<tr>
+<td>loop</td>
+<td>Built-in</td>
+<td>~90</td>
+</tr>
+<tr>
+<td>schedule</td>
+<td>Built-in</td>
+<td>~100</td>
+</tr>
+<tr>
+<td>claude-api</td>
+<td>Built-in</td>
+<td>~270</td>
+</tr>
+<tr>
+<td>run</td>
+<td>Built-in</td>
+<td>~90</td>
+</tr>
+<tr>
+<td>init</td>
+<td>Built-in</td>
+<td>&lt; 20</td>
+</tr>
+<tr>
+<td>review</td>
+<td>Built-in</td>
+<td>&lt; 20</td>
+</tr>
+<tr>
+<td>security-review</td>
+<td>Built-in</td>
+<td>~20</td>
+</tr>
+</tbody>
+</table></div></div></div>
+<div class="message user" id="msg-2026-06-06T01-07-08-347Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-06T01-07-08-347Z" class="timestamp-link"><time datetime="2026-06-06T01:07:08.347Z" data-timestamp="2026-06-06T01:07:08.347Z">2026-06-06T01:07:08.347Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Okay, go ahead and implement CS-008.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-07-14-012Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-07-14-012Z" class="timestamp-link"><time datetime="2026-06-06T01:07:14.012Z" data-timestamp="2026-06-06T01:07:14.012Z">2026-06-06T01:07:14.012Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-07-15-034Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-07-15-034Z" class="timestamp-link"><time datetime="2026-06-06T01:07:15.034Z" data-timestamp="2026-06-06T01:07:15.034Z">2026-06-06T01:07:15.034Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Let me re-read the spec and key files I'll need.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-07-15-550Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-07-15-550Z" class="timestamp-link"><time datetime="2026-06-06T01:07:15.550Z" data-timestamp="2026-06-06T01:07:15.550Z">2026-06-06T01:07:15.550Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01H95fnYk38f3bfYfm3koteX"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/008-example-plugin.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-07-15-603Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-07-15-603Z" class="timestamp-link"><time datetime="2026-06-06T01:07:15.603Z" data-timestamp="2026-06-06T01:07:15.603Z">2026-06-06T01:07:15.603Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# CS-008: Non-Trivial Example Plugin
+2	
+3	**Source:** `downstream_suggestions/ai_enablers.md` §3
+4	**Scope:** Example plugins
+5	**Complexity:** Medium
+6	**Depends on:** CS-003 (handler filters), CS-005 (filter pipeline),
+7	CS-006 (test infrastructure), CS-009 (bot action methods),
+8	CS-010 (case mapping)
+9	**Breaking changes:** None (new plugin)
+10	
+11	---
+12	
+13	## Problem
+14	
+15	The bundled example plugins (Greet, CannedResponses) demonstrate basics but
+16	don&#x27;t cover patterns that real plugins need. Of the documented API patterns,
+17	the examples only cover a subset. Plugin authors encountering uncovered
+18	patterns must read source code, which is expensive and error-prone.
+19	
+20	### Coverage gaps
+21	
+22	| Pattern | Covered? |
+23	|---|---|
+24	| `[OnEvent]` with part/kick/quit | No |
+25	| `[OnRawMessage]` | No |
+26	| `[OnInterval]` | No |
+27	| `[DependsOn]` | No |
+28	| Channel-specific logic | No |
+29	| Direct message handling (`ctx.IsDirect`) | No |
+30	| `Bot.SendNoticeAsync` | No |
+31	| `Bot.SendAndAwaitAsync` | No |
+32	| Multiple `[OnCommand]` on one method | No |
+33	| Handler dispatch filters (CS-003) | No |
+34	| `IFilteringAttribute` / `FilterEvaluator&lt;T&gt;` (CS-005) | No |
+35	| `Bot.KickAsync`, `SetModeAsync`, etc. (CS-009) | No |
+36	| `Bot.CaseComparer` (CS-010) | No |
+37	| Testing with `Marv.Testing` builders (CS-006) | Not in examples |
+38	
+39	## Changes
+40	
+41	### 1. Add `Marv.Plugins.Moderation` example plugin
+42	
+43	A moderation-themed plugin that demonstrates the gaps. Structure:
+44	
+45	**ModerationPlugin.cs** — main plugin class:
+46	- `[OnCommand(&quot;kick&quot;, ChannelOnly = true)]` — kick a user via
+47	  `Bot.KickAsync` (CS-009)
+48	- `[OnCommand(&quot;ban&quot;, ChannelOnly = true)]` + `[OnCommand(&quot;b&quot;, ChannelOnly = true)]`
+49	  on the same method — multiple aliases via stacked attributes, uses
+50	  `Bot.SetModeAsync` for +b (CS-009)
+51	- `[OnCommand(&quot;mute&quot;, ChannelOnly = true)]` — set +q mode via
+52	  `Bot.SetModeAsync` (CS-009)
+53	- `[OnEvent]` for `UserJoinedEvent` — welcome message via
+54	  `Bot.SendNoticeAsync`
+55	- `[OnEvent]` for `UserKickedEvent` — audit log
+56	- `[OnInterval(Minutes = 5)]` — periodic cleanup of expired bans
+57	- `[DependsOn(typeof(AuthPlugin))]` — depends on auth plugin for
+58	  authorization checks
+59	- Uses `Bot.CaseComparer` (CS-010) for nick comparisons in ban tracking
+60	- Uses handler dispatch filters from CS-003 (`ChannelOnly = true`,
+61	  `DirectOnly = true`)
+62	
+63	**RequireAuthAttribute.cs** — custom filter attribute (CS-005):
+64	- Implements `IFilteringAttribute` pointing to a `RequireAuthEvaluator`
+65	- `RequireAuthEvaluator` extends `FilterEvaluator&lt;RequireAuthAttribute&gt;`
+66	- Checks `IAuthorizationService` and sends a denial reply via `IBot`
+67	- Applied to kick/ban/mute commands declaratively
+68	
+69	**ModerationAdminCommands.cs** — handler group:
+70	- `[HandlerGroup(typeof(ModerationPlugin))]`
+71	- `[OnCommand(&quot;modstats&quot;, DirectOnly = true)]` — DM-only stats command
+72	- `[OnRawMessage(&quot;INVITE&quot;)]` — auto-join on invite (demonstrates raw
+73	  message handling)
+74	- Uses `Bot.SendAndAwaitAsync` to query WHO information
+75	
+76	**ModerationConfig.cs** — typed configuration:
+77	- `[PluginConfig(Section = &quot;Moderation&quot;)]`
+78	- `AllowedChannels` — list of channels the plugin operates in
+79	- `BanDurationMinutes` — default ban duration
+80	- `AuditChannel` — channel for audit messages
+81	
+82	**ModerationPluginTests.cs** — test file using `Marv.Testing` (CS-006):
+83	- Uses `PluginTestHarness&lt;ModerationPlugin&gt;` for setup
+84	- Uses `CommandContextBuilder` for command handler tests
+85	- Uses `EventBuilder&lt;T&gt;` for event handler tests
+86	- Uses `MockBot`, `MockUser`, `MockChannel` for mock objects
+87	- Tests for: command handling, event handling, channel filtering,
+88	  authorization filter (deny + allow), interval handler, case-insensitive
+89	  nick tracking via `CaseComparer`
+90	
+91	### 2. Update project structure
+92	
+93	- Add to `Marv.slnx`
+94	- The Makefile already discovers plugins via a `src/plugins/*/` glob, so
+95	  no Makefile changes needed
+96	- Add test project or tests within existing `Marv.Plugins.Tests`
+97	
+98	## Design notes
+99	
+100	- The plugin should be **realistic but self-contained** — no external
+101	  dependencies (no HTTP, no database). It demonstrates API patterns, not
+102	  production moderation logic.
+103	- Keep the total size under ~250 lines for the plugin + ~150 lines for
+104	  tests. Large enough to cover the gaps, small enough to read in one pass.
+105	- Inline comments should explain the &quot;why&quot; of pattern choices, since the
+106	  example serves as documentation.
+107	
+108	## Impact
+109	
+110	- **Pattern coverage:** Covers nearly all documented API patterns. The
+111	  remaining gaps (service provision/consumption) are already covered by
+112	  Auth/AuthConsumer.
+113	- **AI context:** An LLM reading this one plugin + Greet + the
+114	  `PLUGIN_API.md` reference covers all patterns needed for real-world
+115	  plugin authoring.
+116	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-07-16-570Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-07-16-570Z" class="timestamp-link"><time datetime="2026-06-06T01:07:16.570Z" data-timestamp="2026-06-06T01:07:16.570Z">2026-06-06T01:07:16.570Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01YBMe3uzsyRCVTzraM3n9pA"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/plugins/Marv.Plugins.Auth/IAuthorizationService.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-07-16-611Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-07-16-611Z" class="timestamp-link"><time datetime="2026-06-06T01:07:16.611Z" data-timestamp="2026-06-06T01:07:16.611Z">2026-06-06T01:07:16.611Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using Marv.Core.Platform;
+2	
+3	namespace Marv.Plugins.Auth;
+4	
+5	/// &lt;summary&gt;
+6	/// Service interface for account-based authorization. Provided by the Auth plugin
+7	/// and consumed by plugins that need permission checking.
+8	/// &lt;/summary&gt;
+9	public interface IAuthorizationService
+10	{
+11	    /// &lt;summary&gt;
+12	    /// Checks whether the specified user is authorized for the given permission.
+13	    /// &lt;/summary&gt;
+14	    /// &lt;param name=&quot;user&quot;&gt;The user to check.&lt;/param&gt;
+15	    /// &lt;param name=&quot;permission&quot;&gt;The permission to check (e.g. &quot;mod.kick&quot;).&lt;/param&gt;
+16	    /// &lt;param name=&quot;ct&quot;&gt;Cancellation token.&lt;/param&gt;
+17	    /// &lt;returns&gt;True if the user is authorized.&lt;/returns&gt;
+18	    Task&lt;bool&gt; IsAuthorizedAsync(IUser user, string permission, CancellationToken ct);
+19	}
+20	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-07-17-076Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-07-17-076Z" class="timestamp-link"><time datetime="2026-06-06T01:07:17.076Z" data-timestamp="2026-06-06T01:07:17.076Z">2026-06-06T01:07:17.076Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01GqkVku7zJf56TwizdqHfXL"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/plugins/Marv.Plugins.Auth/Marv.Plugins.Auth.csproj&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-07-17-099Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-07-17-099Z" class="timestamp-link"><time datetime="2026-06-06T01:07:17.099Z" data-timestamp="2026-06-06T01:07:17.099Z">2026-06-06T01:07:17.099Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	&lt;Project Sdk=&quot;Microsoft.NET.Sdk&quot;&gt;
+2	
+3	  &lt;PropertyGroup&gt;
+4	    &lt;TargetFramework&gt;net10.0&lt;/TargetFramework&gt;
+5	    &lt;Nullable&gt;enable&lt;/Nullable&gt;
+6	    &lt;ImplicitUsings&gt;enable&lt;/ImplicitUsings&gt;
+7	    &lt;RootNamespace&gt;Marv.Plugins.Auth&lt;/RootNamespace&gt;
+8	  &lt;/PropertyGroup&gt;
+9	
+10	  &lt;ItemGroup&gt;
+11	    &lt;ProjectReference Include=&quot;..\..\Marv.Core\Marv.Core.csproj&quot; Private=&quot;false&quot; /&gt;
+12	  &lt;/ItemGroup&gt;
+13	
+14	&lt;/Project&gt;
+15	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-07-20-453Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-07-20-453Z" class="timestamp-link"><time datetime="2026-06-06T01:07:20.453Z" data-timestamp="2026-06-06T01:07:20.453Z">2026-06-06T01:07:20.453Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01Femzz33aRVYY2BgHzv25WS"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/Marv.slnx&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-07-20-482Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-07-20-482Z" class="timestamp-link"><time datetime="2026-06-06T01:07:20.482Z" data-timestamp="2026-06-06T01:07:20.482Z">2026-06-06T01:07:20.482Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	&lt;Solution&gt;
+2	  &lt;Folder Name=&quot;/src/&quot;&gt;
+3	    &lt;Project Path=&quot;src/Marv/Marv.csproj&quot; /&gt;
+4	    &lt;Project Path=&quot;src/Marv.Core/Marv.Core.csproj&quot; /&gt;
+5	    &lt;Project Path=&quot;src/Marv.Testing/Marv.Testing.csproj&quot; /&gt;
+6	  &lt;/Folder&gt;
+7	  &lt;Folder Name=&quot;/src/plugins/&quot;&gt;
+8	    &lt;Project Path=&quot;src/plugins/Marv.Plugins.Auth/Marv.Plugins.Auth.csproj&quot; /&gt;
+9	    &lt;Project Path=&quot;src/plugins/Marv.Plugins.AuthConsumer/Marv.Plugins.AuthConsumer.csproj&quot; /&gt;
+10	    &lt;Project Path=&quot;src/plugins/Marv.Plugins.CannedResponses/Marv.Plugins.CannedResponses.csproj&quot; /&gt;
+11	    &lt;Project Path=&quot;src/plugins/Marv.Plugins.Greet/Marv.Plugins.Greet.csproj&quot; /&gt;
+12	  &lt;/Folder&gt;
+13	  &lt;Folder Name=&quot;/tests/&quot;&gt;
+14	    &lt;Project Path=&quot;tests/Marv.Core.Tests/Marv.Core.Tests.csproj&quot; /&gt;
+15	    &lt;Project Path=&quot;tests/Marv.Plugins.Tests/Marv.Plugins.Tests.csproj&quot; /&gt;
+16	    &lt;Project Path=&quot;tests/Marv.Testing.Tests/Marv.Testing.Tests.csproj&quot; /&gt;
+17	  &lt;/Folder&gt;
+18	&lt;/Solution&gt;
+19	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-07-20-626Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-07-20-626Z" class="timestamp-link"><time datetime="2026-06-06T01:07:20.626Z" data-timestamp="2026-06-06T01:07:20.626Z">2026-06-06T01:07:20.626Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01QEgEbbzB1rZm7BAh7WsBB5"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/tests/Marv.Plugins.Tests/Marv.Plugins.Tests.csproj&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-07-20-650Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-07-20-650Z" class="timestamp-link"><time datetime="2026-06-06T01:07:20.650Z" data-timestamp="2026-06-06T01:07:20.650Z">2026-06-06T01:07:20.650Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	&lt;Project Sdk=&quot;Microsoft.NET.Sdk&quot;&gt;
+2	
+3	  &lt;PropertyGroup&gt;
+4	    &lt;TargetFramework&gt;net10.0&lt;/TargetFramework&gt;
+5	    &lt;Nullable&gt;enable&lt;/Nullable&gt;
+6	    &lt;ImplicitUsings&gt;enable&lt;/ImplicitUsings&gt;
+7	    &lt;IsPackable&gt;false&lt;/IsPackable&gt;
+8	    &lt;IsTestProject&gt;true&lt;/IsTestProject&gt;
+9	    &lt;RootNamespace&gt;Marv.Plugins.Tests&lt;/RootNamespace&gt;
+10	  &lt;/PropertyGroup&gt;
+11	
+12	  &lt;ItemGroup&gt;
+13	    &lt;PackageReference Include=&quot;Microsoft.NET.Test.Sdk&quot; Version=&quot;18.6.0&quot; /&gt;
+14	    &lt;PackageReference Include=&quot;xunit&quot; Version=&quot;2.9.3&quot; /&gt;
+15	    &lt;PackageReference Include=&quot;xunit.runner.visualstudio&quot; Version=&quot;3.1.5&quot; /&gt;
+16	    &lt;PackageReference Include=&quot;NSubstitute&quot; Version=&quot;5.3.0&quot; /&gt;
+17	  &lt;/ItemGroup&gt;
+18	
+19	  &lt;ItemGroup&gt;
+20	    &lt;ProjectReference Include=&quot;..\..\src\Marv.Core\Marv.Core.csproj&quot; /&gt;
+21	    &lt;ProjectReference Include=&quot;..\..\src\Marv.Testing\Marv.Testing.csproj&quot; /&gt;
+22	    &lt;ProjectReference Include=&quot;..\..\src\plugins\Marv.Plugins.Greet\Marv.Plugins.Greet.csproj&quot; /&gt;
+23	    &lt;ProjectReference Include=&quot;..\..\src\plugins\Marv.Plugins.Auth\Marv.Plugins.Auth.csproj&quot; /&gt;
+24	    &lt;ProjectReference Include=&quot;..\..\src\plugins\Marv.Plugins.AuthConsumer\Marv.Plugins.AuthConsumer.csproj&quot; /&gt;
+25	    &lt;ProjectReference Include=&quot;..\..\src\plugins\Marv.Plugins.CannedResponses\Marv.Plugins.CannedResponses.csproj&quot; /&gt;
+26	  &lt;/ItemGroup&gt;
+27	
+28	&lt;/Project&gt;
+29	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-07-28-379Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-07-28-379Z" class="timestamp-link"><time datetime="2026-06-06T01:07:28.379Z" data-timestamp="2026-06-06T01:07:28.379Z">2026-06-06T01:07:28.379Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Good. Now let me check IrcMessage constructor and IBot for the SendAndAwaitAsync to understand what WHO looks like.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-07-29-001Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-07-29-001Z" class="timestamp-link"><time datetime="2026-06-06T01:07:29.001Z" data-timestamp="2026-06-06T01:07:29.001Z">2026-06-06T01:07:29.001Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_011sYPnXXj79yqSBsoKwHiht">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check Greet csproj for reference</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">ls /workspaces/marv/src/plugins/Marv.Plugins.Greet/*.csproj</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-07-29-149Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-07-29-149Z" class="timestamp-link"><time datetime="2026-06-06T01:07:29.149Z" data-timestamp="2026-06-06T01:07:29.149Z">2026-06-06T01:07:29.149Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/plugins/Marv.Plugins.Greet/Marv.Plugins.Greet.csproj</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-07-32-367Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-07-32-367Z" class="timestamp-link"><time datetime="2026-06-06T01:07:32.367Z" data-timestamp="2026-06-06T01:07:32.367Z">2026-06-06T01:07:32.367Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01R5CdJ8GeyFqgCK6b24HvyN"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/plugins/Marv.Plugins.Greet/Marv.Plugins.Greet.csproj&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-07-32-402Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-07-32-402Z" class="timestamp-link"><time datetime="2026-06-06T01:07:32.402Z" data-timestamp="2026-06-06T01:07:32.402Z">2026-06-06T01:07:32.402Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	&lt;Project Sdk=&quot;Microsoft.NET.Sdk&quot;&gt;
+2	
+3	  &lt;PropertyGroup&gt;
+4	    &lt;TargetFramework&gt;net10.0&lt;/TargetFramework&gt;
+5	    &lt;Nullable&gt;enable&lt;/Nullable&gt;
+6	    &lt;ImplicitUsings&gt;enable&lt;/ImplicitUsings&gt;
+7	    &lt;RootNamespace&gt;Marv.Plugins.Greet&lt;/RootNamespace&gt;
+8	  &lt;/PropertyGroup&gt;
+9	
+10	  &lt;ItemGroup&gt;
+11	    &lt;ProjectReference Include=&quot;..\..\Marv.Core\Marv.Core.csproj&quot; Private=&quot;false&quot; /&gt;
+12	  &lt;/ItemGroup&gt;
+13	
+14	&lt;/Project&gt;
+15	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-07-37-542Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-07-37-542Z" class="timestamp-link"><time datetime="2026-06-06T01:07:37.542Z" data-timestamp="2026-06-06T01:07:37.542Z">2026-06-06T01:07:37.542Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now I have everything. Let me create all the files. I'll start with the project file, then the plugin code, then tests.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-07-37-925Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-07-37-925Z" class="timestamp-link"><time datetime="2026-06-06T01:07:37.925Z" data-timestamp="2026-06-06T01:07:37.925Z">2026-06-06T01:07:37.925Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01FaNzDDfxYo2pitfk5i4eB8">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Create plugin directory</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">mkdir -p /workspaces/marv/src/plugins/Marv.Plugins.Moderation</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-07-38-048Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-07-38-048Z" class="timestamp-link"><time datetime="2026-06-06T01:07:38.048Z" data-timestamp="2026-06-06T01:07:38.048Z">2026-06-06T01:07:38.048Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>(Bash completed with no output)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-07-43-118Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-07-43-118Z" class="timestamp-link"><time datetime="2026-06-06T01:07:43.118Z" data-timestamp="2026-06-06T01:07:43.118Z">2026-06-06T01:07:43.118Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01GZoeqFgzzbLJcRoNqjwuYw">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">Marv.Plugins.Moderation.csproj</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/plugins/Marv.Plugins.Moderation/Marv.Plugins.Moderation.csproj</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content">&lt;Project Sdk=&#34;Microsoft.NET.Sdk&#34;&gt;
+
+  &lt;PropertyGroup&gt;
+    &lt;TargetFramework&gt;net10.0&lt;/TargetFramework&gt;
+    &lt;Nullable&gt;enable&lt;/Nullable&gt;
+    &lt;ImplicitUsings&gt;enable&lt;/ImplicitUsings&gt;
+    &lt;RootNamespace&gt;Marv.Plugins.Moderation&lt;/RootNamespace&gt;
+  &lt;/PropertyGroup&gt;
+
+  &lt;ItemGroup&gt;
+    &lt;ProjectReference Include=&#34;..\..\Marv.Core\Marv.Core.csproj&#34; Private=&#34;false&#34; /&gt;
+    &lt;ProjectReference Include=&#34;..\Marv.Plugins.Auth\Marv.Plugins.Auth.csproj&#34; Private=&#34;false&#34; /&gt;
+  &lt;/ItemGroup&gt;
+
+&lt;/Project&gt;
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-07-43-225Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-07-43-225Z" class="timestamp-link"><time datetime="2026-06-06T01:07:43.225Z" data-timestamp="2026-06-06T01:07:43.225Z">2026-06-06T01:07:43.225Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /workspaces/marv/src/plugins/Marv.Plugins.Moderation/Marv.Plugins.Moderation.csproj (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-07-50-649Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-07-50-649Z" class="timestamp-link"><time datetime="2026-06-06T01:07:50.649Z" data-timestamp="2026-06-06T01:07:50.649Z">2026-06-06T01:07:50.649Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_015eXXo6fvbYWX8pffPuNih6">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">ModerationConfig.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/plugins/Marv.Plugins.Moderation/ModerationConfig.cs</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content">using Marv.Core.Plugin;
+
+namespace Marv.Plugins.Moderation;
+
+/// &lt;summary&gt;
+/// Configuration for the Moderation plugin. Bound to the &#34;Plugins:Moderation&#34; section.
+/// Demonstrates the typed plugin configuration pattern with &lt;see cref=&#34;PluginConfigAttribute&#34;/&gt;.
+/// &lt;/summary&gt;
+[PluginConfig(Section = &#34;Moderation&#34;)]
+public record ModerationConfig
+{
+    /// &lt;summary&gt;Default ban duration in minutes. Expired bans are cleaned up periodically.&lt;/summary&gt;
+    public int BanDurationMinutes { get; init; } = 60;
+
+    /// &lt;summary&gt;Channel to send audit log messages to. If null, audit logging is disabled.&lt;/summary&gt;
+    public string? AuditChannel { get; init; }
+}
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-07-50-800Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-07-50-800Z" class="timestamp-link"><time datetime="2026-06-06T01:07:50.800Z" data-timestamp="2026-06-06T01:07:50.800Z">2026-06-06T01:07:50.800Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /workspaces/marv/src/plugins/Marv.Plugins.Moderation/ModerationConfig.cs (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-08-05-016Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-08-05-016Z" class="timestamp-link"><time datetime="2026-06-06T01:08:05.016Z" data-timestamp="2026-06-06T01:08:05.016Z">2026-06-06T01:08:05.016Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_016w8RgSZ9KQppjvZHmeKocC">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">RequireAuthAttribute.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/plugins/Marv.Plugins.Moderation/RequireAuthAttribute.cs</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content">using Marv.Core.Platform;
+using Marv.Core.Plugin;
+using Marv.Plugins.Auth;
+
+namespace Marv.Plugins.Moderation;
+
+/// &lt;summary&gt;
+/// Filter attribute that requires the sender to be authorized for a specific permission.
+/// Demonstrates the &lt;see cref=&#34;IFilteringAttribute&#34;/&gt; + &lt;see cref=&#34;FilterEvaluator{T}&#34;/&gt;
+/// pattern from CS-005. Apply to any handler method to enforce authorization declaratively.
+/// &lt;/summary&gt;
+/// &lt;example&gt;
+/// &lt;code&gt;
+/// [RequireAuth(&#34;mod.kick&#34;)]
+/// [OnCommand(&#34;kick&#34;, ChannelOnly = true)]
+/// private async Task HandleKick(CommandContext ctx, CancellationToken ct) { ... }
+/// &lt;/code&gt;
+/// &lt;/example&gt;
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+public sealed class RequireAuthAttribute(string permission) : Attribute, IFilteringAttribute
+{
+    /// &lt;summary&gt;The permission string to check (e.g. &#34;mod.kick&#34;).&lt;/summary&gt;
+    public string Permission { get; } = permission;
+
+    /// &lt;inheritdoc /&gt;
+    public Type EvaluatorType =&gt; typeof(RequireAuthEvaluator);
+}
+
+/// &lt;summary&gt;
+/// Evaluator for &lt;see cref=&#34;RequireAuthAttribute&#34;/&gt;. Checks the sender&#39;s authorization
+/// via &lt;see cref=&#34;IAuthorizationService&#34;/&gt; and sends a denial reply if unauthorized.
+/// &lt;/summary&gt;
+public class RequireAuthEvaluator : FilterEvaluator&lt;RequireAuthAttribute&gt;
+{
+    private readonly IAuthorizationService? _auth;
+
+    /// &lt;summary&gt;
+    /// Creates a new evaluator. The auth service is optional — if no plugin provides it,
+    /// all authorization checks pass (fail-open when auth is not configured).
+    /// &lt;/summary&gt;
+    public RequireAuthEvaluator(IAuthorizationService? auth = null)
+    {
+        _auth = auth;
+    }
+
+    /// &lt;inheritdoc /&gt;
+    protected override async ValueTask&lt;FilterResult&gt; EvaluateAsync(
+        RequireAuthAttribute attribute, HandlerInvocation invocation,
+        IBot bot, CancellationToken ct)
+    {
+        if (_auth is null)
+            return FilterResult.Allowed;
+
+        if (invocation.Context is CommandContext cmd)
+        {
+            if (!await _auth.IsAuthorizedAsync(cmd.Sender, attribute.Permission, ct))
+            {
+                await cmd.ReplyAsync(&#34;Permission denied.&#34;, ct);
+                return FilterResult.Denied;
+            }
+        }
+
+        return FilterResult.Allowed;
+    }
+}
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-08-05-229Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-08-05-229Z" class="timestamp-link"><time datetime="2026-06-06T01:08:05.229Z" data-timestamp="2026-06-06T01:08:05.229Z">2026-06-06T01:08:05.229Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /workspaces/marv/src/plugins/Marv.Plugins.Moderation/RequireAuthAttribute.cs (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-08-34-616Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-08-34-616Z" class="timestamp-link"><time datetime="2026-06-06T01:08:34.616Z" data-timestamp="2026-06-06T01:08:34.616Z">2026-06-06T01:08:34.616Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01M5YwLfezqy2PMbU8qLNfbu">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">ModerationPlugin.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/plugins/Marv.Plugins.Moderation/ModerationPlugin.cs</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content">using Marv.Core.Events;
+using Marv.Core.Platform;
+using Marv.Core.Plugin;
+using Marv.Plugins.Auth;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
+namespace Marv.Plugins.Moderation;
+
+/// &lt;summary&gt;
+/// Example moderation plugin demonstrating advanced API patterns: typed configuration,
+/// event handling, interval timers, bot action methods, case-mapped collections,
+/// declarative authorization filters, and inter-plugin dependencies.
+/// &lt;/summary&gt;
+[DependsOn(typeof(AuthPlugin))]
+public class ModerationPlugin : MarvPlugin
+{
+    private readonly ModerationConfig _config;
+
+    // Ban tracking: maps hostmask → expiry. Rebuilt on each connection using
+    // Bot.CaseComparer so nick lookups respect the server&#39;s case mapping rules.
+    private Dictionary&lt;string, DateTimeOffset&gt; _activeBans = new(StringComparer.OrdinalIgnoreCase);
+
+    /// &lt;summary&gt;Creates a new &lt;see cref=&#34;ModerationPlugin&#34;/&gt;.&lt;/summary&gt;
+    public ModerationPlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory,
+        IOptions&lt;ModerationConfig&gt; config)
+        : base(bot, activator, loggerFactory)
+    {
+        _config = config.Value;
+    }
+
+    /// &lt;inheritdoc /&gt;
+    public override Task OnConnectedAsync(CancellationToken ct)
+    {
+        // Rebuild connection-scoped state with the server&#39;s case mapping comparer
+        _activeBans = new Dictionary&lt;string, DateTimeOffset&gt;(Bot.CaseComparer);
+        return base.OnConnectedAsync(ct);
+    }
+
+    /// &lt;inheritdoc /&gt;
+    public override Task OnDisconnectedAsync()
+    {
+        _activeBans.Clear();
+        return base.OnDisconnectedAsync();
+    }
+
+    /// &lt;summary&gt;Kicks a user from the channel. Requires &#34;mod.kick&#34; permission.&lt;/summary&gt;
+    [RequireAuth(&#34;mod.kick&#34;)]
+    [OnCommand(&#34;kick&#34;, ChannelOnly = true)]
+    private async Task HandleKick(CommandContext ctx, CancellationToken ct)
+    {
+        if (ctx.Args.Count == 0)
+        {
+            await ctx.ReplyAsync(&#34;Usage: !kick &lt;nick&gt; [reason]&#34;, ct);
+            return;
+        }
+
+        var nick = ctx.Args[0];
+        var reason = ctx.Args.Count &gt; 1 ? ctx.ArgString[(nick.Length + 1)..] : null;
+        await Bot.KickAsync(ctx.Channel!.Name, nick, reason, ct);
+        await AuditAsync($&#34;{ctx.Sender.Nick} kicked {nick} from {ctx.Channel.Name}&#34;, ct);
+    }
+
+    /// &lt;summary&gt;
+    /// Bans a user&#39;s hostmask from the channel. Demonstrates stacked [OnCommand]
+    /// attributes for command aliases — both &#34;!ban&#34; and &#34;!b&#34; trigger this handler.
+    /// Requires &#34;mod.ban&#34; permission.
+    /// &lt;/summary&gt;
+    [RequireAuth(&#34;mod.ban&#34;)]
+    [OnCommand(&#34;ban&#34;, ChannelOnly = true)]
+    [OnCommand(&#34;b&#34;, ChannelOnly = true)]
+    private async Task HandleBan(CommandContext ctx, CancellationToken ct)
+    {
+        if (ctx.Args.Count == 0)
+        {
+            await ctx.ReplyAsync(&#34;Usage: !ban &lt;nick&gt;&#34;, ct);
+            return;
+        }
+
+        var nick = ctx.Args[0];
+        var mask = $&#34;{nick}!*@*&#34;;
+        await Bot.SetModeAsync(ctx.Channel!.Name, &#34;+b&#34;, mask, ct);
+        _activeBans[nick] = DateTimeOffset.UtcNow.AddMinutes(_config.BanDurationMinutes);
+        await AuditAsync($&#34;{ctx.Sender.Nick} banned {nick} in {ctx.Channel.Name} for {_config.BanDurationMinutes}m&#34;, ct);
+    }
+
+    /// &lt;summary&gt;Mutes a user (+q mode). Requires &#34;mod.mute&#34; permission.&lt;/summary&gt;
+    [RequireAuth(&#34;mod.mute&#34;)]
+    [OnCommand(&#34;mute&#34;, ChannelOnly = true)]
+    private async Task HandleMute(CommandContext ctx, CancellationToken ct)
+    {
+        if (ctx.Args.Count == 0)
+        {
+            await ctx.ReplyAsync(&#34;Usage: !mute &lt;nick&gt;&#34;, ct);
+            return;
+        }
+
+        await Bot.SetModeAsync(ctx.Channel!.Name, &#34;+q&#34;, ctx.Args[0], ct);
+        await AuditAsync($&#34;{ctx.Sender.Nick} muted {ctx.Args[0]} in {ctx.Channel.Name}&#34;, ct);
+    }
+
+    /// &lt;summary&gt;
+    /// Sends a notice to the channel when a user joins. Demonstrates
+    /// [OnEvent] with UserJoinedEvent and Bot.SendNoticeAsync.
+    /// &lt;/summary&gt;
+    [OnEvent]
+    private async Task HandleJoin(UserJoinedEvent e, CancellationToken ct)
+    {
+        if (Bot.CaseComparer.Equals(e.User.Nick, Bot.Self.Nick))
+            return;
+
+        await Bot.SendNoticeAsync(e.Channel.Name,
+            $&#34;Welcome, {e.User.Nick}. This channel is moderated.&#34;, ct);
+    }
+
+    /// &lt;summary&gt;
+    /// Logs kicks to the audit channel. Demonstrates [OnEvent] with UserKickedEvent.
+    /// &lt;/summary&gt;
+    [OnEvent]
+    private async Task HandleKicked(UserKickedEvent e, CancellationToken ct)
+    {
+        await AuditAsync(
+            $&#34;{e.Kicked.Nick} was kicked from {e.Channel.Name} by {e.Kicker.Nick}: {e.Reason ?? &#34;no reason&#34;}&#34;, ct);
+    }
+
+    /// &lt;summary&gt;
+    /// Periodically removes expired bans. Demonstrates [OnInterval] for
+    /// background timer tasks that run independently of the event stream.
+    /// &lt;/summary&gt;
+    [OnInterval(Minutes = 5)]
+    private Task CleanupExpiredBans(CancellationToken ct)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var expired = _activeBans.Where(kvp =&gt; kvp.Value &lt;= now).Select(kvp =&gt; kvp.Key).ToList();
+        foreach (var nick in expired)
+            _activeBans.Remove(nick);
+
+        if (expired.Count &gt; 0)
+            Logger.LogInformation(&#34;Cleaned up {Count} expired ban(s)&#34;, expired.Count);
+
+        return Task.CompletedTask;
+    }
+
+    /// &lt;summary&gt;Sends an audit message to the configured audit channel, if set.&lt;/summary&gt;
+    internal async Task AuditAsync(string message, CancellationToken ct)
+    {
+        if (_config.AuditChannel is not null)
+            await Bot.SendMessageAsync(_config.AuditChannel, $&#34;[Mod] {message}&#34;, ct);
+    }
+
+    /// &lt;summary&gt;Exposes active bans for testing and admin commands.&lt;/summary&gt;
+    internal IReadOnlyDictionary&lt;string, DateTimeOffset&gt; ActiveBans =&gt; _activeBans;
+}
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-08-34-710Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-08-34-710Z" class="timestamp-link"><time datetime="2026-06-06T01:08:34.710Z" data-timestamp="2026-06-06T01:08:34.710Z">2026-06-06T01:08:34.710Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /workspaces/marv/src/plugins/Marv.Plugins.Moderation/ModerationPlugin.cs (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-08-50-468Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-08-50-468Z" class="timestamp-link"><time datetime="2026-06-06T01:08:50.468Z" data-timestamp="2026-06-06T01:08:50.468Z">2026-06-06T01:08:50.468Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01Fdc7jTz259C8KCCTUporA7">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">ModerationAdminCommands.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/plugins/Marv.Plugins.Moderation/ModerationAdminCommands.cs</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content">using Marv.Core.Platform;
+using Marv.Core.Plugin;
+using Marv.Core.Protocol;
+
+namespace Marv.Plugins.Moderation;
+
+/// &lt;summary&gt;
+/// Handler group for admin-facing moderation commands. Demonstrates the
+/// &lt;see cref=&#34;HandlerGroupAttribute&#34;/&gt; pattern for organizing handlers into separate
+/// classes, DM-only commands, raw message handling, and &lt;see cref=&#34;IBot.SendAndAwaitAsync&#34;/&gt;.
+/// &lt;/summary&gt;
+[HandlerGroup(typeof(ModerationPlugin))]
+public class ModerationAdminCommands
+{
+    private readonly IBot _bot;
+
+    /// &lt;summary&gt;
+    /// Creates a new &lt;see cref=&#34;ModerationAdminCommands&#34;/&gt;.
+    /// Constructor parameters are resolved from DI via &lt;see cref=&#34;IPluginActivator&#34;/&gt;.
+    /// &lt;/summary&gt;
+    public ModerationAdminCommands(IBot bot)
+    {
+        _bot = bot;
+    }
+
+    /// &lt;summary&gt;
+    /// Reports moderation stats via DM. Demonstrates &lt;c&gt;DirectOnly = true&lt;/c&gt; to
+    /// restrict a command to private messages only.
+    /// &lt;/summary&gt;
+    [OnCommand(&#34;modstats&#34;, DirectOnly = true)]
+    public async Task HandleModStats(CommandContext ctx, CancellationToken ct)
+    {
+        var channelCount = _bot.Channels.Count;
+        var userCount = _bot.Users.Count;
+        await ctx.ReplyAsync($&#34;Monitoring {channelCount} channel(s) with {userCount} visible user(s).&#34;, ct);
+    }
+
+    /// &lt;summary&gt;
+    /// Auto-joins channels on invite. Demonstrates &lt;see cref=&#34;OnRawMessageAttribute&#34;/&gt;
+    /// for handling IRC protocol messages not covered by typed events.
+    /// &lt;/summary&gt;
+    [OnRawMessage(&#34;INVITE&#34;)]
+    public async Task HandleInvite(IrcMessage msg, CancellationToken ct)
+    {
+        // INVITE params: [target_nick, channel]
+        if (msg.Parameters.Count &gt;= 2)
+            await _bot.JoinAsync(msg.Parameters[1], null, ct);
+    }
+
+    /// &lt;summary&gt;
+    /// Queries WHO information for a nick. Demonstrates &lt;see cref=&#34;IBot.SendAndAwaitAsync&#34;/&gt;
+    /// which sends an IRC command and waits for the server&#39;s correlated response.
+    /// &lt;/summary&gt;
+    [OnCommand(&#34;whois&#34;, DirectOnly = true)]
+    public async Task HandleWhois(CommandContext ctx, CancellationToken ct)
+    {
+        if (ctx.Args.Count == 0)
+        {
+            await ctx.ReplyAsync(&#34;Usage: !whois &lt;nick&gt;&#34;, ct);
+            return;
+        }
+
+        var nick = ctx.Args[0];
+        var replies = await _bot.SendAndAwaitAsync(
+            new IrcMessage(&#34;WHOIS&#34;, [nick]), ct);
+
+        var accountLine = replies.FirstOrDefault(r =&gt; r.Command == &#34;330&#34;);
+        if (accountLine is not null &amp;&amp; accountLine.Parameters.Count &gt;= 3)
+            await ctx.ReplyAsync($&#34;{nick} is logged in as {accountLine.Parameters[2]}&#34;, ct);
+        else
+            await ctx.ReplyAsync($&#34;{nick}: no account info available&#34;, ct);
+    }
+}
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-08-50-753Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-08-50-753Z" class="timestamp-link"><time datetime="2026-06-06T01:08:50.753Z" data-timestamp="2026-06-06T01:08:50.753Z">2026-06-06T01:08:50.753Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /workspaces/marv/src/plugins/Marv.Plugins.Moderation/ModerationAdminCommands.cs (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-08-54-528Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-08-54-528Z" class="timestamp-link"><time datetime="2026-06-06T01:08:54.528Z" data-timestamp="2026-06-06T01:08:54.528Z">2026-06-06T01:08:54.528Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the solution file and test project:</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-08-56-517Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-08-56-517Z" class="timestamp-link"><time datetime="2026-06-06T01:08:56.517Z" data-timestamp="2026-06-06T01:08:56.517Z">2026-06-06T01:08:56.517Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01Ca5LyUjHtV7V1TFXDmzXy1">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">Marv.slnx</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/Marv.slnx</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    &lt;Project Path=&#34;src/plugins/Marv.Plugins.Greet/Marv.Plugins.Greet.csproj&#34; /&gt;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    &lt;Project Path=&#34;src/plugins/Marv.Plugins.Greet/Marv.Plugins.Greet.csproj&#34; /&gt;
+    &lt;Project Path=&#34;src/plugins/Marv.Plugins.Moderation/Marv.Plugins.Moderation.csproj&#34; /&gt;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-08-56-816Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-08-56-816Z" class="timestamp-link"><time datetime="2026-06-06T01:08:56.816Z" data-timestamp="2026-06-06T01:08:56.816Z">2026-06-06T01:08:56.816Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/Marv.slnx has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-09-02-066Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-09-02-066Z" class="timestamp-link"><time datetime="2026-06-06T01:09:02.066Z" data-timestamp="2026-06-06T01:09:02.066Z">2026-06-06T01:09:02.066Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01C6r8iW8C68P84zDx7GVRNC">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">Marv.Plugins.Tests.csproj</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/tests/Marv.Plugins.Tests/Marv.Plugins.Tests.csproj</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    &lt;ProjectReference Include=&#34;..\..\src\plugins\Marv.Plugins.CannedResponses\Marv.Plugins.CannedResponses.csproj&#34; /&gt;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    &lt;ProjectReference Include=&#34;..\..\src\plugins\Marv.Plugins.CannedResponses\Marv.Plugins.CannedResponses.csproj&#34; /&gt;
+    &lt;ProjectReference Include=&#34;..\..\src\plugins\Marv.Plugins.Moderation\Marv.Plugins.Moderation.csproj&#34; /&gt;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-09-02-451Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-09-02-451Z" class="timestamp-link"><time datetime="2026-06-06T01:09:02.451Z" data-timestamp="2026-06-06T01:09:02.451Z">2026-06-06T01:09:02.451Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/tests/Marv.Plugins.Tests/Marv.Plugins.Tests.csproj has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-09-05-615Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-09-05-615Z" class="timestamp-link"><time datetime="2026-06-06T01:09:05.615Z" data-timestamp="2026-06-06T01:09:05.615Z">2026-06-06T01:09:05.615Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now write the tests:</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-09-34-761Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-09-34-761Z" class="timestamp-link"><time datetime="2026-06-06T01:09:34.761Z" data-timestamp="2026-06-06T01:09:34.761Z">2026-06-06T01:09:34.761Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01Njh1X73etRokWT9cZzpByY">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">ModerationPluginTests.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/tests/Marv.Plugins.Tests/ModerationPluginTests.cs</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content">using Xunit;
+using NSubstitute;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Marv.Core.Events;
+using Marv.Core.Platform;
+using Marv.Core.Plugin;
+using Marv.Plugins.Auth;
+using Marv.Plugins.Moderation;
+using Marv.Testing;
+
+namespace Marv.Plugins.Tests;
+
+/// &lt;summary&gt;
+/// Tests for the Moderation example plugin. Demonstrates testing patterns
+/// using &lt;see cref=&#34;PluginTestHarness{T}&#34;/&gt;, &lt;see cref=&#34;CommandContextBuilder&#34;/&gt;,
+/// and &lt;see cref=&#34;EventBuilder{T}&#34;/&gt; from the Marv.Testing package.
+/// &lt;/summary&gt;
+public class ModerationPluginTests
+{
+    private static PluginTestHarness&lt;ModerationPlugin&gt; CreateHarness(
+        IAuthorizationService? auth = null)
+    {
+        return PluginTestHarness&lt;ModerationPlugin&gt;.Create(
+            configureServices: services =&gt;
+            {
+                services.AddSingleton(Options.Create(new ModerationConfig
+                {
+                    AuditChannel = &#34;#audit&#34;,
+                    BanDurationMinutes = 30
+                }));
+                if (auth is not null)
+                    services.AddSingleton(auth);
+            });
+    }
+
+    [Fact]
+    public async Task Kick_SendsKickCommand()
+    {
+        var auth = Substitute.For&lt;IAuthorizationService&gt;();
+        auth.IsAuthorizedAsync(Arg.Any&lt;IUser&gt;(), Arg.Any&lt;string&gt;(), Arg.Any&lt;CancellationToken&gt;())
+            .Returns(true);
+        var harness = CreateHarness(auth);
+        await harness.LoadAsync();
+        await harness.ConnectedAsync();
+
+        var ctx = CommandContextBuilder.Create(&#34;kick&#34;, &#34;baduser being rude&#34;)
+            .InChannel(&#34;#test&#34;)
+            .From(&#34;moderator&#34;, &#34;mod_account&#34;)
+            .WithBot(harness.Bot)
+            .Build();
+        await harness.HandleEventAsync(MessageEventFrom(ctx));
+
+        await harness.Bot.Received().KickAsync(&#34;#test&#34;, &#34;baduser&#34;, &#34;being rude&#34;, Arg.Any&lt;CancellationToken&gt;());
+    }
+
+    [Fact]
+    public async Task Ban_SetsBanMode_AndTracksExpiry()
+    {
+        var auth = Substitute.For&lt;IAuthorizationService&gt;();
+        auth.IsAuthorizedAsync(Arg.Any&lt;IUser&gt;(), Arg.Any&lt;string&gt;(), Arg.Any&lt;CancellationToken&gt;())
+            .Returns(true);
+        var harness = CreateHarness(auth);
+        await harness.LoadAsync();
+        await harness.ConnectedAsync();
+
+        var ctx = CommandContextBuilder.Create(&#34;ban&#34;, &#34;spammer&#34;)
+            .InChannel(&#34;#test&#34;)
+            .From(&#34;moderator&#34;)
+            .WithBot(harness.Bot)
+            .Build();
+        await harness.HandleEventAsync(MessageEventFrom(ctx));
+
+        await harness.Bot.Received().SetModeAsync(&#34;#test&#34;, &#34;+b&#34;, &#34;spammer!*@*&#34;, Arg.Any&lt;CancellationToken&gt;());
+        Assert.True(harness.Plugin.ActiveBans.ContainsKey(&#34;spammer&#34;));
+    }
+
+    [Fact]
+    public async Task Ban_Alias_B_Works()
+    {
+        var auth = Substitute.For&lt;IAuthorizationService&gt;();
+        auth.IsAuthorizedAsync(Arg.Any&lt;IUser&gt;(), Arg.Any&lt;string&gt;(), Arg.Any&lt;CancellationToken&gt;())
+            .Returns(true);
+        var harness = CreateHarness(auth);
+        await harness.LoadAsync();
+        await harness.ConnectedAsync();
+
+        var ctx = CommandContextBuilder.Create(&#34;b&#34;, &#34;spammer&#34;)
+            .InChannel(&#34;#test&#34;)
+            .From(&#34;moderator&#34;)
+            .WithBot(harness.Bot)
+            .Build();
+        await harness.HandleEventAsync(MessageEventFrom(ctx));
+
+        await harness.Bot.Received().SetModeAsync(&#34;#test&#34;, &#34;+b&#34;, &#34;spammer!*@*&#34;, Arg.Any&lt;CancellationToken&gt;());
+    }
+
+    [Fact]
+    public async Task RequireAuth_DeniesUnauthorizedUser()
+    {
+        var auth = Substitute.For&lt;IAuthorizationService&gt;();
+        auth.IsAuthorizedAsync(Arg.Any&lt;IUser&gt;(), &#34;mod.kick&#34;, Arg.Any&lt;CancellationToken&gt;())
+            .Returns(false);
+        var harness = CreateHarness(auth);
+        await harness.LoadAsync();
+        await harness.ConnectedAsync();
+
+        var ctx = CommandContextBuilder.Create(&#34;kick&#34;, &#34;someone&#34;)
+            .InChannel(&#34;#test&#34;)
+            .From(&#34;nobody&#34;)
+            .WithBot(harness.Bot)
+            .Build();
+        await harness.HandleEventAsync(MessageEventFrom(ctx));
+
+        // KickAsync should NOT have been called
+        await harness.Bot.DidNotReceive().KickAsync(
+            Arg.Any&lt;string&gt;(), Arg.Any&lt;string&gt;(), Arg.Any&lt;string?&gt;(), Arg.Any&lt;CancellationToken&gt;());
+        // Should have sent denial reply
+        await harness.Bot.Received().SendMessageAsync(&#34;#test&#34;, &#34;Permission denied.&#34;, Arg.Any&lt;CancellationToken&gt;());
+    }
+
+    [Fact]
+    public async Task HandleJoin_SendsNotice_ForOtherUsers()
+    {
+        var harness = CreateHarness();
+        await harness.LoadAsync();
+        await harness.ConnectedAsync();
+
+        var evt = EventBuilder&lt;UserJoinedEvent&gt;.Create(raw =&gt; new UserJoinedEvent
+        {
+            Channel = MockChannel.Create(&#34;#test&#34;),
+            User = MockUser.Create(&#34;alice&#34;),
+            RawMessage = raw
+        }).Build();
+        await harness.HandleEventAsync(evt);
+
+        await harness.Bot.Received().SendNoticeAsync(&#34;#test&#34;,
+            &#34;Welcome, alice. This channel is moderated.&#34;, Arg.Any&lt;CancellationToken&gt;());
+    }
+
+    [Fact]
+    public async Task HandleJoin_DoesNotGreetSelf()
+    {
+        var harness = CreateHarness();
+        await harness.LoadAsync();
+        await harness.ConnectedAsync();
+
+        var evt = EventBuilder&lt;UserJoinedEvent&gt;.Create(raw =&gt; new UserJoinedEvent
+        {
+            Channel = MockChannel.Create(&#34;#test&#34;),
+            User = MockUser.Create(&#34;Marv&#34;),
+            RawMessage = raw
+        }).Build();
+        await harness.HandleEventAsync(evt);
+
+        await harness.Bot.DidNotReceive().SendNoticeAsync(
+            Arg.Any&lt;string&gt;(), Arg.Any&lt;string&gt;(), Arg.Any&lt;CancellationToken&gt;());
+    }
+
+    [Fact]
+    public async Task HandleKicked_SendsAuditMessage()
+    {
+        var harness = CreateHarness();
+        await harness.LoadAsync();
+        await harness.ConnectedAsync();
+
+        var evt = EventBuilder&lt;UserKickedEvent&gt;.Create(raw =&gt; new UserKickedEvent
+        {
+            Channel = MockChannel.Create(&#34;#test&#34;),
+            Kicker = MockUser.Create(&#34;op&#34;),
+            Kicked = MockUser.Create(&#34;victim&#34;),
+            Reason = &#34;spam&#34;,
+            RawMessage = raw
+        }).Build();
+        await harness.HandleEventAsync(evt);
+
+        await harness.Bot.Received().SendMessageAsync(&#34;#audit&#34;,
+            &#34;[Mod] victim was kicked from #test by op: spam&#34;, Arg.Any&lt;CancellationToken&gt;());
+    }
+
+    [Fact]
+    public async Task OnConnected_RebuildsBanDictionary()
+    {
+        var auth = Substitute.For&lt;IAuthorizationService&gt;();
+        auth.IsAuthorizedAsync(Arg.Any&lt;IUser&gt;(), Arg.Any&lt;string&gt;(), Arg.Any&lt;CancellationToken&gt;())
+            .Returns(true);
+        var harness = CreateHarness(auth);
+        await harness.LoadAsync();
+        await harness.ConnectedAsync();
+
+        // Ban a user
+        var ctx = CommandContextBuilder.Create(&#34;ban&#34;, &#34;spammer&#34;)
+            .InChannel(&#34;#test&#34;).From(&#34;mod&#34;).WithBot(harness.Bot).Build();
+        await harness.HandleEventAsync(MessageEventFrom(ctx));
+        Assert.True(harness.Plugin.ActiveBans.ContainsKey(&#34;spammer&#34;));
+
+        // Reconnect — bans should be cleared (connection-scoped state)
+        await harness.Plugin.OnDisconnectedAsync();
+        await harness.ConnectedAsync();
+        Assert.Empty(harness.Plugin.ActiveBans);
+    }
+
+    /// &lt;summary&gt;
+    /// Creates a MessageEvent from a CommandContext, needed because
+    /// HandleEventAsync dispatches on event type.
+    /// &lt;/summary&gt;
+    private static MessageEvent MessageEventFrom(CommandContext ctx)
+    {
+        return EventBuilder&lt;MessageEvent&gt;.Create(raw =&gt; new MessageEvent
+        {
+            Channel = ctx.Channel,
+            Sender = ctx.Sender,
+            Text = ctx.RawMessage.Parameters[^1],
+            RawMessage = raw
+        }).Build();
+    }
+}
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-09-34-862Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-09-34-862Z" class="timestamp-link"><time datetime="2026-06-06T01:09:34.862Z" data-timestamp="2026-06-06T01:09:34.862Z">2026-06-06T01:09:34.862Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /workspaces/marv/tests/Marv.Plugins.Tests/ModerationPluginTests.cs (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-09-37-477Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-09-37-477Z" class="timestamp-link"><time datetime="2026-06-06T01:09:37.477Z" data-timestamp="2026-06-06T01:09:37.477Z">2026-06-06T01:09:37.477Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now build and test:</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-09-38-431Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-09-38-431Z" class="timestamp-link"><time datetime="2026-06-06T01:09:38.431Z" data-timestamp="2026-06-06T01:09:38.431Z">2026-06-06T01:09:38.431Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01Ge9NUqMcRQ9fLuugzubd8p">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Build everything</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">dotnet build /workspaces/marv/Marv.slnx -c Release 2&gt;&amp;1 | tail -15</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-09-48-437Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-09-48-437Z" class="timestamp-link"><time datetime="2026-06-06T01:09:48.437Z" data-timestamp="2026-06-06T01:09:48.437Z">2026-06-06T01:09:48.437Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  Marv.Plugins.Moderation -&gt; /workspaces/marv/src/plugins/Marv.Plugins.Moderation/bin/Release/net10.0/Marv.Plugins.Moderation.dll
+  Marv.Core.Tests -&gt; /workspaces/marv/tests/Marv.Core.Tests/bin/Release/net10.0/Marv.Core.Tests.dll
+/workspaces/marv/tests/Marv.Plugins.Tests/ModerationPluginTests.cs(75,36): error CS1061: &#x27;ModerationPlugin&#x27; does not contain a definition for &#x27;ActiveBans&#x27; and no accessible extension method &#x27;ActiveBans&#x27; accepting a first argument of type &#x27;ModerationPlugin&#x27; could be found (are you missing a using directive or an assembly reference?) [/workspaces/marv/tests/Marv.Plugins.Tests/Marv.Plugins.Tests.csproj]
+/workspaces/marv/tests/Marv.Plugins.Tests/ModerationPluginTests.cs(195,36): error CS1061: &#x27;ModerationPlugin&#x27; does not contain a definition for &#x27;ActiveBans&#x27; and no accessible extension method &#x27;ActiveBans&#x27; accepting a first argument of type &#x27;ModerationPlugin&#x27; could be found (are you missing a using directive or an assembly reference?) [/workspaces/marv/tests/Marv.Plugins.Tests/Marv.Plugins.Tests.csproj]
+/workspaces/marv/tests/Marv.Plugins.Tests/ModerationPluginTests.cs(200,37): error CS1061: &#x27;ModerationPlugin&#x27; does not contain a definition for &#x27;ActiveBans&#x27; and no accessible extension method &#x27;ActiveBans&#x27; accepting a first argument of type &#x27;ModerationPlugin&#x27; could be found (are you missing a using directive or an assembly reference?) [/workspaces/marv/tests/Marv.Plugins.Tests/Marv.Plugins.Tests.csproj]
+
+Build FAILED.
+
+/workspaces/marv/tests/Marv.Plugins.Tests/ModerationPluginTests.cs(75,36): error CS1061: &#x27;ModerationPlugin&#x27; does not contain a definition for &#x27;ActiveBans&#x27; and no accessible extension method &#x27;ActiveBans&#x27; accepting a first argument of type &#x27;ModerationPlugin&#x27; could be found (are you missing a using directive or an assembly reference?) [/workspaces/marv/tests/Marv.Plugins.Tests/Marv.Plugins.Tests.csproj]
+/workspaces/marv/tests/Marv.Plugins.Tests/ModerationPluginTests.cs(195,36): error CS1061: &#x27;ModerationPlugin&#x27; does not contain a definition for &#x27;ActiveBans&#x27; and no accessible extension method &#x27;ActiveBans&#x27; accepting a first argument of type &#x27;ModerationPlugin&#x27; could be found (are you missing a using directive or an assembly reference?) [/workspaces/marv/tests/Marv.Plugins.Tests/Marv.Plugins.Tests.csproj]
+/workspaces/marv/tests/Marv.Plugins.Tests/ModerationPluginTests.cs(200,37): error CS1061: &#x27;ModerationPlugin&#x27; does not contain a definition for &#x27;ActiveBans&#x27; and no accessible extension method &#x27;ActiveBans&#x27; accepting a first argument of type &#x27;ModerationPlugin&#x27; could be found (are you missing a using directive or an assembly reference?) [/workspaces/marv/tests/Marv.Plugins.Tests/Marv.Plugins.Tests.csproj]
+    0 Warning(s)
+    3 Error(s)
+
+Time Elapsed 00:00:09.74</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-09-59-010Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-09-59-010Z" class="timestamp-link"><time datetime="2026-06-06T01:09:59.010Z" data-timestamp="2026-06-06T01:09:59.010Z">2026-06-06T01:09:59.010Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>The <code>internal</code> members aren't visible across assemblies. I need to add <code>InternalsVisibleTo</code>:</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T01-09-59-523Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T01-09-59-523Z" class="timestamp-link"><time datetime="2026-06-06T01:09:59.523Z" data-timestamp="2026-06-06T01:09:59.523Z">2026-06-06T01:09:59.523Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01A73DvCuVqP1YeRgY9Cp6rH"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/plugins/Marv.Plugins.Moderation/Marv.Plugins.Moderation.csproj&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T01-09-59-567Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T01-09-59-567Z" class="timestamp-link"><time datetime="2026-06-06T01:09:59.567Z" data-timestamp="2026-06-06T01:09:59.567Z">2026-06-06T01:09:59.567Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	&lt;Project Sdk=&quot;Microsoft.NET.Sdk&quot;&gt;
+2	
+3	  &lt;PropertyGroup&gt;
+4	    &lt;TargetFramework&gt;net10.0&lt;/TargetFramework&gt;
+5	    &lt;Nullable&gt;enable&lt;/Nullable&gt;
+6	    &lt;ImplicitUsings&gt;enable&lt;/ImplicitUsings&gt;
+7	    &lt;RootNamespace&gt;Marv.Plugins.Moderation&lt;/RootNamespace&gt;
+8	  &lt;/PropertyGroup&gt;
+9	
+10	  &lt;ItemGroup&gt;
+11	    &lt;ProjectReference Include=&quot;..\..\Marv.Core\Marv.Core.csproj&quot; Private=&quot;false&quot; /&gt;
+12	    &lt;ProjectReference Include=&quot;..\Marv.Plugins.Auth\Marv.Plugins.Auth.csproj&quot; Private=&quot;false&quot; /&gt;
+13	  &lt;/ItemGroup&gt;
+14	
+15	&lt;/Project&gt;
+16	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-004.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<span class="current">5</span>
+<a href="page-006.html">6</a>
+<a href="page-006.html">Next &rarr;</a>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

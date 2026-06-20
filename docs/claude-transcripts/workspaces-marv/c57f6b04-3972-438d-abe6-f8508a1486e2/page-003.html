@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 3</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 3/6</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-002.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<span class="current">3</span>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<a href="page-006.html">6</a>
+<a href="page-004.html">Next &rarr;</a>
+</div>
+
+        
+<div class="message user" id="msg-2026-06-06T00-20-10-271Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-06T00-20-10-271Z" class="timestamp-link"><time datetime="2026-06-06T00:20:10.271Z" data-timestamp="2026-06-06T00:20:10.271Z">2026-06-06T00:20:10.271Z</time></a></div><div class="message-content">
+<div class="user-content"><p><local-command-stdout>Set effort level to medium (saved as your default for new sessions): Balanced approach with standard implementation and testing</local-command-stdout></p></div></div></div>
+<div class="message user" id="msg-2026-06-06T00-26-58-240Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-06T00-26-58-240Z" class="timestamp-link"><time datetime="2026-06-06T00:26:58.240Z" data-timestamp="2026-06-06T00:26:58.240Z">2026-06-06T00:26:58.240Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Create a new change spec for adding more action methods to the bot - in essence, I don't want plugins to have to SendMessageAsync(new IrcMessage("KICK", ...)) when they could just call IBot.KickUserAsync(...)</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-27-05-590Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-27-05-590Z" class="timestamp-link"><time datetime="2026-06-06T00:27:05.590Z" data-timestamp="2026-06-06T00:27:05.590Z">2026-06-06T00:27:05.590Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-27-06-571Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-27-06-571Z" class="timestamp-link"><time datetime="2026-06-06T00:27:06.571Z" data-timestamp="2026-06-06T00:27:06.571Z">2026-06-06T00:27:06.571Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Let me check the current spec numbering and IBot surface to scope this properly.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-27-07-230Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-27-07-230Z" class="timestamp-link"><time datetime="2026-06-06T00:27:07.230Z" data-timestamp="2026-06-06T00:27:07.230Z">2026-06-06T00:27:07.230Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01JchFHorR3cbPvndmyM5xAo"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/README.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-27-07-265Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-27-07-265Z" class="timestamp-link"><time datetime="2026-06-06T00:27:07.265Z" data-timestamp="2026-06-06T00:27:07.265Z">2026-06-06T00:27:07.265Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# Change Specifications
+2	
+3	Actionable change specifications derived from downstream plugin project
+4	feedback (`docs/downstream_suggestions/`). Each spec is a self-contained
+5	document describing a single change or closely related group of changes.
+6	
+7	Specs are numbered in recommended implementation order.
+8	
+9	## Index
+10	
+11	| # | Spec | Scope | Complexity | Dependencies | Status |
+12	|---|---|---|---|---|---|
+13	| 1 | [Command Prefix Configuration](001-command-prefix-config.md) | Core | Small | None | **Done** |
+14	| 2 | [IHttpClientFactory Registration](002-httpclient-registration.md) | Host | Trivial | None | **Done** |
+15	| 3 | [Handler Dispatch Filters](003-handler-dispatch-filters.md) | Core | Small | None | **Done** |
+16	| 4 | [Bulk Channel Join](004-bulk-channel-join.md) | Core | Small-Medium | None | **Done** |
+17	| 5 | [Handler Filter Pipeline](005-handler-filter-pipeline.md) | Core | Medium | #3 | **Done** |
+18	| 6 | [Test Infrastructure](006-test-infrastructure.md) | New package | Medium | None | **Done** |
+19	| 7 | [Plugin API Documentation](007-plugin-api-documentation.md) | Docs | Medium | None | **Done** |
+20	| 8 | [Example Plugin](008-example-plugin.md) | Examples | Medium | #3, #5 | |
+21	
+22	Specs 1-5 are code changes. Specs 6-8 are documentation/DX changes.
+23	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-27-07-741Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-27-07-741Z" class="timestamp-link"><time datetime="2026-06-06T00:27:07.741Z" data-timestamp="2026-06-06T00:27:07.741Z">2026-06-06T00:27:07.741Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01DmAVxtNkDdGXNY4TuhTgcf"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Platform/IBot.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-27-07-759Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-27-07-759Z" class="timestamp-link"><time datetime="2026-06-06T00:27:07.759Z" data-timestamp="2026-06-06T00:27:07.759Z">2026-06-06T00:27:07.759Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using Marv.Core.Protocol;
+2	
+3	namespace Marv.Core.Platform;
+4	
+5	/// &lt;summary&gt;
+6	/// The primary interface plugins interact with. Provides methods for sending messages,
+7	/// querying channel/user state, and checking capability availability.
+8	/// All Send*Async methods are thread-safe and can be called from any context.
+9	/// &lt;/summary&gt;
+10	public interface IBot
+11	{
+12	    /// &lt;summary&gt;The bot&#x27;s own user identity.&lt;/summary&gt;
+13	    IUser Self { get; }
+14	
+15	    /// &lt;summary&gt;The configured command prefix (e.g. &quot;!&quot;).&lt;/summary&gt;
+16	    string CommandPrefix { get; }
+17	
+18	    /// &lt;summary&gt;Sends a PRIVMSG to the specified target (channel or nick).&lt;/summary&gt;
+19	    Task SendMessageAsync(string target, string text, CancellationToken ct);
+20	
+21	    /// &lt;summary&gt;Sends a NOTICE to the specified target (channel or nick).&lt;/summary&gt;
+22	    Task SendNoticeAsync(string target, string text, CancellationToken ct);
+23	
+24	    /// &lt;summary&gt;Sends a CTCP ACTION to the specified target.&lt;/summary&gt;
+25	    Task SendActionAsync(string target, string text, CancellationToken ct);
+26	
+27	    /// &lt;summary&gt;Sends a raw IRC message through the connection.&lt;/summary&gt;
+28	    Task SendRawAsync(IrcMessage message, CancellationToken ct);
+29	
+30	    /// &lt;summary&gt;Joins a channel, optionally with a key.&lt;/summary&gt;
+31	    Task JoinAsync(string channel, string? key, CancellationToken ct);
+32	
+33	    /// &lt;summary&gt;
+34	    /// Joins multiple channels in a single IRC JOIN command.
+35	    /// Channel names are comma-separated per RFC 2812. Automatically
+36	    /// batches into multiple commands if the channel list exceeds the
+37	    /// 512-byte IRC line length limit. Channels with keys should use
+38	    /// &lt;see cref=&quot;JoinAsync&quot;/&gt; individually.
+39	    /// &lt;/summary&gt;
+40	    Task JoinMultipleAsync(IReadOnlyList&lt;string&gt; channels, CancellationToken ct);
+41	
+42	    /// &lt;summary&gt;Parts (leaves) a channel, optionally with a reason.&lt;/summary&gt;
+43	    Task PartAsync(string channel, string? reason, CancellationToken ct);
+44	
+45	    /// &lt;summary&gt;
+46	    /// Dictionary of channels the bot is in, keyed by case-mapped channel name.
+47	    /// &lt;/summary&gt;
+48	    IReadOnlyDictionary&lt;string, IChannel&gt; Channels { get; }
+49	
+50	    /// &lt;summary&gt;
+51	    /// Dictionary of known users, keyed by case-mapped nick.
+52	    /// &lt;/summary&gt;
+53	    IReadOnlyDictionary&lt;string, IUser&gt; Users { get; }
+54	
+55	    /// &lt;summary&gt;Server configuration from ISUPPORT.&lt;/summary&gt;
+56	    IServerInfo ServerInfo { get; }
+57	
+58	    /// &lt;summary&gt;IRCv3 capability negotiation state.&lt;/summary&gt;
+59	    ICapabilityManager Capabilities { get; }
+60	
+61	    /// &lt;summary&gt;
+62	    /// Sends an IRC command and waits for the server&#x27;s correlated response.
+63	    /// Uses labeled-response to correlate, or falls back to timeout-based correlation.
+64	    /// &lt;/summary&gt;
+65	    Task&lt;IReadOnlyList&lt;IrcMessage&gt;&gt; SendAndAwaitAsync(IrcMessage message, CancellationToken ct);
+66	}
+67	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-27-11-631Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-27-11-631Z" class="timestamp-link"><time datetime="2026-06-06T00:27:11.631Z" data-timestamp="2026-06-06T00:27:11.631Z">2026-06-06T00:27:11.631Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Let me also check IrcMessage constructors to understand the current ergonomics of the raw approach.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-27-12-171Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-27-12-171Z" class="timestamp-link"><time datetime="2026-06-06T00:27:12.171Z" data-timestamp="2026-06-06T00:27:12.171Z">2026-06-06T00:27:12.171Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01CTu4atZ1VBTxTGg3uxKzeC"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Protocol/IrcMessage.cs&#34;,
+  &#34;limit&#34;: 60
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-27-12-198Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-27-12-198Z" class="timestamp-link"><time datetime="2026-06-06T00:27:12.198Z" data-timestamp="2026-06-06T00:27:12.198Z">2026-06-06T00:27:12.198Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	namespace Marv.Core.Protocol;
+2	
+3	/// &lt;summary&gt;
+4	/// Immutable representation of an IRC message, used for both inbound and outbound messages.
+5	/// The trailing parameter (after &#x27;:&#x27;) is always folded into &lt;see cref=&quot;Parameters&quot;/&gt;
+6	/// as the last element — there is no separate trailing property.
+7	/// &lt;/summary&gt;
+8	public sealed class IrcMessage
+9	{
+10	    /// &lt;summary&gt;IRCv3 message tags, with values already unescaped.&lt;/summary&gt;
+11	    public IReadOnlyDictionary&lt;string, string?&gt; Tags { get; }
+12	
+13	    /// &lt;summary&gt;
+14	    /// The message source (nick!user@host prefix). Null for outbound messages.
+15	    /// &lt;/summary&gt;
+16	    public MessageSource? Source { get; }
+17	
+18	    /// &lt;summary&gt;The IRC command, always uppercase (e.g. &quot;PRIVMSG&quot;, &quot;001&quot;, &quot;CAP&quot;).&lt;/summary&gt;
+19	    public string Command { get; }
+20	
+21	    /// &lt;summary&gt;The message parameters, including any trailing parameter as the last element.&lt;/summary&gt;
+22	    public IReadOnlyList&lt;string&gt; Parameters { get; }
+23	
+24	    /// &lt;summary&gt;
+25	    /// Creates a new IRC message with all components.
+26	    /// &lt;/summary&gt;
+27	    public IrcMessage(
+28	        IReadOnlyDictionary&lt;string, string?&gt;? tags,
+29	        MessageSource? source,
+30	        string command,
+31	        IReadOnlyList&lt;string&gt; parameters)
+32	    {
+33	        Tags = tags ?? EmptyTags;
+34	        Source = source;
+35	        Command = command.ToUpperInvariant();
+36	        Parameters = parameters;
+37	    }
+38	
+39	    /// &lt;summary&gt;
+40	    /// Creates a new outbound IRC message (no source, no tags).
+41	    /// &lt;/summary&gt;
+42	    public IrcMessage(string command, IReadOnlyList&lt;string&gt; parameters)
+43	        : this(null, null, command, parameters)
+44	    {
+45	    }
+46	
+47	    /// &lt;summary&gt;
+48	    /// Creates a new outbound IRC message with tags (no source).
+49	    /// &lt;/summary&gt;
+50	    public IrcMessage(IReadOnlyDictionary&lt;string, string?&gt; tags, string command, IReadOnlyList&lt;string&gt; parameters)
+51	        : this(tags, null, command, parameters)
+52	    {
+53	    }
+54	
+55	    private static readonly IReadOnlyDictionary&lt;string, string?&gt; EmptyTags =
+56	        new Dictionary&lt;string, string?&gt;().AsReadOnly();
+57	}
+58	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-27-15-171Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-27-15-171Z" class="timestamp-link"><time datetime="2026-06-06T00:27:15.171Z" data-timestamp="2026-06-06T00:27:15.171Z">2026-06-06T00:27:15.171Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now I have a clear picture. Let me write the change spec.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-27-40-829Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-27-40-829Z" class="timestamp-link"><time datetime="2026-06-06T00:27:40.829Z" data-timestamp="2026-06-06T00:27:40.829Z">2026-06-06T00:27:40.829Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01K9Ym4tyuwvYtN3Wd6hje9W">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">009-bot-action-methods.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/009-bot-action-methods.md</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content"># CS-009: Bot Action Convenience Methods
+
+**Source:** Plugin DX feedback
+**Scope:** Core (IBot interface)
+**Complexity:** Small-Medium
+**Breaking changes:** Additive only (new interface members with default
+implementations)
+
+---
+
+## Problem
+
+Plugins that need to perform common IRC actions beyond messaging — kicking
+users, setting modes, changing topics, sending invites — must construct raw
+`IrcMessage` objects and call `SendRawAsync`:
+
+```csharp
+await Bot.SendRawAsync(new IrcMessage(&#34;KICK&#34;, [channel, nick, reason]), ct);
+await Bot.SendRawAsync(new IrcMessage(&#34;MODE&#34;, [channel, &#34;+o&#34;, nick]), ct);
+await Bot.SendRawAsync(new IrcMessage(&#34;TOPIC&#34;, [channel, newTopic]), ct);
+await Bot.SendRawAsync(new IrcMessage(&#34;INVITE&#34;, [nick, channel]), ct);
+```
+
+This is error-prone (parameter ordering varies by command, easy to forget
+trailing parameters) and forces plugin authors to know IRC protocol details
+that the bot should abstract away. The existing `JoinAsync`, `PartAsync`,
+`SendMessageAsync` etc. demonstrate the expected abstraction level — these
+actions are simply missing from it.
+
+## Changes
+
+### 1. Add action methods to `IBot`
+
+```csharp
+// Channel management
+Task SetTopicAsync(string channel, string topic, CancellationToken ct);
+Task InviteAsync(string nick, string channel, CancellationToken ct);
+
+// Moderation
+Task KickAsync(string channel, string nick, string? reason, CancellationToken ct);
+Task SetModeAsync(string target, string modeString, CancellationToken ct);
+Task SetModeAsync(string target, string modeString, string parameter, CancellationToken ct);
+
+// Nick
+Task ChangeNickAsync(string newNick, CancellationToken ct);
+```
+
+Each method constructs the correct `IrcMessage` internally and sends it
+through the existing write pipeline (throttle-aware, thread-safe).
+
+### 2. Implement in `IrcBot`
+
+All methods delegate to the existing `SendRawAsync` path. No new protocol
+handling or state tracking required — the inbound message processor already
+handles the server&#39;s responses to these commands (TOPIC replies update
+`IChannel.Topic`, MODE replies update `IChannel.Modes`, etc.).
+
+`SetModeAsync` takes a mode string like `&#34;+o&#34;` or `&#34;-b&#34;` plus an optional
+parameter. For multi-mode changes (`&#34;+ov nick1 nick2&#34;`), plugins can use
+the single-parameter overload with the full mode string, or call
+`SendRawAsync` directly.
+
+### 3. Update MockBot (Marv.Testing)
+
+`MockBot.Create()` already returns an NSubstitute mock of `IBot`, so the
+new methods are automatically stubbed. No changes needed unless we want
+to add verification helpers.
+
+### 4. Update PLUGIN_API.md
+
+Add the new methods to the IBot table in §5.
+
+## Design decisions
+
+**Why not a fluent builder or ModeBuilder?** The raw `SetModeAsync(target,
+modeString, param)` covers the common single-mode case cleanly. Multi-mode
+changes are uncommon enough that `SendRawAsync` is acceptable. A builder
+would add API surface without proportional value.
+
+**Why not WHOIS/WHO?** These are query commands that return multi-line
+responses. They&#39;re better served by `SendAndAwaitAsync` which already
+handles labeled-response correlation. Adding typed wrappers for queries
+is a separate concern.
+
+**Default interface implementations?** No — `IBot` has a single
+implementation (`IrcBot`), and default implementations would just call
+`SendRawAsync` which is already on the interface. Implementing directly
+in `IrcBot` is simpler and avoids the DIM complexity.
+
+## Impact
+
+- **Plugin DX:** Common moderation and channel management actions become
+  single method calls instead of raw protocol construction.
+- **Safety:** Correct parameter ordering is enforced by the method
+  signature rather than relying on the plugin author to remember it.
+- **API surface:** 6 new methods on `IBot`. All are thin wrappers.
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-27-40-971Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-27-40-971Z" class="timestamp-link"><time datetime="2026-06-06T00:27:40.971Z" data-timestamp="2026-06-06T00:27:40.971Z">2026-06-06T00:27:40.971Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /workspaces/marv/docs/change_specs/009-bot-action-methods.md (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-27-49-761Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-27-49-761Z" class="timestamp-link"><time datetime="2026-06-06T00:27:49.761Z" data-timestamp="2026-06-06T00:27:49.761Z">2026-06-06T00:27:49.761Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01FaK9Xdyd4HSdJnVeB6wnxe">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">README.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/README.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">| 8 | [Example Plugin](008-example-plugin.md) | Examples | Medium | #3, #5 | |
+
+Specs 1-5 are code changes. Specs 6-8 are documentation/DX changes.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">| 8 | [Example Plugin](008-example-plugin.md) | Examples | Medium | #3, #5 | |
+| 9 | [Bot Action Methods](009-bot-action-methods.md) | Core | Small-Medium | None | |
+
+Specs 1-5 and 9 are code changes. Specs 6-8 are documentation/DX changes.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-27-49-792Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-27-49-792Z" class="timestamp-link"><time datetime="2026-06-06T00:27:49.792Z" data-timestamp="2026-06-06T00:27:49.792Z">2026-06-06T00:27:49.792Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/README.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-27-52-789Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-27-52-789Z" class="timestamp-link"><time datetime="2026-06-06T00:27:52.789Z" data-timestamp="2026-06-06T00:27:52.789Z">2026-06-06T00:27:52.789Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now log the prompt and commit.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-27-53-067Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-27-53-067Z" class="timestamp-link"><time datetime="2026-06-06T00:27:53.067Z" data-timestamp="2026-06-06T00:27:53.067Z">2026-06-06T00:27:53.067Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01WmxB9FtXDiRWrLCBXX9ATt"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/prompts.md&#34;,
+  &#34;offset&#34;: 884,
+  &#34;limit&#34;: 10
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-27-53-095Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-27-53-095Z" class="timestamp-link"><time datetime="2026-06-06T00:27:53.095Z" data-timestamp="2026-06-06T00:27:53.095Z">2026-06-06T00:27:53.095Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>884	
+885	**Date**: 2026-06-06T00:00:00Z
+886	
+887	**Prompt**:
+888	
+889	&gt; Slight change to PLUGIN_API.md - remove the references to IAuthorizationService; this is a part of an example plugin, not Marv itself.
+890	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-27-58-922Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-27-58-922Z" class="timestamp-link"><time datetime="2026-06-06T00:27:58.922Z" data-timestamp="2026-06-06T00:27:58.922Z">2026-06-06T00:27:58.922Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01MeQvNec72hfC15qySiTCtt">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">prompts.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/prompts.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">&gt; Slight change to PLUGIN_API.md - remove the references to IAuthorizationService; this is a part of an example plugin, not Marv itself.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">&gt; Slight change to PLUGIN_API.md - remove the references to IAuthorizationService; this is a part of an example plugin, not Marv itself.
+
+## Create change spec for IBot action convenience methods
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+&gt; Create a new change spec for adding more action methods to the bot - in essence, I don&#39;t want plugins to have to SendMessageAsync(new IrcMessage(&#34;KICK&#34;, ...)) when they could just call IBot.KickUserAsync(...)</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-27-58-967Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-27-58-967Z" class="timestamp-link"><time datetime="2026-06-06T00:27:58.967Z" data-timestamp="2026-06-06T00:27:58.967Z">2026-06-06T00:27:58.967Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/prompts.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-28-04-968Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-28-04-968Z" class="timestamp-link"><time datetime="2026-06-06T00:28:04.968Z" data-timestamp="2026-06-06T00:28:04.968Z">2026-06-06T00:28:04.968Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01UdfjNs1JT8cFCXoGtNy8Pc">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit the new change spec</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add docs/change_specs/009-bot-action-methods.md docs/change_specs/README.md docs/prompts.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Add CS-009: Bot action convenience methods
+
+Change spec for adding KickAsync, SetTopicAsync, InviteAsync,
+SetModeAsync, and ChangeNickAsync to IBot so plugins don&#39;t need
+to construct raw IrcMessage objects for common IRC actions.
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-28-05-105Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-28-05-105Z" class="timestamp-link"><time datetime="2026-06-06T00:28:05.105Z" data-timestamp="2026-06-06T00:28:05.105Z">2026-06-06T00:28:05.105Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">043f149</span> Add CS-009: Bot action convenience methods</div><pre>3 files changed, 106 insertions(+), 1 deletion(-)
+ create mode 100644 docs/change_specs/009-bot-action-methods.md</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-28-11-234Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-28-11-234Z" class="timestamp-link"><time datetime="2026-06-06T00:28:11.234Z" data-timestamp="2026-06-06T00:28:11.234Z">2026-06-06T00:28:11.234Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Created <strong>CS-009: Bot Action Convenience Methods</strong>. It proposes 6 new methods on <code>IBot</code>:</p>
+<ul>
+<li><code>KickAsync(channel, nick, reason?, ct)</code> </li>
+<li><code>SetTopicAsync(channel, topic, ct)</code></li>
+<li><code>InviteAsync(nick, channel, ct)</code></li>
+<li><code>SetModeAsync(target, modeString, ct)</code> + overload with parameter</li>
+<li><code>ChangeNickAsync(newNick, ct)</code></li>
+</ul>
+<p>All are thin wrappers around <code>SendRawAsync</code> — no new protocol handling needed since inbound responses are already processed. WHOIS/WHO were intentionally excluded since they're query commands better served by the existing <code>SendAndAwaitAsync</code>.</p></div></div></div>
+<div class="message user" id="msg-2026-06-06T00-38-33-716Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-06T00-38-33-716Z" class="timestamp-link"><time datetime="2026-06-06T00:38:33.716Z" data-timestamp="2026-06-06T00:38:33.716Z">2026-06-06T00:38:33.716Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Some notes about that change spec:
+- Rename SetModeAsync to SetChannelModeAsync
+- Consider adding VoiceUser/OpUser methods (how do these interact with ISUPPORT PREFIX parameter?)</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-38-38-526Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-38-38-526Z" class="timestamp-link"><time datetime="2026-06-06T00:38:38.526Z" data-timestamp="2026-06-06T00:38:38.526Z">2026-06-06T00:38:38.526Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-38-39-149Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-38-39-149Z" class="timestamp-link"><time datetime="2026-06-06T00:38:39.149Z" data-timestamp="2026-06-06T00:38:39.149Z">2026-06-06T00:38:39.149Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_016wMNfY63JJrH5L8n6DAX9C"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/009-bot-action-methods.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-38-39-243Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-38-39-243Z" class="timestamp-link"><time datetime="2026-06-06T00:38:39.243Z" data-timestamp="2026-06-06T00:38:39.243Z">2026-06-06T00:38:39.243Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# CS-009: Bot Action Convenience Methods
+2	
+3	**Source:** Plugin DX feedback
+4	**Scope:** Core (IBot interface)
+5	**Complexity:** Small-Medium
+6	**Breaking changes:** Additive only (new interface members with default
+7	implementations)
+8	
+9	---
+10	
+11	## Problem
+12	
+13	Plugins that need to perform common IRC actions beyond messaging — kicking
+14	users, setting modes, changing topics, sending invites — must construct raw
+15	`IrcMessage` objects and call `SendRawAsync`:
+16	
+17	```csharp
+18	await Bot.SendRawAsync(new IrcMessage(&quot;KICK&quot;, [channel, nick, reason]), ct);
+19	await Bot.SendRawAsync(new IrcMessage(&quot;MODE&quot;, [channel, &quot;+o&quot;, nick]), ct);
+20	await Bot.SendRawAsync(new IrcMessage(&quot;TOPIC&quot;, [channel, newTopic]), ct);
+21	await Bot.SendRawAsync(new IrcMessage(&quot;INVITE&quot;, [nick, channel]), ct);
+22	```
+23	
+24	This is error-prone (parameter ordering varies by command, easy to forget
+25	trailing parameters) and forces plugin authors to know IRC protocol details
+26	that the bot should abstract away. The existing `JoinAsync`, `PartAsync`,
+27	`SendMessageAsync` etc. demonstrate the expected abstraction level — these
+28	actions are simply missing from it.
+29	
+30	## Changes
+31	
+32	### 1. Add action methods to `IBot`
+33	
+34	```csharp
+35	// Channel management
+36	Task SetTopicAsync(string channel, string topic, CancellationToken ct);
+37	Task InviteAsync(string nick, string channel, CancellationToken ct);
+38	
+39	// Moderation
+40	Task KickAsync(string channel, string nick, string? reason, CancellationToken ct);
+41	Task SetModeAsync(string target, string modeString, CancellationToken ct);
+42	Task SetModeAsync(string target, string modeString, string parameter, CancellationToken ct);
+43	
+44	// Nick
+45	Task ChangeNickAsync(string newNick, CancellationToken ct);
+46	```
+47	
+48	Each method constructs the correct `IrcMessage` internally and sends it
+49	through the existing write pipeline (throttle-aware, thread-safe).
+50	
+51	### 2. Implement in `IrcBot`
+52	
+53	All methods delegate to the existing `SendRawAsync` path. No new protocol
+54	handling or state tracking required — the inbound message processor already
+55	handles the server&#x27;s responses to these commands (TOPIC replies update
+56	`IChannel.Topic`, MODE replies update `IChannel.Modes`, etc.).
+57	
+58	`SetModeAsync` takes a mode string like `&quot;+o&quot;` or `&quot;-b&quot;` plus an optional
+59	parameter. For multi-mode changes (`&quot;+ov nick1 nick2&quot;`), plugins can use
+60	the single-parameter overload with the full mode string, or call
+61	`SendRawAsync` directly.
+62	
+63	### 3. Update MockBot (Marv.Testing)
+64	
+65	`MockBot.Create()` already returns an NSubstitute mock of `IBot`, so the
+66	new methods are automatically stubbed. No changes needed unless we want
+67	to add verification helpers.
+68	
+69	### 4. Update PLUGIN_API.md
+70	
+71	Add the new methods to the IBot table in §5.
+72	
+73	## Design decisions
+74	
+75	**Why not a fluent builder or ModeBuilder?** The raw `SetModeAsync(target,
+76	modeString, param)` covers the common single-mode case cleanly. Multi-mode
+77	changes are uncommon enough that `SendRawAsync` is acceptable. A builder
+78	would add API surface without proportional value.
+79	
+80	**Why not WHOIS/WHO?** These are query commands that return multi-line
+81	responses. They&#x27;re better served by `SendAndAwaitAsync` which already
+82	handles labeled-response correlation. Adding typed wrappers for queries
+83	is a separate concern.
+84	
+85	**Default interface implementations?** No — `IBot` has a single
+86	implementation (`IrcBot`), and default implementations would just call
+87	`SendRawAsync` which is already on the interface. Implementing directly
+88	in `IrcBot` is simpler and avoids the DIM complexity.
+89	
+90	## Impact
+91	
+92	- **Plugin DX:** Common moderation and channel management actions become
+93	  single method calls instead of raw protocol construction.
+94	- **Safety:** Correct parameter ordering is enforced by the method
+95	  signature rather than relying on the plugin author to remember it.
+96	- **API surface:** 6 new methods on `IBot`. All are thin wrappers.
+97	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-38-40-576Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-38-40-576Z" class="timestamp-link"><time datetime="2026-06-06T00:38:40.576Z" data-timestamp="2026-06-06T00:38:40.576Z">2026-06-06T00:38:40.576Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_0133GcELbbYUuusrR7RxFBCg">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Find PrefixMapping type</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;PrefixMapping\|class PrefixMapping\|PREFIX&#34; /workspaces/marv/src/Marv.Core/Platform/ --include=&#34;*.cs&#34; | head -10</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-38-40-660Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-38-40-660Z" class="timestamp-link"><time datetime="2026-06-06T00:38:40.660Z" data-timestamp="2026-06-06T00:38:40.660Z">2026-06-06T00:38:40.660Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/Marv.Core/Platform/IServerInfo.cs:20:    /// &lt;summary&gt;The prefix-to-mode mapping (e.g. @ → o, + → v) from PREFIX.&lt;/summary&gt;
+/workspaces/marv/src/Marv.Core/Platform/IServerInfo.cs:21:    PrefixMapping Prefix { get; }
+/workspaces/marv/src/Marv.Core/Platform/PrefixMapping.cs:5:/// as defined by the PREFIX ISUPPORT token (e.g. &quot;(ov)@+&quot;).
+/workspaces/marv/src/Marv.Core/Platform/PrefixMapping.cs:7:public sealed class PrefixMapping
+/workspaces/marv/src/Marv.Core/Platform/PrefixMapping.cs:14:    /// Creates a new &lt;see cref=&quot;PrefixMapping&quot;/&gt; from ordered mode/prefix pairs.
+/workspaces/marv/src/Marv.Core/Platform/PrefixMapping.cs:17:    public PrefixMapping(IReadOnlyList&lt;(char Mode, char Prefix)&gt; entries)
+/workspaces/marv/src/Marv.Core/Platform/PrefixMapping.cs:43:    /// Parses the PREFIX ISUPPORT value (e.g. &quot;(ov)@+&quot;).
+/workspaces/marv/src/Marv.Core/Platform/PrefixMapping.cs:45:    public static PrefixMapping Parse(string prefixValue)
+/workspaces/marv/src/Marv.Core/Platform/PrefixMapping.cs:64:        return new PrefixMapping(entries);
+/workspaces/marv/src/Marv.Core/Platform/PrefixMapping.cs:67:    /// &lt;summary&gt;Default prefix mapping for servers that don&#x27;t advertise PREFIX.&lt;/summary&gt;</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-38-44-105Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-38-44-105Z" class="timestamp-link"><time datetime="2026-06-06T00:38:44.105Z" data-timestamp="2026-06-06T00:38:44.105Z">2026-06-06T00:38:44.105Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01FTWRCNANKP28KZoFymrB6r"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Platform/PrefixMapping.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-38-44-122Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-38-44-122Z" class="timestamp-link"><time datetime="2026-06-06T00:38:44.122Z" data-timestamp="2026-06-06T00:38:44.122Z">2026-06-06T00:38:44.122Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	namespace Marv.Core.Platform;
+2	
+3	/// &lt;summary&gt;
+4	/// Maps channel membership mode characters to their display prefixes,
+5	/// as defined by the PREFIX ISUPPORT token (e.g. &quot;(ov)@+&quot;).
+6	/// &lt;/summary&gt;
+7	public sealed class PrefixMapping
+8	{
+9	    private readonly IReadOnlyList&lt;(char Mode, char Prefix)&gt; _entries;
+10	    private readonly Dictionary&lt;char, char&gt; _modeToPrefix;
+11	    private readonly Dictionary&lt;char, char&gt; _prefixToMode;
+12	
+13	    /// &lt;summary&gt;
+14	    /// Creates a new &lt;see cref=&quot;PrefixMapping&quot;/&gt; from ordered mode/prefix pairs.
+15	    /// Entries are ordered by descending privilege (highest first).
+16	    /// &lt;/summary&gt;
+17	    public PrefixMapping(IReadOnlyList&lt;(char Mode, char Prefix)&gt; entries)
+18	    {
+19	        _entries = entries;
+20	        _modeToPrefix = entries.ToDictionary(e =&gt; e.Mode, e =&gt; e.Prefix);
+21	        _prefixToMode = entries.ToDictionary(e =&gt; e.Prefix, e =&gt; e.Mode);
+22	    }
+23	
+24	    /// &lt;summary&gt;All known prefix characters, ordered by descending privilege.&lt;/summary&gt;
+25	    public IEnumerable&lt;char&gt; Prefixes =&gt; _entries.Select(e =&gt; e.Prefix);
+26	
+27	    /// &lt;summary&gt;All known mode characters, ordered by descending privilege.&lt;/summary&gt;
+28	    public IEnumerable&lt;char&gt; Modes =&gt; _entries.Select(e =&gt; e.Mode);
+29	
+30	    /// &lt;summary&gt;Gets the display prefix for a mode character (e.g. &#x27;o&#x27; → &#x27;@&#x27;).&lt;/summary&gt;
+31	    public char? GetPrefix(char mode) =&gt; _modeToPrefix.TryGetValue(mode, out var p) ? p : null;
+32	
+33	    /// &lt;summary&gt;Gets the mode character for a display prefix (e.g. &#x27;@&#x27; → &#x27;o&#x27;).&lt;/summary&gt;
+34	    public char? GetMode(char prefix) =&gt; _prefixToMode.TryGetValue(prefix, out var m) ? m : null;
+35	
+36	    /// &lt;summary&gt;Returns whether the given character is a known prefix.&lt;/summary&gt;
+37	    public bool IsPrefix(char c) =&gt; _prefixToMode.ContainsKey(c);
+38	
+39	    /// &lt;summary&gt;Returns whether the given character is a known mode.&lt;/summary&gt;
+40	    public bool HasMode(char c) =&gt; _modeToPrefix.ContainsKey(c);
+41	
+42	    /// &lt;summary&gt;
+43	    /// Parses the PREFIX ISUPPORT value (e.g. &quot;(ov)@+&quot;).
+44	    /// &lt;/summary&gt;
+45	    public static PrefixMapping Parse(string prefixValue)
+46	    {
+47	        if (string.IsNullOrEmpty(prefixValue) || prefixValue[0] != &#x27;(&#x27;)
+48	            return Default;
+49	
+50	        var closeIndex = prefixValue.IndexOf(&#x27;)&#x27;);
+51	        if (closeIndex &lt; 0)
+52	            return Default;
+53	
+54	        var modes = prefixValue[1..closeIndex];
+55	        var prefixes = prefixValue[(closeIndex + 1)..];
+56	
+57	        if (modes.Length != prefixes.Length)
+58	            return Default;
+59	
+60	        var entries = new List&lt;(char, char)&gt;(modes.Length);
+61	        for (var i = 0; i &lt; modes.Length; i++)
+62	            entries.Add((modes[i], prefixes[i]));
+63	
+64	        return new PrefixMapping(entries);
+65	    }
+66	
+67	    /// &lt;summary&gt;Default prefix mapping for servers that don&#x27;t advertise PREFIX.&lt;/summary&gt;
+68	    public static PrefixMapping Default { get; } = Parse(&quot;(ov)@+&quot;);
+69	}
+70	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-38-48-462Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-38-48-462Z" class="timestamp-link"><time datetime="2026-06-06T00:38:48.462Z" data-timestamp="2026-06-06T00:38:48.462Z">2026-06-06T00:38:48.462Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Good — <code>PrefixMapping</code> already provides <code>HasMode</code> and <code>GetPrefix</code>/<code>GetMode</code> lookups, so we can use <code>ServerInfo.Prefix</code> to resolve the right mode character. Let me update the spec.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-38-53-602Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-38-53-602Z" class="timestamp-link"><time datetime="2026-06-06T00:38:53.602Z" data-timestamp="2026-06-06T00:38:53.602Z">2026-06-06T00:38:53.602Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_0122Dc8dLpkNxhEXazfzJWGu">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">009-bot-action-methods.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/009-bot-action-methods.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">// Moderation
+Task KickAsync(string channel, string nick, string? reason, CancellationToken ct);
+Task SetModeAsync(string target, string modeString, CancellationToken ct);
+Task SetModeAsync(string target, string modeString, string parameter, CancellationToken ct);
+
+// Nick
+Task ChangeNickAsync(string newNick, CancellationToken ct);</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">// Moderation
+Task KickAsync(string channel, string nick, string? reason, CancellationToken ct);
+Task SetChannelModeAsync(string channel, string modeString, CancellationToken ct);
+Task SetChannelModeAsync(string channel, string modeString, string parameter, CancellationToken ct);
+
+// Prefix-mode shortcuts (op, voice, etc.)
+Task GiveOpAsync(string channel, string nick, CancellationToken ct);
+Task RemoveOpAsync(string channel, string nick, CancellationToken ct);
+Task GiveVoiceAsync(string channel, string nick, CancellationToken ct);
+Task RemoveVoiceAsync(string channel, string nick, CancellationToken ct);
+
+// Nick
+Task ChangeNickAsync(string newNick, CancellationToken ct);</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-38-53-654Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-38-53-654Z" class="timestamp-link"><time datetime="2026-06-06T00:38:53.654Z" data-timestamp="2026-06-06T00:38:53.654Z">2026-06-06T00:38:53.654Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/009-bot-action-methods.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-39-03-722Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-39-03-722Z" class="timestamp-link"><time datetime="2026-06-06T00:39:03.722Z" data-timestamp="2026-06-06T00:39:03.722Z">2026-06-06T00:39:03.722Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01CjsWmxhDoFvcBEavGSQW59">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">009-bot-action-methods.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/009-bot-action-methods.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">`SetModeAsync` takes a mode string like `&#34;+o&#34;` or `&#34;-b&#34;` plus an optional
+parameter. For multi-mode changes (`&#34;+ov nick1 nick2&#34;`), plugins can use
+the single-parameter overload with the full mode string, or call
+`SendRawAsync` directly.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">`SetChannelModeAsync` takes a mode string like `&#34;+b&#34;` or `&#34;-i&#34;` plus an
+optional parameter. For multi-mode changes (`&#34;+bb mask1 mask2&#34;`), plugins
+can use the single-parameter overload with the full mode string, or call
+`SendRawAsync` directly.
+
+`GiveOpAsync` / `RemoveOpAsync` / `GiveVoiceAsync` / `RemoveVoiceAsync`
+are thin wrappers around `SetChannelModeAsync` that look up the correct
+mode character from `IServerInfo.Prefix`. Most servers use `o` for op and
+`v` for voice, but the PREFIX ISUPPORT token is authoritative — some
+servers use additional prefix modes like `a` (admin), `h` (halfop), or
+`q` (owner). These four methods cover the two universally-supported
+prefix modes. Plugins needing other prefix modes (halfop, etc.) can use
+`SetChannelModeAsync` directly with the mode character from
+`Bot.ServerInfo.Prefix`.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-39-03-763Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-39-03-763Z" class="timestamp-link"><time datetime="2026-06-06T00:39:03.763Z" data-timestamp="2026-06-06T00:39:03.763Z">2026-06-06T00:39:03.763Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/009-bot-action-methods.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-39-12-219Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-39-12-219Z" class="timestamp-link"><time datetime="2026-06-06T00:39:12.219Z" data-timestamp="2026-06-06T00:39:12.219Z">2026-06-06T00:39:12.219Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01KiamxJuFN8C9fYFWQ1SPGF">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">009-bot-action-methods.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/009-bot-action-methods.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">**Why not a fluent builder or ModeBuilder?** The raw `SetModeAsync(target,
+modeString, param)` covers the common single-mode case cleanly. Multi-mode
+changes are uncommon enough that `SendRawAsync` is acceptable. A builder
+would add API surface without proportional value.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">**Why not a fluent builder or ModeBuilder?** The raw
+`SetChannelModeAsync(channel, modeString, param)` covers the common
+single-mode case cleanly. Multi-mode changes are uncommon enough that
+`SendRawAsync` is acceptable. A builder would add API surface without
+proportional value.
+
+**Why only op/voice shortcuts, not halfop/admin/owner?** Op (`o`) and
+voice (`v`) are present in every server&#39;s PREFIX. Other prefix modes are
+server-specific and less commonly needed. Plugins targeting those can use
+`SetChannelModeAsync` with the mode character looked up from
+`Bot.ServerInfo.Prefix`.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-39-12-282Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-39-12-282Z" class="timestamp-link"><time datetime="2026-06-06T00:39:12.282Z" data-timestamp="2026-06-06T00:39:12.282Z">2026-06-06T00:39:12.282Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/009-bot-action-methods.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-39-16-728Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-39-16-728Z" class="timestamp-link"><time datetime="2026-06-06T00:39:16.728Z" data-timestamp="2026-06-06T00:39:16.728Z">2026-06-06T00:39:16.728Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01VcZz41Z95qwizTudscByTy">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">009-bot-action-methods.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/009-bot-action-methods.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">- **API surface:** 6 new methods on `IBot`. All are thin wrappers.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">- **API surface:** 10 new methods on `IBot`. All are thin wrappers.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-39-16-758Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-39-16-758Z" class="timestamp-link"><time datetime="2026-06-06T00:39:16.758Z" data-timestamp="2026-06-06T00:39:16.758Z">2026-06-06T00:39:16.758Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/009-bot-action-methods.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-39-20-141Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-39-20-141Z" class="timestamp-link"><time datetime="2026-06-06T00:39:20.141Z" data-timestamp="2026-06-06T00:39:20.141Z">2026-06-06T00:39:20.141Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now log and commit.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-39-20-857Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-39-20-857Z" class="timestamp-link"><time datetime="2026-06-06T00:39:20.857Z" data-timestamp="2026-06-06T00:39:20.857Z">2026-06-06T00:39:20.857Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_017xb9V6FPVfgWSt9V4qczH9"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/prompts.md&#34;,
+  &#34;offset&#34;: 893,
+  &#34;limit&#34;: 10
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-39-20-887Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-39-20-887Z" class="timestamp-link"><time datetime="2026-06-06T00:39:20.887Z" data-timestamp="2026-06-06T00:39:20.887Z">2026-06-06T00:39:20.887Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>893	**Date**: 2026-06-06T00:00:00Z
+894	
+895	**Prompt**:
+896	
+897	&gt; Create a new change spec for adding more action methods to the bot - in essence, I don&#x27;t want plugins to have to SendMessageAsync(new IrcMessage(&quot;KICK&quot;, ...)) when they could just call IBot.KickUserAsync(...)
+898	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-39-27-168Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-39-27-168Z" class="timestamp-link"><time datetime="2026-06-06T00:39:27.168Z" data-timestamp="2026-06-06T00:39:27.168Z">2026-06-06T00:39:27.168Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_011bksc7wP1VFsufpRh6kVME">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">prompts.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/prompts.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">&gt; Create a new change spec for adding more action methods to the bot - in essence, I don&#39;t want plugins to have to SendMessageAsync(new IrcMessage(&#34;KICK&#34;, ...)) when they could just call IBot.KickUserAsync(...)</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">&gt; Create a new change spec for adding more action methods to the bot - in essence, I don&#39;t want plugins to have to SendMessageAsync(new IrcMessage(&#34;KICK&#34;, ...)) when they could just call IBot.KickUserAsync(...)
+
+## Refine CS-009: rename SetModeAsync, add op/voice methods
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+&gt; Some notes about that change spec:
+&gt; - Rename SetModeAsync to SetChannelModeAsync
+&gt; - Consider adding VoiceUser/OpUser methods (how do these interact with ISUPPORT PREFIX parameter?)</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-39-27-197Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-39-27-197Z" class="timestamp-link"><time datetime="2026-06-06T00:39:27.197Z" data-timestamp="2026-06-06T00:39:27.197Z">2026-06-06T00:39:27.197Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/prompts.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-39-33-008Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-39-33-008Z" class="timestamp-link"><time datetime="2026-06-06T00:39:33.008Z" data-timestamp="2026-06-06T00:39:33.008Z">2026-06-06T00:39:33.008Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_016w833sxPPVSJo9mUcnfn1K">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit CS-009 refinements</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add docs/change_specs/009-bot-action-methods.md docs/prompts.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Refine CS-009: rename SetModeAsync, add op/voice convenience methods
+
+Rename SetModeAsync to SetChannelModeAsync for clarity. Add GiveOpAsync,
+RemoveOpAsync, GiveVoiceAsync, RemoveVoiceAsync as shortcuts that look
+up the correct mode character from IServerInfo.Prefix (ISUPPORT PREFIX).
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-39-33-165Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-39-33-165Z" class="timestamp-link"><time datetime="2026-06-06T00:39:33.165Z" data-timestamp="2026-06-06T00:39:33.165Z">2026-06-06T00:39:33.165Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">e265384</span> Refine CS-009: rename SetModeAsync, add op/voice convenience methods</div><pre>2 files changed, 43 insertions(+), 10 deletions(-)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-39-36-505Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-39-36-505Z" class="timestamp-link"><time datetime="2026-06-06T00:39:36.505Z" data-timestamp="2026-06-06T00:39:36.505Z">2026-06-06T00:39:36.505Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Good point — <code>MODE</code> applies to both channels and the bot's own user modes. Let me revert the rename.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-39-37-310Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-39-37-310Z" class="timestamp-link"><time datetime="2026-06-06T00:39:37.310Z" data-timestamp="2026-06-06T00:39:37.310Z">2026-06-06T00:39:37.310Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01HbQub15QUJtuLpkXVA4ptt">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">009-bot-action-methods.md</span> <span class="edit-replace-all">(replace all)</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/009-bot-action-methods.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">SetChannelModeAsync</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">SetModeAsync</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-39-37-359Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-39-37-359Z" class="timestamp-link"><time datetime="2026-06-06T00:39:37.359Z" data-timestamp="2026-06-06T00:39:37.359Z">2026-06-06T00:39:37.359Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/009-bot-action-methods.md has been updated. All occurrences were successfully replaced. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-39-40-175Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-39-40-175Z" class="timestamp-link"><time datetime="2026-06-06T00:39:40.175Z" data-timestamp="2026-06-06T00:39:40.175Z">2026-06-06T00:39:40.175Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Also update the parameter name from <code>channel</code> back to <code>target</code> in the signature:</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-39-42-120Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-39-42-120Z" class="timestamp-link"><time datetime="2026-06-06T00:39:42.120Z" data-timestamp="2026-06-06T00:39:42.120Z">2026-06-06T00:39:42.120Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01Wy4ZEyTEWns3mZeLHD7DEF">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">009-bot-action-methods.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/009-bot-action-methods.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">Task SetModeAsync(string channel, string modeString, CancellationToken ct);
+Task SetModeAsync(string channel, string modeString, string parameter, CancellationToken ct);</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">Task SetModeAsync(string target, string modeString, CancellationToken ct);
+Task SetModeAsync(string target, string modeString, string parameter, CancellationToken ct);</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-39-42-152Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-39-42-152Z" class="timestamp-link"><time datetime="2026-06-06T00:39:42.152Z" data-timestamp="2026-06-06T00:39:42.152Z">2026-06-06T00:39:42.152Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/009-bot-action-methods.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-39-49-278Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-39-49-278Z" class="timestamp-link"><time datetime="2026-06-06T00:39:49.278Z" data-timestamp="2026-06-06T00:39:49.278Z">2026-06-06T00:39:49.278Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01JpuEjdjv5h84SGzoTpiuAf">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">009-bot-action-methods.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/009-bot-action-methods.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">`SetModeAsync` takes a mode string like `&#34;+b&#34;` or `&#34;-i&#34;` plus an
+optional parameter. For multi-mode changes (`&#34;+bb mask1 mask2&#34;`), plugins
+can use the single-parameter overload with the full mode string, or call
+`SendRawAsync` directly.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">`SetModeAsync` takes a target (channel name or nick) and a mode string
+like `&#34;+b&#34;` or `&#34;-i&#34;` plus an optional parameter. Works for both channel
+modes and user modes (e.g. `Bot.Self.Nick, &#34;+i&#34;`). For multi-mode
+changes (`&#34;+bb mask1 mask2&#34;`), plugins can use the single-parameter
+overload with the full mode string, or call `SendRawAsync` directly.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-39-49-339Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-39-49-339Z" class="timestamp-link"><time datetime="2026-06-06T00:39:49.339Z" data-timestamp="2026-06-06T00:39:49.339Z">2026-06-06T00:39:49.339Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/009-bot-action-methods.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-39-52-463Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-39-52-463Z" class="timestamp-link"><time datetime="2026-06-06T00:39:52.463Z" data-timestamp="2026-06-06T00:39:52.463Z">2026-06-06T00:39:52.463Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Also fix the problem statement example back to <code>SetModeAsync</code>:</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-39-52-972Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-39-52-972Z" class="timestamp-link"><time datetime="2026-06-06T00:39:52.972Z" data-timestamp="2026-06-06T00:39:52.972Z">2026-06-06T00:39:52.972Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01Dzvbdw5i24AfvRUwqjUNXH"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/009-bot-action-methods.md&#34;,
+  &#34;offset&#34;: 73,
+  &#34;limit&#34;: 15
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-39-52-999Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-39-52-999Z" class="timestamp-link"><time datetime="2026-06-06T00:39:52.999Z" data-timestamp="2026-06-06T00:39:52.999Z">2026-06-06T00:39:52.999Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>73	`v` for voice, but the PREFIX ISUPPORT token is authoritative — some
+74	servers use additional prefix modes like `a` (admin), `h` (halfop), or
+75	`q` (owner). These four methods cover the two universally-supported
+76	prefix modes. Plugins needing other prefix modes (halfop, etc.) can use
+77	`SetModeAsync` directly with the mode character from
+78	`Bot.ServerInfo.Prefix`.
+79	
+80	### 3. Update MockBot (Marv.Testing)
+81	
+82	`MockBot.Create()` already returns an NSubstitute mock of `IBot`, so the
+83	new methods are automatically stubbed. No changes needed unless we want
+84	to add verification helpers.
+85	
+86	### 4. Update PLUGIN_API.md
+87	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-39-56-202Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-39-56-202Z" class="timestamp-link"><time datetime="2026-06-06T00:39:56.202Z" data-timestamp="2026-06-06T00:39:56.202Z">2026-06-06T00:39:56.202Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Good, all references are consistent now. Let me log and commit.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-40-00-575Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-40-00-575Z" class="timestamp-link"><time datetime="2026-06-06T00:40:00.575Z" data-timestamp="2026-06-06T00:40:00.575Z">2026-06-06T00:40:00.575Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_0181u7KPmyCas4i7LMf75aF9">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">prompts.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/prompts.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">&gt; - Consider adding VoiceUser/OpUser methods (how do these interact with ISUPPORT PREFIX parameter?)</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">&gt; - Consider adding VoiceUser/OpUser methods (how do these interact with ISUPPORT PREFIX parameter?)
+
+## Revert SetChannelModeAsync rename in CS-009
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+&gt; Actually, roll back that SetChannelModeAsync rename - the method could be used on the bot user itself</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-40-00-642Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-40-00-642Z" class="timestamp-link"><time datetime="2026-06-06T00:40:00.642Z" data-timestamp="2026-06-06T00:40:00.642Z">2026-06-06T00:40:00.642Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/prompts.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-40-05-881Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-40-05-881Z" class="timestamp-link"><time datetime="2026-06-06T00:40:05.881Z" data-timestamp="2026-06-06T00:40:05.881Z">2026-06-06T00:40:05.881Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01JH7t41SVmaCZFug1kToS6K">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit the revert</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add docs/change_specs/009-bot-action-methods.md docs/prompts.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Revert SetChannelModeAsync back to SetModeAsync in CS-009
+
+MODE applies to both channels and the bot&#39;s own user modes, so the
+channel-specific name was too narrow.
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-40-06-037Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-40-06-037Z" class="timestamp-link"><time datetime="2026-06-06T00:40:06.037Z" data-timestamp="2026-06-06T00:40:06.037Z">2026-06-06T00:40:06.037Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">0127ba6</span> Revert SetChannelModeAsync back to SetModeAsync in CS-009</div><pre>2 files changed, 19 insertions(+), 10 deletions(-)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-40-10-553Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-40-10-553Z" class="timestamp-link"><time datetime="2026-06-06T00:40:10.553Z" data-timestamp="2026-06-06T00:40:10.553Z">2026-06-06T00:40:10.553Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Reverted to <code>SetModeAsync</code> with a <code>target</code> parameter that accepts either a channel name or nick, since <code>MODE</code> applies to both channel modes and user modes (e.g. <code>+i</code> on the bot itself).</p></div></div></div>
+<div class="message user" id="msg-2026-06-06T00-40-53-619Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-06T00-40-53-619Z" class="timestamp-link"><time datetime="2026-06-06T00:40:53.619Z" data-timestamp="2026-06-06T00:40:53.619Z">2026-06-06T00:40:53.619Z</time></a></div><div class="message-content">
+<div class="user-content"><h2>Context Usage</h2>
+<p><strong>Model:</strong> claude-opus-4-6<br />
+<strong>Tokens:</strong> 110.9k / 200k (55%)</p>
+<h3>Estimated usage by category</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Tokens</th>
+<th>Percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>System prompt</td>
+<td>6.6k</td>
+<td>3.3%</td>
+</tr>
+<tr>
+<td>System tools</td>
+<td>9.3k</td>
+<td>4.7%</td>
+</tr>
+<tr>
+<td>MCP tools (deferred)</td>
+<td>290</td>
+<td>0.1%</td>
+</tr>
+<tr>
+<td>System tools (deferred)</td>
+<td>12.6k</td>
+<td>6.3%</td>
+</tr>
+<tr>
+<td>Memory files</td>
+<td>1.4k</td>
+<td>0.7%</td>
+</tr>
+<tr>
+<td>Skills</td>
+<td>1.1k</td>
+<td>0.5%</td>
+</tr>
+<tr>
+<td>Messages</td>
+<td>92.5k</td>
+<td>46.2%</td>
+</tr>
+<tr>
+<td>Free space</td>
+<td>56.1k</td>
+<td>28.0%</td>
+</tr>
+<tr>
+<td>Autocompact buffer</td>
+<td>33k</td>
+<td>16.5%</td>
+</tr>
+</tbody>
+</table>
+<h3>MCP Tools</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Server</th>
+<th>Tokens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mcp__ide__executeCode</td>
+<td>ide</td>
+<td>189</td>
+</tr>
+<tr>
+<td>mcp__ide__getDiagnostics</td>
+<td>ide</td>
+<td>101</td>
+</tr>
+</tbody>
+</table>
+<h3>Memory Files</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Path</th>
+<th>Tokens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Project</td>
+<td>/workspaces/marv/CLAUDE.md</td>
+<td>1.3k</td>
+</tr>
+<tr>
+<td>AutoMem</td>
+<td>/home/vscode/.claude/projects/-workspaces-marv/memory/MEMORY.md</td>
+<td>71</td>
+</tr>
+</tbody>
+</table>
+<h3>Skills</h3>
+<table>
+<thead>
+<tr>
+<th>Skill</th>
+<th>Source</th>
+<th>Tokens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>update-config</td>
+<td>Built-in</td>
+<td>~180</td>
+</tr>
+<tr>
+<td>keybindings-help</td>
+<td>Built-in</td>
+<td>~60</td>
+</tr>
+<tr>
+<td>verify</td>
+<td>Built-in</td>
+<td>~60</td>
+</tr>
+<tr>
+<td>code-review</td>
+<td>Built-in</td>
+<td>~100</td>
+</tr>
+<tr>
+<td>simplify</td>
+<td>Built-in</td>
+<td>~50</td>
+</tr>
+<tr>
+<td>fewer-permission-prompts</td>
+<td>Built-in</td>
+<td>~50</td>
+</tr>
+<tr>
+<td>loop</td>
+<td>Built-in</td>
+<td>~90</td>
+</tr>
+<tr>
+<td>schedule</td>
+<td>Built-in</td>
+<td>~100</td>
+</tr>
+<tr>
+<td>claude-api</td>
+<td>Built-in</td>
+<td>~270</td>
+</tr>
+<tr>
+<td>run</td>
+<td>Built-in</td>
+<td>~90</td>
+</tr>
+<tr>
+<td>init</td>
+<td>Built-in</td>
+<td>&lt; 20</td>
+</tr>
+<tr>
+<td>review</td>
+<td>Built-in</td>
+<td>&lt; 20</td>
+</tr>
+<tr>
+<td>security-review</td>
+<td>Built-in</td>
+<td>~20</td>
+</tr>
+</tbody>
+</table></div></div></div>
+<div class="message user" id="msg-2026-06-06T00-41-41-197Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-06T00-41-41-197Z" class="timestamp-link"><time datetime="2026-06-06T00:41:41.197Z" data-timestamp="2026-06-06T00:41:41.197Z">2026-06-06T00:41:41.197Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Add another change spec - plugins need a way to compare strings according to the network's casemapping</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-41-46-913Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-41-46-913Z" class="timestamp-link"><time datetime="2026-06-06T00:41:46.913Z" data-timestamp="2026-06-06T00:41:46.913Z">2026-06-06T00:41:46.913Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_014n3eqPZHGBmFE8DmniCfst">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Find existing casemapping types</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;CaseMapping\|CaseMappingType\|CaseMap&#34; /workspaces/marv/src/Marv.Core/Platform/ --include=&#34;*.cs&#34; | head -15</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-41-46-971Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-41-46-971Z" class="timestamp-link"><time datetime="2026-06-06T00:41:46.971Z" data-timestamp="2026-06-06T00:41:46.971Z">2026-06-06T00:41:46.971Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/Marv.Core/Platform/IServerInfo.cs:15:    CaseMappingType CaseMapping { get; }</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-41-51-481Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-41-51-481Z" class="timestamp-link"><time datetime="2026-06-06T00:41:51.481Z" data-timestamp="2026-06-06T00:41:51.481Z">2026-06-06T00:41:51.481Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01FSvr28a7LBhxtjibfFKpsz">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Find casemapping implementation</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;CaseMappingType\|CaseComparer\|CaseMap&#34; /workspaces/marv/src/Marv.Core/ --include=&#34;*.cs&#34; | head -20</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-41-51-549Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-41-51-549Z" class="timestamp-link"><time datetime="2026-06-06T00:41:51.549Z" data-timestamp="2026-06-06T00:41:51.549Z">2026-06-06T00:41:51.549Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/Marv.Core/Platform/IServerInfo.cs:15:    CaseMappingType CaseMapping { get; }
+/workspaces/marv/src/Marv.Core/Irc/ServerInfo.cs:16:    private volatile CaseMappingType _caseMapping = CaseMappingType.Rfc1459;
+/workspaces/marv/src/Marv.Core/Irc/ServerInfo.cs:30:    public CaseMappingType CaseMapping =&gt; _caseMapping;
+/workspaces/marv/src/Marv.Core/Irc/ServerInfo.cs:79:                    &quot;ascii&quot; =&gt; CaseMappingType.Ascii,
+/workspaces/marv/src/Marv.Core/Irc/ServerInfo.cs:80:                    &quot;strict-rfc1459&quot; =&gt; CaseMappingType.StrictRfc1459,
+/workspaces/marv/src/Marv.Core/Irc/ServerInfo.cs:81:                    _ =&gt; CaseMappingType.Rfc1459
+/workspaces/marv/src/Marv.Core/Irc/ServerInfo.cs:131:        _caseMapping = CaseMappingType.Rfc1459;
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:77:        var comparer = CaseMapping.GetComparer(_serverInfo.CaseMapping);
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:94:                CaseMapping.GetComparer(_serverInfo.CaseMapping));
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:107:                CaseMapping.GetComparer(_serverInfo.CaseMapping));
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:266:        var comparer = CaseMapping.GetComparer(_serverInfo.CaseMapping);
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:990:        var comparer = CaseMapping.GetComparer(_serverInfo.CaseMapping);
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:1045:        var comparer = CaseMapping.GetComparer(_serverInfo.CaseMapping);
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:1085:        var comparer = CaseMapping.GetComparer(_serverInfo.CaseMapping);
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:1151:        var comparer = CaseMapping.GetComparer(_serverInfo.CaseMapping);
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:1531:            new IrcUser(n, CaseMapping.GetComparer(_serverInfo.CaseMapping)));
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:1542:            new IrcUser(n, CaseMapping.GetComparer(_serverInfo.CaseMapping)));
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:1550:        var comparer = CaseMapping.GetComparer(_serverInfo.CaseMapping);
+/workspaces/marv/src/Marv.Core/Protocol/CaseMapping.cs:7:public enum CaseMappingType
+/workspaces/marv/src/Marv.Core/Protocol/CaseMapping.cs:31:public static class CaseMapping</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-41-54-904Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-41-54-904Z" class="timestamp-link"><time datetime="2026-06-06T00:41:54.904Z" data-timestamp="2026-06-06T00:41:54.904Z">2026-06-06T00:41:54.904Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_015wozvbEkNkksMekuW55oW3"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Protocol/CaseMapping.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-41-54-914Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-41-54-914Z" class="timestamp-link"><time datetime="2026-06-06T00:41:54.914Z" data-timestamp="2026-06-06T00:41:54.914Z">2026-06-06T00:41:54.914Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	namespace Marv.Core.Protocol;
+2	
+3	/// &lt;summary&gt;
+4	/// IRC case mapping rules as defined by the CASEMAPPING ISUPPORT token.
+5	/// Determines how nicknames and channel names are compared.
+6	/// &lt;/summary&gt;
+7	public enum CaseMappingType
+8	{
+9	    /// &lt;summary&gt;
+10	    /// RFC 1459 case mapping: A-Z maps to a-z, and additionally
+11	    /// [ \ ] map to { | } respectively.
+12	    /// &lt;/summary&gt;
+13	    Rfc1459,
+14	
+15	    /// &lt;summary&gt;
+16	    /// Strict RFC 1459 case mapping: same as RFC 1459 but also
+17	    /// ^ maps to ~.
+18	    /// &lt;/summary&gt;
+19	    StrictRfc1459,
+20	
+21	    /// &lt;summary&gt;
+22	    /// ASCII case mapping: only A-Z maps to a-z. No special character mappings.
+23	    /// &lt;/summary&gt;
+24	    Ascii
+25	}
+26	
+27	/// &lt;summary&gt;
+28	/// Provides case-folding and comparison utilities for IRC nicknames and channel names,
+29	/// respecting the server&#x27;s advertised CASEMAPPING.
+30	/// &lt;/summary&gt;
+31	public static class CaseMapping
+32	{
+33	    /// &lt;summary&gt;
+34	    /// Converts a character to its lowercase equivalent under the specified case mapping.
+35	    /// &lt;/summary&gt;
+36	    public static char ToLower(char c, CaseMappingType mapping)
+37	    {
+38	        if (c &gt;= &#x27;A&#x27; &amp;&amp; c &lt;= &#x27;Z&#x27;)
+39	            return (char)(c + 32);
+40	
+41	        return mapping switch
+42	        {
+43	            CaseMappingType.Rfc1459 =&gt; c switch
+44	            {
+45	                &#x27;[&#x27; =&gt; &#x27;{&#x27;,
+46	                &#x27;\\&#x27; =&gt; &#x27;|&#x27;,
+47	                &#x27;]&#x27; =&gt; &#x27;}&#x27;,
+48	                _ =&gt; c
+49	            },
+50	            CaseMappingType.StrictRfc1459 =&gt; c switch
+51	            {
+52	                &#x27;[&#x27; =&gt; &#x27;{&#x27;,
+53	                &#x27;\\&#x27; =&gt; &#x27;|&#x27;,
+54	                &#x27;]&#x27; =&gt; &#x27;}&#x27;,
+55	                &#x27;^&#x27; =&gt; &#x27;~&#x27;,
+56	                _ =&gt; c
+57	            },
+58	            _ =&gt; c
+59	        };
+60	    }
+61	
+62	    /// &lt;summary&gt;
+63	    /// Folds a string to lowercase under the specified case mapping.
+64	    /// &lt;/summary&gt;
+65	    public static string Fold(string value, CaseMappingType mapping)
+66	    {
+67	        var chars = new char[value.Length];
+68	        for (var i = 0; i &lt; value.Length; i++)
+69	            chars[i] = ToLower(value[i], mapping);
+70	        return new string(chars);
+71	    }
+72	
+73	    /// &lt;summary&gt;
+74	    /// Compares two strings for equality under the specified case mapping.
+75	    /// &lt;/summary&gt;
+76	    public static bool AreEqual(string a, string b, CaseMappingType mapping)
+77	    {
+78	        if (a.Length != b.Length)
+79	            return false;
+80	
+81	        for (var i = 0; i &lt; a.Length; i++)
+82	        {
+83	            if (ToLower(a[i], mapping) != ToLower(b[i], mapping))
+84	                return false;
+85	        }
+86	
+87	        return true;
+88	    }
+89	
+90	    /// &lt;summary&gt;
+91	    /// Creates an &lt;see cref=&quot;IEqualityComparer{T}&quot;/&gt; for strings using the specified case mapping.
+92	    /// &lt;/summary&gt;
+93	    public static IEqualityComparer&lt;string&gt; GetComparer(CaseMappingType mapping) =&gt;
+94	        new IrcCaseComparer(mapping);
+95	
+96	    private sealed class IrcCaseComparer(CaseMappingType mapping) : IEqualityComparer&lt;string&gt;
+97	    {
+98	        public bool Equals(string? x, string? y)
+99	        {
+100	            if (ReferenceEquals(x, y)) return true;
+101	            if (x is null || y is null) return false;
+102	            return AreEqual(x, y, mapping);
+103	        }
+104	
+105	        public int GetHashCode(string obj)
+106	        {
+107	            var hash = new HashCode();
+108	            foreach (var c in obj)
+109	                hash.Add(ToLower(c, mapping));
+110	            return hash.ToHashCode();
+111	        }
+112	    }
+113	}
+114	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-42-01-937Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-42-01-937Z" class="timestamp-link"><time datetime="2026-06-06T00:42:01.937Z" data-timestamp="2026-06-06T00:42:01.937Z">2026-06-06T00:42:01.937Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>So the infrastructure exists (<code>CaseMapping</code> static class with <code>AreEqual</code>, <code>Fold</code>, <code>GetComparer</code>) but it's in <code>Marv.Core.Protocol</code> — internal plumbing. Plugins can access <code>IServerInfo.CaseMapping</code> (the enum) but have no way to get a comparer or do comparisons without depending on the <code>Protocol</code> namespace directly. And <code>CaseMapping.GetComparer()</code> is used heavily inside <code>IrcBot</code> but never exposed to plugins.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-42-26-886Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-42-26-886Z" class="timestamp-link"><time datetime="2026-06-06T00:42:26.886Z" data-timestamp="2026-06-06T00:42:26.886Z">2026-06-06T00:42:26.886Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01Wf9mp8XuECaUbk6PemkBYY">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">010-casemapping-for-plugins.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/010-casemapping-for-plugins.md</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content"># CS-010: Expose Case Mapping to Plugins
+
+**Source:** Plugin DX feedback
+**Scope:** Core (IBot / IServerInfo interface)
+**Complexity:** Small
+**Breaking changes:** Additive only
+
+---
+
+## Problem
+
+IRC nick and channel comparisons are case-insensitive, but the rules are
+server-specific — the `CASEMAPPING` ISUPPORT token selects between `rfc1459`
+(where `[]\` equal `{}|`), `strict-rfc1459` (also `^` equals `~`), and
+`ascii` (A-Z only). The bot uses this internally for its `Channels` and
+`Users` dictionaries, but plugins have no convenient way to perform the
+same comparisons.
+
+Currently a plugin that wants to compare two nicks or check channel
+membership must either:
+
+- Use `string.Equals(..., OrdinalIgnoreCase)` — **wrong** on rfc1459
+  servers where `nick[away]` and `nick{away}` are the same user.
+- Reach into `Marv.Core.Protocol.CaseMapping` — an internal namespace
+  that plugin authors shouldn&#39;t need to know about.
+- Use `IBot.Users` / `IBot.Channels` dictionary lookups as a workaround,
+  which only works for exact-match lookups on known entities.
+
+## Changes
+
+### 1. Add a case-mapping comparer to `IBot`
+
+```csharp
+// On IBot:
+IEqualityComparer&lt;string&gt; CaseComparer { get; }
+```
+
+Returns an `IEqualityComparer&lt;string&gt;` that uses the server&#39;s current
+case mapping. Plugins use it for:
+
+- **Equality checks:** `Bot.CaseComparer.Equals(nick1, nick2)`
+- **Dictionaries:** `new Dictionary&lt;string, T&gt;(Bot.CaseComparer)`
+- **HashSets:** `new HashSet&lt;string&gt;(Bot.CaseComparer)`
+
+The comparer is already created internally by `IrcBot` (via
+`CaseMapping.GetComparer`). This change simply exposes it.
+
+### 2. Implement in `IrcBot`
+
+`IrcBot` already calls `CaseMapping.GetComparer(_serverInfo.CaseMapping)`
+in many places. Store the result and expose it via the `CaseComparer`
+property. Update it when the server sends a new `CASEMAPPING` token
+(rare but possible with some bouncers).
+
+### 3. Update MockBot (Marv.Testing)
+
+`MockBot.Create()` should set `CaseComparer` to return
+`StringComparer.OrdinalIgnoreCase` (close enough for tests, and what
+most servers approximate).
+
+### 4. Update PLUGIN_API.md
+
+Add `CaseComparer` to the IBot table in §5.
+
+## Design decisions
+
+**Why on `IBot` instead of `IServerInfo`?** `IBot` is the primary plugin
+interface and already has `Channels`/`Users` dictionaries that use the
+comparer. Exposing it alongside those is the natural location. Plugins
+shouldn&#39;t need to think about where the comparer comes from — it&#39;s &#34;the
+way this bot compares IRC identifiers.&#34;
+
+**Why `IEqualityComparer&lt;string&gt;` instead of helper methods like
+`NickEquals(a, b)`?** The comparer is more general — plugins can use it
+with standard .NET collections and LINQ. It&#39;s also the type the bot
+already uses internally, so no new abstraction is needed.
+
+**Why not also expose `CaseMapping.Fold()`?** Folding to lowercase is
+occasionally useful, but it&#39;s less commonly needed than comparison, and
+the comparer covers the primary use case. If demand arises, `Fold` can
+be added later without breaking changes.
+
+## Impact
+
+- **Correctness:** Plugins that compare nicks/channels will use the
+  right case mapping instead of guessing.
+- **Simplicity:** One property, zero new types.
+- **API surface:** 1 new property on `IBot`.
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-42-26-962Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-42-26-962Z" class="timestamp-link"><time datetime="2026-06-06T00:42:26.962Z" data-timestamp="2026-06-06T00:42:26.962Z">2026-06-06T00:42:26.962Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /workspaces/marv/docs/change_specs/010-casemapping-for-plugins.md (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-42-32-855Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-42-32-855Z" class="timestamp-link"><time datetime="2026-06-06T00:42:32.855Z" data-timestamp="2026-06-06T00:42:32.855Z">2026-06-06T00:42:32.855Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01CeohkVdn8X8mNKyw16uepe">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">README.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/README.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">| 9 | [Bot Action Methods](009-bot-action-methods.md) | Core | Small-Medium | None | |
+
+Specs 1-5 and 9 are code changes. Specs 6-8 are documentation/DX changes.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">| 9 | [Bot Action Methods](009-bot-action-methods.md) | Core | Small-Medium | None | |
+| 10 | [Case Mapping for Plugins](010-casemapping-for-plugins.md) | Core | Small | None | |
+
+Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-42-32-897Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-42-32-897Z" class="timestamp-link"><time datetime="2026-06-06T00:42:32.897Z" data-timestamp="2026-06-06T00:42:32.897Z">2026-06-06T00:42:32.897Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/README.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-42-36-981Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-42-36-981Z" class="timestamp-link"><time datetime="2026-06-06T00:42:36.981Z" data-timestamp="2026-06-06T00:42:36.981Z">2026-06-06T00:42:36.981Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_0145J8BeRAwBxkrG8cv6G64Q"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/prompts.md&#34;,
+  &#34;offset&#34;: 900,
+  &#34;limit&#34;: 10
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-42-37-013Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-42-37-013Z" class="timestamp-link"><time datetime="2026-06-06T00:42:37.013Z" data-timestamp="2026-06-06T00:42:37.013Z">2026-06-06T00:42:37.013Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>900	
+901	**Date**: 2026-06-06T00:00:00Z
+902	
+903	**Prompt**:
+904	
+905	&gt; Some notes about that change spec:
+906	&gt; - Rename SetModeAsync to SetChannelModeAsync
+907	&gt; - Consider adding VoiceUser/OpUser methods (how do these interact with ISUPPORT PREFIX parameter?)
+908	
+909	## Revert SetChannelModeAsync rename in CS-009</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-42-40-195Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-42-40-195Z" class="timestamp-link"><time datetime="2026-06-06T00:42:40.195Z" data-timestamp="2026-06-06T00:42:40.195Z">2026-06-06T00:42:40.195Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01FSt972mAUciGi9RR3HLH3N"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/prompts.md&#34;,
+  &#34;offset&#34;: 913,
+  &#34;limit&#34;: 10
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-42-40-218Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-42-40-218Z" class="timestamp-link"><time datetime="2026-06-06T00:42:40.218Z" data-timestamp="2026-06-06T00:42:40.218Z">2026-06-06T00:42:40.218Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>913	**Prompt**:
+914	
+915	&gt; Actually, roll back that SetChannelModeAsync rename - the method could be used on the bot user itself
+916	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-42-45-118Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-42-45-118Z" class="timestamp-link"><time datetime="2026-06-06T00:42:45.118Z" data-timestamp="2026-06-06T00:42:45.118Z">2026-06-06T00:42:45.118Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01Nuz9n3iibKidzyCmdmDT4P">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">prompts.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/prompts.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">&gt; Actually, roll back that SetChannelModeAsync rename - the method could be used on the bot user itself</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">&gt; Actually, roll back that SetChannelModeAsync rename - the method could be used on the bot user itself
+
+## Create change spec for exposing case mapping to plugins
+
+**Date**: 2026-06-06T00:00:00Z
+
+**Prompt**:
+
+&gt; Add another change spec - plugins need a way to compare strings according to the network&#39;s casemapping</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-42-45-182Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-42-45-182Z" class="timestamp-link"><time datetime="2026-06-06T00:42:45.182Z" data-timestamp="2026-06-06T00:42:45.182Z">2026-06-06T00:42:45.182Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/prompts.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-42-51-938Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-42-51-938Z" class="timestamp-link"><time datetime="2026-06-06T00:42:51.938Z" data-timestamp="2026-06-06T00:42:51.938Z">2026-06-06T00:42:51.938Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_015JXMq3pixpCKW9z2cZg1ZR">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit CS-010</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add docs/change_specs/010-casemapping-for-plugins.md docs/change_specs/README.md docs/prompts.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Add CS-010: Expose case mapping comparer to plugins
+
+Plugins need to compare nicks and channels using the server&#39;s case
+mapping rules (rfc1459, strict-rfc1459, ascii). Proposes adding
+IBot.CaseComparer to expose the existing internal comparer.
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T00-42-52-073Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T00-42-52-073Z" class="timestamp-link"><time datetime="2026-06-06T00:42:52.073Z" data-timestamp="2026-06-06T00:42:52.073Z">2026-06-06T00:42:52.073Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">fa42fee</span> Add CS-010: Expose case mapping comparer to plugins</div><pre>3 files changed, 98 insertions(+), 1 deletion(-)
+ create mode 100644 docs/change_specs/010-casemapping-for-plugins.md</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T00-42-58-311Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T00-42-58-311Z" class="timestamp-link"><time datetime="2026-06-06T00:42:58.311Z" data-timestamp="2026-06-06T00:42:58.311Z">2026-06-06T00:42:58.311Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Created <strong>CS-010: Expose Case Mapping to Plugins</strong>. The proposal is minimal — one new property on <code>IBot</code>:</p>
+<pre><code class="language-csharp">IEqualityComparer&lt;string&gt; CaseComparer { get; }
+</code></pre>
+<p>The comparer already exists internally (<code>CaseMapping.GetComparer()</code> is called throughout <code>IrcBot</code>). This just exposes it so plugins can do <code>Bot.CaseComparer.Equals(nick1, nick2)</code> or use it with dictionaries/hashsets instead of incorrectly using <code>OrdinalIgnoreCase</code> (which misses rfc1459's <code>[]\</code> ↔ <code>{}|</code> equivalence).</p></div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-002.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<span class="current">3</span>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<a href="page-006.html">6</a>
+<a href="page-004.html">Next &rarr;</a>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

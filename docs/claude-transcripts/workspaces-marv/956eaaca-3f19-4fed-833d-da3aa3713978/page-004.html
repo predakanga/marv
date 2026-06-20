@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 4</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 4/4</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-003.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<span class="current">4</span>
+<span class="disabled">Next &rarr;</span>
+</div>
+
+        
+<div class="message user" id="msg-2026-06-06T04-13-55-864Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-06T04-13-55-864Z" class="timestamp-link"><time datetime="2026-06-06T04:13:55.864Z" data-timestamp="2026-06-06T04:13:55.864Z">2026-06-06T04:13:55.864Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Can you analyze the changelog and generate a description for me to add to the GitHub release of v0.2.0? I'll edit it in myself</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T04-13-59-243Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T04-13-59-243Z" class="timestamp-link"><time datetime="2026-06-06T04:13:59.243Z" data-timestamp="2026-06-06T04:13:59.243Z">2026-06-06T04:13:59.243Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01TqisA7v8Xzkp3aa562VS3W"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/CHANGELOG.md&#34;,
+  &#34;limit&#34;: 70
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T04-13-59-351Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T04-13-59-351Z" class="timestamp-link"><time datetime="2026-06-06T04:13:59.351Z" data-timestamp="2026-06-06T04:13:59.351Z">2026-06-06T04:13:59.351Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# Changelog
+2	
+3	All notable changes to this project will be documented in this file.
+4	
+5	The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+6	and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+7	
+8	## [0.2.0] - 2026-06-06
+9	
+10	### Added
+11	
+12	- Command prefix is now configurable via `CommandPrefix` in bot configuration
+13	  (previously hardcoded to `!`), with support for multi-character prefixes
+14	- `IBot.CommandPrefix` property exposes the configured prefix to plugins
+15	- `[OnCommand]` attribute gains a `Prefix` property to override the bot-wide
+16	  prefix on a per-handler basis (e.g. `[OnCommand(&quot;invite&quot;, Prefix = &quot;.&quot;)]`)
+17	- `IHttpClientFactory` is now registered by default, so plugins can inject it
+18	  without adding the `Microsoft.Extensions.Http` package themselves
+19	- `[OnCommand]` and `[OnRegex]` attributes gain `ChannelOnly`, `DirectOnly`,
+20	  and `Channel` filter properties for declarative message context filtering
+21	- Bot automatically sets bot user mode (e.g. `+B`) when the server advertises
+22	  the `BOT` ISUPPORT token
+23	- `UserModes` config option to set additional user modes after authentication
+24	  (e.g. `&quot;+ix&quot;`), applied before the ready signal
+25	- Server MOTD is now available via `IServerInfo.Motd` after connection
+26	- `IBot.JoinMultipleAsync` sends a single comma-separated `JOIN` command per
+27	  RFC 2812, with automatic batching to stay within the 512-byte line limit
+28	- Handler filter pipeline: plugins can intercept handler invocations via
+29	  `FilterHandlerAsync` override or declarative `IFilteringAttribute` +
+30	  `IFilterEvaluator` pairs for cross-cutting concerns like authorization,
+31	  rate limiting, and auditing
+32	- New `Marv.Testing` package with fluent builders for `CommandContext`,
+33	  `RegexMatchContext`, and events, plus `PluginTestHarness&lt;T&gt;` for
+34	  creating plugin instances with mocked dependencies in ~2 lines
+35	- `docs/PLUGIN_API.md` — consolidated plugin API reference covering all
+36	  handler attributes, context types, events, IBot, formatting, configuration,
+37	  services, handler groups, filters, and testing patterns
+38	- `docs/PLUGIN_PROJECT_CLAUDE.md` — CLAUDE.md template for downstream
+39	  plugin projects
+40	- Old `plugin-api-draft.md` archived to `docs/archive/` with redirect
+41	- `IBot` gains convenience methods for common IRC actions: `KickAsync`,
+42	  `SetTopicAsync`, `InviteAsync`, `SetModeAsync`, `GiveOpAsync`,
+43	  `RemoveOpAsync`, `GiveVoiceAsync`, `RemoveVoiceAsync`, `ChangeNickAsync`
+44	- `IBot.CaseComparer` exposes the server&#x27;s IRC case mapping as an
+45	  `IEqualityComparer&lt;string&gt;` for correct nick/channel comparisons
+46	- New `Marv.Plugins.Moderation` example plugin demonstrating advanced API
+47	  patterns: typed configuration, declarative auth filters, event handling,
+48	  interval timers, bot action methods, case-mapped collections, handler groups,
+49	  raw message handling, and `SendAndAwaitAsync`
+50	
+51	### Changed
+52	
+53	- Initial channel join on connect now uses bulk `JOIN` instead of individual
+54	  commands per channel, reducing startup traffic and rate-limit pressure
+55	
+56	- Updated Microsoft.Extensions.* packages from 10.0.0-preview.4 to 10.0.8 (stable)
+57	- Updated Microsoft.NET.Test.Sdk from 17.14.0 to 18.6.0
+58	- Updated xunit.runner.visualstudio from 3.1.0 to 3.1.5
+59	
+60	### Removed
+61	
+62	- Docker image build from CI workflow — Docker images are now only built during
+63	  tagged releases
+64	
+65	### Fixed
+66	
+67	- Boolean CLI options (e.g. `--use-tls`, `--rate-limit-enabled`) no longer
+68	  override config file values when not explicitly provided on the command line
+69	- Nullable string config properties (e.g. `TlsCaCertFile`, `SaslUser`) no
+70	  longer become empty strings when set to `null` in JSON config files</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T04-14-12-532Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T04-14-12-532Z" class="timestamp-link"><time datetime="2026-06-06T04:14:12.532Z" data-timestamp="2026-06-06T04:14:12.532Z">2026-06-06T04:14:12.532Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Here's a release description:</p>
+<hr />
+<h2>v0.2.0</h2>
+<p>This release focuses on plugin developer experience — making plugins easier to write, test, and document.</p>
+<h3>Highlights</h3>
+<ul>
+<li><strong>Configurable command prefix</strong> — The <code>!</code> prefix is no longer hardcoded. Set <code>CommandPrefix</code> in config, or override per-handler with <code>[OnCommand("invite", Prefix = ".")]</code>.</li>
+<li><strong>Handler filter pipeline</strong> — Plugins can intercept handler invocations for cross-cutting concerns like authorization, rate limiting, and auditing, using either <code>FilterHandlerAsync</code> or declarative <code>IFilteringAttribute</code>/<code>IFilterEvaluator</code> pairs.</li>
+<li><strong>Declarative message filters</strong> — <code>[OnCommand]</code> and <code>[OnRegex]</code> now support <code>ChannelOnly</code>, <code>DirectOnly</code>, and <code>Channel</code> properties to restrict where handlers fire.</li>
+<li><strong>Bot action methods</strong> — <code>IBot</code> gains convenience methods for common IRC operations: <code>KickAsync</code>, <code>SetTopicAsync</code>, <code>InviteAsync</code>, <code>SetModeAsync</code>, <code>GiveOpAsync</code>/<code>RemoveOpAsync</code>, <code>GiveVoiceAsync</code>/<code>RemoveVoiceAsync</code>, <code>ChangeNickAsync</code>.</li>
+<li><strong>IRC case mapping</strong> — <code>IBot.CaseComparer</code> exposes the server's case mapping as an <code>IEqualityComparer&lt;string&gt;</code> for correct nick/channel comparisons.</li>
+<li><strong>Test infrastructure</strong> — New <code>Marv.Testing</code> package with fluent builders and <code>PluginTestHarness&lt;T&gt;</code> for writing plugin unit tests in ~2 lines of setup.</li>
+<li><strong>Plugin API docs</strong> — Consolidated <code>docs/PLUGIN_API.md</code> reference covering attributes, contexts, events, configuration, services, filters, and testing.</li>
+<li><strong>Moderation example plugin</strong> — Demonstrates advanced patterns: typed config, auth filters, event handling, interval timers, bot actions, case-mapped collections, handler groups, and raw message handling.</li>
+</ul>
+<h3>Other changes</h3>
+<ul>
+<li>Bulk <code>JOIN</code> on connect reduces startup traffic and rate-limit pressure</li>
+<li>Automatic bot user mode (<code>+B</code>) when the server advertises the <code>BOT</code> ISUPPORT token</li>
+<li><code>IHttpClientFactory</code> registered by default for plugins</li>
+<li><code>UserModes</code> config option and <code>IServerInfo.Motd</code> access</li>
+<li>Dependencies updated to stable Microsoft.Extensions.* 10.0.8</li>
+<li>Fixed boolean CLI options and nullable string config properties not round-tripping correctly</li>
+</ul>
+<hr /></div></div></div>
+<div class="message user" id="msg-2026-06-06T04-15-05-570Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-06T04-15-05-570Z" class="timestamp-link"><time datetime="2026-06-06T04:15:05.570Z" data-timestamp="2026-06-06T04:15:05.570Z">2026-06-06T04:15:05.570Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Thanks - your output had some formatting that won't survive a copy-and-paste. Can you provide the raw markdown instead?</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T04-15-13-021Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T04-15-13-021Z" class="timestamp-link"><time datetime="2026-06-06T04:15:13.021Z" data-timestamp="2026-06-06T04:15:13.021Z">2026-06-06T04:15:13.021Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_011mjWgCPHcBw4sxkzeCRNv8">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">release-notes-v0.2.0.md</span></div>
+<div class="file-tool-fullpath">/tmp/release-notes-v0.2.0.md</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content">## v0.2.0
+
+This release focuses on plugin developer experience — making plugins easier to write, test, and document.
+
+### Highlights
+
+- **Configurable command prefix** — The `!` prefix is no longer hardcoded. Set `CommandPrefix` in config, or override per-handler with `[OnCommand(&#34;invite&#34;, Prefix = &#34;.&#34;)]`.
+- **Handler filter pipeline** — Plugins can intercept handler invocations for cross-cutting concerns like authorization, rate limiting, and auditing, using either `FilterHandlerAsync` or declarative `IFilteringAttribute`/`IFilterEvaluator` pairs.
+- **Declarative message filters** — `[OnCommand]` and `[OnRegex]` now support `ChannelOnly`, `DirectOnly`, and `Channel` properties to restrict where handlers fire.
+- **Bot action methods** — `IBot` gains convenience methods for common IRC operations: `KickAsync`, `SetTopicAsync`, `InviteAsync`, `SetModeAsync`, `GiveOpAsync`/`RemoveOpAsync`, `GiveVoiceAsync`/`RemoveVoiceAsync`, `ChangeNickAsync`.
+- **IRC case mapping** — `IBot.CaseComparer` exposes the server&#39;s case mapping as an `IEqualityComparer&lt;string&gt;` for correct nick/channel comparisons.
+- **Test infrastructure** — New `Marv.Testing` package with fluent builders and `PluginTestHarness&lt;T&gt;` for writing plugin unit tests in ~2 lines of setup.
+- **Plugin API docs** — Consolidated `docs/PLUGIN_API.md` reference covering attributes, contexts, events, configuration, services, filters, and testing.
+- **Moderation example plugin** — Demonstrates advanced patterns: typed config, auth filters, event handling, interval timers, bot actions, case-mapped collections, handler groups, and raw message handling.
+
+### Other changes
+
+- Bulk `JOIN` on connect reduces startup traffic and rate-limit pressure
+- Automatic bot user mode (`+B`) when the server advertises the `BOT` ISUPPORT token
+- `IHttpClientFactory` registered by default for plugins
+- `UserModes` config option and `IServerInfo.Motd` access
+- Dependencies updated to stable Microsoft.Extensions.* 10.0.8
+- Fixed boolean CLI options and nullable string config properties not round-tripping correctly
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-06T04-15-19-408Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-06T04-15-19-408Z" class="timestamp-link"><time datetime="2026-06-06T04:15:19.408Z" data-timestamp="2026-06-06T04:15:19.408Z">2026-06-06T04:15:19.408Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /tmp/release-notes-v0.2.0.md (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-06T04-15-23-160Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-06T04-15-23-160Z" class="timestamp-link"><time datetime="2026-06-06T04:15:23.160Z" data-timestamp="2026-06-06T04:15:23.160Z">2026-06-06T04:15:23.160Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Written to <code>/tmp/release-notes-v0.2.0.md</code> — you can grab it from there.</p></div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-003.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<span class="current">4</span>
+<span class="disabled">Next &rarr;</span>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

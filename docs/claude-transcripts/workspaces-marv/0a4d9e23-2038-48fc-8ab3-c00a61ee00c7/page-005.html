@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 5</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 5/7</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-004.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<span class="current">5</span>
+<a href="page-006.html">6</a>
+<a href="page-007.html">7</a>
+<a href="page-006.html">Next &rarr;</a>
+</div>
+
+        
+<div class="message user" id="msg-2026-06-17T12-55-59-628Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-17T12-55-59-628Z" class="timestamp-link"><time datetime="2026-06-17T12:55:59.628Z" data-timestamp="2026-06-17T12:55:59.628Z">2026-06-17T12:55:59.628Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Okay, go ahead and implement CS-032, CS-033 and CS-034.
+My only note is that for CS-033, you might consider using the plugin API document as a model for the READMEs. The consumers of the packages are almost always going to be plugin creators.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-56-06-429Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-56-06-429Z" class="timestamp-link"><time datetime="2026-06-17T12:56:06.429Z" data-timestamp="2026-06-17T12:56:06.429Z">2026-06-17T12:56:06.429Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-56-06-985Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-56-06-985Z" class="timestamp-link"><time datetime="2026-06-17T12:56:06.985Z" data-timestamp="2026-06-17T12:56:06.985Z">2026-06-17T12:56:06.985Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>I'll implement all three specs. Let me start by reading the key files I'll need, then work through them.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-56-07-395Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-56-07-395Z" class="timestamp-link"><time datetime="2026-06-17T12:56:07.395Z" data-timestamp="2026-06-17T12:56:07.395Z">2026-06-17T12:56:07.395Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01G9eYbrRk8WPfYAS8fe4nPh"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/PLUGIN_API.md&#34;,
+  &#34;limit&#34;: 80
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-56-07-425Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-56-07-425Z" class="timestamp-link"><time datetime="2026-06-17T12:56:07.425Z" data-timestamp="2026-06-17T12:56:07.425Z">2026-06-17T12:56:07.425Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# Marv Plugin API Reference
+2	
+3	Quick reference for building Marv plugins. All types are in the `Marv.Core`
+4	namespace unless noted otherwise.
+5	
+6	---
+7	
+8	## 1. Minimal Plugin
+9	
+10	```csharp
+11	using Marv.Core.Platform;
+12	using Marv.Core.Plugin;
+13	using Microsoft.Extensions.Logging;
+14	
+15	public class HelloPlugin : MarvPlugin
+16	{
+17	    public HelloPlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory)
+18	        : base(bot, activator, loggerFactory) { }
+19	
+20	    [OnCommand(&quot;hello&quot;)]
+21	    private async Task HandleHello(CommandContext ctx, CancellationToken ct)
+22	    {
+23	        await ctx.ReplyAsync($&quot;Hi, {ctx.Sender.Nick}!&quot;, ct);
+24	    }
+25	}
+26	```
+27	
+28	The three-parameter constructor (`IBot`, `IPluginActivator`, `ILoggerFactory`)
+29	is the minimum. Add more DI parameters after `ILoggerFactory` as needed (see
+30	§8 and §9).
+31	
+32	---
+33	
+34	## 2. Constructor &amp; Base Class
+35	
+36	```
+37	protected MarvPlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory)
+38	```
+39	
+40	**Protected members:** `IBot Bot`, `ILogger Logger` (scoped to your plugin type).
+41	
+42	**Lifecycle overrides** (all `virtual`, all no-op by default):
+43	
+44	| Method | When |
+45	|---|---|
+46	| `OnLoadAsync(ct)` | Once, after construction |
+47	| `OnConnectedAsync(ct)` | Each IRC connection |
+48	| `OnDisconnectedAsync()` | Connection lost (IChannel/IUser refs are stale) |
+49	| `OnUnloadAsync()` | Shutdown, before DI disposal |
+50	| `HandleEventAsync(evt, ct)` | Each event (sequential, never concurrent) |
+51	| `FilterHandlerAsync(invocation, ct)` | Before each handler — return `false` to skip |
+52	
+53	---
+54	
+55	## 3. Handler Attributes
+56	
+57	### `[OnCommand(&quot;name&quot;)]` → `Task Handler(CommandContext ctx, CancellationToken ct)`
+58	
+59	Fires when a message starts with `[prefix][command]`. Command matching is
+60	case-insensitive. AllowMultiple — same method can handle multiple commands.
+61	
+62	| Property | Type | Default | Effect |
+63	|---|---|---|---|
+64	| `Prefix` | `string?` | bot&#x27;s `CommandPrefix` | Override the command prefix |
+65	| `ChannelOnly` | `bool` | `false` | Skip DMs |
+66	| `DirectOnly` | `bool` | `false` | Skip channel messages |
+67	| `Channel` | `string?` | `null` | Only fire in this channel (case-insensitive) |
+68	
+69	### `[OnRegex(&quot;pattern&quot;)]` → `Task Handler(RegexMatchContext ctx, CancellationToken ct)`
+70	
+71	Fires when message text (IRC formatting stripped) matches the pattern. Same
+72	filter properties as `[OnCommand]` minus `Prefix`, plus:
+73	
+74	| Property | Type | Default | Effect |
+75	|---|---|---|---|
+76	| `Options` | `RegexOptions` | `None` | Additional regex options (`Compiled` is always added) |
+77	
+78	### `[OnEvent]` → `Task Handler(TEvent evt, CancellationToken ct)`
+79	
+80	Event type is inferred from the first parameter (must extend `MarvEvent`).</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-56-08-317Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-56-08-317Z" class="timestamp-link"><time datetime="2026-06-17T12:56:08.317Z" data-timestamp="2026-06-17T12:56:08.317Z">2026-06-17T12:56:08.317Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_016pYEMXeo1EKc1AafVEGxJm">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Find relevant test files</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">find /workspaces/marv/tests -name &#34;IrcSerializerTests.cs&#34; -o -name &#34;MarvBotServiceTests.cs&#34; 2&gt;/dev/null</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-56-08-423Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-56-08-423Z" class="timestamp-link"><time datetime="2026-06-17T12:56:08.423Z" data-timestamp="2026-06-17T12:56:08.423Z">2026-06-17T12:56:08.423Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/tests/Marv.Core.Tests/Protocol/IrcSerializerTests.cs</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-56-11-697Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-56-11-697Z" class="timestamp-link"><time datetime="2026-06-17T12:56:11.697Z" data-timestamp="2026-06-17T12:56:11.697Z">2026-06-17T12:56:11.697Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01FJQ2UoJK6nAapUSF6kLQtR"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/tests/Marv.Core.Tests/Protocol/IrcSerializerTests.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-56-11-720Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-56-11-720Z" class="timestamp-link"><time datetime="2026-06-17T12:56:11.720Z" data-timestamp="2026-06-17T12:56:11.720Z">2026-06-17T12:56:11.720Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using Xunit;
+2	using Marv.Core.Protocol;
+3	
+4	namespace Marv.Core.Tests.Protocol;
+5	
+6	/// &lt;summary&gt;
+7	/// Tests for &lt;see cref=&quot;IrcSerializer&quot;/&gt;, validated against the ircdocs/parser-tests
+8	/// msg-join test vectors from https://github.com/ircdocs/parser-tests.
+9	/// &lt;/summary&gt;
+10	public class IrcSerializerTests
+11	{
+12	    [Fact]
+13	    public void Serialize_SimpleVerbAndParams()
+14	    {
+15	        var msg = new IrcMessage(&quot;foo&quot;, [&quot;bar&quot;, &quot;baz&quot;, &quot;asdf&quot;]);
+16	        var result = IrcSerializer.Serialize(msg);
+17	        Assert.Equal(&quot;FOO bar baz asdf&quot;, result);
+18	    }
+19	
+20	    [Fact]
+21	    public void Serialize_SourceAndNoParams()
+22	    {
+23	        var msg = new IrcMessage(null, new MessageSource(&quot;src&quot;, null, null), &quot;AWAY&quot;, []);
+24	        var result = IrcSerializer.Serialize(msg);
+25	        Assert.Equal(&quot;:src AWAY&quot;, result);
+26	    }
+27	
+28	    [Fact]
+29	    public void Serialize_SourceAndEmptyTrailing()
+30	    {
+31	        var msg = new IrcMessage(null, new MessageSource(&quot;src&quot;, null, null), &quot;AWAY&quot;, [&quot;&quot;]);
+32	        var result = IrcSerializer.Serialize(msg);
+33	        Assert.Equal(&quot;:src AWAY :&quot;, result);
+34	    }
+35	
+36	    [Fact]
+37	    public void Serialize_TrailingWithSpaces()
+38	    {
+39	        var msg = new IrcMessage(&quot;foo&quot;, [&quot;bar&quot;, &quot;baz&quot;, &quot;asdf quux&quot;]);
+40	        var result = IrcSerializer.Serialize(msg);
+41	        Assert.Equal(&quot;FOO bar baz :asdf quux&quot;, result);
+42	    }
+43	
+44	    [Fact]
+45	    public void Serialize_TrailingWithColon()
+46	    {
+47	        var msg = new IrcMessage(&quot;foo&quot;, [&quot;bar&quot;, &quot;baz&quot;, &quot;:asdf&quot;]);
+48	        var result = IrcSerializer.Serialize(msg);
+49	        Assert.Equal(&quot;FOO bar baz ::asdf&quot;, result);
+50	    }
+51	
+52	    [Fact]
+53	    public void Serialize_TagsWithEscaping()
+54	    {
+55	        var tags = new Dictionary&lt;string, string?&gt;
+56	        {
+57	            [&quot;a&quot;] = &quot;b\\and\nk&quot;,
+58	            [&quot;d&quot;] = &quot;gh;764&quot;
+59	        };
+60	        var msg = new IrcMessage(tags, &quot;foo&quot;, [&quot;par1&quot;, &quot;par2&quot;]);
+61	        var result = IrcSerializer.Serialize(msg);
+62	        // Tags may be in any order
+63	        Assert.Contains(&quot;a=b\\\\and\\nk&quot;, result);
+64	        Assert.Contains(&quot;d=gh\\:764&quot;, result);
+65	        Assert.Contains(&quot;FOO par1 par2&quot;, result);
+66	    }
+67	
+68	    [Fact]
+69	    public void Serialize_EmptyTrailing()
+70	    {
+71	        var msg = new IrcMessage(&quot;foo&quot;, [&quot;bar&quot;, &quot;baz&quot;, &quot;&quot;]);
+72	        var result = IrcSerializer.Serialize(msg);
+73	        Assert.Equal(&quot;FOO bar baz :&quot;, result);
+74	    }
+75	
+76	    [Fact]
+77	    public void Serialize_CommandOnly()
+78	    {
+79	        var msg = new IrcMessage(&quot;COMMAND&quot;, []);
+80	        var result = IrcSerializer.Serialize(msg);
+81	        Assert.Equal(&quot;COMMAND&quot;, result);
+82	    }
+83	
+84	    [Fact]
+85	    public void Serialize_RoundTrip()
+86	    {
+87	        var input = &quot;@tag1=value1;tag2 :nick!user@host PRIVMSG #channel :hello world&quot;;
+88	        var parsed = IrcParser.Parse(input)!;
+89	        var serialized = IrcSerializer.Serialize(parsed);
+90	        var reparsed = IrcParser.Parse(serialized)!;
+91	
+92	        Assert.Equal(parsed.Command, reparsed.Command);
+93	        Assert.Equal(parsed.Parameters, reparsed.Parameters);
+94	        Assert.Equal(parsed.Tags[&quot;tag1&quot;], reparsed.Tags[&quot;tag1&quot;]);
+95	        Assert.Equal(parsed.Source!.Nick, reparsed.Source!.Nick);
+96	    }
+97	}
+98	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-56-11-857Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-56-11-857Z" class="timestamp-link"><time datetime="2026-06-17T12:56:11.857Z" data-timestamp="2026-06-17T12:56:11.857Z">2026-06-17T12:56:11.857Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01FXqoMgaR2J8YiPhuqdtApj"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/PLUGIN_API.md&#34;,
+  &#34;offset&#34;: 80
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-56-11-871Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-56-11-871Z" class="timestamp-link"><time datetime="2026-06-17T12:56:11.871Z" data-timestamp="2026-06-17T12:56:11.871Z">2026-06-17T12:56:11.871Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>80	Event type is inferred from the first parameter (must extend `MarvEvent`).
+81	
+82	### `[OnRawMessage(&quot;COMMAND&quot;)]` → `Task Handler(IrcMessage msg, CancellationToken ct)`
+83	
+84	Fires for raw IRC messages with matching command. Use for protocol-level
+85	handling not covered by typed events. VERSION, PING, TIME are handled
+86	internally.
+87	
+88	### `[OnInterval(Seconds = 30)]` or `[OnInterval(Minutes = 5)]`
+89	
+90	→ `Task Handler(CancellationToken ct)`
+91	
+92	Fires on a timer while connected. Defaults to 1 minute if neither is set.
+93	
+94	&gt; **Note:** All handler methods may omit the `CancellationToken` parameter.
+95	
+96	---
+97	
+98	## 4. Context Types
+99	
+100	### HandlerContext (`Marv.Core.Plugin`) — abstract base
+101	
+102	Both `CommandContext` and `RegexMatchContext` extend `HandlerContext`,
+103	which provides the shared properties. Filter evaluators can pattern-match
+104	on `HandlerContext` instead of switching on each concrete type:
+105	
+106	```csharp
+107	var sender = (invocation.Context as HandlerContext)?.Sender;
+108	```
+109	
+110	| Property | Type | Description |
+111	|---|---|---|
+112	| `Channel` | `IChannel?` | `null` for DMs |
+113	| `Sender` | `IUser` | Who sent it |
+114	| `IsDirect` | `bool` | `true` when `Channel` is `null` |
+115	| `RawMessage` | `IrcMessage` | Underlying IRC message |
+116	| `Bot` | `IBot` | Bot instance |
+117	| `ReplyAsync(text, ct)` | `Task` | Reply in context (channel or DM) |
+118	
+119	### CommandContext (`Marv.Core.Plugin`) extends HandlerContext
+120	
+121	| Property | Type | Description |
+122	|---|---|---|
+123	| `Command` | `string` | Matched command (without prefix) |
+124	| `Args` | `IReadOnlyList&lt;string&gt;` | Arguments split by whitespace |
+125	| `ArgString` | `string` | Raw argument text |
+126	
+127	### RegexMatchContext (`Marv.Core.Plugin`) extends HandlerContext
+128	
+129	| Property | Type | Description |
+130	|---|---|---|
+131	| `Match` | `System.Text.RegularExpressions.Match` | The regex match result |
+132	
+133	---
+134	
+135	## 5. IBot
+136	
+137	All `Send*Async` methods are thread-safe.
+138	
+139	| Method | Description |
+140	|---|---|
+141	| `SendMessageAsync(target, text, ct)` | PRIVMSG |
+142	| `SendNoticeAsync(target, text, ct)` | NOTICE |
+143	| `SendActionAsync(target, text, ct)` | CTCP ACTION (/me) |
+144	| `SendRawAsync(IrcMessage, ct)` | Raw IRC message |
+145	| `JoinAsync(channel, key?, ct)` | Join with optional key |
+146	| `JoinMultipleAsync(channels, ct)` | Batched JOIN (auto-splits) |
+147	| `PartAsync(channel, reason?, ct)` | Part with optional reason |
+148	| `KickAsync(channel, nick, reason?, ct)` | Kick user from channel |
+149	| `SetTopicAsync(channel, topic, ct)` | Set channel topic |
+150	| `InviteAsync(nick, channel, ct)` | Invite user to channel |
+151	| `SetModeAsync(target, modeString, ct)` | Set mode (channel or user) |
+152	| `SetModeAsync(target, modeString, param, ct)` | Set mode with parameter |
+153	| `GiveOpAsync(channel, nick, ct)` | Give +o |
+154	| `RemoveOpAsync(channel, nick, ct)` | Remove -o |
+155	| `GiveVoiceAsync(channel, nick, ct)` | Give +v |
+156	| `RemoveVoiceAsync(channel, nick, ct)` | Remove -v |
+157	| `ChangeNickAsync(newNick, ct)` | Change bot&#x27;s nick |
+158	| `SendAndAwaitAsync(IrcMessage, ct)` | Send + wait for correlated response (WHO, WHOIS, WHOWAS, LIST, NAMES, LINKS, INFO only) |
+159	| `ClearOutboundQueueAsync(ct)` | Discard all pending outbound messages |
+160	
+161	| Property | Type | Description |
+162	|---|---|---|
+163	| `Self` | `IUser` | Bot&#x27;s own identity |
+164	| `CommandPrefix` | `string` | Configured prefix (e.g. `&quot;!&quot;`) |
+165	| `CaseComparer` | `IEqualityComparer&lt;string&gt;` | Server&#x27;s IRC case mapping comparer |
+166	| `Channels` | `IReadOnlyDictionary&lt;string, IChannel&gt;` | By case-mapped name |
+167	| `Users` | `IReadOnlyDictionary&lt;string, IUser&gt;` | By case-mapped nick |
+168	| `ServerInfo` | `IServerInfo` | ISUPPORT configuration |
+169	| `Capabilities` | `ICapabilityManager` | IRCv3 capability state |
+170	| `Statistics` | `IBotStatistics` | Connection statistics (uptime, bytes, lines, handlers) |
+171	| `OutboundQueueCount` | `int` | Messages waiting in the outbound send queue |
+172	
+173	### CTCP VERSION override
+174	
+175	The bot&#x27;s CTCP VERSION response can be customized via the `CtcpVersionResponse`
+176	configuration property. Set it to a custom string to change the response, or to
+177	an empty string to suppress the response entirely.
+178	
+179	For dynamic VERSION responses (e.g. including loaded plugins or uptime), set
+180	`CtcpVersionResponse` to `&quot;&quot;` in config to suppress the built-in response, then
+181	handle `CtcpEvent` via `[OnEvent]` to send your own NOTICE:
+182	
+183	```csharp
+184	[OnEvent]
+185	public async Task HandleCtcpVersion(CtcpEvent evt, CancellationToken ct)
+186	{
+187	    if (evt.Command != &quot;VERSION&quot;) return;
+188	
+189	    var response = $&quot;MyBot v1.0 — up {_bot.Statistics.Uptime:hh\\:mm\\:ss}&quot;;
+190	    await _bot.SendRawAsync(
+191	        new IrcMessage(&quot;NOTICE&quot;, [evt.Sender.Nick, $&quot;\x01VERSION {response}\x01&quot;]), ct);
+192	}
+193	```
+194	
+195	---
+196	
+197	## 6. Event Types
+198	
+199	All events extend `MarvEvent` which carries: `Timestamp`, `RawMessage`,
+200	`MessageId?`, `BatchId?`.
+201	
+202	### Connection
+203	
+204	| Event | Key Properties | When |
+205	|---|---|---|
+206	| `ConnectedEvent` | — | IRC registration complete (001) |
+207	| `ReadyEvent` | — | Auth done, about to join channels |
+208	| `DisconnectedEvent` | — | Connection lost/closed |
+209	| `CapabilitiesChangedEvent` | — | Runtime cap-notify change |
+210	
+211	### Message
+212	
+213	| Event | Key Properties | When |
+214	|---|---|---|
+215	| `MessageEvent` | `Channel?`, `Sender`, `Text`, `IsDirect`, `ReplyTo?` | PRIVMSG |
+216	| `NoticeEvent` | `Channel?`, `Sender`, `Text`, `IsDirect` | NOTICE |
+217	| `ActionEvent` | `Channel?`, `Sender`, `Text`, `IsDirect` | CTCP ACTION |
+218	| `CtcpEvent` | `Sender`, `Command`, `Args?`, `IsDirect` | Unhandled CTCP |
+219	
+220	### User
+221	
+222	| Event | Key Properties | When |
+223	|---|---|---|
+224	| `UserJoinedEvent` | `Channel`, `User`, `Account?` | JOIN |
+225	| `UserPartedEvent` | `Channel`, `User`, `Reason?` | PART |
+226	| `UserKickedEvent` | `Channel`, `Kicker`, `Kicked`, `Reason?` | KICK |
+227	| `UserQuitEvent` | `User`, `Reason?`, `AffectedChannels` | QUIT |
+228	| `NickChangedEvent` | `User`, `OldNick`, `NewNick` | NICK |
+229	| `AccountChangedEvent` | `User`, `OldAccount?`, `NewAccount?` | Account change |
+230	| `AwayChangedEvent` | `User`, `IsAway`, `Message?` | Away status change |
+231	| `HostChangedEvent` | `User`, `OldHost`, `NewHost` | Host change (cloaking) |
+232	
+233	### Channel
+234	
+235	| Event | Key Properties | When |
+236	|---|---|---|
+237	| `TopicChangedEvent` | `Channel`, `SetBy`, `NewTopic` | TOPIC |
+238	| `ModeChangedEvent` | `Channel`, `SetBy`, `Changes` (list of `ModeChange`) | MODE |
+239	| `InviteReceivedEvent` | `Channel` (string), `InvitedBy` | INVITE |
+240	
+241	`ModeChange`: `IsSet` (bool), `Mode` (char), `Parameter?` (string).
+242	
+243	### Batch
+244	
+245	| Event | Key Properties | When |
+246	|---|---|---|
+247	| `BatchStartEvent` | `BatchRefTag`, `Type`, `Parameters` | BATCH open |
+248	| `BatchEndEvent` | `BatchRefTag` | BATCH close |
+249	
+250	### Raw
+251	
+252	| Event | Key Properties | When |
+253	|---|---|---|
+254	| `RawMessageEvent` | (inherits `RawMessage` from base) | Every inbound message |
+255	
+256	---
+257	
+258	## 7. IrcColor &amp; IrcFormat
+259	
+260	**Wrap-and-reset** (self-contained, safe):
+261	
+262	```csharp
+263	IrcFormat.Bold(&quot;important&quot;) + &quot; and &quot; + IrcFormat.Color(&quot;red text&quot;, IrcColor.Red);
+264	```
+265	
+266	Methods: `Bold`, `Italic`, `Underline`, `Strikethrough`, `Monospace`,
+267	`Reverse`, `Color(text, fg)`, `Color(text, fg, bg)`.
+268	
+269	**Stateful** (for complex formatting — you manage resets):
+270	
+271	```csharp
+272	$&quot;{IrcColor.Cyan.On(IrcColor.Black)}[{IrcColor.Orange} status {IrcColor.Cyan}]{IrcFormat.Reset} ok&quot;
+273	```
+274	
+275	Named colors: `White`, `Black`, `Blue`, `Green`, `Red`, `Brown`, `Purple`,
+276	`Orange`, `Yellow`, `LightGreen`, `Cyan`, `LightCyan`, `LightBlue`, `Pink`,
+277	`Grey`, `LightGrey`, `Default`. Extended colors via `new IrcColor(16..98)`.
+278	
+279	`IrcFormat.Strip(text)` removes all formatting codes.
+280	
+281	---
+282	
+283	## 8. Configuration
+284	
+285	1. Create a config class with `[PluginConfig]`:
+286	
+287	```csharp
+288	[PluginConfig(Section = &quot;Greet&quot;)]
+289	public record GreetConfig
+290	{
+291	    public string Message { get; init; } = &quot;Welcome, {nick}!&quot;;
+292	    public bool Enabled { get; init; } = true;
+293	}
+294	```
+295	
+296	2. Inject `IOptions&lt;T&gt;` in your plugin constructor:
+297	
+298	```csharp
+299	public GreetExamplePlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory,
+300	    IOptions&lt;GreetConfig&gt; config)
+301	    : base(bot, activator, loggerFactory)
+302	{
+303	    _config = config.Value;
+304	}
+305	```
+306	
+307	Config binds to a root-level section in the configuration file (e.g. `&quot;Greet&quot;`).
+308	
+309	### Options API variants
+310	
+311	The full `Microsoft.Extensions.Options` API is available for plugin
+312	configuration. In addition to `IOptions&lt;T&gt;`, you can inject:
+313	
+314	| Type | Lifetime | Use case |
+315	|---|---|---|
+316	| `IOptions&lt;T&gt;` | Singleton | Read config once at construction |
+317	| `IOptionsMonitor&lt;T&gt;` | Singleton | React to config changes at runtime via `OnChange` |
+318	| `IOptionsSnapshot&lt;T&gt;` | Scoped | Re-read config per scope (rarely needed for plugins) |
+319	
+320	Marv enables `reloadOnChange` on all file-based configuration providers, so
+321	`IOptionsMonitor&lt;T&gt;.OnChange` fires automatically when the config file is
+322	edited at runtime.
+323	
+324	Example using `IOptionsMonitor&lt;T&gt;` to react to config file edits:
+325	
+326	```csharp
+327	public class MyPlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory,
+328	    IOptionsMonitor&lt;MyConfig&gt; configMonitor)
+329	    : MarvPlugin(bot, activator, loggerFactory)
+330	{
+331	    private MyConfig _config = configMonitor.CurrentValue;
+332	
+333	    public override Task OnConnectedAsync(CancellationToken ct)
+334	    {
+335	        configMonitor.OnChange(updated =&gt; _config = updated);
+336	        return Task.CompletedTask;
+337	    }
+338	}
+339	```
+340	
+341	---
+342	
+343	## 9. Services
+344	
+345	### Service lifetimes
+346	
+347	Core services like `IBot`, `IServerInfo`, `ICapabilityManager`,
+348	`IBotStatistics`, and `IPluginActivator` are **connection-scoped** — a fresh
+349	instance is created for each IRC connection and disposed on disconnect.
+350	Plugins are also recreated per connection, so they always receive the
+351	current connection&#x27;s services.
+352	
+353	Plugins can register services with any standard DI lifetime:
+354	
+355	| Lifetime | `ConfigureServices` call | Behaviour |
+356	|---|---|---|
+357	| **Scoped** | `services.AddScoped&lt;T, TImpl&gt;()` | Fresh instance per connection — matches plugin lifetime |
+358	| **Singleton** | `services.AddSingleton&lt;T, TImpl&gt;()` | Survives reconnects — use for cross-connection state (caches, metrics) |
+359	| **Transient** | `services.AddTransient&lt;T, TImpl&gt;()` | New instance per resolution |
+360	
+361	&gt; **Note:** Singleton services must not capture scoped services (e.g. `IBot`)
+362	&gt; in their constructors. The DI container will reject this. If a singleton
+363	&gt; needs access to connection-scoped services, inject `IServiceScopeFactory`
+364	&gt; and create a scope on demand.
+365	
+366	**Providing a service:**
+367	
+368	```csharp
+369	[ProvidesService(typeof(IMyService))]
+370	public class MyServicePlugin : MarvPlugin
+371	{
+372	    public MyServicePlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory)
+373	        : base(bot, activator, loggerFactory) { }
+374	
+375	    public static void ConfigureServices(IServiceCollection services)
+376	    {
+377	        services.AddScoped&lt;IMyService, MyServiceImpl&gt;();
+378	    }
+379	}
+380	```
+381	
+382	**Consuming a service** (use `= null` for optional):
+383	
+384	```csharp
+385	public MyConsumerPlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory,
+386	    IMyService? svc = null)
+387	    : base(bot, activator, loggerFactory) { _svc = svc; }
+388	```
+389	
+390	Use `[DependsOn(typeof(OtherPlugin))]` for explicit load ordering without a
+391	service relationship.
+392	
+393	---
+394	
+395	## 10. Handler Groups
+396	
+397	Split handler methods into separate classes to organize large plugins:
+398	
+399	```csharp
+400	[HandlerGroup]
+401	public class AdminHandlers
+402	{
+403	    private readonly IBot _bot;
+404	    public AdminHandlers(IBot bot) { _bot = bot; }
+405	
+406	    [OnCommand(&quot;status&quot;, ChannelOnly = true)]
+407	    public async Task HandleStatus(CommandContext ctx, CancellationToken ct)
+408	    {
+409	        await ctx.ReplyAsync($&quot;Channels: {_bot.Channels.Count}&quot;, ct);
+410	    }
+411	}
+412	```
+413	
+414	Handler groups are discovered automatically in the plugin&#x27;s assembly.
+415	Constructor parameters are resolved from DI via `IPluginActivator`. Handler
+416	group methods must be `public`. Groups support optional lifecycle methods:
+417	`OnLoadAsync(ct)`, `OnConnectedAsync(ct)`, `OnDisconnectedAsync()`,
+418	`OnUnloadAsync()`.
+419	
+420	---
+421	
+422	## 11. Handler Filters
+423	
+424	Declarative cross-cutting logic (auth, rate limits, auditing) via attributes:
+425	
+426	```csharp
+427	[AttributeUsage(AttributeTargets.Method)]
+428	public sealed class RequireAccountAttribute : Attribute, IFilteringAttribute
+429	{
+430	    public Type EvaluatorType =&gt; typeof(RequireAccountEvaluator);
+431	}
+432	
+433	public class RequireAccountEvaluator : FilterEvaluator&lt;RequireAccountAttribute&gt;
+434	{
+435	    protected override ValueTask&lt;FilterResult&gt; EvaluateAsync(
+436	        RequireAccountAttribute attribute, HandlerInvocation invocation,
+437	        IBot bot, CancellationToken ct)
+438	    {
+439	        if (invocation.Context is HandlerContext ctx &amp;&amp; ctx.Sender.Account is null)
+440	        {
+441	            _ = ctx.ReplyAsync(&quot;You must be logged in.&quot;, ct);
+442	            return ValueTask.FromResult(FilterResult.Denied);
+443	        }
+444	        return ValueTask.FromResult(FilterResult.Allowed);
+445	    }
+446	}
+447	```
+448	
+449	Apply to any handler: `[RequireAccount] [OnCommand(&quot;admin&quot;)] private async Task ...`
+450	
+451	**HandlerInvocation** fields: `Method`, `Target`, `Type` (Command/Regex/Event/
+452	RawMessage/Interval), `Context` (the context object or `null` for intervals),
+453	`Attributes` (pre-cached).
+454	
+455	Override `FilterHandlerAsync` in your plugin for per-plugin filtering logic.
+456	
+457	---
+458	
+459	## 12. Testing (Marv.Testing)
+460	
+461	**Builders** reduce context setup to 2–3 lines:
+462	
+463	```csharp
+464	var ctx = CommandContextBuilder.Create(&quot;hello&quot;, &quot;world&quot;)
+465	    .InChannel(&quot;#test&quot;).From(&quot;alice&quot;).Build();
+466	
+467	var ctx2 = RegexMatchContextBuilder.Create(@&quot;hello (\w+)&quot;, &quot;hello world&quot;)
+468	    .InChannel(&quot;#test&quot;).From(&quot;alice&quot;).Build();
+469	
+470	var evt = EventBuilder&lt;MessageEvent&gt;.Create(raw =&gt; new MessageEvent
+471	{
+472	    Sender = MockUser.Create(&quot;alice&quot;),
+473	    Text = &quot;hello&quot;,
+474	    RawMessage = raw
+475	}).Build();
+476	```
+477	
+478	**Mock factories:** `MockBot.Create(nick, prefix)`, `MockUser.Create(nick, account)`,
+479	`MockChannel.Create(name)`, `DummyIrcMessage.Privmsg` / `.Notice` / `.Empty` /
+480	`.PrivmsgFrom(nick, target, text)`.
+481	
+482	**PluginTestHarness** wires up DI with mocked dependencies:
+483	
+484	```csharp
+485	var harness = PluginTestHarness&lt;HelloPlugin&gt;.Create();
+486	await harness.LoadAsync();
+487	await harness.HandleEventAsync(evt);
+488	// harness.Plugin — the plugin instance
+489	// harness.Bot — the mock IBot (use NSubstitute .Received() assertions)
+490	```
+491	
+492	Pass `configureServices:` to register `IOptions&lt;T&gt;` or inter-plugin service
+493	mocks. Pass `bot:` to provide a custom `IBot` mock.
+494	
+495	---
+496	
+497	## 13. Available Services
+498	
+499	**Always available (registered by Marv host):**
+500	
+501	| Service | Lifetime | Description |
+502	|---|---|---|
+503	| `IBot` | Scoped | Bot instance (fresh per connection) |
+504	| `IPluginActivator` | Scoped | Creates instances with DI resolution |
+505	| `IBotStatistics` | Scoped | Connection statistics (also via `IBot.Statistics`) |
+506	| `IServerInfo` | Scoped | ISUPPORT configuration |
+507	| `ICapabilityManager` | Scoped | IRCv3 capability state |
+508	| `ILoggerFactory` / `ILogger&lt;T&gt;` | Singleton | Logging |
+509	| `IOptions&lt;T&gt;` | Singleton | Config for `[PluginConfig]` types |
+510	| `IOptionsMonitor&lt;T&gt;` | Singleton | Config with change notification support |
+511	| `IOptionsSnapshot&lt;T&gt;` | Scoped | Re-read config per connection scope |
+512	| `IHttpClientFactory` | Singleton | HTTP clients (no extra NuGet needed) |
+513	| `IHostApplicationLifetime` | Singleton | App shutdown coordination |
+514	| `IConfiguration` | Singleton | Raw configuration access |
+515	
+516	Services registered by plugins via `[ProvidesService]` + `ConfigureServices`
+517	are available to dependent plugins in load order (see §9).
+518	
+519	---
+520	
+521	## 14. Platform Types Quick Reference
+522	
+523	**IUser:** `Nick`, `User?`, `Host?`, `Account?`, `RealName?`, `IsAway`,
+524	`AwayMessage?`, `IsBot`, `Channels`, `Hostmask`.
+525	
+526	**IChannel:** `Name`, `Topic?`, `TopicSetBy?`, `TopicSetAt?`, `Modes`,
+527	`Members`, `CreatedAt?`, `GetPrefixes(nick)`, `GetJoinTime(nick)`,
+528	`HasMember(nick)`, `IsOp(nick)`, `IsVoiced(nick)`.
+529	
+530	**IServerInfo:** `NetworkName?`, `CaseMapping`, `ChannelModes`, `Prefix`,
+531	`MaxChannels?`, `MaxNickLength?`, `MaxTopicLength?`, `MaxMessageLength`,
+532	`ChannelTypes`, `Motd?`, `Supports(token)`, `GetValue(token)`.
+533	
+534	**ICapabilityManager:** `IsNegotiated(cap)`, `IsAvailable(cap)`,
+535	`NegotiatedCapabilities`, `AvailableCapabilities`, `CapabilitiesChanged` event.
+536	
+537	**IBotStatistics:** `ConnectedAt`, `Uptime`, `BytesReceived`, `BytesSent`,
+538	`LinesReceived`, `LinesSent`, `HandlersInvoked`. All properties are thread-safe.
+539	Counters reset on each new connection.
+540	
+541	**IrcMessage:** `Tags`, `Source?`, `Command`, `Parameters`.
+542	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-56-16-399Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-56-16-399Z" class="timestamp-link"><time datetime="2026-06-17T12:56:16.399Z" data-timestamp="2026-06-17T12:56:16.399Z">2026-06-17T12:56:16.399Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Good, I have all the context I need. Let me implement all three specs. I'll start with CS-034 (simplest), then CS-032, then CS-033.</p>
+<p><strong>Starting with CS-034: Always use colon on trailing parameters.</strong></p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-56-18-974Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-56-18-974Z" class="timestamp-link"><time datetime="2026-06-17T12:56:18.974Z" data-timestamp="2026-06-17T12:56:18.974Z">2026-06-17T12:56:18.974Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01KL6ockYA2yq3VXZBmJiYGg">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">IrcSerializer.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/Protocol/IrcSerializer.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">            // Last parameter needs trailing prefix if it contains spaces,
+            // starts with &#39;:&#39;, or is empty
+            if (i == message.Parameters.Count - 1 &amp;&amp;
+                (param.Contains(&#39; &#39;) || param.StartsWith(&#39;:&#39;) || param.Length == 0))
+            {
+                sb.Append(&#39;:&#39;);
+            }</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">            if (i == message.Parameters.Count - 1)
+            {
+                sb.Append(&#39;:&#39;);
+            }</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-56-19-030Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-56-19-030Z" class="timestamp-link"><time datetime="2026-06-17T12:56:19.030Z" data-timestamp="2026-06-17T12:56:19.030Z">2026-06-17T12:56:19.030Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/Protocol/IrcSerializer.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-56-22-302Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-56-22-302Z" class="timestamp-link"><time datetime="2026-06-17T12:56:22.302Z" data-timestamp="2026-06-17T12:56:22.302Z">2026-06-17T12:56:22.302Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the tests to expect colons on all trailing parameters.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-56-23-526Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-56-23-526Z" class="timestamp-link"><time datetime="2026-06-17T12:56:23.526Z" data-timestamp="2026-06-17T12:56:23.526Z">2026-06-17T12:56:23.526Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01Use2nvNJggpsJrHNgQfSUh">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">IrcSerializerTests.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/tests/Marv.Core.Tests/Protocol/IrcSerializerTests.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">        Assert.Equal(&#34;FOO bar baz asdf&#34;, result);</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">        Assert.Equal(&#34;FOO bar baz :asdf&#34;, result);</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-56-23-567Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-56-23-567Z" class="timestamp-link"><time datetime="2026-06-17T12:56:23.567Z" data-timestamp="2026-06-17T12:56:23.567Z">2026-06-17T12:56:23.567Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/tests/Marv.Core.Tests/Protocol/IrcSerializerTests.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-56-26-888Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-56-26-888Z" class="timestamp-link"><time datetime="2026-06-17T12:56:26.888Z" data-timestamp="2026-06-17T12:56:26.888Z">2026-06-17T12:56:26.888Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>The tags test also needs updating — it checks <code>FOO par1 par2</code> without colon.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-56-27-758Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-56-27-758Z" class="timestamp-link"><time datetime="2026-06-17T12:56:27.758Z" data-timestamp="2026-06-17T12:56:27.758Z">2026-06-17T12:56:27.758Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01WT6KFkJeSoXqxqpaHwEfDo">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">IrcSerializerTests.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/tests/Marv.Core.Tests/Protocol/IrcSerializerTests.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">        Assert.Contains(&#34;FOO par1 par2&#34;, result);</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">        Assert.Contains(&#34;FOO par1 :par2&#34;, result);</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-56-27-786Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-56-27-786Z" class="timestamp-link"><time datetime="2026-06-17T12:56:27.786Z" data-timestamp="2026-06-17T12:56:27.786Z">2026-06-17T12:56:27.786Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/tests/Marv.Core.Tests/Protocol/IrcSerializerTests.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-56-35-550Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-56-35-550Z" class="timestamp-link"><time datetime="2026-06-17T12:56:35.550Z" data-timestamp="2026-06-17T12:56:35.550Z">2026-06-17T12:56:35.550Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p><strong>Now CS-032: Disable auto-reconnect option.</strong></p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-56-39-250Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-56-39-250Z" class="timestamp-link"><time datetime="2026-06-17T12:56:39.250Z" data-timestamp="2026-06-17T12:56:39.250Z">2026-06-17T12:56:39.250Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_015Lwq6gdumHwBuDyNWfY6yo">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">MarvConfiguration.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/MarvConfiguration.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    /// &lt;summary&gt;
+    /// Override for the minimum log level. When set, replaces the default log level
+    /// from appsettings.json.
+    /// &lt;/summary&gt;
+    [Description(&#34;Override for the default log level.&#34;)]
+    public LogLevel? LogLevel { get; init; }</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    /// &lt;summary&gt;
+    /// Whether the bot should automatically reconnect after a connection failure.
+    /// When false, the bot logs the error and exits with a non-zero exit code.
+    /// &lt;/summary&gt;
+    [Description(&#34;Auto-reconnect on connection failure (default: true).&#34;)]
+    public bool AutoReconnect { get; init; } = true;
+
+    /// &lt;summary&gt;
+    /// Override for the minimum log level. When set, replaces the default log level
+    /// from appsettings.json.
+    /// &lt;/summary&gt;
+    [Description(&#34;Override for the default log level.&#34;)]
+    public LogLevel? LogLevel { get; init; }</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-56-39-298Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-56-39-298Z" class="timestamp-link"><time datetime="2026-06-17T12:56:39.298Z" data-timestamp="2026-06-17T12:56:39.298Z">2026-06-17T12:56:39.298Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/MarvConfiguration.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-56-42-701Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-56-42-701Z" class="timestamp-link"><time datetime="2026-06-17T12:56:42.701Z" data-timestamp="2026-06-17T12:56:42.701Z">2026-06-17T12:56:42.701Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now modify <code>MarvBotService</code> to respect the setting.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-56-48-937Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-56-48-937Z" class="timestamp-link"><time datetime="2026-06-17T12:56:48.937Z" data-timestamp="2026-06-17T12:56:48.937Z">2026-06-17T12:56:48.937Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01KFTafDLAc2ppvfab7WfL5n">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">MarvBotService.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/Irc/MarvBotService.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">            catch (Exception ex)
+            {
+                _logger.LogError(ex, &#34;Bot disconnected unexpectedly&#34;);
+            }
+
+            // Cleanup after disconnect
+            try
+            {
+                await _pluginManager.NotifyDisconnectedAsync();
+                await _pluginManager.UnloadPluginsAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, &#34;Error during disconnect cleanup&#34;);
+            }
+
+            if (stoppingToken.IsCancellationRequested) break;
+
+            // Exponential backoff before reconnection
+            _logger.LogInformation(&#34;Reconnecting in {Seconds} seconds...&#34;, backoff);
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(backoff), stoppingToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+
+            backoff = Math.Min(backoff * 2, MaxBackoffSeconds);</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">            catch (Exception ex)
+            {
+                _logger.LogError(ex, &#34;Bot disconnected unexpectedly&#34;);
+            }
+
+            // Cleanup after disconnect
+            try
+            {
+                await _pluginManager.NotifyDisconnectedAsync();
+                await _pluginManager.UnloadPluginsAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, &#34;Error during disconnect cleanup&#34;);
+            }
+
+            if (stoppingToken.IsCancellationRequested) break;
+
+            if (!_config.AutoReconnect)
+            {
+                _logger.LogInformation(&#34;Auto-reconnect is disabled, exiting&#34;);
+                Environment.ExitCode = 1;
+                break;
+            }
+
+            // Exponential backoff before reconnection
+            _logger.LogInformation(&#34;Reconnecting in {Seconds} seconds...&#34;, backoff);
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(backoff), stoppingToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+
+            backoff = Math.Min(backoff * 2, MaxBackoffSeconds);</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-56-49-022Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-56-49-022Z" class="timestamp-link"><time datetime="2026-06-17T12:56:49.022Z" data-timestamp="2026-06-17T12:56:49.022Z">2026-06-17T12:56:49.022Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/Irc/MarvBotService.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-56-52-313Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-56-52-313Z" class="timestamp-link"><time datetime="2026-06-17T12:56:52.313Z" data-timestamp="2026-06-17T12:56:52.313Z">2026-06-17T12:56:52.313Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p><strong>Now CS-033: NuGet package improvements.</strong></p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-56-56-547Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-56-56-547Z" class="timestamp-link"><time datetime="2026-06-17T12:56:56.547Z" data-timestamp="2026-06-17T12:56:56.547Z">2026-06-17T12:56:56.547Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01Csi7qeTwRJY61aHLz2PRq3">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">Directory.Build.props</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/Directory.Build.props</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">&lt;Project&gt;
+  &lt;PropertyGroup&gt;
+    &lt;Version&gt;0.6.2&lt;/Version&gt;
+    &lt;IsPackable&gt;false&lt;/IsPackable&gt;
+  &lt;/PropertyGroup&gt;
+&lt;/Project&gt;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">&lt;Project&gt;
+  &lt;PropertyGroup&gt;
+    &lt;Version&gt;0.6.2&lt;/Version&gt;
+    &lt;IsPackable&gt;false&lt;/IsPackable&gt;
+  &lt;/PropertyGroup&gt;
+
+  &lt;!-- NuGet package improvements for packable projects --&gt;
+  &lt;PropertyGroup Condition=&#34;&#39;$(IsPackable)&#39; == &#39;true&#39;&#34;&gt;
+    &lt;EmbedUntrackedSources&gt;true&lt;/EmbedUntrackedSources&gt;
+    &lt;PublishRepositoryUrl&gt;true&lt;/PublishRepositoryUrl&gt;
+    &lt;IncludeSymbols&gt;true&lt;/IncludeSymbols&gt;
+    &lt;SymbolPackageFormat&gt;snupkg&lt;/SymbolPackageFormat&gt;
+    &lt;PackageReadmeFile&gt;README.md&lt;/PackageReadmeFile&gt;
+  &lt;/PropertyGroup&gt;
+
+  &lt;PropertyGroup Condition=&#34;&#39;$(CI)&#39; == &#39;true&#39;&#34;&gt;
+    &lt;ContinuousIntegrationBuild&gt;true&lt;/ContinuousIntegrationBuild&gt;
+  &lt;/PropertyGroup&gt;
+
+  &lt;ItemGroup Condition=&#34;&#39;$(IsPackable)&#39; == &#39;true&#39;&#34;&gt;
+    &lt;PackageReference Include=&#34;DotNet.ReproducibleBuilds&#34; Version=&#34;1.*&#34; PrivateAssets=&#34;All&#34; /&gt;
+    &lt;PackageReference Include=&#34;Microsoft.SourceLink.GitHub&#34; Version=&#34;8.*&#34; PrivateAssets=&#34;All&#34; /&gt;
+  &lt;/ItemGroup&gt;
+&lt;/Project&gt;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-56-56-597Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-56-56-597Z" class="timestamp-link"><time datetime="2026-06-17T12:56:56.597Z" data-timestamp="2026-06-17T12:56:56.597Z">2026-06-17T12:56:56.597Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/Directory.Build.props has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-56-59-780Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-56-59-780Z" class="timestamp-link"><time datetime="2026-06-17T12:56:59.780Z" data-timestamp="2026-06-17T12:56:59.780Z">2026-06-17T12:56:59.780Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now add the README packing to both .csproj files.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-57-01-061Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-57-01-061Z" class="timestamp-link"><time datetime="2026-06-17T12:57:01.061Z" data-timestamp="2026-06-17T12:57:01.061Z">2026-06-17T12:57:01.061Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01JEpnJDdrHFWxvUcVQNHyE6">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">Marv.Core.csproj</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/Marv.Core.csproj</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">  &lt;ItemGroup&gt;
+    &lt;PackageReference Include=&#34;Microsoft.Extensions.Configuration.Abstractions&#34;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">  &lt;ItemGroup&gt;
+    &lt;None Include=&#34;README.md&#34; Pack=&#34;true&#34; PackagePath=&#34;&#34; /&gt;
+  &lt;/ItemGroup&gt;
+
+  &lt;ItemGroup&gt;
+    &lt;PackageReference Include=&#34;Microsoft.Extensions.Configuration.Abstractions&#34;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-57-01-238Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-57-01-238Z" class="timestamp-link"><time datetime="2026-06-17T12:57:01.238Z" data-timestamp="2026-06-17T12:57:01.238Z">2026-06-17T12:57:01.238Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/Marv.Core.csproj has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-57-04-895Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-57-04-895Z" class="timestamp-link"><time datetime="2026-06-17T12:57:04.895Z" data-timestamp="2026-06-17T12:57:04.895Z">2026-06-17T12:57:04.895Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01FBaTiTVZXSo9WYX41RjaZf">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">Marv.Testing.csproj</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Testing/Marv.Testing.csproj</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">  &lt;ItemGroup&gt;
+    &lt;PackageReference Include=&#34;NSubstitute&#34;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">  &lt;ItemGroup&gt;
+    &lt;None Include=&#34;README.md&#34; Pack=&#34;true&#34; PackagePath=&#34;&#34; /&gt;
+  &lt;/ItemGroup&gt;
+
+  &lt;ItemGroup&gt;
+    &lt;PackageReference Include=&#34;NSubstitute&#34;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-57-04-952Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-57-04-952Z" class="timestamp-link"><time datetime="2026-06-17T12:57:04.952Z" data-timestamp="2026-06-17T12:57:04.952Z">2026-06-17T12:57:04.952Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Testing/Marv.Testing.csproj has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-57-08-202Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-57-08-202Z" class="timestamp-link"><time datetime="2026-06-17T12:57:08.202Z" data-timestamp="2026-06-17T12:57:08.202Z">2026-06-17T12:57:08.202Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now create the package README files, modeled after the plugin API doc style.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-57-24-792Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-57-24-792Z" class="timestamp-link"><time datetime="2026-06-17T12:57:24.792Z" data-timestamp="2026-06-17T12:57:24.792Z">2026-06-17T12:57:24.792Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_018DoVPHJC2okbgoEMgu4Yay">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">README.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/README.md</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content"># TDW.Marv.Core
+
+Core library for the [Marv IRC bot](https://github.com/predakanga/marv).
+Provides the plugin API, bot abstractions, IRC protocol handling, and
+service registry.
+
+## Who is this for?
+
+This package is for **plugin authors** building extensions for Marv. It
+provides the base classes, attributes, context types, and interfaces you
+need to write plugins.
+
+If you&#39;re writing **tests** for your plugins, also add
+[TDW.Marv.Testing](https://www.nuget.org/packages/TDW.Marv.Testing).
+
+## Quick start
+
+Create a class library targeting the same .NET version as Marv, add a
+reference to this package, and implement a plugin:
+
+```csharp
+using Marv.Core.Platform;
+using Marv.Core.Plugin;
+using Microsoft.Extensions.Logging;
+
+public class HelloPlugin : MarvPlugin
+{
+    public HelloPlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory)
+        : base(bot, activator, loggerFactory) { }
+
+    [OnCommand(&#34;hello&#34;)]
+    private async Task HandleHello(CommandContext ctx, CancellationToken ct)
+    {
+        await ctx.ReplyAsync($&#34;Hi, {ctx.Sender.Nick}!&#34;, ct);
+    }
+}
+```
+
+## Key types
+
+| Type | Description |
+|------|-------------|
+| `MarvPlugin` | Base class for all plugins |
+| `IBot` | Bot instance — send messages, query state |
+| `CommandContext` | Context for `[OnCommand]` handlers |
+| `RegexMatchContext` | Context for `[OnRegex]` handlers |
+| `IPluginActivator` | Create instances with DI resolution |
+| `IFilteringAttribute` | Declare handler filter attributes |
+| `FilterEvaluator&lt;T&gt;` | Implement handler filter logic |
+
+## Handler attributes
+
+| Attribute | Handler signature | Fires when |
+|-----------|-------------------|------------|
+| `[OnCommand(&#34;name&#34;)]` | `Task(CommandContext, CancellationToken)` | Prefixed command message |
+| `[OnRegex(&#34;pattern&#34;)]` | `Task(RegexMatchContext, CancellationToken)` | Message matches pattern |
+| `[OnEvent]` | `Task(TEvent, CancellationToken)` | Typed event (inferred from parameter) |
+| `[OnRawMessage(&#34;CMD&#34;)]` | `Task(IrcMessage, CancellationToken)` | Raw IRC message |
+| `[OnInterval(Seconds = n)]` | `Task(CancellationToken)` | Timer tick while connected |
+
+All handler methods may omit the `CancellationToken` parameter.
+
+## Configuration
+
+Declare a config class with `[PluginConfig]` and inject `IOptions&lt;T&gt;`:
+
+```csharp
+[PluginConfig(Section = &#34;MyPlugin&#34;)]
+public record MyConfig
+{
+    public string Greeting { get; init; } = &#34;Hello!&#34;;
+}
+```
+
+Config binds to a root-level JSON section matching the `Section` name.
+`IOptionsMonitor&lt;T&gt;` is also available for live-reload support.
+
+## Services
+
+Plugins can provide services to other plugins via `[ProvidesService]` and
+`ConfigureServices`. Consume services by adding constructor parameters
+(use `= null` for optional dependencies).
+
+## Documentation
+
+Full API reference: [Plugin API docs](https://github.com/predakanga/marv/blob/main/docs/PLUGIN_API.md)
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-57-24-843Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-57-24-843Z" class="timestamp-link"><time datetime="2026-06-17T12:57:24.843Z" data-timestamp="2026-06-17T12:57:24.843Z">2026-06-17T12:57:24.843Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /workspaces/marv/src/Marv.Core/README.md (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-57-41-232Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-57-41-232Z" class="timestamp-link"><time datetime="2026-06-17T12:57:41.232Z" data-timestamp="2026-06-17T12:57:41.232Z">2026-06-17T12:57:41.232Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01M2AqG6ag2ZaX5VzEGi3dfi">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">README.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Testing/README.md</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content"># TDW.Marv.Testing
+
+Test helpers for [Marv IRC bot](https://github.com/predakanga/marv)
+plugins. Provides builders for handler contexts, mock factories, and a
+plugin test harness.
+
+## Who is this for?
+
+This package is for **plugin authors** writing unit tests for their Marv
+plugins. It pairs with
+[TDW.Marv.Core](https://www.nuget.org/packages/TDW.Marv.Core).
+
+## Quick start
+
+Add this package alongside your preferred test framework (xUnit, NUnit,
+etc.) and [NSubstitute](https://nsubstitute.github.io/) (included as a
+dependency).
+
+```csharp
+using Marv.Testing;
+using NSubstitute;
+using Xunit;
+
+public class HelloPluginTests
+{
+    [Fact]
+    public async Task Hello_RepliesWithGreeting()
+    {
+        var harness = PluginTestHarness&lt;HelloPlugin&gt;.Create();
+        await harness.LoadAsync();
+
+        var ctx = CommandContextBuilder.Create(&#34;hello&#34;)
+            .InChannel(&#34;#test&#34;).From(&#34;alice&#34;).Build();
+
+        await harness.HandleCommandAsync(ctx);
+
+        await harness.Bot.Received().SendMessageAsync(
+            &#34;#test&#34;, Arg.Is&lt;string&gt;(s =&gt; s.Contains(&#34;alice&#34;)), Arg.Any&lt;CancellationToken&gt;());
+    }
+}
+```
+
+## Context builders
+
+Reduce test setup to 2-3 lines with fluent builders:
+
+```csharp
+// Command context
+var ctx = CommandContextBuilder.Create(&#34;greet&#34;, &#34;world&#34;)
+    .InChannel(&#34;#test&#34;).From(&#34;alice&#34;).Build();
+
+// Regex match context
+var ctx = RegexMatchContextBuilder.Create(@&#34;hello (\w+)&#34;, &#34;hello world&#34;)
+    .InChannel(&#34;#test&#34;).From(&#34;alice&#34;).Build();
+
+// Typed events
+var evt = EventBuilder&lt;MessageEvent&gt;.Create(raw =&gt; new MessageEvent
+{
+    Sender = MockUser.Create(&#34;alice&#34;),
+    Text = &#34;hello&#34;,
+    RawMessage = raw
+}).Build();
+```
+
+## Mock factories
+
+| Factory | Description |
+|---------|-------------|
+| `MockBot.Create(nick?, prefix?)` | NSubstitute mock of `IBot` |
+| `MockUser.Create(nick, account?)` | Mock `IUser` |
+| `MockChannel.Create(name)` | Mock `IChannel` |
+| `DummyIrcMessage.Privmsg` / `.Notice` / `.Empty` | Pre-built IRC messages |
+| `DummyIrcMessage.PrivmsgFrom(nick, target, text)` | Custom PRIVMSG |
+
+## Plugin test harness
+
+`PluginTestHarness&lt;T&gt;` wires up DI with mocked dependencies:
+
+```csharp
+var harness = PluginTestHarness&lt;MyPlugin&gt;.Create(
+    configureServices: services =&gt;
+    {
+        services.AddSingleton(Options.Create(new MyConfig { ... }));
+    });
+
+await harness.LoadAsync();
+
+// Access the plugin and mock bot
+harness.Plugin;  // MyPlugin instance
+harness.Bot;     // IBot mock (use .Received() assertions)
+```
+
+## Documentation
+
+Full API reference: [Plugin API docs](https://github.com/predakanga/marv/blob/main/docs/PLUGIN_API.md)
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-57-41-294Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-57-41-294Z" class="timestamp-link"><time datetime="2026-06-17T12:57:41.294Z" data-timestamp="2026-06-17T12:57:41.294Z">2026-06-17T12:57:41.294Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /workspaces/marv/src/Marv.Testing/README.md (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-57-44-675Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-57-44-675Z" class="timestamp-link"><time datetime="2026-06-17T12:57:44.675Z" data-timestamp="2026-06-17T12:57:44.675Z">2026-06-17T12:57:44.675Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me build and test to make sure everything compiles.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-57-45-413Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-57-45-413Z" class="timestamp-link"><time datetime="2026-06-17T12:57:45.413Z" data-timestamp="2026-06-17T12:57:45.413Z">2026-06-17T12:57:45.413Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01M5bTbcUqT9KtzequfZBHJ2">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Build to check for compilation errors</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">dotnet build -c Release 2&gt;&amp;1 | tail -20</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-57-55-738Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-57-55-738Z" class="timestamp-link"><time datetime="2026-06-17T12:57:55.738Z" data-timestamp="2026-06-17T12:57:55.738Z">2026-06-17T12:57:55.738Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Marv.Core -&gt; /workspaces/marv/src/Marv.Core/bin/Release/net10.0/Marv.Core.dll
+  Marv.Plugins.Greet -&gt; /workspaces/marv/src/plugins/Marv.Plugins.Greet/bin/Release/net10.0/Marv.Plugins.Greet.dll
+  Marv.Plugins.CannedResponses -&gt; /workspaces/marv/src/plugins/Marv.Plugins.CannedResponses/bin/Release/net10.0/Marv.Plugins.CannedResponses.dll
+  Marv.Testing -&gt; /workspaces/marv/src/Marv.Testing/bin/Release/net10.0/Marv.Testing.dll
+  Marv.Plugins.Auth -&gt; /workspaces/marv/src/plugins/Marv.Plugins.Auth/bin/Release/net10.0/Marv.Plugins.Auth.dll
+  Marv -&gt; /workspaces/marv/src/Marv/bin/Release/net10.0/Marv.dll
+  Marv.Plugins.AuthConsumer -&gt; /workspaces/marv/src/plugins/Marv.Plugins.AuthConsumer/bin/Release/net10.0/Marv.Plugins.AuthConsumer.dll
+  Marv.Testing.Tests -&gt; /workspaces/marv/tests/Marv.Testing.Tests/bin/Release/net10.0/Marv.Testing.Tests.dll
+  Marv.Plugins.Moderation -&gt; /workspaces/marv/src/plugins/Marv.Plugins.Moderation/bin/Release/net10.0/Marv.Plugins.Moderation.dll
+  Marv.Core.Tests -&gt; /workspaces/marv/tests/Marv.Core.Tests/bin/Release/net10.0/Marv.Core.Tests.dll
+  Marv.Plugins.Tests -&gt; /workspaces/marv/tests/Marv.Plugins.Tests/bin/Release/net10.0/Marv.Plugins.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:09.97</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-58-02-739Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-58-02-739Z" class="timestamp-link"><time datetime="2026-06-17T12:58:02.739Z" data-timestamp="2026-06-17T12:58:02.739Z">2026-06-17T12:58:02.739Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Build succeeds. Now run tests.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-58-03-152Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-58-03-152Z" class="timestamp-link"><time datetime="2026-06-17T12:58:03.152Z" data-timestamp="2026-06-17T12:58:03.152Z">2026-06-17T12:58:03.152Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01Vwa3MNRUKhSuiU5WsSVGUD">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Run all tests</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">dotnet test -c Release 2&gt;&amp;1 | tail -30</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-59-06-508Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-59-06-508Z" class="timestamp-link"><time datetime="2026-06-17T12:59:06.508Z" data-timestamp="2026-06-17T12:59:06.508Z">2026-06-17T12:59:06.508Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Marv.Core -&gt; /workspaces/marv/src/Marv.Core/bin/Release/net10.0/Marv.Core.dll
+  Marv.Testing -&gt; /workspaces/marv/src/Marv.Testing/bin/Release/net10.0/Marv.Testing.dll
+  Marv.Plugins.CannedResponses -&gt; /workspaces/marv/src/plugins/Marv.Plugins.CannedResponses/bin/Release/net10.0/Marv.Plugins.CannedResponses.dll
+  Marv.Plugins.Auth -&gt; /workspaces/marv/src/plugins/Marv.Plugins.Auth/bin/Release/net10.0/Marv.Plugins.Auth.dll
+  Marv.Plugins.Greet -&gt; /workspaces/marv/src/plugins/Marv.Plugins.Greet/bin/Release/net10.0/Marv.Plugins.Greet.dll
+  Marv -&gt; /workspaces/marv/src/Marv/bin/Release/net10.0/Marv.dll
+  Marv.Plugins.Moderation -&gt; /workspaces/marv/src/plugins/Marv.Plugins.Moderation/bin/Release/net10.0/Marv.Plugins.Moderation.dll
+  Marv.Plugins.AuthConsumer -&gt; /workspaces/marv/src/plugins/Marv.Plugins.AuthConsumer/bin/Release/net10.0/Marv.Plugins.AuthConsumer.dll
+  Marv.Testing.Tests -&gt; /workspaces/marv/tests/Marv.Testing.Tests/bin/Release/net10.0/Marv.Testing.Tests.dll
+  Marv.Core.Tests -&gt; /workspaces/marv/tests/Marv.Core.Tests/bin/Release/net10.0/Marv.Core.Tests.dll
+Test run for /workspaces/marv/tests/Marv.Core.Tests/bin/Release/net10.0/Marv.Core.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /workspaces/marv/tests/Marv.Testing.Tests/bin/Release/net10.0/Marv.Testing.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    35, Skipped:     0, Total:    35, Duration: 172 ms - Marv.Testing.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   287, Skipped:     0, Total:   287, Duration: 55 s - Marv.Core.Tests.dll (net10.0)
+  Marv.Plugins.Tests -&gt; /workspaces/marv/tests/Marv.Plugins.Tests/bin/Release/net10.0/Marv.Plugins.Tests.dll
+Test run for /workspaces/marv/tests/Marv.Plugins.Tests/bin/Release/net10.0/Marv.Plugins.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    24, Skipped:     0, Total:    24, Duration: 132 ms - Marv.Plugins.Tests.dll (net10.0)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-59-10-646Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-59-10-646Z" class="timestamp-link"><time datetime="2026-06-17T12:59:10.646Z" data-timestamp="2026-06-17T12:59:10.646Z">2026-06-17T12:59:10.646Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>All 346 tests pass. Now let me update the change specs, changelog, and prompt log.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-59-11-218Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-59-11-218Z" class="timestamp-link"><time datetime="2026-06-17T12:59:11.218Z" data-timestamp="2026-06-17T12:59:11.218Z">2026-06-17T12:59:11.218Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01NbTvCU6vKni165D2bN2ZVt"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/032-disable-auto-reconnect.md&#34;,
+  &#34;limit&#34;: 3
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-59-11-247Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-59-11-247Z" class="timestamp-link"><time datetime="2026-06-17T12:59:11.247Z" data-timestamp="2026-06-17T12:59:11.247Z">2026-06-17T12:59:11.247Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# CS-032: Disable Auto-Reconnect Option
+2	
+3	**Source:** GitHub issue #8</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-59-15-179Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-59-15-179Z" class="timestamp-link"><time datetime="2026-06-17T12:59:15.179Z" data-timestamp="2026-06-17T12:59:15.179Z">2026-06-17T12:59:15.179Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01Pjf4NUG4koQPAPAN3mKNy1">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">032-disable-auto-reconnect.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/032-disable-auto-reconnect.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content"># CS-032: Disable Auto-Reconnect Option</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content"># CS-032: Disable Auto-Reconnect Option — COMPLETED</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-59-15-220Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-59-15-220Z" class="timestamp-link"><time datetime="2026-06-17T12:59:15.220Z" data-timestamp="2026-06-17T12:59:15.220Z">2026-06-17T12:59:15.220Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/032-disable-auto-reconnect.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-59-16-119Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-59-16-119Z" class="timestamp-link"><time datetime="2026-06-17T12:59:16.119Z" data-timestamp="2026-06-17T12:59:16.119Z">2026-06-17T12:59:16.119Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_019DzCv4xfGjrSnTUpgiJ9aX">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">032-disable-auto-reconnect.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/032-disable-auto-reconnect.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">**Status:** Pending</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">**Status:** Completed</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-59-16-164Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-59-16-164Z" class="timestamp-link"><time datetime="2026-06-17T12:59:16.164Z" data-timestamp="2026-06-17T12:59:16.164Z">2026-06-17T12:59:16.164Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/032-disable-auto-reconnect.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-59-17-533Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-59-17-533Z" class="timestamp-link"><time datetime="2026-06-17T12:59:17.533Z" data-timestamp="2026-06-17T12:59:17.533Z">2026-06-17T12:59:17.533Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01KSDDRUMx3PTKCx7XwNiygx">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">033-nuget-package-improvements.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/033-nuget-package-improvements.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content"># CS-033: NuGet Package Improvements</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content"># CS-033: NuGet Package Improvements — COMPLETED</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-59-17-563Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-59-17-563Z" class="timestamp-link"><time datetime="2026-06-17T12:59:17.563Z" data-timestamp="2026-06-17T12:59:17.563Z">2026-06-17T12:59:17.563Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/033-nuget-package-improvements.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-59-18-476Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-59-18-476Z" class="timestamp-link"><time datetime="2026-06-17T12:59:18.476Z" data-timestamp="2026-06-17T12:59:18.476Z">2026-06-17T12:59:18.476Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_019Lf4iKoFmYpnRPgrooQukD">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">033-nuget-package-improvements.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/033-nuget-package-improvements.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">**Status:** Pending</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">**Status:** Completed</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-59-18-510Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-59-18-510Z" class="timestamp-link"><time datetime="2026-06-17T12:59:18.510Z" data-timestamp="2026-06-17T12:59:18.510Z">2026-06-17T12:59:18.510Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/033-nuget-package-improvements.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-59-19-412Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-59-19-412Z" class="timestamp-link"><time datetime="2026-06-17T12:59:19.412Z" data-timestamp="2026-06-17T12:59:19.412Z">2026-06-17T12:59:19.412Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_012si7ZLZsJVgxtXTwSJFm9y">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">034-trailing-colon-consistency.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/034-trailing-colon-consistency.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content"># CS-034: Always Use Colon on Trailing Parameters</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content"># CS-034: Always Use Colon on Trailing Parameters — COMPLETED</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-59-19-439Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-59-19-439Z" class="timestamp-link"><time datetime="2026-06-17T12:59:19.439Z" data-timestamp="2026-06-17T12:59:19.439Z">2026-06-17T12:59:19.439Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/034-trailing-colon-consistency.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-59-20-392Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-59-20-392Z" class="timestamp-link"><time datetime="2026-06-17T12:59:20.392Z" data-timestamp="2026-06-17T12:59:20.392Z">2026-06-17T12:59:20.392Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01DZGBiven1Umt8WxwRuDaVd">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">034-trailing-colon-consistency.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/034-trailing-colon-consistency.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">**Status:** Pending</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">**Status:** Completed</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-59-20-438Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-59-20-438Z" class="timestamp-link"><time datetime="2026-06-17T12:59:20.438Z" data-timestamp="2026-06-17T12:59:20.438Z">2026-06-17T12:59:20.438Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/034-trailing-colon-consistency.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-59-29-670Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-59-29-670Z" class="timestamp-link"><time datetime="2026-06-17T12:59:29.670Z" data-timestamp="2026-06-17T12:59:29.670Z">2026-06-17T12:59:29.670Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the index statuses.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-59-32-998Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-59-32-998Z" class="timestamp-link"><time datetime="2026-06-17T12:59:32.998Z" data-timestamp="2026-06-17T12:59:32.998Z">2026-06-17T12:59:32.998Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01SuNd23tHLJBU1p8UNq5qKw">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">README.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/README.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">| 32 | [Disable Auto-Reconnect Option](032-disable-auto-reconnect.md) | Core / Host | Small | None | Pending |
+| 33 | [NuGet Package Improvements](033-nuget-package-improvements.md) | CI/CD + Core | Small-Medium | #29, #31 | Pending |
+| 34 | [Always Use Colon on Trailing Parameters](034-trailing-colon-consistency.md) | Core | Small | None | Pending |</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">| 32 | [Disable Auto-Reconnect Option](032-disable-auto-reconnect.md) | Core / Host | Small | None | **Done** |
+| 33 | [NuGet Package Improvements](033-nuget-package-improvements.md) | CI/CD + Core | Small-Medium | #29, #31 | **Done** |
+| 34 | [Always Use Colon on Trailing Parameters](034-trailing-colon-consistency.md) | Core | Small | None | **Done** |</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-59-33-056Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-59-33-056Z" class="timestamp-link"><time datetime="2026-06-17T12:59:33.056Z" data-timestamp="2026-06-17T12:59:33.056Z">2026-06-17T12:59:33.056Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/README.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-59-35-993Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-59-35-993Z" class="timestamp-link"><time datetime="2026-06-17T12:59:35.993Z" data-timestamp="2026-06-17T12:59:35.993Z">2026-06-17T12:59:35.993Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the changelog.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-59-42-109Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-59-42-109Z" class="timestamp-link"><time datetime="2026-06-17T12:59:42.109Z" data-timestamp="2026-06-17T12:59:42.109Z">2026-06-17T12:59:42.109Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_017B9U8NbjhfgBVxLeattisk">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">CHANGELOG.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/CHANGELOG.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">## [Unreleased]
+
+### Removed
+
+- Removed `marv.debug.json` from repository and git history (contained
+  sensitive configuration data).
+
+### Fixed
+
+- Added `marv.debug.json` to `.gitignore` to prevent accidental commits.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">## [Unreleased]
+
+### Added
+
+- New `AutoReconnect` configuration option (default: `true`). When set to
+  `false`, the bot logs the error and exits with a non-zero exit code
+  instead of reconnecting after a connection failure.
+- NuGet packages now include symbol packages (`.snupkg`) with Source Link
+  for debugger step-into support.
+- NuGet packages now include per-package README files visible on nuget.org.
+- Deterministic builds enabled for NuGet packages in CI.
+
+### Changed
+
+- IRC message serialization now always includes a `:` prefix on the last
+  parameter, improving compatibility with non-standard IRC software.
+
+### Removed
+
+- Removed `marv.debug.json` from repository and git history (contained
+  sensitive configuration data).
+
+### Fixed
+
+- Added `marv.debug.json` to `.gitignore` to prevent accidental commits.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-59-42-216Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-59-42-216Z" class="timestamp-link"><time datetime="2026-06-17T12:59:42.216Z" data-timestamp="2026-06-17T12:59:42.216Z">2026-06-17T12:59:42.216Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/CHANGELOG.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-59-44-956Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-59-44-956Z" class="timestamp-link"><time datetime="2026-06-17T12:59:44.956Z" data-timestamp="2026-06-17T12:59:44.956Z">2026-06-17T12:59:44.956Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now close the GitHub issues and update the prompt log.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-59-47-305Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-59-47-305Z" class="timestamp-link"><time datetime="2026-06-17T12:59:47.305Z" data-timestamp="2026-06-17T12:59:47.305Z">2026-06-17T12:59:47.305Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01AvKFL4T1x3i9buLEuD9xx7">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Close issue #8 with implementing comment</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">gh issue close 8 --repo predakanga/marv --comment &#34;Implemented in CS-032. The \`AutoReconnect\` configuration property (default \`true\`) controls whether the bot reconnects after a connection failure. When disabled, the bot logs the error, runs plugin cleanup, and exits with exit code 1.&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-59-48-725Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-59-48-725Z" class="timestamp-link"><time datetime="2026-06-17T12:59:48.725Z" data-timestamp="2026-06-17T12:59:48.725Z">2026-06-17T12:59:48.725Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01KyuiDEFwnQzdPyRdtJUy58">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Close issue #9 with implementing comment</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">gh issue close 9 --repo predakanga/marv --comment &#34;Implemented in CS-033. Added deterministic builds, Source Link, symbol packages (.snupkg), and per-package README files for both TDW.Marv.Core and TDW.Marv.Testing.&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-59-49-806Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-59-49-806Z" class="timestamp-link"><time datetime="2026-06-17T12:59:49.806Z" data-timestamp="2026-06-17T12:59:49.806Z">2026-06-17T12:59:49.806Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01Sj1myDNWsXng2Eao1T3vKE">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Close issue #10 with implementing comment</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">gh issue close 10 --repo predakanga/marv --comment &#34;Implemented in CS-034. \`IrcSerializer\` now unconditionally prefixes the last parameter with \`:\`, removing the conditional logic.&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-59-49-857Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-59-49-857Z" class="timestamp-link"><time datetime="2026-06-17T12:59:49.857Z" data-timestamp="2026-06-17T12:59:49.857Z">2026-06-17T12:59:49.857Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>✓ Closed issue predakanga/marv#8 (Provided a way to disable reconnects)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-59-52-152Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-59-52-152Z" class="timestamp-link"><time datetime="2026-06-17T12:59:52.152Z" data-timestamp="2026-06-17T12:59:52.152Z">2026-06-17T12:59:52.152Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>✓ Closed issue predakanga/marv#9 (Improve NuGet packages)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-59-54-424Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-59-54-424Z" class="timestamp-link"><time datetime="2026-06-17T12:59:54.424Z" data-timestamp="2026-06-17T12:59:54.424Z">2026-06-17T12:59:54.424Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>✓ Closed issue predakanga/marv#10 (Use a colon consistently on trailing parameters)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-59-56-891Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-59-56-891Z" class="timestamp-link"><time datetime="2026-06-17T12:59:56.891Z" data-timestamp="2026-06-17T12:59:56.891Z">2026-06-17T12:59:56.891Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the prompt log and commit.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T12-59-57-264Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T12-59-57-264Z" class="timestamp-link"><time datetime="2026-06-17T12:59:57.264Z" data-timestamp="2026-06-17T12:59:57.264Z">2026-06-17T12:59:57.264Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01B3fwAWhLjSKjWYBNbC9drR"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/prompts.md&#34;,
+  &#34;offset&#34;: 1635
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T12-59-57-288Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T12-59-57-288Z" class="timestamp-link"><time datetime="2026-06-17T12:59:57.288Z" data-timestamp="2026-06-17T12:59:57.288Z">2026-06-17T12:59:57.288Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1635	&gt; /triage-issues
+1636	
+1637	- Rejected #2 (filter data passing) per OWNER&#x27;s `/reject` — labelled `rejected`, posted acknowledgement
+1638	- #8, #9, #10 already triaged
+1639	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-00-03-512Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-00-03-512Z" class="timestamp-link"><time datetime="2026-06-17T13:00:03.512Z" data-timestamp="2026-06-17T13:00:03.512Z">2026-06-17T13:00:03.512Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01UBx4udKPC4xHkXzqgS3r4t">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">prompts.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/prompts.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">- Rejected #2 (filter data passing) per OWNER&#39;s `/reject` — labelled `rejected`, posted acknowledgement
+- #8, #9, #10 already triaged</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">- Rejected #2 (filter data passing) per OWNER&#39;s `/reject` — labelled `rejected`, posted acknowledgement
+- #8, #9, #10 already triaged
+
+## Implement CS-032, CS-033, and CS-034
+
+**Date**: 2026-06-17T00:00:00Z
+
+&gt; Okay, go ahead and implement CS-032, CS-033 and CS-034.
+&gt; My only note is that for CS-033, you might consider using the plugin API document as a model for the READMEs. The consumers of the packages are almost always going to be plugin creators.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T13-00-03-567Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T13-00-03-567Z" class="timestamp-link"><time datetime="2026-06-17T13:00:03.567Z" data-timestamp="2026-06-17T13:00:03.567Z">2026-06-17T13:00:03.567Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/prompts.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-00-06-395Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-00-06-395Z" class="timestamp-link"><time datetime="2026-06-17T13:00:06.395Z" data-timestamp="2026-06-17T13:00:06.395Z">2026-06-17T13:00:06.395Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01SEpRT411qp9HqbLR1brYdv">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Stage all changes and check status</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add -A &amp;&amp; git status</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T13-00-06-608Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T13-00-06-608Z" class="timestamp-link"><time datetime="2026-06-17T13:00:06.608Z" data-timestamp="2026-06-17T13:00:06.608Z">2026-06-17T13:00:06.608Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>On branch main
+Changes to be committed:
+  (use &quot;git restore --staged &lt;file&gt;...&quot; to unstage)
+	modified:   CHANGELOG.md
+	modified:   Directory.Build.props
+	modified:   docs/change_specs/032-disable-auto-reconnect.md
+	modified:   docs/change_specs/033-nuget-package-improvements.md
+	modified:   docs/change_specs/034-trailing-colon-consistency.md
+	modified:   docs/change_specs/README.md
+	modified:   docs/prompts.md
+	modified:   src/Marv.Core/Irc/MarvBotService.cs
+	modified:   src/Marv.Core/Marv.Core.csproj
+	modified:   src/Marv.Core/MarvConfiguration.cs
+	modified:   src/Marv.Core/Protocol/IrcSerializer.cs
+	new file:   src/Marv.Core/README.md
+	modified:   src/Marv.Testing/Marv.Testing.csproj
+	new file:   src/Marv.Testing/README.md
+	modified:   tests/Marv.Core.Tests/Protocol/IrcSerializerTests.cs</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-00-11-375Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-00-11-375Z" class="timestamp-link"><time datetime="2026-06-17T13:00:11.375Z" data-timestamp="2026-06-17T13:00:11.375Z">2026-06-17T13:00:11.375Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01XAwgiSAr8PB6kzmdkSazCi">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit all implementations</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Implement CS-032, CS-033, and CS-034
+
+CS-032: Add AutoReconnect config option (default true). When false,
+the bot exits with code 1 after a connection failure instead of
+reconnecting.
+
+CS-033: Enable deterministic builds, Source Link, symbol packages
+(.snupkg), and per-package README files for TDW.Marv.Core and
+TDW.Marv.Testing NuGet packages.
+
+CS-034: Always prefix the last IRC parameter with &#39;:&#39; in
+IrcSerializer for compatibility with non-standard software.
+
+Closes #8, closes #9, closes #10.
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T13-00-11-498Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T13-00-11-498Z" class="timestamp-link"><time datetime="2026-06-17T13:00:11.498Z" data-timestamp="2026-06-17T13:00:11.498Z">2026-06-17T13:00:11.498Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">96a1b5e</span> Implement CS-032, CS-033, and CS-034</div><pre>15 files changed, 255 insertions(+), 15 deletions(-)
+ create mode 100644 src/Marv.Core/README.md
+ create mode 100644 src/Marv.Testing/README.md</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-00-19-227Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-00-19-227Z" class="timestamp-link"><time datetime="2026-06-17T13:00:19.227Z" data-timestamp="2026-06-17T13:00:19.227Z">2026-06-17T13:00:19.227Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>All three specs implemented. Here's what changed:</p>
+<p><strong>CS-032 (Auto-reconnect):</strong>
+- Added <code>AutoReconnect</code> property to <code>MarvConfiguration</code> (default <code>true</code>)
+- <code>MarvBotService</code> now checks the flag after disconnect cleanup — when <code>false</code>, sets exit code 1 and breaks the loop</p>
+<p><strong>CS-033 (NuGet improvements):</strong>
+- <code>Directory.Build.props</code>: deterministic builds in CI, Source Link, symbol packages, README packaging — all conditional on <code>IsPackable</code>
+- Added <code>DotNet.ReproducibleBuilds</code> and <code>Microsoft.SourceLink.GitHub</code> package references
+- Created standalone README files for both packages, modeled after <code>docs/PLUGIN_API.md</code> and targeting plugin authors</p>
+<p><strong>CS-034 (Trailing colon):</strong>
+- <code>IrcSerializer.Serialize()</code> now unconditionally adds <code>:</code> before the last parameter
+- Updated serializer tests to match</p>
+<p>All 346 tests pass, all three GitHub issues closed.</p></div></div></div>
+<div class="message user" id="msg-2026-06-17T13-05-15-183Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-17T13-05-15-183Z" class="timestamp-link"><time datetime="2026-06-17T13:05:15.183Z" data-timestamp="2026-06-17T13:05:15.183Z">2026-06-17T13:05:15.183Z</time></a></div><div class="message-content">
+<div class="user-content"><p>If we're making changes to the packaging, perhaps we should improve our PackageReference version constraints as well - the official Microsoft guidance at https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/dependencies seems like a good place to start</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-05-18-281Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-05-18-281Z" class="timestamp-link"><time datetime="2026-06-17T13:05:18.281Z" data-timestamp="2026-06-17T13:05:18.281Z">2026-06-17T13:05:18.281Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_018an1F914xQqMHHwQta28gd"><div class="tool-header"><span class="tool-icon">⚙</span> ToolSearch</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;query&#34;: &#34;select:WebFetch&#34;,
+  &#34;max_results&#34;: 1
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T13-05-18-321Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T13-05-18-321Z" class="timestamp-link"><time datetime="2026-06-17T13:05:18.321Z" data-timestamp="2026-06-17T13:05:18.321Z">2026-06-17T13:05:18.321Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &quot;type&quot;: &quot;tool_reference&quot;,
+  &quot;tool_name&quot;: &quot;WebFetch&quot;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-05-22-921Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-05-22-921Z" class="timestamp-link"><time datetime="2026-06-17T13:05:22.921Z" data-timestamp="2026-06-17T13:05:22.921Z">2026-06-17T13:05:22.921Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01Sm35NKFQk5jvauEwbCBoLg"><div class="tool-header"><span class="tool-icon">⚙</span> WebFetch</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;url&#34;: &#34;https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/dependencies&#34;,
+  &#34;prompt&#34;: &#34;Extract the specific guidance on NuGet dependency version ranges for library authors. What version constraints does Microsoft recommend for PackageReference versions? Include the specific recommendations about version ranges, minimum versions, and any guidance about floating versions or exact versions. Also extract any guidance about Microsoft.Extensions.* packages specifically.&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T13-05-23-685Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T13-05-23-685Z" class="timestamp-link"><time datetime="2026-06-17T13:05:23.685Z" data-timestamp="2026-06-17T13:05:23.685Z">2026-06-17T13:05:23.685Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>---
+layout: Conceptual
+title: Dependencies and .NET libraries - .NET | Microsoft Learn
+canonicalUrl: https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/dependencies
+apiPlatform: dotnet
+author: JamesNK
+breadcrumb_path: /dotnet/breadcrumb/toc.json
+feedback_system: OpenSource
+feedback_product_url: https://aka.ms/feedback/report?space=61
+ms.author: jamesnk
+ms.devlang: dotnet
+ms.service: dotnet-fundamentals
+ms.topic: concept-article
+show_latex: true
+uhfHeaderId: MSDocsHeader-DotNet
+description: Best practice recommendations for managing NuGet dependencies in .NET libraries.
+ms.date: 2018-10-02T00:00:00.0000000Z
+locale: en-us
+document_id: 33821846-a525-de11-06a3-ac4552d6421f
+document_version_independent_id: 30297ee3-b24d-9fd2-f007-6d381d125282
+updated_at: 2025-12-04T22:24:00.0000000Z
+original_content_git_url: https://github.com/dotnet/docs/blob/live/docs/standard/library-guidance/dependencies.md
+gitcommit: https://github.com/dotnet/docs/blob/cc76ba79b6b0de125017d49b93ae101f13e3b2aa/docs/standard/library-guidance/dependencies.md
+git_commit_id: cc76ba79b6b0de125017d49b93ae101f13e3b2aa
+site_name: Docs
+depot_name: VS.core-docs
+page_type: conceptual
+toc_rel: toc.json
+pdf_url_template: https://learn.microsoft.com/pdfstore/en-us/VS.core-docs/{branchName}{pdfName}
+feedback_help_link_type: &#x27;&#x27;
+feedback_help_link_url: &#x27;&#x27;
+search.mshattr.devlang: csharp
+word_count: 813
+asset_id: standard/library-guidance/dependencies
+moniker_range_name: 
+monikers: []
+item_type: Content
+source_path: docs/standard/library-guidance/dependencies.md
+cmProducts:
+- https://authoring-docs-microsoft.poolparty.biz/devrel/7696cda6-0510-47f6-8302-71bb5d2e28cf
+spProducts:
+- https://authoring-docs-microsoft.poolparty.biz/devrel/69c76c32-967e-4c65-b89a-74cc527db725
+platformId: 7ca0f638-a7cc-de15-9fe4-4da2d9bc963c
+---
+
+# Dependencies and .NET libraries - .NET | Microsoft Learn
+
+The primary way of adding dependencies to a .NET library is referencing NuGet packages. NuGet package references allow you to quickly reuse and leverage already written functionality, but they&#x27;re a common source of friction for .NET developers. Correctly managing dependencies is important to prevent changes in other .NET libraries from breaking your .NET library, and vice versa!
+
+## Diamond dependencies
+
+It&#x27;s common for a .NET project to have multiple versions of a package in its dependency tree. For example, an app depends on two NuGet packages, each of which depends on a different version of the same package. A diamond dependency now exists in the app&#x27;s dependency graph.
+
+![Diamond dependency](media/dependencies/diamond-dependency.png)
+
+At build time, NuGet analyzes all the packages that a project depends on, including the dependencies of dependencies. When multiple versions of a package are detected, rules are evaluated to pick one. Unifying packages is necessary because running side-by-side versions of an assembly in the same application is problematic in .NET.
+
+Most diamond dependencies are easily resolved; however, they can create issues in certain circumstances:
+
+- **Conflicting NuGet package references** prevent a version from being resolved during package restore.
+- **Breaking changes between the versions** cause bugs and exceptions at runtime.
+- **The package assembly is strong named**, the assembly version changed, and the app is running on .NET Framework. Assembly binding redirects are required.
+
+It&#x27;s not possible to know what packages will be used alongside your own. A good way to reduce the likelihood of a diamond dependency breaking your library is to minimize the number of packages you depend on.
+
+✔️ DO review your .NET library for unnecessary dependencies.
+
+## NuGet dependency version ranges
+
+A package reference specifies the range of valid packages it allows. Typically, the package reference version in the project file is the minimum version, and there&#x27;s no maximum.
+
+```xml
+&lt;!-- Accepts any version 1.0 and above. --&gt;
+&lt;PackageReference Include=&quot;ExamplePackage&quot; Version=&quot;1.0&quot; /&gt;
+```
+
+The rules that NuGet uses when resolving dependencies are [complex](/en-us/nuget/consume-packages/dependency-resolution), but NuGet [by default](/en-us/nuget/consume-packages/install-use-packages-visual-studio#install-and-update-options) looks for the lowest applicable version. NuGet prefers the lowest applicable version over using the highest available because the lowest will have the least compatibility issues.
+
+Because of NuGet&#x27;s lowest applicable version rule, it isn&#x27;t necessary to place an upper version or exact range on package references to avoid getting the latest version. NuGet already tries to find the lowest, most compatible version for you.
+
+```xml
+&lt;!-- Accepts 1.0 up to 1.x, but not 2.0 and higher. --&gt;
+&lt;PackageReference Include=&quot;ExamplePackage&quot; Version=&quot;[1.0,2.0)&quot; /&gt;
+
+&lt;!-- Accepts exactly 1.0. --&gt;
+&lt;PackageReference Include=&quot;ExamplePackage&quot; Version=&quot;[1.0]&quot; /&gt;
+```
+
+Upper version limits will cause NuGet to fail if there&#x27;s a conflict. For example, one library accepts exactly 1.0 while another library requires 2.0 or above. While breaking changes may have been introduced in version 2.0, a strict or upper limit version dependency guarantees an error.
+
+![Diamond dependency conflict](media/dependencies/diamond-dependency-conflict.png)
+
+❌ DO NOT have NuGet package references with no minimum version.
+
+❌ AVOID NuGet package references that demand an exact version.
+
+❌ AVOID NuGet package references with a version upper limit.
+
+For more information, see [Package versioning](/en-us/nuget/concepts/package-versioning).
+
+## NuGet shared source packages
+
+One way to reduce external NuGet package dependencies is to reference shared source packages. A shared source package contains [source code files](/en-us/nuget/reference/nuspec#including-content-files) that are included in a project when referenced. Because you&#x27;re just including source code files that are compiled with the rest of your project, there&#x27;s no external dependency and chance of conflict.
+
+Shared source packages are great for including small pieces of functionality. For example, you might reference a shared source package of helper methods for making HTTP calls.
+
+![Shared source package](media/dependencies/shared-source-package.png)
+
+```xml
+&lt;PackageReference Include=&quot;Microsoft.Extensions.Buffers.Testing.Sources&quot; PrivateAssets=&quot;All&quot; Version=&quot;1.0&quot; /&gt;
+```
+
+![Shared source project](media/dependencies/shared-source-project.png)
+
+Shared source packages have some limitations. They can only be referenced by `PackageReference`, so older `packages.config` projects are excluded. Also, shared source packages are only usable by projects with the same language. Because of these limitations, shared source packages are best used to share functionality within an open-source project.
+
+✔️ CONSIDER referencing shared source packages for small, internal pieces of functionality.
+
+✔️ CONSIDER making your package a shared source package if it provides small, internal pieces of functionality.
+
+✔️ DO reference shared source packages with `PrivateAssets=&quot;All&quot;`.
+
+&gt; 
+&gt; This setting tells NuGet the package is only to be used at development time and shouldn&#x27;t be exposed as a public dependency.
+
+❌ DO NOT have shared source package types in your public API.
+
+&gt; 
+&gt; Shared source types are compiled into the referencing assembly and can&#x27;t be exchanged across assembly boundaries. For example, a shared-source `IRepository` type in one project is a separate type from the same shared-source `IRepository` in another project. Types in shared source packages should have an `internal` visibility.
+
+❌ DO NOT publish shared source packages to NuGet.org.
+
+&gt; 
+&gt; Shared source packages contain source code and can only be used by projects with the same language type. For example, a C# shared source package cannot be used by an F# application.
+&gt; 
+&gt; Publish shared source packages to a [local feed or MyGet](publish-nuget-package) to consume them internally within your project.
+
+[Previous](nuget)[Next](sourcelink)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-05-44-637Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-05-44-637Z" class="timestamp-link"><time datetime="2026-06-17T13:05:44.637Z" data-timestamp="2026-06-17T13:05:44.637Z">2026-06-17T13:05:44.637Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-05-49-587Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-05-49-587Z" class="timestamp-link"><time datetime="2026-06-17T13:05:49.587Z" data-timestamp="2026-06-17T13:05:49.587Z">2026-06-17T13:05:49.587Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>The key guidance is:
+- Use <strong>minimum version only</strong> (no upper bounds) — <code>Version="1.0"</code> means "1.0 and above"
+- NuGet resolves the <strong>lowest applicable version</strong> by default, so consumers get the most compatible choice
+- Avoid exact versions <code>[1.0]</code> and upper limits <code>[1.0,2.0)</code></p>
+<p>The current <code>.csproj</code> syntax (<code>Version="10.0.8"</code>) already means "10.0.8 or higher", which is the right format. But the issue is that <code>10.0.8</code> is unnecessarily high as a minimum — it forces consumers to use at least that patch version. For a library targeting <code>net10.0</code>, the true minimum for the <code>Microsoft.Extensions.*</code> packages is <code>10.0.0</code>.</p>
+<p>I'd recommend lowering the minimums in the two packable projects (Marv.Core and Marv.Testing) to <code>10.0.0</code> for all <code>Microsoft.Extensions.*</code> and <code>System.Reflection.MetadataLoadContext</code> references. The host app and test projects don't need changes since they aren't consumed as packages. The build-tooling packages (<code>DotNet.ReproducibleBuilds</code>, <code>Microsoft.SourceLink.GitHub</code>) have <code>PrivateAssets="All"</code> so they don't flow to consumers.</p>
+<p>Want me to go ahead with that approach?</p></div></div></div>
+<div class="message user" id="msg-2026-06-17T13-06-16-737Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-17T13-06-16-737Z" class="timestamp-link"><time datetime="2026-06-17T13:06:16.737Z" data-timestamp="2026-06-17T13:06:16.737Z">2026-06-17T13:06:16.737Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Yes please</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-06-20-385Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-06-20-385Z" class="timestamp-link"><time datetime="2026-06-17T13:06:20.385Z" data-timestamp="2026-06-17T13:06:20.385Z">2026-06-17T13:06:20.385Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01SnnUe3nb1T4dGZ7qYRYZbn">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">Marv.Core.csproj</span> <span class="edit-replace-all">(replace all)</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/Marv.Core.csproj</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">Version=&#34;10.0.8&#34;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">Version=&#34;10.0.0&#34;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T13-06-20-445Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T13-06-20-445Z" class="timestamp-link"><time datetime="2026-06-17T13:06:20.445Z" data-timestamp="2026-06-17T13:06:20.445Z">2026-06-17T13:06:20.445Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/Marv.Core.csproj has been updated. All occurrences were successfully replaced. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-06-23-658Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-06-23-658Z" class="timestamp-link"><time datetime="2026-06-17T13:06:23.658Z" data-timestamp="2026-06-17T13:06:23.658Z">2026-06-17T13:06:23.658Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_018zBStjm6XxcWy6CsRG12AB">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">Marv.Testing.csproj</span> <span class="edit-replace-all">(replace all)</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Testing/Marv.Testing.csproj</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">Version=&#34;10.0.8&#34;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">Version=&#34;10.0.0&#34;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T13-06-23-773Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T13-06-23-773Z" class="timestamp-link"><time datetime="2026-06-17T13:06:23.773Z" data-timestamp="2026-06-17T13:06:23.773Z">2026-06-17T13:06:23.773Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Testing/Marv.Testing.csproj has been updated. All occurrences were successfully replaced. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-06-27-057Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-06-27-057Z" class="timestamp-link"><time datetime="2026-06-17T13:06:27.057Z" data-timestamp="2026-06-17T13:06:27.057Z">2026-06-17T13:06:27.057Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me check if NSubstitute in Marv.Testing could also be lowered. Let me see what version introduced the features we use.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-06-27-837Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-06-27-837Z" class="timestamp-link"><time datetime="2026-06-17T13:06:27.837Z" data-timestamp="2026-06-17T13:06:27.837Z">2026-06-17T13:06:27.837Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01L6spdgubKGx8RtNqcYtXb6">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check NSubstitute usage in Marv.Testing</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -r &#34;NSubstitute&#34; /workspaces/marv/src/Marv.Testing/ --include=&#34;*.cs&#34; | head -5</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T13-06-28-213Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T13-06-28-213Z" class="timestamp-link"><time datetime="2026-06-17T13:06:28.213Z" data-timestamp="2026-06-17T13:06:28.213Z">2026-06-17T13:06:28.213Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/Marv.Testing/MockUser.cs:using NSubstitute;
+/workspaces/marv/src/Marv.Testing/MockChannel.cs:using NSubstitute;
+/workspaces/marv/src/Marv.Testing/MockBot.cs:using NSubstitute;</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-06-35-533Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-06-35-533Z" class="timestamp-link"><time datetime="2026-06-17T13:06:35.533Z" data-timestamp="2026-06-17T13:06:35.533Z">2026-06-17T13:06:35.533Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>NSubstitute 5.3.0 is reasonable — it's a standard mocking library and consumers likely already have a compatible version. I'll leave it as-is. Let me build and test.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-06-36-375Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-06-36-375Z" class="timestamp-link"><time datetime="2026-06-17T13:06:36.375Z" data-timestamp="2026-06-17T13:06:36.375Z">2026-06-17T13:06:36.375Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01LpN5FUWGDL1piLAn6WjmGB">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Build to verify</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">dotnet build -c Release 2&gt;&amp;1 | tail -5</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T13-06-41-642Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T13-06-41-642Z" class="timestamp-link"><time datetime="2026-06-17T13:06:41.642Z" data-timestamp="2026-06-17T13:06:41.642Z">2026-06-17T13:06:41.642Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:05.00</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-06-44-544Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-06-44-544Z" class="timestamp-link"><time datetime="2026-06-17T13:06:44.544Z" data-timestamp="2026-06-17T13:06:44.544Z">2026-06-17T13:06:44.544Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01JFs7aTQaBUGutRywZu2Kqm">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Run tests</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">dotnet test -c Release 2&gt;&amp;1 | tail -10</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T13-07-46-756Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T13-07-46-756Z" class="timestamp-link"><time datetime="2026-06-17T13:07:46.756Z" data-timestamp="2026-06-17T13:07:46.756Z">2026-06-17T13:07:46.756Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    35, Skipped:     0, Total:    35, Duration: 262 ms - Marv.Testing.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   287, Skipped:     0, Total:   287, Duration: 55 s - Marv.Core.Tests.dll (net10.0)
+  Marv.Plugins.Tests -&gt; /workspaces/marv/tests/Marv.Plugins.Tests/bin/Release/net10.0/Marv.Plugins.Tests.dll
+Test run for /workspaces/marv/tests/Marv.Plugins.Tests/bin/Release/net10.0/Marv.Plugins.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    24, Skipped:     0, Total:    24, Duration: 129 ms - Marv.Plugins.Tests.dll (net10.0)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-07-52-117Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-07-52-117Z" class="timestamp-link"><time datetime="2026-06-17T13:07:52.117Z" data-timestamp="2026-06-17T13:07:52.117Z">2026-06-17T13:07:52.117Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>All 346 tests pass. Let me update the changelog, prompt log, and commit.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-07-54-057Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-07-54-057Z" class="timestamp-link"><time datetime="2026-06-17T13:07:54.057Z" data-timestamp="2026-06-17T13:07:54.057Z">2026-06-17T13:07:54.057Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01XaVc6ndMWG5bBgdqDqg83v">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">CHANGELOG.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/CHANGELOG.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">- Deterministic builds enabled for NuGet packages in CI.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">- Deterministic builds enabled for NuGet packages in CI.
+- Lowered NuGet package dependency minimums from 10.0.8 to 10.0.0 for
+  all `Microsoft.Extensions.*` and `System.Reflection.MetadataLoadContext`
+  references, giving consumers more flexibility in version resolution.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T13-07-54-178Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T13-07-54-178Z" class="timestamp-link"><time datetime="2026-06-17T13:07:54.178Z" data-timestamp="2026-06-17T13:07:54.178Z">2026-06-17T13:07:54.178Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/CHANGELOG.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-08-00-617Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-08-00-617Z" class="timestamp-link"><time datetime="2026-06-17T13:08:00.617Z" data-timestamp="2026-06-17T13:08:00.617Z">2026-06-17T13:08:00.617Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01BUxb1Wq6jETDQT2DipmK9X"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/prompts.md&#34;,
+  &#34;offset&#34;: 1645
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T13-08-00-640Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T13-08-00-640Z" class="timestamp-link"><time datetime="2026-06-17T13:08:00.640Z" data-timestamp="2026-06-17T13:08:00.640Z">2026-06-17T13:08:00.640Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1645	&gt; My only note is that for CS-033, you might consider using the plugin API document as a model for the READMEs. The consumers of the packages are almost always going to be plugin creators.
+1646	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-08-06-552Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-08-06-552Z" class="timestamp-link"><time datetime="2026-06-17T13:08:06.552Z" data-timestamp="2026-06-17T13:08:06.552Z">2026-06-17T13:08:06.552Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_015YwzWAmDSKfsyK1VWsWiEb">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">prompts.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/prompts.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">&gt; My only note is that for CS-033, you might consider using the plugin API document as a model for the READMEs. The consumers of the packages are almost always going to be plugin creators.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">&gt; My only note is that for CS-033, you might consider using the plugin API document as a model for the READMEs. The consumers of the packages are almost always going to be plugin creators.
+
+## Lower NuGet package dependency minimums
+
+**Date**: 2026-06-17T00:00:00Z
+
+&gt; If we&#39;re making changes to the packaging, perhaps we should improve our PackageReference version constraints as well - the official Microsoft guidance at https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/dependencies seems like a good place to start</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T13-08-06-622Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T13-08-06-622Z" class="timestamp-link"><time datetime="2026-06-17T13:08:06.622Z" data-timestamp="2026-06-17T13:08:06.622Z">2026-06-17T13:08:06.622Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/prompts.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-08-11-980Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-08-11-980Z" class="timestamp-link"><time datetime="2026-06-17T13:08:11.980Z" data-timestamp="2026-06-17T13:08:11.980Z">2026-06-17T13:08:11.980Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_018QnonahiHxSDFH7XDCwpJt">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit dependency version changes</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add src/Marv.Core/Marv.Core.csproj src/Marv.Testing/Marv.Testing.csproj CHANGELOG.md docs/prompts.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Lower NuGet dependency minimums to 10.0.0 for packable projects
+
+Per Microsoft library guidance, use the lowest version that works as
+the minimum to give consumers maximum flexibility in version resolution.
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-17T13-08-12-107Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-17T13-08-12-107Z" class="timestamp-link"><time datetime="2026-06-17T13:08:12.107Z" data-timestamp="2026-06-17T13:08:12.107Z">2026-06-17T13:08:12.107Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><div class="commit-card"><span class="commit-card-hash">392b70b</span> Lower NuGet dependency minimums to 10.0.0 for packable projects</div><pre>4 files changed, 24 insertions(+), 15 deletions(-)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-08-15-752Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-08-15-752Z" class="timestamp-link"><time datetime="2026-06-17T13:08:15.752Z" data-timestamp="2026-06-17T13:08:15.752Z">2026-06-17T13:08:15.752Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Done. Lowered all <code>Microsoft.Extensions.*</code> and <code>System.Reflection.MetadataLoadContext</code> minimums from <code>10.0.8</code> to <code>10.0.0</code> in both Marv.Core and Marv.Testing. Consumers can now use any .NET 10 patch version without being forced to <code>10.0.8+</code>.</p></div></div></div>
+<div class="message user" id="msg-2026-06-17T13-08-44-993Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-17T13-08-44-993Z" class="timestamp-link"><time datetime="2026-06-17T13:08:44.993Z" data-timestamp="2026-06-17T13:08:44.993Z">2026-06-17T13:08:44.993Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Just re-reading that page, is there any reason not to set the package versions to something like "[10.0, 11.0)"?</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-08-53-405Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-08-53-405Z" class="timestamp-link"><time datetime="2026-06-17T13:08:53.405Z" data-timestamp="2026-06-17T13:08:53.405Z">2026-06-17T13:08:53.405Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-08-57-169Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-08-57-169Z" class="timestamp-link"><time datetime="2026-06-17T13:08:57.169Z" data-timestamp="2026-06-17T13:08:57.169Z">2026-06-17T13:08:57.169Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Yes — the guidance on that same page explicitly warns against it:</p>
+<blockquote>
+<p>❌ AVOID NuGet package references with a version upper limit.</p>
+</blockquote>
+<p>The reason is diamond dependencies. If your library specifies <code>[10.0, 11.0)</code> and a consumer also depends on another package that requires <code>Microsoft.Extensions.* &gt;= 11.0</code>, NuGet will <strong>fail to resolve</strong> the conflict — it can't pick a version that satisfies both constraints. Without the upper bound, NuGet can unify to the higher version, which is almost always compatible (especially within Microsoft.Extensions where major version bumps track the .NET runtime version).</p>
+<p>Since Marv.Core already targets <code>net10.0</code>, the TFM itself already constrains consumers to the .NET 10+ ecosystem. The version floor of <code>10.0.0</code> is sufficient.</p></div></div></div>
+<div class="message user" id="msg-2026-06-17T13-10-23-228Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-17T13-10-23-228Z" class="timestamp-link"><time datetime="2026-06-17T13:10:23.228Z" data-timestamp="2026-06-17T13:10:23.228Z">2026-06-17T13:10:23.228Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Good point. My concern is just that since NuGet prefers the lowest applicable version, it'll default to using 10.0.0 even when a newer version is available with bugfixes. Or am I overthinking this?</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-17T13-10-30-697Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-17T13-10-30-697Z" class="timestamp-link"><time datetime="2026-06-17T13:10:30.697Z" data-timestamp="2026-06-17T13:10:30.697Z">2026-06-17T13:10:30.697Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>You're overthinking it. NuGet's "lowest applicable version" rule only applies when <strong>resolving the dependency graph</strong> — it picks the lowest version that satisfies all constraints across all packages in the consumer's project. In practice, consumers almost always have their own direct or transitive reference to <code>Microsoft.Extensions.*</code> at a higher patch version (from the .NET SDK, the runtime metapackage, or other dependencies), so NuGet unifies upward to that version anyway.</p>
+<p>The only scenario where a consumer would actually get <code>10.0.0</code> is if they had zero other references to those packages and did a fresh restore — and even then, <code>10.0.0</code> is a shipped, supported release. If it had a critical bug, Microsoft would yank it from the feed.</p>
+<p>The current setup is correct per the guidance.</p></div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-004.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<span class="current">5</span>
+<a href="page-006.html">6</a>
+<a href="page-007.html">7</a>
+<a href="page-006.html">Next &rarr;</a>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>
