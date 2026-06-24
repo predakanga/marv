@@ -98,19 +98,12 @@ When an issue is accepted:
 4. Add the `triaged` label to the issue.
 5. Post a comment on the issue noting which change spec(s) were created.
 6. Follow the mandatory instructions in CLAUDE.md (commit, changelog if
-   user-visible, prompt log).
+   user-visible).
 
 ## Important notes
 
 - This skill does NOT implement any code. It only creates change
   specifications.
-- Only log to `docs/prompts.md` if actions were taken (e.g. posted
-  analysis, created change specs, responded to discussion). If no
-  issues needed action, skip the prompt log. The entry must match the
-  format used by the rest of the file — a `##` heading, a `**Date**:`
-  line, the prompt in a blockquote, then a concise bulleted summary of
-  actions taken (e.g. "Posted triage analysis on #5", "Created CS-029
-  from #2").
 - When analysing feasibility, read relevant source files — don't guess.
 - Keep issue comments concise and professional.
 - If `gh` commands fail with auth errors, ask the user to run
