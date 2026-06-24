@@ -1,5 +1,6 @@
 using System.IO.Enumeration;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using System.Threading.Channels;
 using Marv.Core.Events;
@@ -32,9 +33,33 @@ public sealed class PluginManager
     internal IReadOnlyList<PluginDescriptor> Descriptors => _descriptors;
 
     /// <summary>
-    /// Phase 1: Discovers plugins from assemblies, sorts them by dependency,
-    /// and registers services and configurations into the service collection.
-    /// Called during <c>AddMarv</c> before the container is built.
+    /// Runs the full plugin loading pipeline: deduplicates directories, registers
+    /// assembly resolvers, scans for metadata, expands wildcard patterns, resolves
+    /// names to assembly paths, loads assemblies, sorts by dependency, and registers
+    /// services and configurations. Returns an empty list when no plugins are requested.
+    /// </summary>
+    internal static IReadOnlyList<PluginDescriptor> ResolveAndRegister(
+        IServiceCollection services,
+        IConfiguration configuration,
+        MarvConfiguration config,
+        ILogger? logger = null)
+    {
+        var pluginDirs = DeduplicateDirectories(config.PluginDirectories);
+        RegisterAssemblyResolvers(pluginDirs);
+
+        if (config.Plugins.Length == 0)
+            return [];
+
+        var allMetadata = PluginMetadataScanner.ScanDirectories(pluginDirs, logger);
+        var expandedPlugins = ExpandPluginPatterns(config.Plugins, allMetadata, logger);
+        var resolvedPaths = ResolveRequestedPlugins(expandedPlugins, allMetadata, logger);
+
+        return DiscoverAndRegister(services, configuration, resolvedPaths, logger);
+    }
+
+    /// <summary>
+    /// Loads plugin assemblies, sorts them by dependency, and registers services
+    /// and configurations into the service collection.
     /// </summary>
     internal static IReadOnlyList<PluginDescriptor> DiscoverAndRegister(
         IServiceCollection services,
@@ -561,6 +586,49 @@ public sealed class PluginManager
         }
 
         return prev[b.Length];
+    }
+
+    /// <summary>
+    /// Registers handlers on the default <see cref="AssemblyLoadContext"/> to probe
+    /// plugin directories and the application base directory for managed and native
+    /// assemblies that are not in the host's dependency graph.
+    /// </summary>
+    private static void RegisterAssemblyResolvers(IReadOnlyList<string> pluginDirectories)
+    {
+        var probeDirs = pluginDirectories
+            .Select(Path.GetFullPath)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        AssemblyLoadContext.Default.Resolving += (_, assemblyName) =>
+        {
+            foreach (var dir in probeDirs)
+            {
+                if (!Directory.Exists(dir))
+                    continue;
+
+                var candidate = Path.Combine(dir, assemblyName.Name + ".dll");
+                if (File.Exists(candidate))
+                    return AssemblyLoadContext.Default.LoadFromAssemblyPath(candidate);
+            }
+
+            return null;
+        };
+
+        AssemblyLoadContext.Default.ResolvingUnmanagedDll += (_, unmanagedDllName) =>
+        {
+            foreach (var dir in probeDirs)
+            {
+                if (!Directory.Exists(dir))
+                    continue;
+
+                var candidate = Path.Combine(dir, unmanagedDllName);
+                if (File.Exists(candidate))
+                    return NativeLibrary.Load(candidate);
+            }
+
+            return IntPtr.Zero;
+        };
     }
 }
 

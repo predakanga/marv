@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `"IdleRPG.*"` to match by prefix, and `"!"` prefix (e.g. `"!Slap"`)
   to exclude specific plugins. Patterns are evaluated left-to-right.
 
+### Changed
+
+- Moved plugin loading pipeline (directory deduplication, metadata
+  scanning, pattern expansion, name resolution, assembly resolving)
+  from `MarvServiceExtensions` into `PluginManager`.
+
 ## [0.7.2] - 2026-06-18
 
 ### Changed

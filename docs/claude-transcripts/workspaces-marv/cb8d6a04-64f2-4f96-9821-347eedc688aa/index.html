@@ -162,10 +162,11 @@ details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom
 <a href="page-001.html">1</a>
 <a href="page-002.html">2</a>
 <a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
 <a href="page-001.html">Next &rarr;</a>
 </div>
 
-        <p style="color: var(--text-muted); margin-bottom: 24px;">14 prompts · 201 messages · 69 tool calls · 4 commits · 3 pages</p>
+        <p style="color: var(--text-muted); margin-bottom: 24px;">16 prompts · 244 messages · 84 tool calls · 5 commits · 4 pages</p>
         
 <div class="index-item"><a href="page-001.html#msg-2026-06-24T13-17-58-137Z"><div class="index-item-header"><span class="index-item-number">#1</span><time datetime="2026-06-24T13:17:58.137Z" data-timestamp="2026-06-24T13:17:58.137Z">2026-06-24T13:17:58.137Z</time></div><div class="index-item-content"><p><command-message>triage-issues</command-message>
 <command-name>/triage-issues</command-name></p></div></a></div>
@@ -772,7 +773,32 @@ discussion comments.</p>
 <p>Let me make all the changes.</p></div></div><button class="expand-btn">Show more</button></div></div>
 <div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>Done. Moved <code>ResolveRequestedPlugins</code>, <code>DeduplicateDirectories</code>, <code>FindClosestMatch</code>, and <code>LevenshteinDistance</code> from <code>MarvServiceExtensions</code> into <code>PluginManager</code>. <code>MarvServiceExtensions</code> is now just DI wiring (~90 lines vs ~300 before). All 346 tests pass, and CS-035 has been updated to reference <code>PluginManager</code> as the target for the new <code>ExpandPluginPatterns</code> method.</p></div></div><button class="expand-btn">Show more</button></div></div>
 </div></div><div class="index-commit"><div class="index-commit-header"><span class="index-commit-hash">34cfeda</span><time datetime="2026-06-24T13:42:44.110Z" data-timestamp="2026-06-24T13:42:44.110Z">2026-06-24T13:42:44.110Z</time></div><div class="index-commit-msg">Move plugin resolution logic from MarvServiceExtensions to PluginManager</div></div>
-<div class="index-item"><a href="page-003.html#msg-2026-06-24T13-43-21-564Z"><div class="index-item-header"><span class="index-item-number">#14</span><time datetime="2026-06-24T13:43:21.564Z" data-timestamp="2026-06-24T13:43:21.564Z">2026-06-24T13:43:21.564Z</time></div><div class="index-item-content"><p>Okay, go ahead and implement CS-035</p></div></a><div class="index-item-stats"><span>8 edit · 6 read · 6 bash · 1 write</span>
+<div class="index-item"><a href="page-003.html#msg-2026-06-24T13-43-21-564Z"><div class="index-item-header"><span class="index-item-number">#14</span><time datetime="2026-06-24T13:43:21.564Z" data-timestamp="2026-06-24T13:43:21.564Z">2026-06-24T13:43:21.564Z</time></div><div class="index-item-content"><p>Okay, go ahead and implement CS-035</p></div></a><div class="index-item-stats"><span>8 edit · 7 bash · 6 read · 1 write</span>
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>CS-035 is implemented. Here's what was done:</p>
+<ul>
+<li><strong><code>PluginManager.ExpandPluginPatterns</code></strong> — new static method that processes the <code>Plugins</code> config list left-to-right, expanding glob patterns (<code>*</code>, <code>?</code>) via <code>FileSystemName.MatchesSimpleExpression</code> and removing matches for <code>!</code>-prefixed negation patterns. Plain names pass through unchanged for existing exact-match resolution.</li>
+<li><strong><code>MarvServiceExtensions.AddMarv</code></strong> — updated to call <code>ExpandPluginPatterns</code> before <code>ResolveRequestedPlugins</code>.</li>
+<li><strong>16 unit tests</strong> in <code>PluginPatternExpansionTests</code> covering all pattern types, case insensitivity, duplicate suppression, evaluation order, and edge cases.</li>
+<li><strong>2 integration tests</strong> in <code>FullPipelineTests</code> verifying wildcard loading and negation against real plugin assemblies.</li>
+<li>CS-035 marked completed, changelog updated, GitHub issue #11 closed.</li>
+</ul></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div><div class="index-commit"><div class="index-commit-header"><span class="index-commit-hash">221246b</span><time datetime="2026-06-24T13:48:06.641Z" data-timestamp="2026-06-24T13:48:06.641Z">2026-06-24T13:48:06.641Z</time></div><div class="index-commit-msg">Implement CS-035: wildcard and negation support in Plugins config</div></div>
+<div class="index-item"><a href="page-003.html#msg-2026-06-24T13-50-47-751Z"><div class="index-item-header"><span class="index-item-number">#15</span><time datetime="2026-06-24T13:50:47.751Z" data-timestamp="2026-06-24T13:50:47.751Z">2026-06-24T13:50:47.751Z</time></div><div class="index-item-content"><p>Okay, next question - we currently coordinate the plugin loading process from MarvServiceExtension (phases 1-5).
+Is it worth having this logic in a separate class, or would it be better to have a single method on PluginManager that returns the list of plugin descriptors?</p>
+<p>Note that we can and should still split the logic between several functions to reduce complexity, but the split doesn't need to be exactly as it is today.</p></div></a><div class="index-item-stats">
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>A single orchestrating method on <code>PluginManager</code> makes sense. The phases are all plugin-loading concerns — directory dedup, assembly resolvers, metadata scan, pattern expansion, name resolution, discover+register. <code>MarvServiceExtensions</code> shouldn't need to know the steps; it just needs the descriptors back.</p>
+<p>Something like:</p>
+<pre><code class="language-csharp">internal static IReadOnlyList&lt;PluginDescriptor&gt; ResolveAndRegister(
+    IServiceCollection services,
+    IConfiguration configuration,
+    MarvConfiguration config,
+    ILogger? logger = null)
+</code></pre>
+<p><code>AddMarv</code> would reduce to: register core services, call <code>PluginManager.ResolveAndRegister</code>, store the result. The internal sub-methods (<code>DeduplicateDirectories</code>, <code>ExpandPluginPatterns</code>, <code>ResolveRequestedPlugins</code>, <code>DiscoverAndRegister</code>, <code>RegisterAssemblyResolvers</code>) stay as private helpers inside <code>PluginManager</code> — same decomposition, just no longer exposed.</p>
+<p>The one piece that's arguably not <code>PluginManager</code>'s job is <code>RegisterAssemblyResolvers</code> (it's about the <code>AssemblyLoadContext</code>, not plugin management), but it's only ever called as part of plugin loading and needs the plugin directories, so keeping it as a private detail of the pipeline seems cleaner than leaving it stranded in <code>MarvServiceExtensions</code>.</p>
+<p>Want me to go ahead with this?</p></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div>
+<div class="index-item"><a href="page-004.html#msg-2026-06-24T13-52-09-198Z"><div class="index-item-header"><span class="index-item-number">#16</span><time datetime="2026-06-24T13:52:09.198Z" data-timestamp="2026-06-24T13:52:09.198Z">2026-06-24T13:52:09.198Z</time></div><div class="index-item-content"><p>Yes please</p></div></a><div class="index-item-stats"><span>6 read · 4 edit · 3 bash · 1 write</span>
 </div></div>
         
 
@@ -782,6 +808,7 @@ discussion comments.</p>
 <a href="page-001.html">1</a>
 <a href="page-002.html">2</a>
 <a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
 <a href="page-001.html">Next &rarr;</a>
 </div>
 
@@ -801,7 +828,7 @@ discussion comments.</p>
         </dialog>
         <script>
 (function() {
-    var totalPages = 3;
+    var totalPages = 4;
     var searchBox = document.getElementById('search-box');
     var searchInput = document.getElementById('search-input');
     var searchBtn = document.getElementById('search-btn');

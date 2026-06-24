@@ -1,5 +1,3 @@
-using System.Runtime.InteropServices;
-using System.Runtime.Loader;
 using Marv.Core.Irc;
 using Marv.Core.Platform;
 using Marv.Core.Plugin;
@@ -47,91 +45,22 @@ public static class MarvServiceExtensions
         // Register the hosted service
         services.AddHostedService<MarvBotService>();
 
-        // Discover plugins from configured directories, filtered by name
+        // Discover, resolve, and register plugins
         var config = configuration.Get<MarvConfiguration>() ?? new MarvConfiguration();
-
-        // Deduplicate plugin directories
-        var pluginDirs = PluginManager.DeduplicateDirectories(config.PluginDirectories);
-
-        // Register assembly resolving handlers so plugin transitive dependencies
-        // are found by probing the plugin directories and the app base directory.
-        RegisterAssemblyResolvers(pluginDirs);
-
-        IReadOnlyList<PluginDescriptor> sortedPlugins = [];
-        if (config.Plugins.Length > 0)
+        var configuredLogLevel = configuration.GetValue<LogLevel?>("LogLevel");
+        using var bootstrapLoggerFactory = LoggerFactory.Create(b =>
         {
-            var configuredLogLevel = configuration.GetValue<LogLevel?>("LogLevel");
-            using var bootstrapLoggerFactory = LoggerFactory.Create(b =>
-            {
-                b.AddConsole();
-                if (configuredLogLevel.HasValue)
-                    b.SetMinimumLevel(configuredLogLevel.Value);
-            });
-            var bootstrapLogger = bootstrapLoggerFactory.CreateLogger("Marv.Bootstrap");
+            b.AddConsole();
+            if (configuredLogLevel.HasValue)
+                b.SetMinimumLevel(configuredLogLevel.Value);
+        });
+        var bootstrapLogger = bootstrapLoggerFactory.CreateLogger("Marv.Bootstrap");
 
-            // Phase 1: Metadata scan — identify plugins without loading assemblies
-            var allPluginMetadata = PluginMetadataScanner.ScanDirectories(pluginDirs, bootstrapLogger);
+        var sortedPlugins = PluginManager.ResolveAndRegister(
+            services, configuration, config, bootstrapLogger);
 
-            // Phase 2: Expand wildcard/negation patterns against discovered plugins
-            var expandedPlugins = PluginManager.ExpandPluginPatterns(
-                config.Plugins, allPluginMetadata, bootstrapLogger);
-
-            // Phase 3: Resolve expanded plugin names to assembly paths
-            var resolvedPaths = PluginManager.ResolveRequestedPlugins(
-                expandedPlugins, allPluginMetadata, bootstrapLogger);
-
-            // Phase 4: Load and register
-            sortedPlugins = PluginManager.DiscoverAndRegister(
-                services, configuration, resolvedPaths, bootstrapLogger);
-        }
-
-        // Store the sorted descriptors for later use during instantiation
         services.AddSingleton(sortedPlugins);
 
         return services;
-    }
-
-    /// <summary>
-    /// Registers handlers on the default <see cref="AssemblyLoadContext"/> to probe
-    /// plugin directories and the application base directory for managed and native
-    /// assemblies that are not in the host's dependency graph.
-    /// </summary>
-    private static void RegisterAssemblyResolvers(IReadOnlyList<string> pluginDirectories)
-    {
-        // Probe plugin directories + app base directory (for PublishSingleFile support)
-        var probeDirs = pluginDirectories
-            .Select(Path.GetFullPath)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        AssemblyLoadContext.Default.Resolving += (_, assemblyName) =>
-        {
-            foreach (var dir in probeDirs)
-            {
-                if (!Directory.Exists(dir))
-                    continue;
-
-                var candidate = Path.Combine(dir, assemblyName.Name + ".dll");
-                if (File.Exists(candidate))
-                    return AssemblyLoadContext.Default.LoadFromAssemblyPath(candidate);
-            }
-
-            return null;
-        };
-
-        AssemblyLoadContext.Default.ResolvingUnmanagedDll += (_, unmanagedDllName) =>
-        {
-            foreach (var dir in probeDirs)
-            {
-                if (!Directory.Exists(dir))
-                    continue;
-
-                var candidate = Path.Combine(dir, unmanagedDllName);
-                if (File.Exists(candidate))
-                    return NativeLibrary.Load(candidate);
-            }
-
-            return IntPtr.Zero;
-        };
     }
 }
