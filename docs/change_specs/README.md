@@ -47,6 +47,7 @@ Specs are numbered in recommended implementation order.
 | 32 | [Disable Auto-Reconnect Option](032-disable-auto-reconnect.md) | Core / Host | Small | None | **Done** |
 | 33 | [NuGet Package Improvements](033-nuget-package-improvements.md) | CI/CD + Core | Small-Medium | #29, #31 | **Done** |
 | 34 | [Always Use Colon on Trailing Parameters](034-trailing-colon-consistency.md) | Core | Small | None | **Reverted** |
+| 35 | [Wildcard Plugin Loading](035-wildcard-plugin-loading.md) | Core / Host | Medium | None | **Pending** |
 
 Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
 Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
