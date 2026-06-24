@@ -18,11 +18,11 @@ requires a config change. There is no way to say "load everything" or
 
 ## Changes
 
-### 1. Add pattern expansion step in `MarvServiceExtensions`
+### 1. Add pattern expansion step in `PluginManager`
 
-Insert a new method between reading `config.Plugins` and the existing
-`ResolveRequestedPlugins` call. This method expands wildcard/glob entries
-against the metadata-scanned plugin names:
+Add a new static method to `PluginManager` (where `ResolveRequestedPlugins`
+and `DeduplicateDirectories` already live). This method expands
+wildcard/glob entries against the metadata-scanned plugin names:
 
 ```csharp
 internal static IReadOnlyList<string> ExpandPluginPatterns(
@@ -53,13 +53,13 @@ The expanded list of concrete plugin names is then passed to
 ### 2. Update `AddMarv` call site
 
 In `MarvServiceExtensions.AddMarv`, after the metadata scan and before
-`ResolveRequestedPlugins`, call `ExpandPluginPatterns`:
+`PluginManager.ResolveRequestedPlugins`, call `ExpandPluginPatterns`:
 
 ```csharp
-var expandedPlugins = ExpandPluginPatterns(
+var expandedPlugins = PluginManager.ExpandPluginPatterns(
     config.Plugins, allPluginMetadata, bootstrapLogger);
 
-var resolvedPaths = ResolveRequestedPlugins(
+var resolvedPaths = PluginManager.ResolveRequestedPlugins(
     expandedPlugins, allPluginMetadata, bootstrapLogger);
 ```
 

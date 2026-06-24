@@ -4,7 +4,7 @@ using Xunit;
 namespace Marv.Core.Tests.Plugin;
 
 /// <summary>
-/// Tests for plugin name resolution in <see cref="MarvServiceExtensions.ResolveRequestedPlugins"/>
+/// Tests for plugin name resolution in <see cref="PluginManager.ResolveRequestedPlugins"/>
 /// and <see cref="PluginMetadataScanner.DeriveNameFromAssemblyFile"/>.
 /// </summary>
 public class PluginNameResolutionTests
@@ -30,7 +30,7 @@ public class PluginNameResolutionTests
     public void ResolveRequestedPlugins_ExactMatch_Resolves()
     {
         var metadata = new[] { Meta("Auth", "Marv.Plugins.Auth.dll") };
-        var result = MarvServiceExtensions.ResolveRequestedPlugins(["Auth"], metadata);
+        var result = PluginManager.ResolveRequestedPlugins(["Auth"], metadata);
 
         Assert.Single(result);
         Assert.Equal("/plugins/Marv.Plugins.Auth.dll", result[0]);
@@ -40,7 +40,7 @@ public class PluginNameResolutionTests
     public void ResolveRequestedPlugins_CaseInsensitiveMatch_Resolves()
     {
         var metadata = new[] { Meta("Auth", "Marv.Plugins.Auth.dll") };
-        var result = MarvServiceExtensions.ResolveRequestedPlugins(["auth"], metadata);
+        var result = PluginManager.ResolveRequestedPlugins(["auth"], metadata);
 
         Assert.Single(result);
     }
@@ -51,7 +51,7 @@ public class PluginNameResolutionTests
         var metadata = new[] { Meta("ExampleCommon", "Marv.Plugins.Common.dll") };
         // "Common" doesn't match plugin name "ExampleCommon", but matches the
         // assembly-derived name from "Marv.Plugins.Common.dll" → "Common"
-        var result = MarvServiceExtensions.ResolveRequestedPlugins(["Common"], metadata);
+        var result = PluginManager.ResolveRequestedPlugins(["Common"], metadata);
 
         Assert.Single(result);
     }
@@ -66,7 +66,7 @@ public class PluginNameResolutionTests
         };
 
         var ex = Assert.Throws<InvalidOperationException>(
-            () => MarvServiceExtensions.ResolveRequestedPlugins(["Nonexistent"], metadata));
+            () => PluginManager.ResolveRequestedPlugins(["Nonexistent"], metadata));
 
         Assert.Contains("Nonexistent", ex.Message);
         Assert.Contains("Auth", ex.Message);
@@ -79,7 +79,7 @@ public class PluginNameResolutionTests
         var metadata = new[] { Meta("ExampleCommon", "Marv.Plugins.Common.dll") };
 
         var ex = Assert.Throws<InvalidOperationException>(
-            () => MarvServiceExtensions.ResolveRequestedPlugins(["ExampleComon"], metadata));
+            () => PluginManager.ResolveRequestedPlugins(["ExampleComon"], metadata));
 
         Assert.Contains("Did you mean", ex.Message);
         Assert.Contains("ExampleCommon", ex.Message);
@@ -89,7 +89,7 @@ public class PluginNameResolutionTests
     public void ResolveRequestedPlugins_DuplicateRequest_DeduplicatesPath()
     {
         var metadata = new[] { Meta("Auth", "Marv.Plugins.Auth.dll") };
-        var result = MarvServiceExtensions.ResolveRequestedPlugins(["Auth", "Auth"], metadata);
+        var result = PluginManager.ResolveRequestedPlugins(["Auth", "Auth"], metadata);
 
         // Second "Auth" is a duplicate — same path, should be skipped
         Assert.Single(result);
@@ -99,7 +99,7 @@ public class PluginNameResolutionTests
     public void ResolveRequestedPlugins_EmptyRequest_ReturnsEmpty()
     {
         var metadata = new[] { Meta("Auth", "Marv.Plugins.Auth.dll") };
-        var result = MarvServiceExtensions.ResolveRequestedPlugins([], metadata);
+        var result = PluginManager.ResolveRequestedPlugins([], metadata);
 
         Assert.Empty(result);
     }
@@ -108,7 +108,7 @@ public class PluginNameResolutionTests
     public void DeduplicateDirectories_RemovesDuplicates()
     {
         var dirs = new[] { "plugins", "./plugins", "other" };
-        var result = MarvServiceExtensions.DeduplicateDirectories(dirs);
+        var result = PluginManager.DeduplicateDirectories(dirs);
 
         // "plugins" and "./plugins" resolve to the same absolute path
         Assert.Equal(2, result.Count);

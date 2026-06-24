@@ -161,10 +161,11 @@ details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom
 <span class="disabled">&larr; Prev</span>
 <a href="page-001.html">1</a>
 <a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
 <a href="page-001.html">Next &rarr;</a>
 </div>
 
-        <p style="color: var(--text-muted); margin-bottom: 24px;">10 prompts · 82 messages · 27 tool calls · 2 commits · 2 pages</p>
+        <p style="color: var(--text-muted); margin-bottom: 24px;">13 prompts · 142 messages · 47 tool calls · 3 commits · 3 pages</p>
         
 <div class="index-item"><a href="page-001.html#msg-2026-06-24T13-17-58-137Z"><div class="index-item-header"><span class="index-item-number">#1</span><time datetime="2026-06-24T13:17:58.137Z" data-timestamp="2026-06-24T13:17:58.137Z">2026-06-24T13:17:58.137Z</time></div><div class="index-item-content"><p><command-message>triage-issues</command-message>
 <command-name>/triage-issues</command-name></p></div></a></div>
@@ -655,7 +656,7 @@ discussion comments.</p>
 <li>Keep issue comments concise and professional.</li>
 <li>If <code>gh</code> commands fail with auth errors, ask the user to run
   <code>! gh auth login</code> in their terminal.</li>
-</ul></div></a><div class="index-item-stats"><span>3 bash · 2 read · 1 write · 1 edit</span>
+</ul></div></a><div class="index-item-stats"><span>4 bash · 2 read · 1 write · 1 edit</span>
 <div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>Base directory for this skill: /workspaces/marv/.claude/skills/triage-issues</p>
 <h1>Triage GitHub Issues</h1>
 <p>Reconcile open GitHub issues with the local codebase by reviewing,
@@ -744,6 +745,31 @@ discussion comments.</p>
 <li>If <code>gh</code> commands fail with auth errors, ask the user to run
   <code>! gh auth login</code> in their terminal.</li>
 </ul></div></div><button class="expand-btn">Show more</button></div></div>
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>Triage complete. Issue #11 was accepted by the owner, so I:</p>
+<ol>
+<li>Created <strong>CS-035 — Wildcard Plugin Loading</strong> (<code>docs/change_specs/035-wildcard-plugin-loading.md</code>) with glob patterns via <code>FileSystemName.MatchesSimpleExpression</code>, <code>!</code> prefix for negation (per owner's YAML concern), left-to-right evaluation, and unmatched globs as non-fatal.</li>
+<li>Updated the change specs index with status <strong>Pending</strong>.</li>
+<li>Added the <code>triaged</code> label to the issue.</li>
+<li>Posted a comment on the issue linking to the spec.</li>
+</ol>
+<p>No other open issues needed action.</p></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div><div class="index-commit"><div class="index-commit-header"><span class="index-commit-hash">7cbd5c3</span><time datetime="2026-06-24T13:29:53.070Z" data-timestamp="2026-06-24T13:29:53.070Z">2026-06-24T13:29:53.070Z</time></div><div class="index-commit-msg">Add CS-035: Wildcard Plugin Loading</div></div>
+<div class="index-item"><a href="page-003.html#msg-2026-06-24T13-35-57-195Z"><div class="index-item-header"><span class="index-item-number">#11</span><time datetime="2026-06-24T13:35:57.195Z" data-timestamp="2026-06-24T13:35:57.195Z">2026-06-24T13:35:57.195Z</time></div><div class="index-item-content"><p>The spec for CS-035 looks good to me, but it did raise a question: Is MarvServiceExtensions the right place for plugin loading?</p></div></a><div class="index-item-stats">
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>Good question. <code>MarvServiceExtensions</code> has grown to ~300 lines, and most of that is plugin resolution logic (pattern matching, Levenshtein distance, assembly resolving) that has nothing to do with DI service registration. The class name suggests it should just be the <code>AddMarv</code> entry point.</p>
+<p>I'd recommend extracting the plugin resolution methods (<code>ResolveRequestedPlugins</code>, <code>ExpandPluginPatterns</code>, <code>FindClosestMatch</code>, <code>LevenshteinDistance</code>, and <code>DeduplicateDirectories</code>) into a dedicated <code>PluginResolver</code> class in <code>Marv.Core/Plugin/</code>. <code>MarvServiceExtensions.AddMarv</code> would call into it, keeping the DI wiring thin. This would also give CS-035's new <code>ExpandPluginPatterns</code> a natural home alongside the existing resolution logic.</p>
+<p>Want me to write a change spec for that refactor, or just fold it into CS-035's implementation when the time comes?</p></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div>
+<div class="index-item"><a href="page-003.html#msg-2026-06-24T13-36-35-407Z"><div class="index-item-header"><span class="index-item-number">#12</span><time datetime="2026-06-24T13:36:35.407Z" data-timestamp="2026-06-24T13:36:35.407Z">2026-06-24T13:36:35.407Z</time></div><div class="index-item-content"><p>Do we need a separate PluginResolver, or should it be folded into PluginManager?</p></div></a><div class="index-item-stats">
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p><code>PluginManager</code> already owns the rest of the plugin lifecycle (discovery, instantiation, loading, events, teardown). Moving resolution there too would give it the complete pipeline — from pattern expansion through to unload — which makes conceptual sense. The class would grow, but the resolution methods are self-contained and distinct from the runtime lifecycle methods, so it stays readable.</p>
+<p>I'd fold it into <code>PluginManager</code> rather than creating a new class. Want me to update CS-035 to include that refactor?</p></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div>
+<div class="index-item"><a href="page-003.html#msg-2026-06-24T13-38-05-599Z"><div class="index-item-header"><span class="index-item-number">#13</span><time datetime="2026-06-24T13:38:05.599Z" data-timestamp="2026-06-24T13:38:05.599Z">2026-06-24T13:38:05.599Z</time></div><div class="index-item-content"><p>I think that change is simple enough to not need a change spec. Implement it directly, then update CS-035 to reflect the changes.</p></div></a><div class="index-item-stats"><span>10 edit · 6 read · 3 bash</span>
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>Now I have the full picture. I need to:
+1. Move <code>ResolveRequestedPlugins</code>, <code>FindClosestMatch</code>, <code>LevenshteinDistance</code>, and <code>DeduplicateDirectories</code> from <code>MarvServiceExtensions</code> to <code>PluginManager</code>
+2. Update <code>MarvServiceExtensions.AddMarv</code> to call <code>PluginManager.*</code> instead
+3. Update tests to reference <code>PluginManager</code> instead of <code>MarvServiceExtensions</code>
+4. Update CS-035</p>
+<p>Let me make all the changes.</p></div></div><button class="expand-btn">Show more</button></div></div>
 </div></div>
         
 
@@ -752,6 +778,7 @@ discussion comments.</p>
 <span class="disabled">&larr; Prev</span>
 <a href="page-001.html">1</a>
 <a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
 <a href="page-001.html">Next &rarr;</a>
 </div>
 
@@ -771,7 +798,7 @@ discussion comments.</p>
         </dialog>
         <script>
 (function() {
-    var totalPages = 2;
+    var totalPages = 3;
     var searchBox = document.getElementById('search-box');
     var searchInput = document.getElementById('search-input');
     var searchBtn = document.getElementById('search-btn');

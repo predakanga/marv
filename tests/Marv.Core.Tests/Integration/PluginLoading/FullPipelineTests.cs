@@ -28,7 +28,7 @@ public class FullPipelineTests
         var metadata = PluginMetadataScanner.ScanDirectories([_fixture.PluginDir]);
         var requested = new[] { "Greet", "CannedResponses", "Auth", "AuthConsumer", "Moderation" };
 
-        var resolved = MarvServiceExtensions.ResolveRequestedPlugins(requested, metadata);
+        var resolved = PluginManager.ResolveRequestedPlugins(requested, metadata);
 
         Assert.Equal(5, resolved.Count);
         Assert.All(resolved, path => Assert.True(File.Exists(path)));
@@ -39,7 +39,7 @@ public class FullPipelineTests
     {
         var metadata = PluginMetadataScanner.ScanDirectories([_fixture.PluginDir]);
         var requested = new[] { "Greet", "CannedResponses", "Auth", "AuthConsumer", "Moderation" };
-        var resolvedPaths = MarvServiceExtensions.ResolveRequestedPlugins(requested, metadata);
+        var resolvedPaths = PluginManager.ResolveRequestedPlugins(requested, metadata);
 
         var services = new ServiceCollection();
         var configuration = new ConfigurationBuilder()
@@ -69,7 +69,7 @@ public class FullPipelineTests
         // DiscoverAndRegister loads assemblies in order and AuthConsumer
         // references Auth at the assembly level.
         var requested = new[] { "Auth", "AuthConsumer" };
-        var resolvedPaths = MarvServiceExtensions.ResolveRequestedPlugins(requested, metadata);
+        var resolvedPaths = PluginManager.ResolveRequestedPlugins(requested, metadata);
 
         var services = new ServiceCollection();
         var configuration = new ConfigurationBuilder()
@@ -94,7 +94,7 @@ public class FullPipelineTests
     {
         var metadata = PluginMetadataScanner.ScanDirectories([_fixture.PluginDir]);
         var requested = new[] { "Greet" };
-        var resolvedPaths = MarvServiceExtensions.ResolveRequestedPlugins(requested, metadata);
+        var resolvedPaths = PluginManager.ResolveRequestedPlugins(requested, metadata);
 
         var services = new ServiceCollection();
         var configuration = new ConfigurationBuilder()
@@ -118,7 +118,7 @@ public class FullPipelineTests
         var requested = new[] { "NonExistentPlugin" };
 
         var ex = Assert.Throws<InvalidOperationException>(
-            () => MarvServiceExtensions.ResolveRequestedPlugins(requested, metadata));
+            () => PluginManager.ResolveRequestedPlugins(requested, metadata));
 
         Assert.Contains("NonExistentPlugin", ex.Message);
         Assert.Contains("was requested", ex.Message);
