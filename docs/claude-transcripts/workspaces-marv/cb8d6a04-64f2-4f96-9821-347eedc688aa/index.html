@@ -166,7 +166,7 @@ details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom
 <a href="page-001.html">Next &rarr;</a>
 </div>
 
-        <p style="color: var(--text-muted); margin-bottom: 24px;">16 prompts · 244 messages · 84 tool calls · 5 commits · 4 pages</p>
+        <p style="color: var(--text-muted); margin-bottom: 24px;">16 prompts · 247 messages · 85 tool calls · 6 commits · 4 pages</p>
         
 <div class="index-item"><a href="page-001.html#msg-2026-06-24T13-17-58-137Z"><div class="index-item-header"><span class="index-item-number">#1</span><time datetime="2026-06-24T13:17:58.137Z" data-timestamp="2026-06-24T13:17:58.137Z">2026-06-24T13:17:58.137Z</time></div><div class="index-item-content"><p><command-message>triage-issues</command-message>
 <command-name>/triage-issues</command-name></p></div></a></div>
@@ -798,8 +798,9 @@ Is it worth having this logic in a separate class, or would it be better to have
 <p>The one piece that's arguably not <code>PluginManager</code>'s job is <code>RegisterAssemblyResolvers</code> (it's about the <code>AssemblyLoadContext</code>, not plugin management), but it's only ever called as part of plugin loading and needs the plugin directories, so keeping it as a private detail of the pipeline seems cleaner than leaving it stranded in <code>MarvServiceExtensions</code>.</p>
 <p>Want me to go ahead with this?</p></div></div><button class="expand-btn">Show more</button></div></div>
 </div></div>
-<div class="index-item"><a href="page-004.html#msg-2026-06-24T13-52-09-198Z"><div class="index-item-header"><span class="index-item-number">#16</span><time datetime="2026-06-24T13:52:09.198Z" data-timestamp="2026-06-24T13:52:09.198Z">2026-06-24T13:52:09.198Z</time></div><div class="index-item-content"><p>Yes please</p></div></a><div class="index-item-stats"><span>6 read · 4 edit · 3 bash · 1 write</span>
-</div></div>
+<div class="index-item"><a href="page-004.html#msg-2026-06-24T13-52-09-198Z"><div class="index-item-header"><span class="index-item-number">#16</span><time datetime="2026-06-24T13:52:09.198Z" data-timestamp="2026-06-24T13:52:09.198Z">2026-06-24T13:52:09.198Z</time></div><div class="index-item-content"><p>Yes please</p></div></a><div class="index-item-stats"><span>6 read · 4 bash · 4 edit · 1 write</span>
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>Done. <code>MarvServiceExtensions.AddMarv</code> is now ~40 lines of pure DI wiring with a single call to <code>PluginManager.ResolveAndRegister</code>. The full plugin loading pipeline (directory dedup, assembly resolvers, metadata scan, pattern expansion, name resolution, discover+register) is consolidated in <code>PluginManager</code>. All 364 tests pass, and the changelog notes the move.</p></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div><div class="index-commit"><div class="index-commit-header"><span class="index-commit-hash">94b7ec8</span><time datetime="2026-06-24T13:56:41.859Z" data-timestamp="2026-06-24T13:56:41.859Z">2026-06-24T13:56:41.859Z</time></div><div class="index-commit-msg">Consolidate plugin loading pipeline into PluginManager</div></div>
         
 
 <div class="pagination">

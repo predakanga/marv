@@ -16,9 +16,10 @@
     "ghcr.io/devcontainers/features/docker-in-docker:3": {
       "moby": false
     },
+    "ghcr.io/devcontainers-extra/features/uv": {},
     "ghcr.io/anthropics/devcontainer-features/claude-code:1": {},
     "ghcr.io/devcontainers-extra/features/apt-get-packages:1": {
-      "packages": "netcat-openbsd"
+      "packages": "netcat-openbsd python3"
     }
   },
   "mounts": [
