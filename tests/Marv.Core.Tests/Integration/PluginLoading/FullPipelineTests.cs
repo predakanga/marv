@@ -154,4 +154,26 @@ public class FullPipelineTests
 
         Assert.Contains("no IPlugin implementation", ex.Message);
     }
+
+    [Fact]
+    public void WildcardStar_LoadsAllPlugins()
+    {
+        var metadata = PluginMetadataScanner.ScanDirectories([_fixture.PluginDir]);
+        var expanded = PluginManager.ExpandPluginPatterns(["*"], metadata);
+        var resolved = PluginManager.ResolveRequestedPlugins(expanded, metadata);
+
+        Assert.True(resolved.Count >= 5, "Expected at least 5 plugins from wildcard");
+        Assert.All(resolved, path => Assert.True(File.Exists(path)));
+    }
+
+    [Fact]
+    public void WildcardWithNegation_ExcludesPlugin()
+    {
+        var metadata = PluginMetadataScanner.ScanDirectories([_fixture.PluginDir]);
+        var expanded = PluginManager.ExpandPluginPatterns(["*", "!Greet"], metadata);
+
+        Assert.DoesNotContain("Greet", expanded);
+        Assert.Contains("Auth", expanded);
+        Assert.Contains("CannedResponses", expanded);
+    }
 }

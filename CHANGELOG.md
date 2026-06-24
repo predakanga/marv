@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Wildcard and negation support in the `Plugins` configuration list.
+  Use `"*"` to load all discovered plugins, glob patterns like
+  `"IdleRPG.*"` to match by prefix, and `"!"` prefix (e.g. `"!Slap"`)
+  to exclude specific plugins. Patterns are evaluated left-to-right.
+
 ## [0.7.2] - 2026-06-18
 
 ### Changed

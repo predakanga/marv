@@ -1,10 +1,10 @@
-# CS-035: Wildcard Plugin Loading
+# CS-035: Wildcard Plugin Loading — COMPLETED
 
 **Source:** GitHub issue #11
 **Scope:** Core / Host
 **Complexity:** Medium
 **Breaking changes:** None — existing exact-name behaviour is preserved; wildcards are additive
-**Status:** Pending
+**Status:** Completed
 
 ---
 

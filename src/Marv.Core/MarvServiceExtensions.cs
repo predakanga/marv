@@ -72,11 +72,15 @@ public static class MarvServiceExtensions
             // Phase 1: Metadata scan — identify plugins without loading assemblies
             var allPluginMetadata = PluginMetadataScanner.ScanDirectories(pluginDirs, bootstrapLogger);
 
-            // Phase 2: Resolve requested plugin names to assembly paths
-            var resolvedPaths = PluginManager.ResolveRequestedPlugins(
+            // Phase 2: Expand wildcard/negation patterns against discovered plugins
+            var expandedPlugins = PluginManager.ExpandPluginPatterns(
                 config.Plugins, allPluginMetadata, bootstrapLogger);
 
-            // Phase 3: Load and register
+            // Phase 3: Resolve expanded plugin names to assembly paths
+            var resolvedPaths = PluginManager.ResolveRequestedPlugins(
+                expandedPlugins, allPluginMetadata, bootstrapLogger);
+
+            // Phase 4: Load and register
             sortedPlugins = PluginManager.DiscoverAndRegister(
                 services, configuration, resolvedPaths, bootstrapLogger);
         }

@@ -1,3 +1,4 @@
+using System.IO.Enumeration;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading.Channels;
@@ -313,6 +314,89 @@ public sealed class PluginManager
                 _logger.LogDebug("  Plugin '{Name}' optional: {Service}", descriptor.Name, svc.FullName);
         }
     }
+
+    /// <summary>
+    /// Expands wildcard and negation patterns in the plugin list against
+    /// discovered plugin metadata. Plain names pass through unchanged;
+    /// glob patterns (<c>*</c>, <c>?</c>) match against plugin names;
+    /// negation patterns (<c>!</c> prefix) remove previously matched names.
+    /// Patterns are evaluated left-to-right.
+    /// </summary>
+    internal static IReadOnlyList<string> ExpandPluginPatterns(
+        IReadOnlyList<string> patterns,
+        IReadOnlyList<PluginMetadata> allMetadata,
+        ILogger? logger = null)
+    {
+        var result = new List<string>();
+        var resultSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var pattern in patterns)
+        {
+            if (pattern.StartsWith('!'))
+            {
+                var inner = pattern[1..];
+                if (IsGlobPattern(inner))
+                {
+                    var removed = result.RemoveAll(name =>
+                        FileSystemName.MatchesSimpleExpression(inner, name, ignoreCase: true));
+                    if (removed > 0)
+                    {
+                        resultSet.Clear();
+                        foreach (var name in result)
+                            resultSet.Add(name);
+                        logger?.LogInformation(
+                            "Negation pattern '{Pattern}' excluded {Count} plugin(s)",
+                            pattern, removed);
+                    }
+                }
+                else
+                {
+                    if (resultSet.Remove(inner))
+                    {
+                        result.RemoveAll(name =>
+                            string.Equals(name, inner, StringComparison.OrdinalIgnoreCase));
+                        logger?.LogInformation(
+                            "Negation pattern '{Pattern}' excluded plugin '{Name}'",
+                            pattern, inner);
+                    }
+                }
+            }
+            else if (IsGlobPattern(pattern))
+            {
+                var matched = new List<string>();
+                foreach (var meta in allMetadata)
+                {
+                    if (FileSystemName.MatchesSimpleExpression(pattern, meta.Name, ignoreCase: true)
+                        && resultSet.Add(meta.Name))
+                    {
+                        result.Add(meta.Name);
+                        matched.Add(meta.Name);
+                    }
+                }
+
+                if (matched.Count > 0)
+                    logger?.LogInformation(
+                        "Pattern '{Pattern}' matched plugin(s): {Names}",
+                        pattern, string.Join(", ", matched));
+                else
+                    logger?.LogDebug(
+                        "Pattern '{Pattern}' matched no plugins", pattern);
+            }
+            else
+            {
+                if (resultSet.Add(pattern))
+                    result.Add(pattern);
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Returns true if the pattern contains glob wildcard characters.
+    /// </summary>
+    private static bool IsGlobPattern(string pattern) =>
+        pattern.Contains('*') || pattern.Contains('?');
 
     /// <summary>
     /// Deduplicates plugin directories by normalizing to absolute paths.

@@ -165,7 +165,7 @@ details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom
 <a href="page-001.html">Next &rarr;</a>
 </div>
 
-        <p style="color: var(--text-muted); margin-bottom: 24px;">13 prompts · 142 messages · 47 tool calls · 3 commits · 3 pages</p>
+        <p style="color: var(--text-muted); margin-bottom: 24px;">14 prompts · 201 messages · 69 tool calls · 4 commits · 3 pages</p>
         
 <div class="index-item"><a href="page-001.html#msg-2026-06-24T13-17-58-137Z"><div class="index-item-header"><span class="index-item-number">#1</span><time datetime="2026-06-24T13:17:58.137Z" data-timestamp="2026-06-24T13:17:58.137Z">2026-06-24T13:17:58.137Z</time></div><div class="index-item-content"><p><command-message>triage-issues</command-message>
 <command-name>/triage-issues</command-name></p></div></a></div>
@@ -763,13 +763,16 @@ discussion comments.</p>
 <div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p><code>PluginManager</code> already owns the rest of the plugin lifecycle (discovery, instantiation, loading, events, teardown). Moving resolution there too would give it the complete pipeline — from pattern expansion through to unload — which makes conceptual sense. The class would grow, but the resolution methods are self-contained and distinct from the runtime lifecycle methods, so it stays readable.</p>
 <p>I'd fold it into <code>PluginManager</code> rather than creating a new class. Want me to update CS-035 to include that refactor?</p></div></div><button class="expand-btn">Show more</button></div></div>
 </div></div>
-<div class="index-item"><a href="page-003.html#msg-2026-06-24T13-38-05-599Z"><div class="index-item-header"><span class="index-item-number">#13</span><time datetime="2026-06-24T13:38:05.599Z" data-timestamp="2026-06-24T13:38:05.599Z">2026-06-24T13:38:05.599Z</time></div><div class="index-item-content"><p>I think that change is simple enough to not need a change spec. Implement it directly, then update CS-035 to reflect the changes.</p></div></a><div class="index-item-stats"><span>10 edit · 6 read · 3 bash</span>
+<div class="index-item"><a href="page-003.html#msg-2026-06-24T13-38-05-599Z"><div class="index-item-header"><span class="index-item-number">#13</span><time datetime="2026-06-24T13:38:05.599Z" data-timestamp="2026-06-24T13:38:05.599Z">2026-06-24T13:38:05.599Z</time></div><div class="index-item-content"><p>I think that change is simple enough to not need a change spec. Implement it directly, then update CS-035 to reflect the changes.</p></div></a><div class="index-item-stats"><span>10 edit · 6 read · 4 bash</span>
 <div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>Now I have the full picture. I need to:
 1. Move <code>ResolveRequestedPlugins</code>, <code>FindClosestMatch</code>, <code>LevenshteinDistance</code>, and <code>DeduplicateDirectories</code> from <code>MarvServiceExtensions</code> to <code>PluginManager</code>
 2. Update <code>MarvServiceExtensions.AddMarv</code> to call <code>PluginManager.*</code> instead
 3. Update tests to reference <code>PluginManager</code> instead of <code>MarvServiceExtensions</code>
 4. Update CS-035</p>
 <p>Let me make all the changes.</p></div></div><button class="expand-btn">Show more</button></div></div>
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>Done. Moved <code>ResolveRequestedPlugins</code>, <code>DeduplicateDirectories</code>, <code>FindClosestMatch</code>, and <code>LevenshteinDistance</code> from <code>MarvServiceExtensions</code> into <code>PluginManager</code>. <code>MarvServiceExtensions</code> is now just DI wiring (~90 lines vs ~300 before). All 346 tests pass, and CS-035 has been updated to reference <code>PluginManager</code> as the target for the new <code>ExpandPluginPatterns</code> method.</p></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div><div class="index-commit"><div class="index-commit-header"><span class="index-commit-hash">34cfeda</span><time datetime="2026-06-24T13:42:44.110Z" data-timestamp="2026-06-24T13:42:44.110Z">2026-06-24T13:42:44.110Z</time></div><div class="index-commit-msg">Move plugin resolution logic from MarvServiceExtensions to PluginManager</div></div>
+<div class="index-item"><a href="page-003.html#msg-2026-06-24T13-43-21-564Z"><div class="index-item-header"><span class="index-item-number">#14</span><time datetime="2026-06-24T13:43:21.564Z" data-timestamp="2026-06-24T13:43:21.564Z">2026-06-24T13:43:21.564Z</time></div><div class="index-item-content"><p>Okay, go ahead and implement CS-035</p></div></a><div class="index-item-stats"><span>8 edit · 6 read · 6 bash · 1 write</span>
 </div></div>
         
 

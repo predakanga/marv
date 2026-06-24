@@ -1804,6 +1804,1269 @@ var resolvedPaths = PluginManager.ResolveRequestedPlugins(
 </div><button class="expand-btn">Show more</button></div>
 </div></div></div>
 <div class="message tool-reply" id="msg-2026-06-24T13-42-29-058Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-42-29-058Z" class="timestamp-link"><time datetime="2026-06-24T13:42:29.058Z" data-timestamp="2026-06-24T13:42:29.058Z">2026-06-24T13:42:29.058Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/035-wildcard-plugin-loading.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-42-36-075Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-42-36-075Z" class="timestamp-link"><time datetime="2026-06-24T13:42:36.075Z" data-timestamp="2026-06-24T13:42:36.075Z">2026-06-24T13:42:36.075Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now commit everything.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-42-39-540Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-42-39-540Z" class="timestamp-link"><time datetime="2026-06-24T13:42:39.540Z" data-timestamp="2026-06-24T13:42:39.540Z">2026-06-24T13:42:39.540Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01VwcGwveubBadqu7Hoctqx8">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit refactor</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add src/Marv.Core/MarvServiceExtensions.cs src/Marv.Core/Plugin/PluginManager.cs tests/Marv.Core.Tests/Plugin/PluginNameResolutionTests.cs tests/Marv.Core.Tests/Integration/PluginLoading/FullPipelineTests.cs docs/change_specs/035-wildcard-plugin-loading.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Move plugin resolution logic from MarvServiceExtensions to PluginManager
+
+ResolveRequestedPlugins, DeduplicateDirectories, FindClosestMatch, and
+LevenshteinDistance now live in PluginManager alongside the rest of the
+plugin lifecycle. MarvServiceExtensions is reduced to DI wiring only.
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-42-44-110Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-42-44-110Z" class="timestamp-link"><time datetime="2026-06-24T13:42:44.110Z" data-timestamp="2026-06-24T13:42:44.110Z">2026-06-24T13:42:44.110Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Scanning /home/vscode/.claude/projects...
+Found 1 projects with 31 sessions
+
+Generating archive in docs/claude-transcripts...
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/cb8d6a04-64f2-4f96-9821-347eedc688aa/index.html (13 prompts, 3 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/e10af4c7-6382-4a5d-adee-13353fbc04b8/index.html (2 prompts, 1 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/837fee6c-b9a3-42b4-a3ce-071b631d86e6/index.html (1 prompts, 1 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated page-004.html
+Generated page-005.html
+Generated page-006.html
+Generated page-007.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/0a4d9e23-2038-48fc-8ab3-c00a61ee00c7/index.html (31 prompts, 7 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/0d6a5f3c-2665-4f7f-afc9-d26c179dc62c/index.html (8 prompts, 2 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated page-004.html
+Generated page-005.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/3d2ee8af-0da3-4625-bc4f-2cfe388e0234/index.html (24 prompts, 5 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/e6441249-df95-4154-bf36-03cec10a96ce/index.html (13 prompts, 3 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated page-004.html
+Generated page-005.html
+Generated page-006.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/fe85a754-b380-48c3-aa73-46824260def8/index.html (28 prompts, 6 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/2e285066-9b5a-43e4-bb0f-c9afe49c0f78/index.html (9 prompts, 2 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/b131faeb-66ef-4a86-921e-2b0f5c1aadca/index.html (11 prompts, 3 pages)
+  Processed 10/31 sessions...
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/7a1e79d0-f5b5-4c38-9098-166288fb66be/index.html (5 prompts, 1 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated page-004.html
+Generated page-005.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/651f885a-3e6d-40b9-8b21-9b41fef5f341/index.html (25 prompts, 5 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/2aecb37a-ba54-4eb7-9ae5-1087c116fc4c/index.html (14 prompts, 3 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/d99073d4-1803-4605-bcd5-a55119912483/index.html (12 prompts, 3 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/b2f2c10c-7bdf-4566-b908-4e5161cca36a/index.html (1 prompts, 1 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/8e57f9f8-2c1b-4ded-9176-b7933c65c21b/index.html (10 prompts, 2 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated page-004.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/956eaaca-3f19-4fed-833d-da3aa3713978/index.html (17 prompts, 4 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated page-004.html
+Generated page-005.html
+Generated page-006.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/c57f6b04-3972-438d-abe6-f8508a1486e2/index.html (26 prompts, 6 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated page-004.html
+Generated page-005.html
+Generated page-006.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/92166a87-b389-4cd2-89c3-3413596f81ad/index.html (26 prompts, 6 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/74106bff-6152-4f5e-b88d-e70654201d46/index.html (13 prompts, 3 pages)
+  Processed 20/31 sessions...
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/70844a78-f6af-4e5b-ada7-23cffed31f81/index.html (11 prompts, 3 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated page-004.html
+Generated page-005.html
+Generated page-006.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/45ed1f25-7568-410f-9816-4691c1889369/index.html (26 prompts, 6 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/bd127df7-ec76-498d-9682-16d40777a852/index.html (9 prompts, 2 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/ce180230-d37d-4bb8-b865-8b151b9e6fac/index.html (13 prompts, 3 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/a464a080-f4c2-49f8-bbec-768af7983c7c/index.html (4 prompts, 1 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated page-004.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/7ec4f04e-6808-4073-9ee3-8eff9c628513/index.html (17 prompts, 4 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated page-004.html
+Generated page-005.html
+Generated page-006.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/9492cbfb-8246-4599-9955-89738c59cc6a/index.html (29 prompts, 6 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated page-004.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/f967c9ab-6f0d-4bfd-a605-dbe73d7515ba/index.html (17 prompts, 4 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/67501c0a-d16b-4f30-b393-1820c24e716a/index.html (6 prompts, 2 pages)
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated page-002.html
+Generated page-003.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/c82ca884-39a2-4b26-a9e3-6997b39b37bf/index.html (13 prompts, 3 pages)
+  Processed 30/31 sessions...
+Warning: Could not auto-detect GitHub repo. Commit links will be disabled.
+Generated page-001.html
+Generated /workspaces/marv/docs/claude-transcripts/workspaces-marv/389dbd53-e24a-46ce-b4f4-e23b61718813/index.html (1 prompts, 1 pages)
+
+Generated archive with 1 projects, 31 sessions
+Output: /workspaces/marv/docs/claude-transcripts</pre><div class="commit-card"><span class="commit-card-hash">34cfeda</span> Move plugin resolution logic from MarvServiceExtensions to PluginManager</div><pre>10 files changed, 2276 insertions(+), 197 deletions(-)
+ create mode 100644 docs/claude-transcripts/workspaces-marv/cb8d6a04-64f2-4f96-9821-347eedc688aa/page-003.html</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-42-54-654Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-42-54-654Z" class="timestamp-link"><time datetime="2026-06-24T13:42:54.654Z" data-timestamp="2026-06-24T13:42:54.654Z">2026-06-24T13:42:54.654Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Done. Moved <code>ResolveRequestedPlugins</code>, <code>DeduplicateDirectories</code>, <code>FindClosestMatch</code>, and <code>LevenshteinDistance</code> from <code>MarvServiceExtensions</code> into <code>PluginManager</code>. <code>MarvServiceExtensions</code> is now just DI wiring (~90 lines vs ~300 before). All 346 tests pass, and CS-035 has been updated to reference <code>PluginManager</code> as the target for the new <code>ExpandPluginPatterns</code> method.</p></div></div></div>
+<div class="message user" id="msg-2026-06-24T13-43-21-564Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-24T13-43-21-564Z" class="timestamp-link"><time datetime="2026-06-24T13:43:21.564Z" data-timestamp="2026-06-24T13:43:21.564Z">2026-06-24T13:43:21.564Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Okay, go ahead and implement CS-035</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-43-29-486Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-43-29-486Z" class="timestamp-link"><time datetime="2026-06-24T13:43:29.486Z" data-timestamp="2026-06-24T13:43:29.486Z">2026-06-24T13:43:29.486Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01Ln71cxdnN3f4LFxKffrX71"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/035-wildcard-plugin-loading.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-43-29-516Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-43-29-516Z" class="timestamp-link"><time datetime="2026-06-24T13:43:29.516Z" data-timestamp="2026-06-24T13:43:29.516Z">2026-06-24T13:43:29.516Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# CS-035: Wildcard Plugin Loading
+2	
+3	**Source:** GitHub issue #11
+4	**Scope:** Core / Host
+5	**Complexity:** Medium
+6	**Breaking changes:** None — existing exact-name behaviour is preserved; wildcards are additive
+7	**Status:** Pending
+8	
+9	---
+10	
+11	## Problem
+12	
+13	The `Plugins` configuration list requires every plugin to be named
+14	individually. Downstream projects with many plugins find this tedious and
+15	error-prone — adding a new plugin assembly to the plugin directory still
+16	requires a config change. There is no way to say &quot;load everything&quot; or
+17	&quot;load everything except X&quot;.
+18	
+19	## Changes
+20	
+21	### 1. Add pattern expansion step in `PluginManager`
+22	
+23	Add a new static method to `PluginManager` (where `ResolveRequestedPlugins`
+24	and `DeduplicateDirectories` already live). This method expands
+25	wildcard/glob entries against the metadata-scanned plugin names:
+26	
+27	```csharp
+28	internal static IReadOnlyList&lt;string&gt; ExpandPluginPatterns(
+29	    IReadOnlyList&lt;string&gt; patterns,
+30	    IReadOnlyList&lt;PluginMetadata&gt; allMetadata,
+31	    ILogger? logger = null)
+32	```
+33	
+34	**Pattern rules (evaluated left-to-right):**
+35	
+36	- A plain name (no `*` or `?` characters) is passed through as-is to
+37	  `ResolveRequestedPlugins` for exact matching (preserving current
+38	  behaviour including the &quot;did you mean?&quot; error).
+39	- A glob pattern (contains `*` or `?`) is matched case-insensitively
+40	  against all discovered plugin names using
+41	  `FileSystemName.MatchesSimpleExpression`. Every match is added to
+42	  the result set. An unmatched glob silently matches nothing (logged at
+43	  Debug level).
+44	- A negation pattern (prefixed with `!`) removes previously matched
+45	  names. The remainder after `!` may be a plain name or a glob. For
+46	  example, `[&quot;*&quot;, &quot;!Slap&quot;]` loads all plugins except `Slap`.
+47	- Duplicate names are suppressed — each plugin appears at most once in
+48	  the expanded result.
+49	
+50	The expanded list of concrete plugin names is then passed to
+51	`ResolveRequestedPlugins` as today.
+52	
+53	### 2. Update `AddMarv` call site
+54	
+55	In `MarvServiceExtensions.AddMarv`, after the metadata scan and before
+56	`PluginManager.ResolveRequestedPlugins`, call `ExpandPluginPatterns`:
+57	
+58	```csharp
+59	var expandedPlugins = PluginManager.ExpandPluginPatterns(
+60	    config.Plugins, allPluginMetadata, bootstrapLogger);
+61	
+62	var resolvedPaths = PluginManager.ResolveRequestedPlugins(
+63	    expandedPlugins, allPluginMetadata, bootstrapLogger);
+64	```
+65	
+66	### 3. Logging
+67	
+68	- Log at Information level when a glob pattern matches one or more
+69	  plugins, listing the matched names.
+70	- Log at Information level when a negation pattern excludes plugins.
+71	- Log at Debug level when a glob matches nothing.
+72	
+73	### 4. Default behaviour unchanged
+74	
+75	An empty `Plugins` list (`[]`) still loads nothing. Users who want all
+76	plugins must explicitly set `[&quot;*&quot;]`. This avoids accidentally loading
+77	untested or unwanted plugins.
+78	
+79	### 5. Unit tests
+80	
+81	- Test that plain names pass through unchanged (backward compatibility).
+82	- Test that `[&quot;*&quot;]` expands to all discovered plugin names.
+83	- Test that `[&quot;IdleRPG.*&quot;]` matches only plugins with that prefix.
+84	- Test that `[&quot;*&quot;, &quot;!Slap&quot;]` loads everything except `Slap`.
+85	- Test that `[&quot;*&quot;, &quot;!IdleRPG.*&quot;]` excludes all `IdleRPG.*` plugins.
+86	- Test that negation of an unmatched name is a no-op (no error).
+87	- Test that an unmatched glob silently matches nothing.
+88	- Test that duplicate names are suppressed.
+89	- Test that evaluation order matters: `[&quot;!Slap&quot;, &quot;*&quot;]` loads everything
+90	  including `Slap` (negation had nothing to remove when it ran).
+91	
+92	## Design decisions
+93	
+94	- **`!` prefix for negation, not `-`:** The `!` prefix avoids ambiguity
+95	  with YAML list syntax where `-` is a list item marker. This was
+96	  confirmed by the issue author.
+97	- **`FileSystemName.MatchesSimpleExpression`:** Available in
+98	  `System.IO.Enumeration` without external dependencies. Supports `*`
+99	  and `?` wildcards, which covers the requested use cases without the
+100	  complexity of full regex.
+101	- **Unmatched globs are not fatal:** Unlike plain names (which are fatal
+102	  when unmatched, to catch typos), globs matching nothing is expected
+103	  and normal — e.g. `[&quot;IdleRPG.*&quot;]` when no IdleRPG plugins are
+104	  installed. Plain names retain the existing fatal-error-with-suggestions
+105	  behaviour.
+106	- **Left-to-right evaluation:** Simple and predictable. Matches how
+107	  `.gitignore` and similar tools process patterns.
+108	
+109	## Testing
+110	
+111	- Unit tests for `ExpandPluginPatterns` covering all pattern types.
+112	- Unit tests for interaction with `ResolveRequestedPlugins` (plain names
+113	  still get &quot;did you mean?&quot; errors).
+114	- Integration test: configure `[&quot;*&quot;]`, place multiple plugin DLLs in the
+115	  plugin directory, verify all are loaded.
+116	- Integration test: configure `[&quot;*&quot;, &quot;!Greet&quot;]`, verify Greet is
+117	  excluded.
+118	- Manual test: set `&quot;Plugins&quot;: [&quot;*&quot;]` in config, verify all plugins in
+119	  the directory are loaded.
+120	
+121	## Impact
+122	
+123	- **Plugin API:** No changes.
+124	- **DX:** Users can now use `[&quot;*&quot;]` to load all plugins, reducing
+125	  boilerplate config. Negation patterns provide fine-grained exclusion.
+126	- **Risk:** Low — plain name behaviour is unchanged; the new code path
+127	  only activates when patterns contain `*`, `?`, or `!` characters.
+128	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-43-34-441Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-43-34-441Z" class="timestamp-link"><time datetime="2026-06-24T13:43:34.441Z" data-timestamp="2026-06-24T13:43:34.441Z">2026-06-24T13:43:34.441Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Let me read the current state of the files I need to modify.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-43-34-925Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-43-34-925Z" class="timestamp-link"><time datetime="2026-06-24T13:43:34.925Z" data-timestamp="2026-06-24T13:43:34.925Z">2026-06-24T13:43:34.925Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01JmK7Cze4naQDWMFkxDdkRT"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Plugin/PluginManager.cs&#34;,
+  &#34;offset&#34;: 300
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-43-34-948Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-43-34-948Z" class="timestamp-link"><time datetime="2026-06-24T13:43:34.948Z" data-timestamp="2026-06-24T13:43:34.948Z">2026-06-24T13:43:34.948Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>300	    /// &lt;summary&gt;
+301	    /// Logs diagnostic information about loaded plugins, their services, and dependencies.
+302	    /// &lt;/summary&gt;
+303	    internal void LogDiagnostics()
+304	    {
+305	        foreach (var descriptor in _descriptors)
+306	        {
+307	            _logger.LogInformation(&quot;Plugin &#x27;{Name}&#x27; loaded&quot;, descriptor.Name);
+308	            foreach (var svc in descriptor.ProvidedServices)
+309	                _logger.LogDebug(&quot;  Plugin &#x27;{Name}&#x27; provides: {Service}&quot;, descriptor.Name, svc.FullName);
+310	            foreach (var svc in descriptor.RequiredServices)
+311	                _logger.LogDebug(&quot;  Plugin &#x27;{Name}&#x27; requires: {Service}&quot;, descriptor.Name, svc.FullName);
+312	            foreach (var svc in descriptor.OptionalServices)
+313	                _logger.LogDebug(&quot;  Plugin &#x27;{Name}&#x27; optional: {Service}&quot;, descriptor.Name, svc.FullName);
+314	        }
+315	    }
+316	
+317	    /// &lt;summary&gt;
+318	    /// Deduplicates plugin directories by normalizing to absolute paths.
+319	    /// &lt;/summary&gt;
+320	    internal static IReadOnlyList&lt;string&gt; DeduplicateDirectories(IReadOnlyList&lt;string&gt; directories)
+321	    {
+322	        var seen = new HashSet&lt;string&gt;(StringComparer.OrdinalIgnoreCase);
+323	        var result = new List&lt;string&gt;();
+324	
+325	        foreach (var dir in directories)
+326	        {
+327	            var fullPath = Path.GetFullPath(dir);
+328	            if (seen.Add(fullPath))
+329	                result.Add(fullPath);
+330	        }
+331	
+332	        return result;
+333	    }
+334	
+335	    /// &lt;summary&gt;
+336	    /// Resolves each requested plugin name to an assembly path using the metadata
+337	    /// scan results. Matching order:
+338	    /// 1. Exact plugin name match (case-insensitive).
+339	    /// 2. Assembly filename convention match (e.g., &quot;CannedResponses&quot; matches
+340	    ///    Marv.Plugins.CannedResponses.dll) — logs a warning.
+341	    /// 3. No match — fatal error with suggestions.
+342	    /// &lt;/summary&gt;
+343	    internal static IReadOnlyList&lt;string&gt; ResolveRequestedPlugins(
+344	        IReadOnlyList&lt;string&gt; requestedPlugins,
+345	        IReadOnlyList&lt;PluginMetadata&gt; allMetadata,
+346	        ILogger? logger = null)
+347	    {
+348	        var resolvedPaths = new List&lt;string&gt;();
+349	        var resolvedSet = new HashSet&lt;string&gt;(StringComparer.OrdinalIgnoreCase);
+350	
+351	        foreach (var requested in requestedPlugins)
+352	        {
+353	            // 1. Exact plugin name match
+354	            var exact = allMetadata.FirstOrDefault(
+355	                m =&gt; string.Equals(m.Name, requested, StringComparison.OrdinalIgnoreCase));
+356	
+357	            if (exact is not null)
+358	            {
+359	                if (resolvedSet.Add(exact.AssemblyPath))
+360	                    resolvedPaths.Add(exact.AssemblyPath);
+361	                else
+362	                    logger?.LogWarning(
+363	                        &quot;Plugin &#x27;{Name}&#x27; (from {Path}) was already resolved. &quot; +
+364	                        &quot;Skipping duplicate. Check your Plugins config for repeated entries&quot;,
+365	                        exact.Name, exact.AssemblyPath);
+366	                continue;
+367	            }
+368	
+369	            // 2. Assembly filename convention match
+370	            var conventionMatch = allMetadata.FirstOrDefault(m =&gt;
+371	                string.Equals(
+372	                    PluginMetadataScanner.DeriveNameFromAssemblyFile(m.AssemblyFileName),
+373	                    requested,
+374	                    StringComparison.OrdinalIgnoreCase));
+375	
+376	            if (conventionMatch is not null)
+377	            {
+378	                logger?.LogWarning(
+379	                    &quot;Plugin &#x27;{Requested}&#x27; matched by assembly filename convention to &quot; +
+380	                    &quot;plugin &#x27;{ActualName}&#x27; (from {Path}). Consider updating your config &quot; +
+381	                    &quot;to use the canonical plugin name &#x27;{ActualName}&#x27;&quot;,
+382	                    requested, conventionMatch.Name, conventionMatch.AssemblyPath,
+383	                    conventionMatch.Name);
+384	
+385	                if (resolvedSet.Add(conventionMatch.AssemblyPath))
+386	                    resolvedPaths.Add(conventionMatch.AssemblyPath);
+387	                continue;
+388	            }
+389	
+390	            // 3. No match — fatal error with suggestions
+391	            var availableNames = allMetadata
+392	                .Select(m =&gt; $&quot;  - &#x27;{m.Name}&#x27; (from {m.AssemblyFileName})&quot;)
+393	                .ToList();
+394	
+395	            var suggestion = FindClosestMatch(requested, allMetadata);
+396	            var suggestionText = suggestion is not null
+397	                ? $&quot;\n\n  Did you mean &#x27;{suggestion}&#x27;?&quot;
+398	                : &quot;&quot;;
+399	
+400	            var availableList = availableNames.Count &gt; 0
+401	                ? &quot;\n\n  Available plugins in configured directories:\n&quot; +
+402	                  string.Join(&quot;\n&quot;, availableNames)
+403	                : &quot;\n\n  No plugins were found in the configured directories.&quot;;
+404	
+405	            throw new InvalidOperationException(
+406	                $&quot;Plugin &#x27;{requested}&#x27; was requested in config but no plugin with &quot; +
+407	                $&quot;that name was found.{availableList}{suggestionText}&quot;);
+408	        }
+409	
+410	        return resolvedPaths;
+411	    }
+412	
+413	    /// &lt;summary&gt;
+414	    /// Finds the closest matching plugin name for a &quot;did you mean?&quot; suggestion.
+415	    /// Uses case-insensitive substring matching and Levenshtein distance.
+416	    /// &lt;/summary&gt;
+417	    private static string? FindClosestMatch(
+418	        string requested, IReadOnlyList&lt;PluginMetadata&gt; allMetadata)
+419	    {
+420	        var requestedLower = requested.ToLowerInvariant();
+421	        string? bestMatch = null;
+422	        var bestDistance = int.MaxValue;
+423	
+424	        foreach (var meta in allMetadata)
+425	        {
+426	            // Check plugin name
+427	            var distance = LevenshteinDistance(requestedLower, meta.Name.ToLowerInvariant());
+428	            if (distance &lt; bestDistance)
+429	            {
+430	                bestDistance = distance;
+431	                bestMatch = meta.Name;
+432	            }
+433	
+434	            // Check assembly-derived name
+435	            var assemblyName = PluginMetadataScanner.DeriveNameFromAssemblyFile(meta.AssemblyFileName);
+436	            distance = LevenshteinDistance(requestedLower, assemblyName.ToLowerInvariant());
+437	            if (distance &lt; bestDistance)
+438	            {
+439	                bestDistance = distance;
+440	                bestMatch = meta.Name;
+441	            }
+442	        }
+443	
+444	        // Only suggest if the distance is reasonable (less than half the length)
+445	        if (bestMatch is not null &amp;&amp; bestDistance &lt;= Math.Max(requested.Length, bestMatch.Length) / 2)
+446	            return bestMatch;
+447	
+448	        return null;
+449	    }
+450	
+451	    /// &lt;summary&gt;
+452	    /// Computes the Levenshtein edit distance between two strings.
+453	    /// &lt;/summary&gt;
+454	    private static int LevenshteinDistance(string a, string b)
+455	    {
+456	        if (a.Length == 0) return b.Length;
+457	        if (b.Length == 0) return a.Length;
+458	
+459	        var prev = new int[b.Length + 1];
+460	        var curr = new int[b.Length + 1];
+461	
+462	        for (var j = 0; j &lt;= b.Length; j++)
+463	            prev[j] = j;
+464	
+465	        for (var i = 1; i &lt;= a.Length; i++)
+466	        {
+467	            curr[0] = i;
+468	            for (var j = 1; j &lt;= b.Length; j++)
+469	            {
+470	                var cost = a[i - 1] == b[j - 1] ? 0 : 1;
+471	                curr[j] = Math.Min(
+472	                    Math.Min(curr[j - 1] + 1, prev[j] + 1),
+473	                    prev[j - 1] + cost);
+474	            }
+475	
+476	            (prev, curr) = (curr, prev);
+477	        }
+478	
+479	        return prev[b.Length];
+480	    }
+481	}
+482	
+483	/// &lt;summary&gt;
+484	/// Pairs a plugin descriptor with its runtime instance.
+485	/// &lt;/summary&gt;
+486	internal sealed class PluginInstance(PluginDescriptor descriptor, IPlugin plugin)
+487	{
+488	    public PluginDescriptor Descriptor =&gt; descriptor;
+489	    public IPlugin Plugin =&gt; plugin;
+490	}
+491	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-43-35-361Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-43-35-361Z" class="timestamp-link"><time datetime="2026-06-24T13:43:35.361Z" data-timestamp="2026-06-24T13:43:35.361Z">2026-06-24T13:43:35.361Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01MmbV6Biu6u36aDTLv2UcZB"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-43-35-378Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-43-35-378Z" class="timestamp-link"><time datetime="2026-06-24T13:43:35.378Z" data-timestamp="2026-06-24T13:43:35.378Z">2026-06-24T13:43:35.378Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using System.Runtime.InteropServices;
+2	using System.Runtime.Loader;
+3	using Marv.Core.Irc;
+4	using Marv.Core.Platform;
+5	using Marv.Core.Plugin;
+6	using Microsoft.Extensions.Configuration;
+7	using Microsoft.Extensions.DependencyInjection;
+8	using Microsoft.Extensions.Logging;
+9	
+10	namespace Marv.Core;
+11	
+12	/// &lt;summary&gt;
+13	/// Extension methods for registering Marv services into an &lt;see cref=&quot;IServiceCollection&quot;/&gt;.
+14	/// &lt;/summary&gt;
+15	public static class MarvServiceExtensions
+16	{
+17	    /// &lt;summary&gt;
+18	    /// Registers all Marv core services, discovers and loads plugins, and configures
+19	    /// the DI container for the bot. This is the single entry point called by the host application.
+20	    /// &lt;/summary&gt;
+21	    /// &lt;param name=&quot;services&quot;&gt;The service collection to register into.&lt;/param&gt;
+22	    /// &lt;param name=&quot;configuration&quot;&gt;The application configuration.&lt;/param&gt;
+23	    /// &lt;returns&gt;The service collection for chaining.&lt;/returns&gt;
+24	    public static IServiceCollection AddMarv(
+25	        this IServiceCollection services,
+26	        IConfiguration configuration)
+27	    {
+28	        // Bind configuration from the root (flat layout)
+29	        services.Configure&lt;MarvConfiguration&gt;(configuration);
+30	
+31	        // Register connection-scoped core services — fresh instances per connection
+32	        services.AddScoped&lt;ServerInfo&gt;();
+33	        services.AddScoped&lt;IServerInfo&gt;(sp =&gt; sp.GetRequiredService&lt;ServerInfo&gt;());
+34	        services.AddScoped&lt;CapabilityManager&gt;();
+35	        services.AddScoped&lt;ICapabilityManager&gt;(sp =&gt; sp.GetRequiredService&lt;CapabilityManager&gt;());
+36	        services.AddScoped&lt;IPluginActivator, PluginActivator&gt;();
+37	        services.AddScoped&lt;IrcBot&gt;();
+38	        services.AddScoped&lt;IBot&gt;(sp =&gt; sp.GetRequiredService&lt;IrcBot&gt;());
+39	        services.AddScoped&lt;IBotStatistics&gt;(sp =&gt; sp.GetRequiredService&lt;IrcBot&gt;().Statistics);
+40	
+41	        // Register application-lifetime services
+42	        services.AddSingleton&lt;PluginManager&gt;();
+43	
+44	        // Register IHttpClientFactory so plugins can inject it without adding the package themselves
+45	        services.AddHttpClient();
+46	
+47	        // Register the hosted service
+48	        services.AddHostedService&lt;MarvBotService&gt;();
+49	
+50	        // Discover plugins from configured directories, filtered by name
+51	        var config = configuration.Get&lt;MarvConfiguration&gt;() ?? new MarvConfiguration();
+52	
+53	        // Deduplicate plugin directories
+54	        var pluginDirs = PluginManager.DeduplicateDirectories(config.PluginDirectories);
+55	
+56	        // Register assembly resolving handlers so plugin transitive dependencies
+57	        // are found by probing the plugin directories and the app base directory.
+58	        RegisterAssemblyResolvers(pluginDirs);
+59	
+60	        IReadOnlyList&lt;PluginDescriptor&gt; sortedPlugins = [];
+61	        if (config.Plugins.Length &gt; 0)
+62	        {
+63	            var configuredLogLevel = configuration.GetValue&lt;LogLevel?&gt;(&quot;LogLevel&quot;);
+64	            using var bootstrapLoggerFactory = LoggerFactory.Create(b =&gt;
+65	            {
+66	                b.AddConsole();
+67	                if (configuredLogLevel.HasValue)
+68	                    b.SetMinimumLevel(configuredLogLevel.Value);
+69	            });
+70	            var bootstrapLogger = bootstrapLoggerFactory.CreateLogger(&quot;Marv.Bootstrap&quot;);
+71	
+72	            // Phase 1: Metadata scan — identify plugins without loading assemblies
+73	            var allPluginMetadata = PluginMetadataScanner.ScanDirectories(pluginDirs, bootstrapLogger);
+74	
+75	            // Phase 2: Resolve requested plugin names to assembly paths
+76	            var resolvedPaths = PluginManager.ResolveRequestedPlugins(
+77	                config.Plugins, allPluginMetadata, bootstrapLogger);
+78	
+79	            // Phase 3: Load and register
+80	            sortedPlugins = PluginManager.DiscoverAndRegister(
+81	                services, configuration, resolvedPaths, bootstrapLogger);
+82	        }
+83	
+84	        // Store the sorted descriptors for later use during instantiation
+85	        services.AddSingleton(sortedPlugins);
+86	
+87	        return services;
+88	    }
+89	
+90	    /// &lt;summary&gt;
+91	    /// Registers handlers on the default &lt;see cref=&quot;AssemblyLoadContext&quot;/&gt; to probe
+92	    /// plugin directories and the application base directory for managed and native
+93	    /// assemblies that are not in the host&#x27;s dependency graph.
+94	    /// &lt;/summary&gt;
+95	    private static void RegisterAssemblyResolvers(IReadOnlyList&lt;string&gt; pluginDirectories)
+96	    {
+97	        // Probe plugin directories + app base directory (for PublishSingleFile support)
+98	        var probeDirs = pluginDirectories
+99	            .Select(Path.GetFullPath)
+100	            .Distinct(StringComparer.OrdinalIgnoreCase)
+101	            .ToList();
+102	
+103	        AssemblyLoadContext.Default.Resolving += (_, assemblyName) =&gt;
+104	        {
+105	            foreach (var dir in probeDirs)
+106	            {
+107	                if (!Directory.Exists(dir))
+108	                    continue;
+109	
+110	                var candidate = Path.Combine(dir, assemblyName.Name + &quot;.dll&quot;);
+111	                if (File.Exists(candidate))
+112	                    return AssemblyLoadContext.Default.LoadFromAssemblyPath(candidate);
+113	            }
+114	
+115	            return null;
+116	        };
+117	
+118	        AssemblyLoadContext.Default.ResolvingUnmanagedDll += (_, unmanagedDllName) =&gt;
+119	        {
+120	            foreach (var dir in probeDirs)
+121	            {
+122	                if (!Directory.Exists(dir))
+123	                    continue;
+124	
+125	                var candidate = Path.Combine(dir, unmanagedDllName);
+126	                if (File.Exists(candidate))
+127	                    return NativeLibrary.Load(candidate);
+128	            }
+129	
+130	            return IntPtr.Zero;
+131	        };
+132	    }
+133	}
+134	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-43-43-033Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-43-43-033Z" class="timestamp-link"><time datetime="2026-06-24T13:43:43.033Z" data-timestamp="2026-06-24T13:43:43.033Z">2026-06-24T13:43:43.033Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>I have everything I need. Let me implement the three changes: add <code>ExpandPluginPatterns</code> to <code>PluginManager</code>, update the <code>AddMarv</code> call site, and write the unit tests.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-43-43-406Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-43-43-406Z" class="timestamp-link"><time datetime="2026-06-24T13:43:43.406Z" data-timestamp="2026-06-24T13:43:43.406Z">2026-06-24T13:43:43.406Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01Hj3khUpWig7XfMpJGvB9At"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Plugin/PluginManager.cs&#34;,
+  &#34;limit&#34;: 10
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-43-43-435Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-43-43-435Z" class="timestamp-link"><time datetime="2026-06-24T13:43:43.435Z" data-timestamp="2026-06-24T13:43:43.435Z">2026-06-24T13:43:43.435Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using System.Reflection;
+2	using System.Runtime.Loader;
+3	using System.Threading.Channels;
+4	using Marv.Core.Events;
+5	using Microsoft.Extensions.Configuration;
+6	using Microsoft.Extensions.DependencyInjection;
+7	using Microsoft.Extensions.Logging;
+8	
+9	namespace Marv.Core.Plugin;
+10	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-43-49-030Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-43-49-030Z" class="timestamp-link"><time datetime="2026-06-24T13:43:49.030Z" data-timestamp="2026-06-24T13:43:49.030Z">2026-06-24T13:43:49.030Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01BTc1d77dVQyNfrdtKq5nZ5">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">PluginManager.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/Plugin/PluginManager.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">using System.Reflection;
+using System.Runtime.Loader;
+using System.Threading.Channels;
+using Marv.Core.Events;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">using System.IO.Enumeration;
+using System.Reflection;
+using System.Runtime.Loader;
+using System.Threading.Channels;
+using Marv.Core.Events;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-43-49-106Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-43-49-106Z" class="timestamp-link"><time datetime="2026-06-24T13:43:49.106Z" data-timestamp="2026-06-24T13:43:49.106Z">2026-06-24T13:43:49.106Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/Plugin/PluginManager.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-43-55-200Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-43-55-200Z" class="timestamp-link"><time datetime="2026-06-24T13:43:55.200Z" data-timestamp="2026-06-24T13:43:55.200Z">2026-06-24T13:43:55.200Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now add <code>ExpandPluginPatterns</code> before <code>DeduplicateDirectories</code>:</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-44-06-072Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-44-06-072Z" class="timestamp-link"><time datetime="2026-06-24T13:44:06.072Z" data-timestamp="2026-06-24T13:44:06.072Z">2026-06-24T13:44:06.072Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01RkPKRdMuNPVvaMrHVRmyTL">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">PluginManager.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/Plugin/PluginManager.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    /// &lt;summary&gt;
+    /// Deduplicates plugin directories by normalizing to absolute paths.
+    /// &lt;/summary&gt;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    /// &lt;summary&gt;
+    /// Expands wildcard and negation patterns in the plugin list against
+    /// discovered plugin metadata. Plain names pass through unchanged;
+    /// glob patterns (&lt;c&gt;*&lt;/c&gt;, &lt;c&gt;?&lt;/c&gt;) match against plugin names;
+    /// negation patterns (&lt;c&gt;!&lt;/c&gt; prefix) remove previously matched names.
+    /// Patterns are evaluated left-to-right.
+    /// &lt;/summary&gt;
+    internal static IReadOnlyList&lt;string&gt; ExpandPluginPatterns(
+        IReadOnlyList&lt;string&gt; patterns,
+        IReadOnlyList&lt;PluginMetadata&gt; allMetadata,
+        ILogger? logger = null)
+    {
+        var result = new List&lt;string&gt;();
+        var resultSet = new HashSet&lt;string&gt;(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var pattern in patterns)
+        {
+            if (pattern.StartsWith(&#39;!&#39;))
+            {
+                var inner = pattern[1..];
+                if (IsGlobPattern(inner))
+                {
+                    var removed = result.RemoveAll(name =&gt;
+                        FileSystemName.MatchesSimpleExpression(inner, name, ignoreCase: true));
+                    if (removed &gt; 0)
+                    {
+                        resultSet.Clear();
+                        foreach (var name in result)
+                            resultSet.Add(name);
+                        logger?.LogInformation(
+                            &#34;Negation pattern &#39;{Pattern}&#39; excluded {Count} plugin(s)&#34;,
+                            pattern, removed);
+                    }
+                }
+                else
+                {
+                    if (resultSet.Remove(inner))
+                    {
+                        result.RemoveAll(name =&gt;
+                            string.Equals(name, inner, StringComparison.OrdinalIgnoreCase));
+                        logger?.LogInformation(
+                            &#34;Negation pattern &#39;{Pattern}&#39; excluded plugin &#39;{Name}&#39;&#34;,
+                            pattern, inner);
+                    }
+                }
+            }
+            else if (IsGlobPattern(pattern))
+            {
+                var matched = new List&lt;string&gt;();
+                foreach (var meta in allMetadata)
+                {
+                    if (FileSystemName.MatchesSimpleExpression(pattern, meta.Name, ignoreCase: true)
+                        &amp;&amp; resultSet.Add(meta.Name))
+                    {
+                        result.Add(meta.Name);
+                        matched.Add(meta.Name);
+                    }
+                }
+
+                if (matched.Count &gt; 0)
+                    logger?.LogInformation(
+                        &#34;Pattern &#39;{Pattern}&#39; matched plugin(s): {Names}&#34;,
+                        pattern, string.Join(&#34;, &#34;, matched));
+                else
+                    logger?.LogDebug(
+                        &#34;Pattern &#39;{Pattern}&#39; matched no plugins&#34;, pattern);
+            }
+            else
+            {
+                if (resultSet.Add(pattern))
+                    result.Add(pattern);
+            }
+        }
+
+        return result;
+    }
+
+    /// &lt;summary&gt;
+    /// Returns true if the pattern contains glob wildcard characters.
+    /// &lt;/summary&gt;
+    private static bool IsGlobPattern(string pattern) =&gt;
+        pattern.Contains(&#39;*&#39;) || pattern.Contains(&#39;?&#39;);
+
+    /// &lt;summary&gt;
+    /// Deduplicates plugin directories by normalizing to absolute paths.
+    /// &lt;/summary&gt;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-44-06-156Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-44-06-156Z" class="timestamp-link"><time datetime="2026-06-24T13:44:06.156Z" data-timestamp="2026-06-24T13:44:06.156Z">2026-06-24T13:44:06.156Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/Plugin/PluginManager.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-44-11-845Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-44-11-845Z" class="timestamp-link"><time datetime="2026-06-24T13:44:11.845Z" data-timestamp="2026-06-24T13:44:11.845Z">2026-06-24T13:44:11.845Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the <code>AddMarv</code> call site to insert <code>ExpandPluginPatterns</code> before <code>ResolveRequestedPlugins</code>:</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-44-15-222Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-44-15-222Z" class="timestamp-link"><time datetime="2026-06-24T13:44:15.222Z" data-timestamp="2026-06-24T13:44:15.222Z">2026-06-24T13:44:15.222Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01GNEwskG8B66WTV4wnm3HTa">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">MarvServiceExtensions.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">            // Phase 2: Resolve requested plugin names to assembly paths
+            var resolvedPaths = PluginManager.ResolveRequestedPlugins(
+                config.Plugins, allPluginMetadata, bootstrapLogger);</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">            // Phase 2: Expand wildcard/negation patterns against discovered plugins
+            var expandedPlugins = PluginManager.ExpandPluginPatterns(
+                config.Plugins, allPluginMetadata, bootstrapLogger);
+
+            // Phase 3: Resolve expanded plugin names to assembly paths
+            var resolvedPaths = PluginManager.ResolveRequestedPlugins(
+                expandedPlugins, allPluginMetadata, bootstrapLogger);</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-44-15-295Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-44-15-295Z" class="timestamp-link"><time datetime="2026-06-24T13:44:15.295Z" data-timestamp="2026-06-24T13:44:15.295Z">2026-06-24T13:44:15.295Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-44-20-210Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-44-20-210Z" class="timestamp-link"><time datetime="2026-06-24T13:44:20.210Z" data-timestamp="2026-06-24T13:44:20.210Z">2026-06-24T13:44:20.210Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Also update the phase 3 comment:</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-44-21-561Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-44-21-561Z" class="timestamp-link"><time datetime="2026-06-24T13:44:21.561Z" data-timestamp="2026-06-24T13:44:21.561Z">2026-06-24T13:44:21.561Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_014rpSycjxtyAYV82LQpwdN4">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">MarvServiceExtensions.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">            // Phase 3: Load and register</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">            // Phase 4: Load and register</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-44-21-637Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-44-21-637Z" class="timestamp-link"><time datetime="2026-06-24T13:44:21.637Z" data-timestamp="2026-06-24T13:44:21.637Z">2026-06-24T13:44:21.637Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-44-27-076Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-44-27-076Z" class="timestamp-link"><time datetime="2026-06-24T13:44:27.076Z" data-timestamp="2026-06-24T13:44:27.076Z">2026-06-24T13:44:27.076Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now write the unit tests. Let me check the test directory structure.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-44-27-317Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-44-27-317Z" class="timestamp-link"><time datetime="2026-06-24T13:44:27.317Z" data-timestamp="2026-06-24T13:44:27.317Z">2026-06-24T13:44:27.317Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01F7ngoZ3nEeSXLA9DRQqdBG">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">List plugin test files</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">ls /workspaces/marv/tests/Marv.Core.Tests/Plugin/</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-44-27-383Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-44-27-383Z" class="timestamp-link"><time datetime="2026-06-24T13:44:27.383Z" data-timestamp="2026-06-24T13:44:27.383Z">2026-06-24T13:44:27.383Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>CommandPrefixTests.cs
+HandlerDispatchFilterTests.cs
+HandlerFilterPipelineTests.cs
+HandlerResilienceTests.cs
+IntervalTimerTests.cs
+PluginDependencySorterTests.cs
+PluginDiscoveryTests.cs
+PluginManagerResilienceTests.cs
+PluginNameResolutionTests.cs</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-44-53-507Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-44-53-507Z" class="timestamp-link"><time datetime="2026-06-24T13:44:53.507Z" data-timestamp="2026-06-24T13:44:53.507Z">2026-06-24T13:44:53.507Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_012tpTWD5NZdE9kYNDNX9oPZ">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">PluginPatternExpansionTests.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/tests/Marv.Core.Tests/Plugin/PluginPatternExpansionTests.cs</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content">using Marv.Core.Plugin;
+using Xunit;
+
+namespace Marv.Core.Tests.Plugin;
+
+/// &lt;summary&gt;
+/// Tests for wildcard and negation pattern expansion in
+/// &lt;see cref=&#34;PluginManager.ExpandPluginPatterns&#34;/&gt;.
+/// &lt;/summary&gt;
+public class PluginPatternExpansionTests
+{
+    private static PluginMetadata Meta(string name) =&gt;
+        new(name, $&#34;/plugins/Marv.Plugins.{name}.dll&#34;, $&#34;Marv.Plugins.{name}.dll&#34;);
+
+    private static readonly IReadOnlyList&lt;PluginMetadata&gt; AllPlugins =
+    [
+        Meta(&#34;Auth&#34;),
+        Meta(&#34;Greet&#34;),
+        Meta(&#34;CannedResponses&#34;),
+        Meta(&#34;Moderation&#34;),
+        Meta(&#34;IdleRPG.Core&#34;),
+        Meta(&#34;IdleRPG.Combat&#34;),
+    ];
+
+    [Fact]
+    public void PlainNames_PassThroughUnchanged()
+    {
+        var result = PluginManager.ExpandPluginPatterns([&#34;Auth&#34;, &#34;Greet&#34;], AllPlugins);
+
+        Assert.Equal(2, result.Count);
+        Assert.Equal(&#34;Auth&#34;, result[0]);
+        Assert.Equal(&#34;Greet&#34;, result[1]);
+    }
+
+    [Fact]
+    public void WildcardStar_ExpandsToAllPlugins()
+    {
+        var result = PluginManager.ExpandPluginPatterns([&#34;*&#34;], AllPlugins);
+
+        Assert.Equal(AllPlugins.Count, result.Count);
+        foreach (var meta in AllPlugins)
+            Assert.Contains(meta.Name, result);
+    }
+
+    [Fact]
+    public void GlobPattern_MatchesPrefix()
+    {
+        var result = PluginManager.ExpandPluginPatterns([&#34;IdleRPG.*&#34;], AllPlugins);
+
+        Assert.Equal(2, result.Count);
+        Assert.Contains(&#34;IdleRPG.Core&#34;, result);
+        Assert.Contains(&#34;IdleRPG.Combat&#34;, result);
+    }
+
+    [Fact]
+    public void QuestionMarkWildcard_MatchesSingleCharacter()
+    {
+        var result = PluginManager.ExpandPluginPatterns([&#34;Gree?&#34;], AllPlugins);
+
+        Assert.Single(result);
+        Assert.Equal(&#34;Greet&#34;, result[0]);
+    }
+
+    [Fact]
+    public void Negation_ExcludesExactName()
+    {
+        var result = PluginManager.ExpandPluginPatterns([&#34;*&#34;, &#34;!Greet&#34;], AllPlugins);
+
+        Assert.Equal(AllPlugins.Count - 1, result.Count);
+        Assert.DoesNotContain(&#34;Greet&#34;, result);
+    }
+
+    [Fact]
+    public void Negation_ExcludesGlobPattern()
+    {
+        var result = PluginManager.ExpandPluginPatterns([&#34;*&#34;, &#34;!IdleRPG.*&#34;], AllPlugins);
+
+        Assert.Equal(AllPlugins.Count - 2, result.Count);
+        Assert.DoesNotContain(&#34;IdleRPG.Core&#34;, result);
+        Assert.DoesNotContain(&#34;IdleRPG.Combat&#34;, result);
+    }
+
+    [Fact]
+    public void Negation_UnmatchedName_IsNoOp()
+    {
+        var result = PluginManager.ExpandPluginPatterns([&#34;*&#34;, &#34;!NonExistent&#34;], AllPlugins);
+
+        Assert.Equal(AllPlugins.Count, result.Count);
+    }
+
+    [Fact]
+    public void UnmatchedGlob_MatchesNothing()
+    {
+        var result = PluginManager.ExpandPluginPatterns([&#34;Foo.*&#34;], AllPlugins);
+
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public void DuplicateNames_AreSuppressed()
+    {
+        var result = PluginManager.ExpandPluginPatterns([&#34;Auth&#34;, &#34;Auth&#34;], AllPlugins);
+
+        Assert.Single(result);
+        Assert.Equal(&#34;Auth&#34;, result[0]);
+    }
+
+    [Fact]
+    public void GlobAndPlainName_DuplicateSuppressed()
+    {
+        var result = PluginManager.ExpandPluginPatterns([&#34;Auth&#34;, &#34;*&#34;], AllPlugins);
+
+        Assert.Equal(AllPlugins.Count, result.Count);
+        Assert.Equal(&#34;Auth&#34;, result[0]);
+    }
+
+    [Fact]
+    public void EvaluationOrder_NegationBeforeWildcard_HasNoEffect()
+    {
+        var result = PluginManager.ExpandPluginPatterns([&#34;!Greet&#34;, &#34;*&#34;], AllPlugins);
+
+        Assert.Equal(AllPlugins.Count, result.Count);
+        Assert.Contains(&#34;Greet&#34;, result);
+    }
+
+    [Fact]
+    public void CaseInsensitive_GlobMatching()
+    {
+        var result = PluginManager.ExpandPluginPatterns([&#34;auth&#34;], AllPlugins);
+
+        Assert.Single(result);
+        Assert.Equal(&#34;auth&#34;, result[0]);
+    }
+
+    [Fact]
+    public void CaseInsensitive_GlobWildcardMatching()
+    {
+        var result = PluginManager.ExpandPluginPatterns([&#34;idlerpg.*&#34;], AllPlugins);
+
+        Assert.Equal(2, result.Count);
+    }
+
+    [Fact]
+    public void CaseInsensitive_NegationMatching()
+    {
+        var result = PluginManager.ExpandPluginPatterns([&#34;*&#34;, &#34;!greet&#34;], AllPlugins);
+
+        Assert.Equal(AllPlugins.Count - 1, result.Count);
+        Assert.DoesNotContain(&#34;Greet&#34;, result);
+    }
+
+    [Fact]
+    public void EmptyPatterns_ReturnsEmpty()
+    {
+        var result = PluginManager.ExpandPluginPatterns([], AllPlugins);
+
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public void MultipleNegations_AllApplied()
+    {
+        var result = PluginManager.ExpandPluginPatterns(
+            [&#34;*&#34;, &#34;!Auth&#34;, &#34;!Greet&#34;, &#34;!IdleRPG.*&#34;], AllPlugins);
+
+        Assert.Equal(2, result.Count);
+        Assert.Contains(&#34;CannedResponses&#34;, result);
+        Assert.Contains(&#34;Moderation&#34;, result);
+    }
+}
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-44-53-594Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-44-53-594Z" class="timestamp-link"><time datetime="2026-06-24T13:44:53.594Z" data-timestamp="2026-06-24T13:44:53.594Z">2026-06-24T13:44:53.594Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /workspaces/marv/tests/Marv.Core.Tests/Plugin/PluginPatternExpansionTests.cs (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-45-03-027Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-45-03-027Z" class="timestamp-link"><time datetime="2026-06-24T13:45:03.027Z" data-timestamp="2026-06-24T13:45:03.027Z">2026-06-24T13:45:03.027Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me also add integration tests to <code>FullPipelineTests</code>. Let me read the current state to find where to insert.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-45-03-766Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-45-03-766Z" class="timestamp-link"><time datetime="2026-06-24T13:45:03.766Z" data-timestamp="2026-06-24T13:45:03.766Z">2026-06-24T13:45:03.766Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01WxC3XTaab38GXBtWPLw9kS"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/tests/Marv.Core.Tests/Integration/PluginLoading/FullPipelineTests.cs&#34;,
+  &#34;offset&#34;: 140
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-45-03-795Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-45-03-795Z" class="timestamp-link"><time datetime="2026-06-24T13:45:03.795Z" data-timestamp="2026-06-24T13:45:03.795Z">2026-06-24T13:45:03.795Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>140	    }
+141	
+142	    [Fact]
+143	    public void NonPluginAssembly_ThrowsWhenPassedDirectly()
+144	    {
+145	        // Marv.Core.dll is a valid managed assembly but contains no IPlugin implementation
+146	        var nonPluginDll = typeof(MarvConfiguration).Assembly.Location;
+147	
+148	        var services = new ServiceCollection();
+149	        var configuration = new ConfigurationBuilder().Build();
+150	
+151	        var ex = Assert.Throws&lt;InvalidOperationException&gt;(
+152	            () =&gt; PluginManager.DiscoverAndRegister(
+153	                services, configuration, [nonPluginDll], NullLogger.Instance));
+154	
+155	        Assert.Contains(&quot;no IPlugin implementation&quot;, ex.Message);
+156	    }
+157	}
+158	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-45-16-561Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-45-16-561Z" class="timestamp-link"><time datetime="2026-06-24T13:45:16.561Z" data-timestamp="2026-06-24T13:45:16.561Z">2026-06-24T13:45:16.561Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01968xmJu7yP876UjUoYA81j">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">FullPipelineTests.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/tests/Marv.Core.Tests/Integration/PluginLoading/FullPipelineTests.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    [Fact]
+    public void NonPluginAssembly_ThrowsWhenPassedDirectly()
+    {
+        // Marv.Core.dll is a valid managed assembly but contains no IPlugin implementation
+        var nonPluginDll = typeof(MarvConfiguration).Assembly.Location;
+
+        var services = new ServiceCollection();
+        var configuration = new ConfigurationBuilder().Build();
+
+        var ex = Assert.Throws&lt;InvalidOperationException&gt;(
+            () =&gt; PluginManager.DiscoverAndRegister(
+                services, configuration, [nonPluginDll], NullLogger.Instance));
+
+        Assert.Contains(&#34;no IPlugin implementation&#34;, ex.Message);
+    }
+}</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    [Fact]
+    public void NonPluginAssembly_ThrowsWhenPassedDirectly()
+    {
+        // Marv.Core.dll is a valid managed assembly but contains no IPlugin implementation
+        var nonPluginDll = typeof(MarvConfiguration).Assembly.Location;
+
+        var services = new ServiceCollection();
+        var configuration = new ConfigurationBuilder().Build();
+
+        var ex = Assert.Throws&lt;InvalidOperationException&gt;(
+            () =&gt; PluginManager.DiscoverAndRegister(
+                services, configuration, [nonPluginDll], NullLogger.Instance));
+
+        Assert.Contains(&#34;no IPlugin implementation&#34;, ex.Message);
+    }
+
+    [Fact]
+    public void WildcardStar_LoadsAllPlugins()
+    {
+        var metadata = PluginMetadataScanner.ScanDirectories([_fixture.PluginDir]);
+        var expanded = PluginManager.ExpandPluginPatterns([&#34;*&#34;], metadata);
+        var resolved = PluginManager.ResolveRequestedPlugins(expanded, metadata);
+
+        Assert.True(resolved.Count &gt;= 5, &#34;Expected at least 5 plugins from wildcard&#34;);
+        Assert.All(resolved, path =&gt; Assert.True(File.Exists(path)));
+    }
+
+    [Fact]
+    public void WildcardWithNegation_ExcludesPlugin()
+    {
+        var metadata = PluginMetadataScanner.ScanDirectories([_fixture.PluginDir]);
+        var expanded = PluginManager.ExpandPluginPatterns([&#34;*&#34;, &#34;!Greet&#34;], metadata);
+
+        Assert.DoesNotContain(&#34;Greet&#34;, expanded);
+        Assert.Contains(&#34;Auth&#34;, expanded);
+        Assert.Contains(&#34;CannedResponses&#34;, expanded);
+    }
+}</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-45-16-632Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-45-16-632Z" class="timestamp-link"><time datetime="2026-06-24T13:45:16.632Z" data-timestamp="2026-06-24T13:45:16.632Z">2026-06-24T13:45:16.632Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/tests/Marv.Core.Tests/Integration/PluginLoading/FullPipelineTests.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-45-25-738Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-45-25-738Z" class="timestamp-link"><time datetime="2026-06-24T13:45:25.738Z" data-timestamp="2026-06-24T13:45:25.738Z">2026-06-24T13:45:25.738Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now build and test.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-45-26-248Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-45-26-248Z" class="timestamp-link"><time datetime="2026-06-24T13:45:26.248Z" data-timestamp="2026-06-24T13:45:26.248Z">2026-06-24T13:45:26.248Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01JgRNKgs8tL6n1xCum4UJfB">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Build the solution</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">dotnet build -c Release 2&gt;&amp;1 | tail -5</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-45-33-062Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-45-33-062Z" class="timestamp-link"><time datetime="2026-06-24T13:45:33.062Z" data-timestamp="2026-06-24T13:45:33.062Z">2026-06-24T13:45:33.062Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:06.52</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-45-40-854Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-45-40-854Z" class="timestamp-link"><time datetime="2026-06-24T13:45:40.854Z" data-timestamp="2026-06-24T13:45:40.854Z">2026-06-24T13:45:40.854Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_0189EkUXKFWK6H7VSLJtrDVN">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Run all tests</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">dotnet test -c Release 2&gt;&amp;1 | tail -15</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-46-44-866Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-46-44-866Z" class="timestamp-link"><time datetime="2026-06-24T13:46:44.866Z" data-timestamp="2026-06-24T13:46:44.866Z">2026-06-24T13:46:44.866Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  Marv.Plugins.Moderation -&gt; /workspaces/marv/src/plugins/Marv.Plugins.Moderation/bin/Release/net10.0/Marv.Plugins.Moderation.dll
+  Marv.Plugins.AuthConsumer -&gt; /workspaces/marv/src/plugins/Marv.Plugins.AuthConsumer/bin/Release/net10.0/Marv.Plugins.AuthConsumer.dll
+  Marv.Core.Tests -&gt; /workspaces/marv/tests/Marv.Core.Tests/bin/Release/net10.0/Marv.Core.Tests.dll
+Test run for /workspaces/marv/tests/Marv.Core.Tests/bin/Release/net10.0/Marv.Core.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    35, Skipped:     0, Total:    35, Duration: 278 ms - Marv.Testing.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   305, Skipped:     0, Total:   305, Duration: 56 s - Marv.Core.Tests.dll (net10.0)
+  Marv.Plugins.Tests -&gt; /workspaces/marv/tests/Marv.Plugins.Tests/bin/Release/net10.0/Marv.Plugins.Tests.dll
+Test run for /workspaces/marv/tests/Marv.Plugins.Tests/bin/Release/net10.0/Marv.Plugins.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    24, Skipped:     0, Total:    24, Duration: 135 ms - Marv.Plugins.Tests.dll (net10.0)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-46-57-528Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-46-57-528Z" class="timestamp-link"><time datetime="2026-06-24T13:46:57.528Z" data-timestamp="2026-06-24T13:46:57.528Z">2026-06-24T13:46:57.528Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>All 364 tests pass (305 core + 35 testing + 24 plugins — up from 287 core previously, so 18 new tests added). Now mark CS-035 as completed and update the changelog.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-47-00-881Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-47-00-881Z" class="timestamp-link"><time datetime="2026-06-24T13:47:00.881Z" data-timestamp="2026-06-24T13:47:00.881Z">2026-06-24T13:47:00.881Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_018hKntsHWkZw2RMjd6BAUEK">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">035-wildcard-plugin-loading.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/035-wildcard-plugin-loading.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content"># CS-035: Wildcard Plugin Loading
+
+**Source:** GitHub issue #11
+**Scope:** Core / Host
+**Complexity:** Medium
+**Breaking changes:** None — existing exact-name behaviour is preserved; wildcards are additive
+**Status:** Pending</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content"># CS-035: Wildcard Plugin Loading — COMPLETED
+
+**Source:** GitHub issue #11
+**Scope:** Core / Host
+**Complexity:** Medium
+**Breaking changes:** None — existing exact-name behaviour is preserved; wildcards are additive
+**Status:** Completed</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-47-00-995Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-47-00-995Z" class="timestamp-link"><time datetime="2026-06-24T13:47:00.995Z" data-timestamp="2026-06-24T13:47:00.995Z">2026-06-24T13:47:00.995Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/035-wildcard-plugin-loading.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-47-07-802Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-47-07-802Z" class="timestamp-link"><time datetime="2026-06-24T13:47:07.802Z" data-timestamp="2026-06-24T13:47:07.802Z">2026-06-24T13:47:07.802Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01VkXnoEnHJ88JXmYazHmqrx">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">README.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/README.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">| 35 | [Wildcard Plugin Loading](035-wildcard-plugin-loading.md) | Core / Host | Medium | None | **Pending** |</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">| 35 | [Wildcard Plugin Loading](035-wildcard-plugin-loading.md) | Core / Host | Medium | None | **Done** |</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-47-07-861Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-47-07-861Z" class="timestamp-link"><time datetime="2026-06-24T13:47:07.861Z" data-timestamp="2026-06-24T13:47:07.861Z">2026-06-24T13:47:07.861Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/README.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-47-17-567Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-47-17-567Z" class="timestamp-link"><time datetime="2026-06-24T13:47:17.567Z" data-timestamp="2026-06-24T13:47:17.567Z">2026-06-24T13:47:17.567Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the changelog and update the PLUGIN_API docs (since this changes how the <code>Plugins</code> config works).</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-47-17-700Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-47-17-700Z" class="timestamp-link"><time datetime="2026-06-24T13:47:17.700Z" data-timestamp="2026-06-24T13:47:17.700Z">2026-06-24T13:47:17.700Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01H8jUbtZyuTYDUUNne7vvtr"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/CHANGELOG.md&#34;,
+  &#34;limit&#34;: 20
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-47-17-727Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-47-17-727Z" class="timestamp-link"><time datetime="2026-06-24T13:47:17.727Z" data-timestamp="2026-06-24T13:47:17.727Z">2026-06-24T13:47:17.727Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# Changelog
+2	
+3	All notable changes to this project will be documented in this file.
+4	
+5	The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+6	and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+7	
+8	## [Unreleased]
+9	
+10	## [0.7.2] - 2026-06-18
+11	
+12	### Changed
+13	
+14	- Reverted always-colon trailing parameter serialization (CS-034) — the
+15	  unconditional colon caused more false positives than the original
+16	  conditional logic. The serializer now only prefixes the last parameter
+17	  with `:` when it contains spaces, starts with `:`, or is empty.
+18	
+19	## [0.7.1] - 2026-06-17
+20	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-47-29-644Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-47-29-644Z" class="timestamp-link"><time datetime="2026-06-24T13:47:29.644Z" data-timestamp="2026-06-24T13:47:29.644Z">2026-06-24T13:47:29.644Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01TY1Ja69t1bNKScijcfqzqW">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">CHANGELOG.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/CHANGELOG.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">## [Unreleased]
+
+## [0.7.2] - 2026-06-18</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">## [Unreleased]
+
+### Added
+
+- Wildcard and negation support in the `Plugins` configuration list.
+  Use `&#34;*&#34;` to load all discovered plugins, glob patterns like
+  `&#34;IdleRPG.*&#34;` to match by prefix, and `&#34;!&#34;` prefix (e.g. `&#34;!Slap&#34;`)
+  to exclude specific plugins. Patterns are evaluated left-to-right.
+
+## [0.7.2] - 2026-06-18</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-47-29-712Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-47-29-712Z" class="timestamp-link"><time datetime="2026-06-24T13:47:29.712Z" data-timestamp="2026-06-24T13:47:29.712Z">2026-06-24T13:47:29.712Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/CHANGELOG.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-47-36-968Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-47-36-968Z" class="timestamp-link"><time datetime="2026-06-24T13:47:36.968Z" data-timestamp="2026-06-24T13:47:36.968Z">2026-06-24T13:47:36.968Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now check if PLUGIN_API.md mentions the Plugins config and needs updating.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-47-37-541Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-47-37-541Z" class="timestamp-link"><time datetime="2026-06-24T13:47:37.541Z" data-timestamp="2026-06-24T13:47:37.541Z">2026-06-24T13:47:37.541Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01XXay6GBoFgYkvkJrZxcxqv">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check if PLUGIN_API.md references plugin config</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -n -i &#34;plugins\|plugin.*list\|plugin.*config&#34; /workspaces/marv/docs/PLUGIN_API.md | head -20</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-47-37-629Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-47-37-629Z" class="timestamp-link"><time datetime="2026-06-24T13:47:37.629Z" data-timestamp="2026-06-24T13:47:37.629Z">2026-06-24T13:47:37.629Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>3:Quick reference for building Marv plugins. All types are in the `Marv.Core`
+179:For dynamic VERSION responses (e.g. including loaded plugins or uptime), set
+285:1. Create a config class with `[PluginConfig]`:
+288:[PluginConfig(Section = &quot;Greet&quot;)]
+318:| `IOptionsSnapshot&lt;T&gt;` | Scoped | Re-read config per scope (rarely needed for plugins) |
+350:Plugins are also recreated per connection, so they always receive the
+353:Plugins can register services with any standard DI lifetime:
+397:Split handler methods into separate classes to organize large plugins:
+509:| `IOptions&lt;T&gt;` | Singleton | Config for `[PluginConfig]` types |
+516:Services registered by plugins via `[ProvidesService]` + `ConfigureServices`
+517:are available to dependent plugins in load order (see §9).</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-47-44-787Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-47-44-787Z" class="timestamp-link"><time datetime="2026-06-24T13:47:44.787Z" data-timestamp="2026-06-24T13:47:44.787Z">2026-06-24T13:47:44.787Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>The PLUGIN_API.md doesn't document the <code>Plugins</code> configuration property itself — it's about plugin authoring, not bot configuration. No update needed there.</p>
+<p>Now close the GitHub issue and commit.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-47-49-028Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-47-49-028Z" class="timestamp-link"><time datetime="2026-06-24T13:47:49.028Z" data-timestamp="2026-06-24T13:47:49.028Z">2026-06-24T13:47:49.028Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01MhkJkRZMTPNjHcLKFGZ9iZ">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Post implementation comment on issue #11</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">gh issue comment 11 --repo predakanga/marv --body &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Implemented in CS-035. The `Plugins` config now supports:
+
+- **Glob patterns**: `&#34;*&#34;` (all plugins), `&#34;IdleRPG.*&#34;` (prefix match), `&#34;Gree?&#34;` (single-char wildcard)
+- **Negation**: `&#34;!Slap&#34;` (exclude by name), `&#34;!IdleRPG.*&#34;` (exclude by pattern)
+- **Left-to-right evaluation**: `[&#34;*&#34;, &#34;!Slap&#34;]` loads everything except Slap
+
+Plain names retain the existing exact-match behaviour including &#34;did you mean?&#34; suggestions. An empty list still loads nothing.
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message assistant" id="msg-2026-06-24T13-47-49-146Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-24T13-47-49-146Z" class="timestamp-link"><time datetime="2026-06-24T13:47:49.146Z" data-timestamp="2026-06-24T13:47:49.146Z">2026-06-24T13:47:49.146Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01RgZQwpdjNbYTQG4nE1uJ7e">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Close issue #11</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">gh issue close 11 --repo predakanga/marv</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-47-50-971Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-47-50-971Z" class="timestamp-link"><time datetime="2026-06-24T13:47:50.971Z" data-timestamp="2026-06-24T13:47:50.971Z">2026-06-24T13:47:50.971Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>https://github.com/predakanga/marv/issues/11#issuecomment-4789957068</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-24T13-47-52-839Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-24T13-47-52-839Z" class="timestamp-link"><time datetime="2026-06-24T13:47:52.839Z" data-timestamp="2026-06-24T13:47:52.839Z">2026-06-24T13:47:52.839Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>✓ Closed issue predakanga/marv#11 (Allow wildcards in plugin list)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
         
 
 <div class="pagination">
