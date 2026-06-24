@@ -1676,3 +1676,11 @@
 **Date**: 2026-06-18T00:00:00Z
 
 > I'd like you to revert CS-034 - it turned out to cause more false positives than we had before.
+
+## Triage GitHub Issues
+
+**Date**: 2026-06-24T00:00:00Z
+
+> /triage-issues
+
+- Posted triage analysis on #11 (Allow wildcards in plugin list)
