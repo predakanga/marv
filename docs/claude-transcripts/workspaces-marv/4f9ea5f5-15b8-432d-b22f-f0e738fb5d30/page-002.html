@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 2</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 2/2</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-001.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<span class="current">2</span>
+<span class="disabled">Next &rarr;</span>
+</div>
+
+        
+<div class="message user" id="msg-2026-06-27T09-41-41-675Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-27T09-41-41-675Z" class="timestamp-link"><time datetime="2026-06-27T09:41:41.675Z" data-timestamp="2026-06-27T09:41:41.675Z">2026-06-27T09:41:41.675Z</time></a></div><div class="message-content">
+<div class="user-content"><p>1</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-41-45-442Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-41-45-442Z" class="timestamp-link"><time datetime="2026-06-27T09:41:45.442Z" data-timestamp="2026-06-27T09:41:45.442Z">2026-06-27T09:41:45.442Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-41-45-981Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-41-45-981Z" class="timestamp-link"><time datetime="2026-06-27T09:41:45.981Z" data-timestamp="2026-06-27T09:41:45.981Z">2026-06-27T09:41:45.981Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Let me dig into all the identity-related code paths.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-41-46-954Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-41-46-954Z" class="timestamp-link"><time datetime="2026-06-27T09:41:46.954Z" data-timestamp="2026-06-27T09:41:46.954Z">2026-06-27T09:41:46.954Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01QusKHBhNjYMDphzMBT4VbL"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/MarvConfiguration.cs&#34;,
+  &#34;limit&#34;: 30,
+  &#34;offset&#34;: 145
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-27T09-41-46-979Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-27T09-41-46-979Z" class="timestamp-link"><time datetime="2026-06-27T09:41:46.979Z" data-timestamp="2026-06-27T09:41:46.979Z">2026-06-27T09:41:46.979Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>145	    /// to complete before proceeding anyway. Set to 0 to wait indefinitely.
+146	    /// &lt;/summary&gt;
+147	    [Description(&quot;Timeout (seconds) for NickServ/OPER auth; 0 = no timeout.&quot;)]
+148	    public int AuthTimeoutSeconds { get; init; } = 15;
+149	
+150	    /// &lt;summary&gt;
+151	    /// Sentry DSN for error reporting. When empty or null, Sentry is disabled.
+152	    /// &lt;/summary&gt;
+153	    [Description(&quot;Sentry DSN for error reporting (empty = disabled).&quot;)]
+154	    public string? SentryDsn { get =&gt; _sentryDsn; init =&gt; _sentryDsn = NullIfEmpty(value); }
+155	    private readonly string? _sentryDsn;
+156	
+157	    /// &lt;summary&gt;
+158	    /// Custom response to CTCP VERSION queries. If null, uses the default
+159	    /// &quot;Marv IRC Bot {version}&quot; string. Set to empty string to suppress
+160	    /// VERSION responses entirely.
+161	    /// &lt;/summary&gt;
+162	    [Description(&quot;Custom CTCP VERSION response (empty = suppress).&quot;)]
+163	    public string? CtcpVersionResponse { get; init; }
+164	
+165	    /// &lt;summary&gt;
+166	    /// Whether the bot should automatically reconnect after a connection failure.
+167	    /// When false, the bot logs the error and exits with a non-zero exit code.
+168	    /// &lt;/summary&gt;
+169	    [Description(&quot;Auto-reconnect on connection failure (default: true).&quot;)]
+170	    public bool AutoReconnect { get; init; } = true;
+171	
+172	    /// &lt;summary&gt;
+173	    /// Override for the minimum log level. When set, replaces the default log level
+174	    /// from appsettings.json.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-41-47-418Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-41-47-418Z" class="timestamp-link"><time datetime="2026-06-27T09:41:47.418Z" data-timestamp="2026-06-27T09:41:47.418Z">2026-06-27T09:41:47.418Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01LPGD3RKashZkWJJGPNzedG"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs&#34;,
+  &#34;offset&#34;: 970,
+  &#34;limit&#34;: 20
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-27T09-41-47-433Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-27T09-41-47-433Z" class="timestamp-link"><time datetime="2026-06-27T09:41:47.433Z" data-timestamp="2026-06-27T09:41:47.433Z">2026-06-27T09:41:47.433Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>970	                        Text = args ?? &quot;&quot;
+971	                    };
+972	                    await FanOutEventAsync(evt, ct);
+973	                    break;
+974	                }
+975	            case &quot;VERSION&quot;:
+976	                var versionResponse = _config.CtcpVersionResponse
+977	                    ?? $&quot;Marv IRC Bot {MarvVersion.Current}&quot;;
+978	
+979	                if (!string.IsNullOrEmpty(versionResponse))
+980	                {
+981	                    await SendRawAsync(new IrcMessage(&quot;NOTICE&quot;, [sender.Nick,
+982	                        $&quot;\x01VERSION {versionResponse}\x01&quot;]), ct);
+983	                }
+984	                break;
+985	            case &quot;PING&quot;:
+986	                await SendRawAsync(new IrcMessage(&quot;NOTICE&quot;, [sender.Nick,
+987	                    $&quot;\x01PING {args ?? &quot;&quot;}\x01&quot;]), ct);
+988	                break;
+989	            case &quot;TIME&quot;:</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-41-47-829Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-41-47-829Z" class="timestamp-link"><time datetime="2026-06-27T09:41:47.829Z" data-timestamp="2026-06-27T09:41:47.829Z">2026-06-27T09:41:47.829Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01ATmAMYGubFB7TsHeivq8r7"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/plugins/Marv.Plugins.CannedResponses/InfoHandlers.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-27T09-41-47-905Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-27T09-41-47-905Z" class="timestamp-link"><time datetime="2026-06-27T09:41:47.905Z" data-timestamp="2026-06-27T09:41:47.905Z">2026-06-27T09:41:47.905Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using Marv.Core;
+2	using Marv.Core.Platform;
+3	using Marv.Core.Plugin;
+4	
+5	namespace Marv.Plugins.CannedResponses;
+6	
+7	/// &lt;summary&gt;
+8	/// Handler group for informational canned responses.
+9	/// Demonstrates organizing related command handlers into a separate class.
+10	/// &lt;/summary&gt;
+11	[HandlerGroup]
+12	public class InfoHandlers
+13	{
+14	    private readonly IBot _bot;
+15	
+16	    /// &lt;summary&gt;
+17	    /// Creates a new &lt;see cref=&quot;InfoHandlers&quot;/&gt; with the specified bot.
+18	    /// Constructor parameters are resolved from DI via &lt;see cref=&quot;IPluginActivator&quot;/&gt;.
+19	    /// &lt;/summary&gt;
+20	    public InfoHandlers(IBot bot)
+21	    {
+22	        _bot = bot;
+23	    }
+24	
+25	    /// &lt;summary&gt;Responds with version information.&lt;/summary&gt;
+26	    [OnCommand(&quot;version&quot;)]
+27	    public async Task HandleVersion(CommandContext ctx, CancellationToken ct)
+28	    {
+29	        await ctx.ReplyAsync($&quot;Marv IRC Bot v{MarvVersion.Current}&quot;, ct);
+30	    }
+31	
+32	    /// &lt;summary&gt;Responds with help text.&lt;/summary&gt;
+33	    [OnCommand(&quot;help&quot;)]
+34	    public async Task HandleHelp(CommandContext ctx, CancellationToken ct)
+35	    {
+36	        await ctx.ReplyAsync(&quot;Available commands: !help, !version, !source, !ping&quot;, ct);
+37	    }
+38	
+39	    /// &lt;summary&gt;Responds with the source code URL.&lt;/summary&gt;
+40	    [OnCommand(&quot;source&quot;)]
+41	    public async Task HandleSource(CommandContext ctx, CancellationToken ct)
+42	    {
+43	        await ctx.ReplyAsync(&quot;Source code: https://github.com/predakanga/marv&quot;, ct);
+44	    }
+45	}
+46	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-41-52-420Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-41-52-420Z" class="timestamp-link"><time datetime="2026-06-27T09:41:52.420Z" data-timestamp="2026-06-27T09:41:52.420Z">2026-06-27T09:41:52.420Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me check how the host app is structured and whether there's any existing extensibility point for downstream projects.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-41-53-992Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-41-53-992Z" class="timestamp-link"><time datetime="2026-06-27T09:41:53.992Z" data-timestamp="2026-06-27T09:41:53.992Z">2026-06-27T09:41:53.992Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01TSWRNb9vZQkkyqNfB88ujj">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Find service registration and IBot interface</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;AddMarv\|UseMarv\|IBot\b&#34; --include=&#34;*.cs&#34; /workspaces/marv/src/Marv.Core/ | grep -v obj/ | grep -v &#34;Test&#34; | head -20</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-27T09-41-54-064Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-27T09-41-54-064Z" class="timestamp-link"><time datetime="2026-06-27T09:41:54.064Z" data-timestamp="2026-06-27T09:41:54.064Z">2026-06-27T09:41:54.064Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs:22:    public static IServiceCollection AddMarv(
+/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs:36:        services.AddScoped&lt;IBot&gt;(sp =&gt; sp.GetRequiredService&lt;IrcBot&gt;());
+/workspaces/marv/src/Marv.Core/Platform/IBot.cs:10:public interface IBot
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:12:/// Implements &lt;see cref=&quot;IBot&quot;/&gt; and runs the message processor loop.
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:16:internal sealed class IrcBot : IBot
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:106:    // --- IBot implementation ---
+/workspaces/marv/src/Marv.Core/Plugin/Attributes.cs:78:    /// When null, the bot&#x27;s configured &lt;see cref=&quot;IBot.CommandPrefix&quot;/&gt; is used.
+/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs:12:/// &lt;see cref=&quot;IBot&quot;/&gt; access, and reflection-based event dispatch to attributed handler
+/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs:18:    protected IBot Bot { get; }
+/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs:36:    /// Derived plugins accept &lt;see cref=&quot;IBot&quot;/&gt;, &lt;see cref=&quot;IPluginActivator&quot;/&gt;,
+/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs:40:    protected MarvPlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory)
+/workspaces/marv/src/Marv.Core/Plugin/MarvPlugin.cs:273:    /// attributes on the handler method. Evaluators receive the &lt;see cref=&quot;IBot&quot;/&gt;
+/workspaces/marv/src/Marv.Core/Plugin/IFilterEvaluator.cs:8:/// Receives the &lt;see cref=&quot;IBot&quot;/&gt; instance so that evaluators can take
+/workspaces/marv/src/Marv.Core/Plugin/IFilterEvaluator.cs:21:        IBot bot,
+/workspaces/marv/src/Marv.Core/Plugin/HandlerContext.cs:26:    public required IBot Bot { get; init; }
+/workspaces/marv/src/Marv.Core/Plugin/FilterEvaluator.cs:19:        IBot bot,
+/workspaces/marv/src/Marv.Core/Plugin/FilterEvaluator.cs:31:        IBot bot,</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-41-55-466Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-41-55-466Z" class="timestamp-link"><time datetime="2026-06-27T09:41:55.466Z" data-timestamp="2026-06-27T09:41:55.466Z">2026-06-27T09:41:55.466Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01WhDGKwMu8usf5MQbbrfg4i">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check if Sentry release/environment is set</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;Release\|Environment\|AppName\|ProductName&#34; --include=&#34;*.cs&#34; /workspaces/marv/src/Marv/ | grep -v obj/</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-27T09-41-55-534Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-27T09-41-55-534Z" class="timestamp-link"><time datetime="2026-06-27T09:41:55.534Z" data-timestamp="2026-06-27T09:41:55.534Z">2026-06-27T09:41:55.534Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/Marv/Program.cs:28:    // Environment variables with MARV_ prefix (the default host builder adds
+/workspaces/marv/src/Marv/Program.cs:30:    builder.Configuration.AddEnvironmentVariables(&quot;MARV_&quot;);</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-41-59-632Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-41-59-632Z" class="timestamp-link"><time datetime="2026-06-27T09:41:59.632Z" data-timestamp="2026-06-27T09:41:59.632Z">2026-06-27T09:41:59.632Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01HAUQ9dKAMU65hqZCvTk4q8"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-41-59-639Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-41-59-639Z" class="timestamp-link"><time datetime="2026-06-27T09:41:59.639Z" data-timestamp="2026-06-27T09:41:59.639Z">2026-06-27T09:41:59.639Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01H2HCenpxTstYN1pyrz3kHP"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/Platform/IBot.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-27T09-41-59-659Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-27T09-41-59-659Z" class="timestamp-link"><time datetime="2026-06-27T09:41:59.659Z" data-timestamp="2026-06-27T09:41:59.659Z">2026-06-27T09:41:59.659Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using Marv.Core.Irc;
+2	using Marv.Core.Platform;
+3	using Marv.Core.Plugin;
+4	using Microsoft.Extensions.Configuration;
+5	using Microsoft.Extensions.DependencyInjection;
+6	using Microsoft.Extensions.Logging;
+7	
+8	namespace Marv.Core;
+9	
+10	/// &lt;summary&gt;
+11	/// Extension methods for registering Marv services into an &lt;see cref=&quot;IServiceCollection&quot;/&gt;.
+12	/// &lt;/summary&gt;
+13	public static class MarvServiceExtensions
+14	{
+15	    /// &lt;summary&gt;
+16	    /// Registers all Marv core services, discovers and loads plugins, and configures
+17	    /// the DI container for the bot. This is the single entry point called by the host application.
+18	    /// &lt;/summary&gt;
+19	    /// &lt;param name=&quot;services&quot;&gt;The service collection to register into.&lt;/param&gt;
+20	    /// &lt;param name=&quot;configuration&quot;&gt;The application configuration.&lt;/param&gt;
+21	    /// &lt;returns&gt;The service collection for chaining.&lt;/returns&gt;
+22	    public static IServiceCollection AddMarv(
+23	        this IServiceCollection services,
+24	        IConfiguration configuration)
+25	    {
+26	        // Bind configuration from the root (flat layout)
+27	        services.Configure&lt;MarvConfiguration&gt;(configuration);
+28	
+29	        // Register connection-scoped core services — fresh instances per connection
+30	        services.AddScoped&lt;ServerInfo&gt;();
+31	        services.AddScoped&lt;IServerInfo&gt;(sp =&gt; sp.GetRequiredService&lt;ServerInfo&gt;());
+32	        services.AddScoped&lt;CapabilityManager&gt;();
+33	        services.AddScoped&lt;ICapabilityManager&gt;(sp =&gt; sp.GetRequiredService&lt;CapabilityManager&gt;());
+34	        services.AddScoped&lt;IPluginActivator, PluginActivator&gt;();
+35	        services.AddScoped&lt;IrcBot&gt;();
+36	        services.AddScoped&lt;IBot&gt;(sp =&gt; sp.GetRequiredService&lt;IrcBot&gt;());
+37	        services.AddScoped&lt;IBotStatistics&gt;(sp =&gt; sp.GetRequiredService&lt;IrcBot&gt;().Statistics);
+38	
+39	        // Register application-lifetime services
+40	        services.AddSingleton&lt;PluginManager&gt;();
+41	
+42	        // Register IHttpClientFactory so plugins can inject it without adding the package themselves
+43	        services.AddHttpClient();
+44	
+45	        // Register the hosted service
+46	        services.AddHostedService&lt;MarvBotService&gt;();
+47	
+48	        // Discover, resolve, and register plugins
+49	        var config = configuration.Get&lt;MarvConfiguration&gt;() ?? new MarvConfiguration();
+50	        var configuredLogLevel = configuration.GetValue&lt;LogLevel?&gt;(&quot;LogLevel&quot;);
+51	        using var bootstrapLoggerFactory = LoggerFactory.Create(b =&gt;
+52	        {
+53	            b.AddConsole();
+54	            if (configuredLogLevel.HasValue)
+55	                b.SetMinimumLevel(configuredLogLevel.Value);
+56	        });
+57	        var bootstrapLogger = bootstrapLoggerFactory.CreateLogger(&quot;Marv.Bootstrap&quot;);
+58	
+59	        var sortedPlugins = PluginManager.ResolveAndRegister(
+60	            services, configuration, config, bootstrapLogger);
+61	
+62	        services.AddSingleton(sortedPlugins);
+63	
+64	        return services;
+65	    }
+66	}
+67	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-27T09-41-59-662Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-27T09-41-59-662Z" class="timestamp-link"><time datetime="2026-06-27T09:41:59.662Z" data-timestamp="2026-06-27T09:41:59.662Z">2026-06-27T09:41:59.662Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using Marv.Core.Protocol;
+2	
+3	namespace Marv.Core.Platform;
+4	
+5	/// &lt;summary&gt;
+6	/// The primary interface plugins interact with. Provides methods for sending messages,
+7	/// querying channel/user state, and checking capability availability.
+8	/// All Send*Async methods are thread-safe and can be called from any context.
+9	/// &lt;/summary&gt;
+10	public interface IBot
+11	{
+12	    /// &lt;summary&gt;The bot&#x27;s own user identity.&lt;/summary&gt;
+13	    IUser Self { get; }
+14	
+15	    /// &lt;summary&gt;The configured command prefix (e.g. &quot;!&quot;).&lt;/summary&gt;
+16	    string CommandPrefix { get; }
+17	
+18	    /// &lt;summary&gt;Sends a PRIVMSG to the specified target (channel or nick).&lt;/summary&gt;
+19	    Task SendMessageAsync(string target, string text, CancellationToken ct);
+20	
+21	    /// &lt;summary&gt;Sends a NOTICE to the specified target (channel or nick).&lt;/summary&gt;
+22	    Task SendNoticeAsync(string target, string text, CancellationToken ct);
+23	
+24	    /// &lt;summary&gt;Sends a CTCP ACTION to the specified target.&lt;/summary&gt;
+25	    Task SendActionAsync(string target, string text, CancellationToken ct);
+26	
+27	    /// &lt;summary&gt;Sends a raw IRC message through the connection.&lt;/summary&gt;
+28	    Task SendRawAsync(IrcMessage message, CancellationToken ct);
+29	
+30	    /// &lt;summary&gt;Joins a channel, optionally with a key.&lt;/summary&gt;
+31	    Task JoinAsync(string channel, string? key, CancellationToken ct);
+32	
+33	    /// &lt;summary&gt;
+34	    /// Joins multiple channels in a single IRC JOIN command.
+35	    /// Channel names are comma-separated per RFC 2812. Automatically
+36	    /// batches into multiple commands if the channel list exceeds the
+37	    /// 512-byte IRC line length limit. Channels with keys should use
+38	    /// &lt;see cref=&quot;JoinAsync&quot;/&gt; individually.
+39	    /// &lt;/summary&gt;
+40	    Task JoinMultipleAsync(IReadOnlyList&lt;string&gt; channels, CancellationToken ct);
+41	
+42	    /// &lt;summary&gt;Parts (leaves) a channel, optionally with a reason.&lt;/summary&gt;
+43	    Task PartAsync(string channel, string? reason, CancellationToken ct);
+44	
+45	    /// &lt;summary&gt;Kicks a user from a channel, optionally with a reason.&lt;/summary&gt;
+46	    Task KickAsync(string channel, string nick, string? reason, CancellationToken ct);
+47	
+48	    /// &lt;summary&gt;Sets or changes the topic of a channel.&lt;/summary&gt;
+49	    Task SetTopicAsync(string channel, string topic, CancellationToken ct);
+50	
+51	    /// &lt;summary&gt;Invites a user to a channel.&lt;/summary&gt;
+52	    Task InviteAsync(string nick, string channel, CancellationToken ct);
+53	
+54	    /// &lt;summary&gt;
+55	    /// Sets a mode on a channel or user. The mode string should include the
+56	    /// +/- prefix (e.g. &quot;+i&quot;, &quot;-b&quot;). For user modes, pass the bot&#x27;s own nick
+57	    /// as the target.
+58	    /// &lt;/summary&gt;
+59	    Task SetModeAsync(string target, string modeString, CancellationToken ct);
+60	
+61	    /// &lt;summary&gt;
+62	    /// Sets a mode on a channel or user with a parameter (e.g. &quot;+b&quot;, &quot;nick!*@*&quot;).
+63	    /// &lt;/summary&gt;
+64	    Task SetModeAsync(string target, string modeString, string parameter, CancellationToken ct);
+65	
+66	    /// &lt;summary&gt;Gives operator status (+o) to a user in a channel.&lt;/summary&gt;
+67	    Task GiveOpAsync(string channel, string nick, CancellationToken ct);
+68	
+69	    /// &lt;summary&gt;Removes operator status (-o) from a user in a channel.&lt;/summary&gt;
+70	    Task RemoveOpAsync(string channel, string nick, CancellationToken ct);
+71	
+72	    /// &lt;summary&gt;Gives voice status (+v) to a user in a channel.&lt;/summary&gt;
+73	    Task GiveVoiceAsync(string channel, string nick, CancellationToken ct);
+74	
+75	    /// &lt;summary&gt;Removes voice status (-v) from a user in a channel.&lt;/summary&gt;
+76	    Task RemoveVoiceAsync(string channel, string nick, CancellationToken ct);
+77	
+78	    /// &lt;summary&gt;Changes the bot&#x27;s nickname.&lt;/summary&gt;
+79	    Task ChangeNickAsync(string newNick, CancellationToken ct);
+80	
+81	    /// &lt;summary&gt;
+82	    /// Dictionary of channels the bot is in, keyed by case-mapped channel name.
+83	    /// &lt;/summary&gt;
+84	    IReadOnlyDictionary&lt;string, IChannel&gt; Channels { get; }
+85	
+86	    /// &lt;summary&gt;
+87	    /// Dictionary of known users, keyed by case-mapped nick.
+88	    /// &lt;/summary&gt;
+89	    IReadOnlyDictionary&lt;string, IUser&gt; Users { get; }
+90	
+91	    /// &lt;summary&gt;
+92	    /// String comparer that uses the server&#x27;s case mapping rules (rfc1459, ascii, etc.)
+93	    /// for comparing nicks and channel names. Defaults to rfc1459 before connection.
+94	    /// Plugins should treat collections built with this comparer as connection-scoped
+95	    /// state — rebuild them in &lt;see cref=&quot;Plugin.IPlugin.OnConnectedAsync&quot;/&gt; since the
+96	    /// comparer instance may change between connections.
+97	    /// &lt;/summary&gt;
+98	    IEqualityComparer&lt;string&gt; CaseComparer { get; }
+99	
+100	    /// &lt;summary&gt;Server configuration from ISUPPORT.&lt;/summary&gt;
+101	    IServerInfo ServerInfo { get; }
+102	
+103	    /// &lt;summary&gt;IRCv3 capability negotiation state.&lt;/summary&gt;
+104	    ICapabilityManager Capabilities { get; }
+105	
+106	    /// &lt;summary&gt;Operational statistics for the current connection.&lt;/summary&gt;
+107	    IBotStatistics Statistics { get; }
+108	
+109	    /// &lt;summary&gt;
+110	    /// Number of messages currently waiting in the outbound send queue.
+111	    /// &lt;/summary&gt;
+112	    int OutboundQueueCount { get; }
+113	
+114	    /// &lt;summary&gt;
+115	    /// Discards all messages currently waiting in the outbound send queue.
+116	    /// Messages already handed to the rate limiter or TCP write are not affected.
+117	    /// &lt;/summary&gt;
+118	    Task ClearOutboundQueueAsync(CancellationToken ct);
+119	
+120	    /// &lt;summary&gt;
+121	    /// Sends an IRC command and waits for the server&#x27;s correlated response.
+122	    /// Only commands with well-known ENDOF* terminators are supported: WHO,
+123	    /// WHOIS, WHOWAS, LIST, NAMES, LINKS, INFO. Uses labeled-response when
+124	    /// available, otherwise falls back to ENDOF* numeric correlation.
+125	    /// &lt;/summary&gt;
+126	    /// &lt;exception cref=&quot;NotSupportedException&quot;&gt;The command is not in the supported set.&lt;/exception&gt;
+127	    /// &lt;exception cref=&quot;TimeoutException&quot;&gt;No response received within 30 seconds.&lt;/exception&gt;
+128	    Task&lt;IReadOnlyList&lt;IrcMessage&gt;&gt; SendAndAwaitAsync(IrcMessage message, CancellationToken ct);
+129	}
+130	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-42-04-990Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-42-04-990Z" class="timestamp-link"><time datetime="2026-06-27T09:42:04.990Z" data-timestamp="2026-06-27T09:42:04.990Z">2026-06-27T09:42:04.990Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01W1b7hPXdfqq2m53Nro9Bfe">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Find all hardcoded &#34;Marv&#34; strings in source</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;\&#34;Marv\b&#34; --include=&#34;*.cs&#34; /workspaces/marv/src/ | grep -v obj/ | grep -v Test</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-27T09-42-05-125Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-27T09-42-05-125Z" class="timestamp-link"><time datetime="2026-06-27T09:42:05.125Z" data-timestamp="2026-06-27T09:42:05.125Z">2026-06-27T09:42:05.125Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/plugins/Marv.Plugins.CannedResponses/InfoHandlers.cs:29:        await ctx.ReplyAsync($&quot;Marv IRC Bot v{MarvVersion.Current}&quot;, ct);
+/workspaces/marv/src/Marv/Program.cs:14:var rootCommand = new RootCommand(&quot;Marv IRC Bot&quot;) { configOption };
+/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs:57:        var bootstrapLogger = bootstrapLoggerFactory.CreateLogger(&quot;Marv.Bootstrap&quot;);
+/workspaces/marv/src/Marv.Core/MarvConfiguration.cs:56:    public string Nick { get; init; } = &quot;Marv&quot;;
+/workspaces/marv/src/Marv.Core/MarvConfiguration.cs:64:    public string RealName { get; init; } = &quot;Marv IRC Bot&quot;;
+/workspaces/marv/src/Marv.Core/MarvConfiguration.cs:159:    /// &quot;Marv IRC Bot {version}&quot; string. Set to empty string to suppress
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:98:        _currentNick = &quot;Marv&quot;;
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs:977:                    ?? $&quot;Marv IRC Bot {MarvVersion.Current}&quot;;
+/workspaces/marv/src/Marv.Core/Plugin/PluginMetadataScanner.cs:21:    private const string PluginInterfaceFullName = &quot;Marv.Core.Plugin.IPlugin&quot;;
+/workspaces/marv/src/Marv.Core/Plugin/PluginMetadataScanner.cs:22:    private const string MarvPluginBaseFullName = &quot;Marv.Core.Plugin.MarvPlugin&quot;;
+/workspaces/marv/src/Marv.Core/Plugin/PluginMetadataScanner.cs:23:    private const string PluginNameAttributeFullName = &quot;Marv.Core.Plugin.PluginNameAttribute&quot;;</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-42-10-408Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-42-10-408Z" class="timestamp-link"><time datetime="2026-06-27T09:42:10.408Z" data-timestamp="2026-06-27T09:42:10.408Z">2026-06-27T09:42:10.408Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me check whether <code>Sentry.Release</code> is configurable and how downstream projects currently consume Marv.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-42-10-919Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-42-10-919Z" class="timestamp-link"><time datetime="2026-06-27T09:42:10.919Z" data-timestamp="2026-06-27T09:42:10.919Z">2026-06-27T09:42:10.919Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01YV1x7ebD7i6YsBPPuck5Yz">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check which project references Sentry</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;Sentry&#34; --include=&#34;*.csproj&#34; /workspaces/marv/src/</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-27T09-42-11-008Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-27T09-42-11-008Z" class="timestamp-link"><time datetime="2026-06-27T09:42:11.008Z" data-timestamp="2026-06-27T09:42:11.008Z">2026-06-27T09:42:11.008Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/Marv/Marv.csproj:27:    &lt;PackageReference Include=&quot;Sentry.Extensions.Logging&quot; Version=&quot;6.6.0&quot; /&gt;</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-42-11-396Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-42-11-396Z" class="timestamp-link"><time datetime="2026-06-27T09:42:11.396Z" data-timestamp="2026-06-27T09:42:11.396Z">2026-06-27T09:42:11.396Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_017DsFHKBHoVSa8jNQNPrZ4X"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/MarvConfiguration.cs&#34;,
+  &#34;limit&#34;: 70
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-27T09-42-11-413Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-27T09-42-11-413Z" class="timestamp-link"><time datetime="2026-06-27T09:42:11.413Z" data-timestamp="2026-06-27T09:42:11.413Z">2026-06-27T09:42:11.413Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using System.ComponentModel;
+2	using Microsoft.Extensions.Logging;
+3	
+4	namespace Marv.Core;
+5	
+6	/// &lt;summary&gt;
+7	/// Root configuration model for the Marv bot.
+8	/// Bound from the configuration file, environment variables, and CLI arguments.
+9	/// All properties are at the top level — there is no nesting.
+10	/// &lt;/summary&gt;
+11	public record MarvConfiguration
+12	{
+13	    /// &lt;summary&gt;
+14	    /// Normalizes empty strings to null. .NET&#x27;s JSON configuration provider converts
+15	    /// explicit JSON &lt;c&gt;null&lt;/c&gt; values to empty strings; this ensures nullable string
+16	    /// properties treat both representations as &quot;not set&quot;.
+17	    /// &lt;/summary&gt;
+18	    private static string? NullIfEmpty(string? value) =&gt;
+19	        string.IsNullOrEmpty(value) ? null : value;
+20	
+21	    /// &lt;summary&gt;The IRC server hostname.&lt;/summary&gt;
+22	    [Description(&quot;IRC server hostname.&quot;)]
+23	    public string Server { get; init; } = &quot;localhost&quot;;
+24	
+25	    /// &lt;summary&gt;The IRC server port.&lt;/summary&gt;
+26	    [Description(&quot;IRC server port.&quot;)]
+27	    public int Port { get; init; } = 6667;
+28	
+29	    /// &lt;summary&gt;Whether to use TLS for the connection.&lt;/summary&gt;
+30	    [Description(&quot;Use TLS for the connection.&quot;)]
+31	    public bool UseTls { get; init; }
+32	
+33	    /// &lt;summary&gt;
+34	    /// When true, disables all TLS certificate validation. Useful for servers
+35	    /// with self-signed or expired certificates. Use with caution.
+36	    /// &lt;/summary&gt;
+37	    [Description(&quot;Skip TLS certificate validation (insecure).&quot;)]
+38	    public bool TlsSkipCertificateValidation { get; init; }
+39	
+40	    /// &lt;summary&gt;
+41	    /// Path to a PEM-encoded CA certificate file to trust in addition to the
+42	    /// system trust store. Use this to connect to servers with certificates
+43	    /// signed by a private CA.
+44	    /// &lt;/summary&gt;
+45	    [Description(&quot;Path to a PEM CA certificate file for custom trust.&quot;)]
+46	    public string? TlsCaCertFile { get =&gt; _tlsCaCertFile; init =&gt; _tlsCaCertFile = NullIfEmpty(value); }
+47	    private readonly string? _tlsCaCertFile;
+48	
+49	    /// &lt;summary&gt;Server password sent via the PASS command during registration.&lt;/summary&gt;
+50	    [Description(&quot;Server password (PASS command).&quot;)]
+51	    public string? ServerPassword { get =&gt; _serverPassword; init =&gt; _serverPassword = NullIfEmpty(value); }
+52	    private readonly string? _serverPassword;
+53	
+54	    /// &lt;summary&gt;The bot&#x27;s nickname.&lt;/summary&gt;
+55	    [Description(&quot;Bot nickname.&quot;)]
+56	    public string Nick { get; init; } = &quot;Marv&quot;;
+57	
+58	    /// &lt;summary&gt;The bot&#x27;s username (ident).&lt;/summary&gt;
+59	    [Description(&quot;Bot username (ident).&quot;)]
+60	    public string User { get; init; } = &quot;marv&quot;;
+61	
+62	    /// &lt;summary&gt;The bot&#x27;s real name (GECOS).&lt;/summary&gt;
+63	    [Description(&quot;Bot real name (GECOS).&quot;)]
+64	    public string RealName { get; init; } = &quot;Marv IRC Bot&quot;;
+65	
+66	    /// &lt;summary&gt;SASL username for authentication.&lt;/summary&gt;
+67	    [Description(&quot;SASL username for authentication.&quot;)]
+68	    public string? SaslUser { get =&gt; _saslUser; init =&gt; _saslUser = NullIfEmpty(value); }
+69	    private readonly string? _saslUser;
+70	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-42-35-867Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-42-35-867Z" class="timestamp-link"><time datetime="2026-06-27T09:42:35.867Z" data-timestamp="2026-06-27T09:42:35.867Z">2026-06-27T09:42:35.867Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Here are my investigation findings:</p>
+<hr />
+<h2>Investigation Summary</h2>
+<h3>Places where "Marv" identity is hardcoded</h3>
+<p>There are <strong>6 distinct identity touchpoints</strong>, only one of which is currently overridable:</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Location</th>
+<th>Hardcoded Value</th>
+<th>Overridable?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>IrcBot.cs:977</code></td>
+<td><code>"Marv IRC Bot {version}"</code> (CTCP VERSION)</td>
+<td>Yes — via <code>CtcpVersionResponse</code> config (CS-023)</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>InfoHandlers.cs:29</code></td>
+<td><code>"Marv IRC Bot v{version}"</code> (!version command)</td>
+<td>No</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>Program.cs:14</code></td>
+<td><code>"Marv IRC Bot"</code> (CLI description)</td>
+<td>No (cosmetic, low priority)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>Program.cs:44-50</code></td>
+<td>Sentry setup — no <code>Release</code> set</td>
+<td>No — Sentry auto-detects from assembly, which will be Marv's version</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>MarvConfiguration.cs:64</code></td>
+<td><code>RealName = "Marv IRC Bot"</code> (IRC GECOS default)</td>
+<td>Yes — via config, but default is still "Marv"</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>MarvVersion.cs:18</code></td>
+<td>Reads version from <code>Marv.Core</code> assembly</td>
+<td>No — downstream projects get Marv.Core's version, not their own</td>
+</tr>
+</tbody>
+</table>
+<h3>Root cause</h3>
+<p>There's no unified identity concept. The bot name, version string, and product identity are scattered across hardcoded strings and assembly metadata. A downstream project that references <code>Marv.Core</code> as a NuGet package and provides its own host app + plugins has no way to:</p>
+<ol>
+<li>Set its own product name (affects CTCP, !version, Sentry, IRC GECOS)</li>
+<li>Set its own version (affects Sentry release tracking, CTCP, !version)</li>
+<li>Do so from a single place rather than overriding each individually</li>
+</ol>
+<h3>Observations</h3>
+<ul>
+<li><code>CtcpVersionResponse</code> (CS-023) is a point override — it doesn't solve the systemic problem</li>
+<li><code>MarvVersion.Current</code> always reads from <code>Marv.Core</code>'s assembly, so downstream projects can't provide their own version through it</li>
+<li>Sentry's <code>Release</code> defaults to the entry assembly's informational version, but that might still say "Marv" in the product name context</li>
+<li>The CannedResponses plugin hardcodes "Marv IRC Bot" with no way to customise it</li>
+</ul>
+<h3>Fix complexity: <strong>Medium</strong></h3>
+<p>A clean fix would introduce a small identity model (bot name + version, maybe source URL) that:
+- Has sensible defaults (read from the entry assembly or fall back to Marv.Core)
+- Can be overridden via configuration
+- Is registered in DI so plugins can access it
+- Replaces all the scattered hardcoded strings
+- Gets wired into Sentry's <code>Release</code> property</p>
+<p>Existing tests cover CTCP VERSION (via CS-023) but not the !version command or Sentry integration.</p>
+<hr />
+<p>Based on this, I'd suggest <strong>Spec</strong> — there are enough design decisions (where does identity live, how do downstream projects set it, should <code>CtcpVersionResponse</code> be subsumed) that it's worth writing up before implementing.</p>
+<p>What would you like to do?</p>
+<ol>
+<li><strong>Spec</strong> — create a change specification</li>
+<li><strong>Implement</strong> — go straight to implementation</li>
+<li><strong>Reject</strong> — decline</li>
+<li><strong>Skip</strong> — done with this issue</li>
+</ol></div></div></div>
+<div class="message user" id="msg-2026-06-27T09-43-20-238Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-27T09-43-20-238Z" class="timestamp-link"><time datetime="2026-06-27T09:43:20.238Z" data-timestamp="2026-06-27T09:43:20.238Z">2026-06-27T09:43:20.238Z</time></a></div><div class="message-content">
+<div class="user-content"><p>1</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-43-26-181Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-43-26-181Z" class="timestamp-link"><time datetime="2026-06-27T09:43:26.181Z" data-timestamp="2026-06-27T09:43:26.181Z">2026-06-27T09:43:26.181Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Let me draft the change specification. First, let me check the next CS number and review CS-023 since it'll be partially subsumed.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-43-26-515Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-43-26-515Z" class="timestamp-link"><time datetime="2026-06-27T09:43:26.515Z" data-timestamp="2026-06-27T09:43:26.515Z">2026-06-27T09:43:26.515Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01P6bxATzE8igyc9uE436MPQ"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/023-ctcp-version-override.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-27T09-43-26-532Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-27T09-43-26-532Z" class="timestamp-link"><time datetime="2026-06-27T09:43:26.532Z" data-timestamp="2026-06-27T09:43:26.532Z">2026-06-27T09:43:26.532Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# CS-023: CTCP VERSION Response Override — COMPLETED
+2	
+3	**Source:** Downstream feature request
+4	**Scope:** Core
+5	**Complexity:** Small
+6	**Breaking changes:** None
+7	**Status:** Completed
+8	
+9	---
+10	
+11	## Problem
+12	
+13	The bot responds to CTCP VERSION queries with a hardcoded string:
+14	
+15	```csharp
+16	$&quot;\x01VERSION Marv IRC Bot {MarvVersion.Current}\x01&quot;
+17	```
+18	
+19	(`IrcBot.cs`, line ~904)
+20	
+21	Some operators want to customize this — to include plugin names, the host
+22	OS, or to obscure the bot&#x27;s identity for security. There is currently no
+23	way to change this without modifying the bot&#x27;s source code.
+24	
+25	## Approach options considered
+26	
+27	| Approach | Pros | Cons |
+28	|---|---|---|
+29	| **A. Configuration property** | Simple, discoverable, no code changes at runtime | Static — can&#x27;t include dynamic info (plugin list, uptime) |
+30	| **B. Writable property on IBot** | Plugins can set it dynamically | Unclear ownership if multiple plugins set it; still just a string |
+31	| **C. Subclass IrcBot** | Maximum flexibility | Defeats the plugin model; IrcBot is internal |
+32	| **D. Configuration + format tokens** | Config-driven but with dynamic placeholders | Custom token system adds complexity |
+33	| **E. Event/delegate on IBot** | Plugin provides a callback; full dynamic control | Clean ownership, composable, maximum flexibility |
+34	
+35	**Recommendation: Configuration property (A) only.**
+36	
+37	A simple `CtcpVersionResponse` config property covers the common case
+38	(operators who want a static override or want to suppress the response).
+39	For plugins that need fully dynamic VERSION responses, the existing
+40	`[OnEvent]` handler with `CtcpEvent` already provides the mechanism —
+41	the plugin sets an empty config value to suppress the default and handles
+42	the CTCP VERSION event itself.
+43	
+44	## Changes
+45	
+46	### 1. Add `CtcpVersionResponse` to `MarvConfiguration`
+47	
+48	```csharp
+49	/// &lt;summary&gt;
+50	/// Custom response to CTCP VERSION queries. If null, uses the default
+51	/// &quot;Marv IRC Bot {version}&quot; string. Set to empty string to suppress
+52	/// VERSION responses entirely.
+53	/// &lt;/summary&gt;
+54	public string? CtcpVersionResponse { get; set; }
+55	```
+56	
+57	### 2. Update `HandleCtcp` in `IrcBot`
+58	
+59	```csharp
+60	case &quot;VERSION&quot;:
+61	    var versionResponse = _config.CtcpVersionResponse
+62	        ?? $&quot;Marv IRC Bot {MarvVersion.Current}&quot;;
+63	
+64	    if (!string.IsNullOrEmpty(versionResponse))
+65	    {
+66	        await SendRawAsync(new IrcMessage(&quot;NOTICE&quot;, [sender.Nick,
+67	            $&quot;\x01VERSION {versionResponse}\x01&quot;]), ct);
+68	    }
+69	    break;
+70	```
+71	
+72	### 3. Update PLUGIN_API.md
+73	
+74	Document the `CtcpVersionResponse` configuration property. Add a note
+75	explaining that plugins needing dynamic VERSION responses can set
+76	`CtcpVersionResponse` to an empty string to suppress the built-in
+77	response, then handle `CtcpEvent` via `[OnEvent]` to send their own.
+78	
+79	## Design decisions
+80	
+81	**Why config-only, no delegate?** A delegate property on `IBot` would be
+82	the only such pattern in the entire API — everything else uses either
+83	configuration or handler attributes. The existing `[OnEvent]` +
+84	`CtcpEvent` handler already provides the dynamic escape hatch without
+85	introducing a new API pattern.
+86	
+87	**Why allow suppressing the response?** Some operators don&#x27;t want to
+88	reveal bot software information. Setting an empty string in config
+89	suppresses the NOTICE entirely. This also enables the plugin takeover
+90	pattern: suppress the default, handle the event yourself.
+91	
+92	## Testing
+93	
+94	- **Unit test:** Default behavior — verify VERSION response contains
+95	  `MarvVersion.Current`.
+96	- **Unit test:** Set config value — verify it&#x27;s used instead of the default.
+97	- **Unit test:** Config set to empty string — verify no NOTICE is sent.
+98	
+99	## Impact
+100	
+101	- **Configuration:** One new optional property in `MarvConfiguration`.
+102	- **API surface:** No changes to `IBot`.
+103	- **Plugin DX:** Simple config override for static strings; documented
+104	  escape hatch via `[OnEvent]` + `CtcpEvent` for dynamic responses.
+105	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-43-29-744Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-43-29-744Z" class="timestamp-link"><time datetime="2026-06-27T09:43:29.744Z" data-timestamp="2026-06-27T09:43:29.744Z">2026-06-27T09:43:29.744Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Good context. Now let me write the spec.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-44-11-128Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-44-11-128Z" class="timestamp-link"><time datetime="2026-06-27T09:44:11.128Z" data-timestamp="2026-06-27T09:44:11.128Z">2026-06-27T09:44:11.128Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01GpP129MPQhssuxanpCFFF3">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">036-bot-identity.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/036-bot-identity.md</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content"># CS-036: Bot Identity
+
+**Source:** GitHub issue #12
+**Scope:** Core / Host
+**Complexity:** Medium
+**Breaking changes:** None
+**Status:** Pending
+
+---
+
+## Problem
+
+When Marv is used as the foundation for a downstream project (e.g. an
+&#34;IdleRPG&#34; bot), the bot identifies itself as &#34;Marv&#34; everywhere:
+
+- Sentry error reports use Marv&#39;s version number, not the downstream
+  project&#39;s.
+- The CTCP VERSION response defaults to &#34;Marv IRC Bot {version}&#34;.
+- The `!version` command in CannedResponses is hardcoded to
+  &#34;Marv IRC Bot v{version}&#34;.
+- The IRC GECOS (real name) defaults to &#34;Marv IRC Bot&#34;.
+- `MarvVersion.Current` always reads from the `Marv.Core` assembly,
+  so downstream projects that reference Marv.Core as a NuGet package
+  get Marv&#39;s version, not their own.
+
+CS-023 partially addressed this by adding a `CtcpVersionResponse`
+configuration override, but that&#39;s a point fix for one touchpoint.
+There&#39;s no unified identity concept that downstream distributions can
+use to take ownership of the bot&#39;s branding.
+
+## Changes
+
+### 1. Add `BotIdentity` record to `Marv.Core`
+
+A simple, immutable identity model:
+
+```csharp
+/// &lt;summary&gt;
+/// Identifies the bot product for display, telemetry, and protocol responses.
+/// &lt;/summary&gt;
+public record BotIdentity(string Name, string Version, string? SourceUrl = null)
+{
+    /// &lt;summary&gt;
+    /// Combined name and version string (e.g. &#34;Marv IRC Bot 0.8.0&#34;).
+    /// &lt;/summary&gt;
+    public string FullIdentity =&gt; $&#34;{Name} {Version}&#34;;
+}
+```
+
+### 2. Add identity configuration properties to `MarvConfiguration`
+
+```csharp
+/// &lt;summary&gt;
+/// The bot&#39;s product name, used in CTCP VERSION, the !version command,
+/// Sentry reports, and anywhere else the bot identifies itself.
+/// Defaults to &#34;Marv IRC Bot&#34;.
+/// &lt;/summary&gt;
+[Description(&#34;Bot product name for identification.&#34;)]
+public string BotName { get; init; } = &#34;Marv IRC Bot&#34;;
+
+/// &lt;summary&gt;
+/// The bot&#39;s product version. When null, auto-detected from the entry
+/// assembly&#39;s informational version. Set this when running a downstream
+/// distribution that packages Marv as a dependency.
+/// &lt;/summary&gt;
+[Description(&#34;Bot product version (null = auto-detect from entry assembly).&#34;)]
+public string? BotVersion { get; init; }
+```
+
+### 3. Register `BotIdentity` in DI
+
+In `MarvServiceExtensions.AddMarv()`, construct and register a
+singleton `BotIdentity` from configuration:
+
+```csharp
+var identity = new BotIdentity(
+    config.BotName,
+    config.BotVersion ?? EntryAssemblyVersion() ?? MarvVersion.Current,
+    config.SourceUrl);
+services.AddSingleton(identity);
+```
+
+The version resolution order is:
+1. Explicit `BotVersion` config value (highest priority).
+2. Entry assembly&#39;s informational version (catches downstream hosts
+   that set their own version in their `.csproj`).
+3. `MarvVersion.Current` (fallback — the Marv.Core assembly version).
+
+Add a private helper to read the entry assembly version:
+
+```csharp
+private static string? EntryAssemblyVersion()
+{
+    var asm = Assembly.GetEntryAssembly();
+    if (asm is null) return null;
+    var info = asm.GetCustomAttribute&lt;AssemblyInformationalVersionAttribute&gt;()
+        ?.InformationalVersion;
+    if (info is null) return null;
+    var plus = info.IndexOf(&#39;+&#39;);
+    return plus &gt;= 0 ? info[..plus] : info;
+}
+```
+
+### 4. Update CTCP VERSION handling in `IrcBot`
+
+Replace the hardcoded fallback with `BotIdentity`:
+
+```csharp
+case &#34;VERSION&#34;:
+    var versionResponse = _config.CtcpVersionResponse
+        ?? _identity.FullIdentity;
+    // ...
+```
+
+`CtcpVersionResponse` remains as a point override for operators who
+want a completely custom string or want to suppress the response.
+Its existing behaviour is unchanged.
+
+### 5. Update `InfoHandlers` in CannedResponses
+
+Inject `BotIdentity` and use it instead of the hardcoded string:
+
+```csharp
+public InfoHandlers(IBot bot, BotIdentity identity)
+{
+    _bot = bot;
+    _identity = identity;
+}
+
+[OnCommand(&#34;version&#34;)]
+public async Task HandleVersion(CommandContext ctx, CancellationToken ct)
+{
+    await ctx.ReplyAsync($&#34;{_identity.Name} v{_identity.Version}&#34;, ct);
+}
+```
+
+### 6. Wire `BotIdentity` into Sentry in `Program.cs`
+
+After building the host, resolve `BotIdentity` and set the Sentry
+release. Since Sentry is configured during host building (before
+services are available), use the same config-reading approach:
+
+```csharp
+builder.Logging.AddSentry(o =&gt;
+{
+    o.Dsn = sentryDsn;
+    o.Release = $&#34;{config.BotName}@{config.BotVersion ?? MarvVersion.Current}&#34;;
+    o.MinimumEventLevel = LogLevel.Error;
+    o.MinimumBreadcrumbLevel = LogLevel.Warning;
+    o.TracesSampleRate = 0;
+});
+```
+
+This requires reading `MarvConfiguration` earlier in `Program.cs`,
+which is straightforward since the configuration sources are already
+registered at that point.
+
+### 7. Update `MarvVersion` documentation
+
+Add an XML doc note to `MarvVersion.Current` clarifying that it
+returns the `Marv.Core` assembly version specifically, and that
+`BotIdentity` should be preferred for display purposes.
+
+### 8. Update `docs/PLUGIN_API.md`
+
+Document:
+- The `BotIdentity` record and how to inject it.
+- The `BotName` and `BotVersion` configuration properties.
+- That `CtcpVersionResponse` still works as a CTCP-specific override.
+- How downstream distributions should set their identity (config or
+  entry assembly version).
+
+## Design decisions
+
+**Why a dedicated `BotIdentity` type instead of just config properties?**
+A typed record in DI gives plugins a clean injection point without
+coupling to `MarvConfiguration`. It also provides `FullIdentity` as a
+canonical formatted string, preventing each consumer from assembling
+name + version differently.
+
+**Why keep `CtcpVersionResponse`?** It serves a different purpose —
+it&#39;s a protocol-level override that can suppress the response entirely
+(empty string) or provide a string unrelated to the bot&#39;s actual
+identity. `BotIdentity` is the product identity; `CtcpVersionResponse`
+is what you want the IRC network to see, which may differ.
+
+**Why auto-detect from the entry assembly?** Downstream projects that
+create their own host application (referencing Marv.Core as a NuGet
+package) naturally have their own assembly version in their `.csproj`.
+Auto-detecting from the entry assembly means they get correct identity
+without any configuration, while still allowing explicit override.
+
+**Why not a subclassable host app?** The issue mentions this as a
+possibility, but it would be a much larger change with significant API
+surface implications. Configuration-based identity covers the concrete
+use cases (Sentry version, CTCP, display strings) without requiring
+downstream projects to subclass anything.
+
+## Testing
+
+- **Unit test:** Default identity — `BotIdentity` uses &#34;Marv IRC Bot&#34;
+  and `MarvVersion.Current` when no config overrides are set.
+- **Unit test:** Config override — setting `BotName` and `BotVersion`
+  in config produces a `BotIdentity` with those values.
+- **Unit test:** CTCP VERSION uses `BotIdentity.FullIdentity` as
+  default, but `CtcpVersionResponse` still takes precedence when set.
+- **Unit test:** `InfoHandlers.HandleVersion` uses injected
+  `BotIdentity` values.
+- **Unit test:** Entry assembly version detection fallback.
+
+## Impact
+
+- **Configuration:** Two new optional properties (`BotName`,
+  `BotVersion`) in `MarvConfiguration`. No breaking changes — defaults
+  match current behaviour.
+- **DI:** One new singleton registration (`BotIdentity`).
+- **Plugin API:** `BotIdentity` is a new injectable type. Existing
+  plugins are unaffected. `CtcpVersionResponse` continues to work.
+- **Risk:** Low. All changes are additive. Existing behaviour is
+  preserved when no new config properties are set.
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-27T09-44-17-067Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-27T09-44-17-067Z" class="timestamp-link"><time datetime="2026-06-27T09:44:17.067Z" data-timestamp="2026-06-27T09:44:17.067Z">2026-06-27T09:44:17.067Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>File created successfully at: /workspaces/marv/docs/change_specs/036-bot-identity.md (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-44-20-453Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-44-20-453Z" class="timestamp-link"><time datetime="2026-06-27T09:44:20.453Z" data-timestamp="2026-06-27T09:44:20.453Z">2026-06-27T09:44:20.453Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now update the index.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-44-23-326Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-44-23-326Z" class="timestamp-link"><time datetime="2026-06-27T09:44:23.326Z" data-timestamp="2026-06-27T09:44:23.326Z">2026-06-27T09:44:23.326Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_018JcG5wfbNmfpzkvjCT6nvV">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">README.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/README.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">| 35 | [Wildcard Plugin Loading](035-wildcard-plugin-loading.md) | Core / Host | Medium | None | **Done** |
+
+Specs 1-5, 9-10 are code changes.</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">| 35 | [Wildcard Plugin Loading](035-wildcard-plugin-loading.md) | Core / Host | Medium | None | **Done** |
+| 36 | [Bot Identity](036-bot-identity.md) | Core / Host | Medium | None | **Pending** |
+
+Specs 1-5, 9-10 are code changes.</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-27T09-44-23-373Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-27T09-44-23-373Z" class="timestamp-link"><time datetime="2026-06-27T09:44:23.373Z" data-timestamp="2026-06-27T09:44:23.373Z">2026-06-27T09:44:23.373Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/README.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-44-29-592Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-44-29-592Z" class="timestamp-link"><time datetime="2026-06-27T09:44:29.592Z" data-timestamp="2026-06-27T09:44:29.592Z">2026-06-27T09:44:29.592Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me commit and post to GitHub.</p></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T09-44-32-437Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T09-44-32-437Z" class="timestamp-link"><time datetime="2026-06-27T09:44:32.437Z" data-timestamp="2026-06-27T09:44:32.437Z">2026-06-27T09:44:32.437Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01JsyCbFHZqADn63FFURMQxt">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit the new change spec</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add docs/change_specs/036-bot-identity.md docs/change_specs/README.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Add CS-036: Bot Identity change specification
+
+Introduces a unified BotIdentity model so downstream distributions can
+take ownership of the bot&#39;s name and version across CTCP VERSION, the
+!version command, Sentry reports, and IRC GECOS.
+
+Source: GitHub issue #12
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-001.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<span class="current">2</span>
+<span class="disabled">Next &rarr;</span>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>
