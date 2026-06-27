@@ -21,10 +21,15 @@ and extracting overrides via `GetOverrides` — when it should only do the forme
 
 ### 1. Preserve the default configuration stack
 
-Stop calling `builder.Configuration.Sources.Clear()`. Instead, walk the existing
-`IConfigurationBuilder.Sources` and replace any `JsonConfigurationSource`
-instances with JSON5 equivalents so that `appsettings.json` gains JSON5 comment
-support for free.
+Stop calling `builder.Configuration.Sources.Clear()`. The default .NET JSON
+configuration provider already supports comments and trailing commas, so no
+source replacement is needed.
+
+> **Note:** This step originally replaced `JsonConfigurationSource` instances
+> with JSON5 equivalents. That was reverted when we discovered the built-in
+> `Microsoft.Extensions.Configuration.Json` provider supports comments and
+> trailing commas natively (via `System.Text.Json` with
+> `JsonCommentHandling.Skip` and `AllowTrailingCommas = true`).
 
 ### 2. Add `marv.json` as a higher-priority source
 

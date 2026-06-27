@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Removed `Json5.Configuration` dependency. The built-in .NET JSON configuration
+  provider natively supports comments and trailing commas, making the third-party
+  JSON5 parser unnecessary. JSON config files (including `marv.json`) continue to
+  support `//` and `/* */` comments and trailing commas. The `.json5` file
+  extension is no longer supported.
+
 ## [0.8.0] - 2026-06-24
 
 ### Added

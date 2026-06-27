@@ -1,10 +1,10 @@
-# CS-019: JSON5 Configuration Parser — COMPLETED
+# CS-019: JSON5 Configuration Parser — REVERTED
 
 **Source:** `TODO.md` item 9
 **Scope:** Marv (host application)
 **Complexity:** Trivial
 **Breaking changes:** None
-**Status:** Completed
+**Status:** Reverted
 
 ---
 

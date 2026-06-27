@@ -1,16 +1,14 @@
 using System.CommandLine;
-using Json5;
 using Marv;
 using Marv.Core;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensions.Logging;
 
 var configOption = new Option<string?>("--config", "-c")
 {
-    Description = "Path to the configuration file. Format is determined by extension (.json, .json5, .yaml/.yml, .xml)."
+    Description = "Path to the configuration file. Format is determined by extension (.json, .yaml/.yml, .xml)."
 };
 
 var rootCommand = new RootCommand("Marv IRC Bot") { configOption };
@@ -22,10 +20,6 @@ rootCommand.SetAction(async (result, ct) =>
     var configPath = result.GetValue(configOption);
 
     var builder = Host.CreateApplicationBuilder();
-
-    // Replace default JSON sources with JSON5 equivalents so appsettings.json
-    // files gain JSON5 comment support
-    ReplaceJsonWithJson5(builder.Configuration);
 
     // Add marv.json (or user-specified config) on top of the default stack
     var effectivePath = configPath ?? "marv.json";
@@ -70,31 +64,8 @@ var parseResult = rootCommand.Parse(args);
 await parseResult.InvokeAsync();
 
 /// <summary>
-/// Walks the configuration sources and replaces any <see cref="JsonConfigurationSource"/>
-/// instances with <see cref="Json5ConfigurationSource"/> equivalents, preserving
-/// path, optional, and reloadOnChange settings.
-/// </summary>
-static void ReplaceJsonWithJson5(IConfigurationBuilder config)
-{
-    var sources = config.Sources;
-    for (var i = 0; i < sources.Count; i++)
-    {
-        if (sources[i] is JsonConfigurationSource jsonSource)
-        {
-            sources[i] = new Json5ConfigurationSource
-            {
-                Path = jsonSource.Path!,
-                Optional = jsonSource.Optional,
-                ReloadOnChange = jsonSource.ReloadOnChange,
-                FileProvider = jsonSource.FileProvider,
-            };
-        }
-    }
-}
-
-/// <summary>
 /// Adds a configuration file source based on the file extension.
-/// Supports .json, .json5, .yaml/.yml, and .xml formats.
+/// Supports .json, .yaml/.yml, and .xml formats.
 /// </summary>
 static void AddConfigFile(IConfigurationBuilder config, string path, bool required)
 {
@@ -102,8 +73,8 @@ static void AddConfigFile(IConfigurationBuilder config, string path, bool requir
 
     switch (extension)
     {
-        case ".json" or ".json5":
-            config.AddJson5File(path, optional: !required, reloadOnChange: true);
+        case ".json":
+            config.AddJsonFile(path, optional: !required, reloadOnChange: true);
             break;
         case ".yaml" or ".yml":
             config.AddYamlFile(path, optional: !required, reloadOnChange: true);
@@ -114,6 +85,6 @@ static void AddConfigFile(IConfigurationBuilder config, string path, bool requir
         default:
             throw new InvalidOperationException(
                 $"Unsupported configuration file format: '{extension}'. " +
-                "Supported formats: .json, .json5, .yaml, .yml, .xml");
+                "Supported formats: .json, .yaml, .yml, .xml");
     }
 }
