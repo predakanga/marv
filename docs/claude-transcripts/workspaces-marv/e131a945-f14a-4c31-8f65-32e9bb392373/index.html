@@ -163,7 +163,7 @@ details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom
 <a href="page-001.html">Next &rarr;</a>
 </div>
 
-        <p style="color: var(--text-muted); margin-bottom: 24px;">3 prompts · 71 messages · 26 tool calls · 0 commits · 1 pages</p>
+        <p style="color: var(--text-muted); margin-bottom: 24px;">4 prompts · 86 messages · 31 tool calls · 1 commits · 1 pages</p>
         
 <div class="index-item"><a href="page-001.html#msg-2026-06-27T08-22-16-869Z"><div class="index-item-header"><span class="index-item-number">#1</span><time datetime="2026-06-27T08:22:16.869Z" data-timestamp="2026-06-27T08:22:16.869Z">2026-06-27T08:22:16.869Z</time></div><div class="index-item-content"><p>It looks like Microsoft.Extension.Configuration's default Json provider might support comments and trailing commas, can you confirm that?</p></div></a></div>
 <div class="index-item"><a href="page-001.html#msg-2026-06-27T08-22-51-559Z"><div class="index-item-header"><span class="index-item-number">#2</span><time datetime="2026-06-27T08:22:51.559Z" data-timestamp="2026-06-27T08:22:51.559Z">2026-06-27T08:22:51.559Z</time></div><div class="index-item-content"><p>I'd like you to write and run a script to make sure that's true for the version that we're using.</p></div></a><div class="index-item-stats"><span>3 bash</span>
@@ -177,6 +177,17 @@ details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom
 4. Update CS-019 and CS-027 to note they've been partially reverted
 5. Update the change specs index</p>
 <p>Let me make the changes.</p></div></div><button class="expand-btn">Show more</button></div></div>
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>Done. Here's what changed:</p>
+<ul>
+<li><strong>Removed</strong> <code>Json5.Configuration</code> package from <code>Marv.csproj</code></li>
+<li><strong>Simplified</strong> <code>Program.cs</code> — removed the <code>ReplaceJsonWithJson5</code> method, switched <code>AddConfigFile</code> back to <code>AddJsonFile</code>, dropped <code>.json5</code> extension support</li>
+<li><strong>Marked CS-019</strong> as Reverted (in both the spec and the index)</li>
+<li><strong>Updated CS-027</strong> to note the JSON source replacement step is no longer needed</li>
+<li><strong>Added</strong> changelog entry under <code>[Unreleased]</code></li>
+</ul>
+<p>The <code>marv.example.json</code> with its comments and trailing commas will continue to work — the built-in provider handles them natively.</p></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div><div class="index-commit"><div class="index-commit-header"><span class="index-commit-hash">ebf5639</span><time datetime="2026-06-27T08:33:04.709Z" data-timestamp="2026-06-27T08:33:04.709Z">2026-06-27T08:33:04.709Z</time></div><div class="index-commit-msg">Remove Json5.Configuration dependency — built-in JSON provider supports comments</div></div>
+<div class="index-item"><a href="page-001.html#msg-2026-06-27T09-00-45-744Z"><div class="index-item-header"><span class="index-item-number">#4</span><time datetime="2026-06-27T09:00:45.744Z" data-timestamp="2026-06-27T09:00:45.744Z">2026-06-27T09:00:45.744Z</time></div><div class="index-item-content"><p>Oh, just to be extra certain could you add a unit test to assert that the config supports both comments and trailing commas?</p></div></a><div class="index-item-stats"><span>2 bash · 2 read · 1 write</span>
 </div></div>
         
 
