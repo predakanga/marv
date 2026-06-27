@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 3</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 3/3</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-002.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<span class="current">3</span>
+<span class="disabled">Next &rarr;</span>
+</div>
+
+        
+<div class="message user" id="msg-2026-06-27T11-48-45-260Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-06-27T11-48-45-260Z" class="timestamp-link"><time datetime="2026-06-27T11:48:45.260Z" data-timestamp="2026-06-27T11:48:45.260Z">2026-06-27T11:48:45.260Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Please update CS-036 with those changes.</p>
+<ol>
+<li>Drop the override</li>
+<li>Sounds good</li>
+<li>Yep, inlining it is what I was thinking. We're still pre-1.0, so the breaking change isn't a killer.</li>
+</ol></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T11-48-50-112Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T11-48-50-112Z" class="timestamp-link"><time datetime="2026-06-27T11:48:50.112Z" data-timestamp="2026-06-27T11:48:50.112Z">2026-06-27T11:48:50.112Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01Pr1RcEogSfXt8Xx7XkUXxo"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/036-bot-identity.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-06-27T11-48-50-143Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-27T11-48-50-143Z" class="timestamp-link"><time datetime="2026-06-27T11:48:50.143Z" data-timestamp="2026-06-27T11:48:50.143Z">2026-06-27T11:48:50.143Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# CS-036: Bot Identity
+2	
+3	**Source:** GitHub issue #12
+4	**Scope:** Core / Host
+5	**Complexity:** Medium
+6	**Breaking changes:** None
+7	**Status:** Pending
+8	
+9	---
+10	
+11	## Problem
+12	
+13	When Marv is used as the foundation for a downstream project (e.g. an
+14	&quot;IdleRPG&quot; bot), the bot identifies itself as &quot;Marv&quot; everywhere:
+15	
+16	- Sentry error reports use Marv&#x27;s version number, not the downstream
+17	  project&#x27;s.
+18	- The CTCP VERSION response defaults to &quot;Marv IRC Bot {version}&quot;.
+19	- The `!version` command in CannedResponses is hardcoded to
+20	  &quot;Marv IRC Bot v{version}&quot;.
+21	- The IRC GECOS (real name) defaults to &quot;Marv IRC Bot&quot;.
+22	- `MarvVersion.Current` always reads from the `Marv.Core` assembly,
+23	  so downstream projects that reference Marv.Core as a NuGet package
+24	  get Marv&#x27;s version, not their own.
+25	
+26	CS-023 partially addressed this by adding a `CtcpVersionResponse`
+27	configuration override, but that&#x27;s a point fix for one touchpoint.
+28	There&#x27;s no unified identity concept that downstream distributions can
+29	use to take ownership of the bot&#x27;s branding.
+30	
+31	## Changes
+32	
+33	### 1. Add `BotIdentity` record to `Marv.Core`
+34	
+35	A simple, immutable identity model:
+36	
+37	```csharp
+38	/// &lt;summary&gt;
+39	/// Identifies the bot product for display, telemetry, and protocol responses.
+40	/// &lt;/summary&gt;
+41	public record BotIdentity(string Name, string Version, string? SourceUrl = null)
+42	{
+43	    /// &lt;summary&gt;
+44	    /// Combined name and version string (e.g. &quot;Marv IRC Bot 0.8.0&quot;).
+45	    /// &lt;/summary&gt;
+46	    public string FullIdentity =&gt; $&quot;{Name} {Version}&quot;;
+47	}
+48	```
+49	
+50	### 2. Add identity configuration properties to `MarvConfiguration`
+51	
+52	```csharp
+53	/// &lt;summary&gt;
+54	/// The bot&#x27;s product name, used in CTCP VERSION, the !version command,
+55	/// Sentry reports, and anywhere else the bot identifies itself.
+56	/// Defaults to &quot;Marv IRC Bot&quot;.
+57	/// &lt;/summary&gt;
+58	[Description(&quot;Bot product name for identification.&quot;)]
+59	public string BotName { get; init; } = &quot;Marv IRC Bot&quot;;
+60	
+61	/// &lt;summary&gt;
+62	/// The bot&#x27;s product version. When null, auto-detected from the entry
+63	/// assembly&#x27;s informational version. Set this when running a downstream
+64	/// distribution that packages Marv as a dependency.
+65	/// &lt;/summary&gt;
+66	[Description(&quot;Bot product version (null = auto-detect from entry assembly).&quot;)]
+67	public string? BotVersion { get; init; }
+68	```
+69	
+70	### 3. Register `BotIdentity` in DI
+71	
+72	In `MarvServiceExtensions.AddMarv()`, construct and register a
+73	singleton `BotIdentity` from configuration:
+74	
+75	```csharp
+76	var identity = new BotIdentity(
+77	    config.BotName,
+78	    config.BotVersion ?? EntryAssemblyVersion() ?? MarvVersion.Current,
+79	    config.SourceUrl);
+80	services.AddSingleton(identity);
+81	```
+82	
+83	The version resolution order is:
+84	1. Explicit `BotVersion` config value (highest priority).
+85	2. Entry assembly&#x27;s informational version (catches downstream hosts
+86	   that set their own version in their `.csproj`).
+87	3. `MarvVersion.Current` (fallback — the Marv.Core assembly version).
+88	
+89	Add a private helper to read the entry assembly version:
+90	
+91	```csharp
+92	private static string? EntryAssemblyVersion()
+93	{
+94	    var asm = Assembly.GetEntryAssembly();
+95	    if (asm is null) return null;
+96	    var info = asm.GetCustomAttribute&lt;AssemblyInformationalVersionAttribute&gt;()
+97	        ?.InformationalVersion;
+98	    if (info is null) return null;
+99	    var plus = info.IndexOf(&#x27;+&#x27;);
+100	    return plus &gt;= 0 ? info[..plus] : info;
+101	}
+102	```
+103	
+104	### 4. Update CTCP VERSION handling in `IrcBot`
+105	
+106	Replace the hardcoded fallback with `BotIdentity`:
+107	
+108	```csharp
+109	case &quot;VERSION&quot;:
+110	    var versionResponse = _config.CtcpVersionResponse
+111	        ?? _identity.FullIdentity;
+112	    // ...
+113	```
+114	
+115	`CtcpVersionResponse` remains as a point override for operators who
+116	want a completely custom string or want to suppress the response.
+117	Its existing behaviour is unchanged.
+118	
+119	### 5. Update `InfoHandlers` in CannedResponses
+120	
+121	Inject `BotIdentity` and use it instead of the hardcoded string:
+122	
+123	```csharp
+124	public InfoHandlers(IBot bot, BotIdentity identity)
+125	{
+126	    _bot = bot;
+127	    _identity = identity;
+128	}
+129	
+130	[OnCommand(&quot;version&quot;)]
+131	public async Task HandleVersion(CommandContext ctx, CancellationToken ct)
+132	{
+133	    await ctx.ReplyAsync($&quot;{_identity.Name} v{_identity.Version}&quot;, ct);
+134	}
+135	```
+136	
+137	### 6. Wire `BotIdentity` into Sentry in `Program.cs`
+138	
+139	After building the host, resolve `BotIdentity` and set the Sentry
+140	release. Since Sentry is configured during host building (before
+141	services are available), use the same config-reading approach:
+142	
+143	```csharp
+144	builder.Logging.AddSentry(o =&gt;
+145	{
+146	    o.Dsn = sentryDsn;
+147	    o.Release = $&quot;{config.BotName}@{config.BotVersion ?? MarvVersion.Current}&quot;;
+148	    o.MinimumEventLevel = LogLevel.Error;
+149	    o.MinimumBreadcrumbLevel = LogLevel.Warning;
+150	    o.TracesSampleRate = 0;
+151	});
+152	```
+153	
+154	This requires reading `MarvConfiguration` earlier in `Program.cs`,
+155	which is straightforward since the configuration sources are already
+156	registered at that point.
+157	
+158	### 7. Update `MarvVersion` documentation
+159	
+160	Add an XML doc note to `MarvVersion.Current` clarifying that it
+161	returns the `Marv.Core` assembly version specifically, and that
+162	`BotIdentity` should be preferred for display purposes.
+163	
+164	### 8. Update `docs/PLUGIN_API.md`
+165	
+166	Document:
+167	- The `BotIdentity` record and how to inject it.
+168	- The `BotName` and `BotVersion` configuration properties.
+169	- That `CtcpVersionResponse` still works as a CTCP-specific override.
+170	- How downstream distributions should set their identity (config or
+171	  entry assembly version).
+172	
+173	## Design decisions
+174	
+175	**Why a dedicated `BotIdentity` type instead of just config properties?**
+176	A typed record in DI gives plugins a clean injection point without
+177	coupling to `MarvConfiguration`. It also provides `FullIdentity` as a
+178	canonical formatted string, preventing each consumer from assembling
+179	name + version differently.
+180	
+181	**Why keep `CtcpVersionResponse`?** It serves a different purpose —
+182	it&#x27;s a protocol-level override that can suppress the response entirely
+183	(empty string) or provide a string unrelated to the bot&#x27;s actual
+184	identity. `BotIdentity` is the product identity; `CtcpVersionResponse`
+185	is what you want the IRC network to see, which may differ.
+186	
+187	**Why auto-detect from the entry assembly?** Downstream projects that
+188	create their own host application (referencing Marv.Core as a NuGet
+189	package) naturally have their own assembly version in their `.csproj`.
+190	Auto-detecting from the entry assembly means they get correct identity
+191	without any configuration, while still allowing explicit override.
+192	
+193	**Why not a subclassable host app?** The issue mentions this as a
+194	possibility, but it would be a much larger change with significant API
+195	surface implications. Configuration-based identity covers the concrete
+196	use cases (Sentry version, CTCP, display strings) without requiring
+197	downstream projects to subclass anything.
+198	
+199	## Testing
+200	
+201	- **Unit test:** Default identity — `BotIdentity` uses &quot;Marv IRC Bot&quot;
+202	  and `MarvVersion.Current` when no config overrides are set.
+203	- **Unit test:** Config override — setting `BotName` and `BotVersion`
+204	  in config produces a `BotIdentity` with those values.
+205	- **Unit test:** CTCP VERSION uses `BotIdentity.FullIdentity` as
+206	  default, but `CtcpVersionResponse` still takes precedence when set.
+207	- **Unit test:** `InfoHandlers.HandleVersion` uses injected
+208	  `BotIdentity` values.
+209	- **Unit test:** Entry assembly version detection fallback.
+210	
+211	## Impact
+212	
+213	- **Configuration:** Two new optional properties (`BotName`,
+214	  `BotVersion`) in `MarvConfiguration`. No breaking changes — defaults
+215	  match current behaviour.
+216	- **DI:** One new singleton registration (`BotIdentity`).
+217	- **Plugin API:** `BotIdentity` is a new injectable type. Existing
+218	  plugins are unaffected. `CtcpVersionResponse` continues to work.
+219	- **Risk:** Low. All changes are additive. Existing behaviour is
+220	  preserved when no new config properties are set.
+221	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T11-49-39-743Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T11-49-39-743Z" class="timestamp-link"><time datetime="2026-06-27T11:49:39.743Z" data-timestamp="2026-06-27T11:49:39.743Z">2026-06-27T11:49:39.743Z</time></a></div><div class="message-content"><div class="file-tool write-tool" data-tool-id="toolu_01L4ZadmV7hixk9GAFZEqByT">
+<div class="file-tool-header write-header"><span class="file-tool-icon">📝</span> Write <span class="file-tool-path">036-bot-identity.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/docs/change_specs/036-bot-identity.md</div>
+<div class="truncatable"><div class="truncatable-content"><pre class="file-content"># CS-036: Bot Identity
+
+**Source:** GitHub issue #12
+**Scope:** Core / Host
+**Complexity:** Medium
+**Breaking changes:** Yes — removes `CtcpVersionResponse` config property and `MarvVersion` class
+**Status:** Pending
+
+---
+
+## Problem
+
+When Marv is used as the foundation for a downstream project (e.g. an
+&#34;IdleRPG&#34; bot), the bot identifies itself as &#34;Marv&#34; everywhere:
+
+- Sentry error reports use Marv&#39;s version number, not the downstream
+  project&#39;s.
+- The CTCP VERSION response defaults to &#34;Marv IRC Bot {version}&#34;.
+- The `!version` command in CannedResponses is hardcoded to
+  &#34;Marv IRC Bot v{version}&#34;.
+- The IRC GECOS (real name) defaults to &#34;Marv IRC Bot&#34;.
+- `MarvVersion.Current` always reads from the `Marv.Core` assembly,
+  so downstream projects that reference Marv.Core as a NuGet package
+  get Marv&#39;s version, not their own.
+
+CS-023 partially addressed this by adding a `CtcpVersionResponse`
+configuration override, but that&#39;s a point fix for one touchpoint.
+There&#39;s no unified identity concept that downstream distributions can
+use to take ownership of the bot&#39;s branding.
+
+## Changes
+
+### 1. Add `BotIdentity` record to `Marv.Core`
+
+A simple, immutable identity model:
+
+```csharp
+/// &lt;summary&gt;
+/// The bot&#39;s public identity — name, version, and optional source URL.
+/// Used in CTCP VERSION responses, the !version command, Sentry reports,
+/// and anywhere else the bot identifies itself.
+/// &lt;/summary&gt;
+public record BotIdentity(string Name, string Version, string? SourceUrl = null)
+{
+    /// &lt;summary&gt;
+    /// Combined name and version string (e.g. &#34;Marv IRC Bot 0.8.0&#34;).
+    /// &lt;/summary&gt;
+    public string FullIdentity =&gt; $&#34;{Name} {Version}&#34;;
+}
+```
+
+### 2. Add identity configuration properties to `MarvConfiguration`
+
+```csharp
+/// &lt;summary&gt;
+/// The bot&#39;s public name, used in CTCP VERSION, the !version command,
+/// Sentry reports, and anywhere else the bot identifies itself.
+/// Defaults to &#34;Marv IRC Bot&#34;.
+/// &lt;/summary&gt;
+[Description(&#34;Bot public name for identification.&#34;)]
+public string BotName { get; init; } = &#34;Marv IRC Bot&#34;;
+
+/// &lt;summary&gt;
+/// The bot&#39;s public version. When null, auto-detected from the entry
+/// assembly&#39;s informational version. Set this when running a downstream
+/// distribution that packages Marv as a dependency.
+/// &lt;/summary&gt;
+[Description(&#34;Bot public version (null = auto-detect from entry assembly).&#34;)]
+public string? BotVersion { get; init; }
+```
+
+### 3. Remove `CtcpVersionResponse` from `MarvConfiguration`
+
+Delete the `CtcpVersionResponse` property. With `BotIdentity` providing
+a unified name + version, a separate CTCP-specific override is
+redundant. Operators who need to completely suppress or customise the
+CTCP VERSION response beyond what `BotName`/`BotVersion` provide can
+use the existing `[OnEvent]` + `CtcpEvent` handler pattern — set the
+handler to intercept the VERSION event and send (or not send) whatever
+response they want.
+
+This is a breaking change for anyone using `CtcpVersionResponse` in
+their config file (the property will be silently ignored) or
+referencing it in code (compile error). Acceptable pre-1.0.
+
+### 4. Remove `MarvVersion` class
+
+Delete `src/Marv.Core/MarvVersion.cs`. Its version-detection logic is
+inlined into the `BotIdentity` construction (see below). With
+`BotIdentity` as the canonical source of version information, a
+separate `MarvVersion` class is unnecessary.
+
+This is a breaking change for any code referencing
+`MarvVersion.Current`. Acceptable pre-1.0.
+
+### 5. Register `BotIdentity` in DI
+
+In `MarvServiceExtensions.AddMarv()`, construct and register a
+singleton `BotIdentity` from configuration:
+
+```csharp
+var identity = new BotIdentity(
+    config.BotName,
+    config.BotVersion ?? ResolveVersion());
+services.AddSingleton(identity);
+```
+
+The version resolution order is:
+1. Explicit `BotVersion` config value (highest priority).
+2. Entry assembly&#39;s informational version (catches downstream hosts
+   that set their own version in their `.csproj`).
+3. `Marv.Core` assembly&#39;s informational version (fallback for test
+   hosts or environments with no entry assembly).
+
+```csharp
+private static string ResolveVersion()
+{
+    // Try the entry assembly first — downstream hosts set their
+    // own version in their .csproj
+    var entry = Assembly.GetEntryAssembly();
+    var info = (entry ?? typeof(MarvServiceExtensions).Assembly)
+        .GetCustomAttribute&lt;AssemblyInformationalVersionAttribute&gt;()
+        ?.InformationalVersion;
+
+    if (info is not null)
+    {
+        // Strip build metadata suffix (e.g. &#34;+abc123def&#34;)
+        var plus = info.IndexOf(&#39;+&#39;);
+        return plus &gt;= 0 ? info[..plus] : info;
+    }
+
+    return entry?.GetName().Version?.ToString(3)
+        ?? typeof(MarvServiceExtensions).Assembly.GetName().Version?.ToString(3)
+        ?? &#34;0.0.0&#34;;
+}
+```
+
+### 6. Update CTCP VERSION handling in `IrcBot`
+
+Replace the current logic (which references `CtcpVersionResponse` and
+`MarvVersion`) with `BotIdentity`:
+
+```csharp
+case &#34;VERSION&#34;:
+    await SendRawAsync(new IrcMessage(&#34;NOTICE&#34;, [sender.Nick,
+        $&#34;\x01VERSION {_identity.FullIdentity}\x01&#34;]), ct);
+    break;
+```
+
+Inject `BotIdentity` into `IrcBot`&#39;s constructor.
+
+### 7. Update `InfoHandlers` in CannedResponses
+
+Inject `BotIdentity` and use it instead of the hardcoded string:
+
+```csharp
+public InfoHandlers(IBot bot, BotIdentity identity)
+{
+    _bot = bot;
+    _identity = identity;
+}
+
+[OnCommand(&#34;version&#34;)]
+public async Task HandleVersion(CommandContext ctx, CancellationToken ct)
+{
+    await ctx.ReplyAsync($&#34;{_identity.Name} v{_identity.Version}&#34;, ct);
+}
+```
+
+### 8. Wire `BotIdentity` into Sentry in `Program.cs`
+
+Read `MarvConfiguration` from the config sources (already registered
+at that point) and use the identity fields for the Sentry release:
+
+```csharp
+builder.Logging.AddSentry(o =&gt;
+{
+    o.Dsn = sentryDsn;
+    o.Release = $&#34;{config.BotName}@{config.BotVersion ?? ResolveVersion()}&#34;;
+    o.MinimumEventLevel = LogLevel.Error;
+    o.MinimumBreadcrumbLevel = LogLevel.Warning;
+    o.TracesSampleRate = 0;
+});
+```
+
+The `ResolveVersion()` helper can be extracted to a shared location or
+duplicated in `Program.cs` since it&#39;s a small static method. The
+implementation can decide the cleanest approach.
+
+### 9. Update `docs/PLUGIN_API.md`
+
+Document:
+- The `BotIdentity` record and how to inject it.
+- The `BotName` and `BotVersion` configuration properties.
+- Removal of `CtcpVersionResponse` and the `[OnEvent]` + `CtcpEvent`
+  alternative for advanced CTCP VERSION customisation.
+- How downstream distributions should set their identity (config or
+  entry assembly version).
+
+## Design decisions
+
+**Why a dedicated `BotIdentity` type instead of just config properties?**
+A typed record in DI gives plugins a clean injection point without
+coupling to `MarvConfiguration`. It also provides `FullIdentity` as a
+canonical formatted string, preventing each consumer from assembling
+name + version differently.
+
+**Why remove `CtcpVersionResponse`?** It was a stopgap from CS-023 that
+addressed one touchpoint. With `BotIdentity` providing the unified
+name + version, the config override is redundant — changing `BotName`
+and `BotVersion` covers the common case. The suppress/fully-custom case
+is already handled by the `[OnEvent]` + `CtcpEvent` handler pattern,
+which is more powerful and doesn&#39;t require a special config property.
+
+**Why remove `MarvVersion`?** Its sole purpose was reading the version
+from the `Marv.Core` assembly. That logic is now inlined into the
+`BotIdentity` construction, and `BotIdentity` is the canonical source
+for all version display. Keeping `MarvVersion` around would be a
+confusing alternative path to the same information.
+
+**Why auto-detect from the entry assembly?** Downstream projects that
+create their own host application (referencing Marv.Core as a NuGet
+package) naturally have their own assembly version in their `.csproj`.
+Auto-detecting from the entry assembly means they get correct identity
+without any configuration, while still allowing explicit override.
+
+**Why not a subclassable host app?** The issue mentions this as a
+possibility, but it would be a much larger change with significant API
+surface implications. Configuration-based identity covers the concrete
+use cases (Sentry version, CTCP, display strings) without requiring
+downstream projects to subclass anything.
+
+## Testing
+
+- **Unit test:** Default identity — `BotIdentity` uses &#34;Marv IRC Bot&#34;
+  and the resolved assembly version when no config overrides are set.
+- **Unit test:** Config override — setting `BotName` and `BotVersion`
+  in config produces a `BotIdentity` with those values.
+- **Unit test:** CTCP VERSION uses `BotIdentity.FullIdentity`.
+- **Unit test:** `InfoHandlers.HandleVersion` uses injected
+  `BotIdentity` values.
+- **Unit test:** Version resolution falls back from entry assembly to
+  `Marv.Core` assembly.
+
+## Impact
+
+- **Configuration:** Two new optional properties (`BotName`,
+  `BotVersion`). One removed property (`CtcpVersionResponse`).
+  Defaults match current behaviour for users who haven&#39;t set
+  `CtcpVersionResponse`.
+- **DI:** One new singleton registration (`BotIdentity`).
+- **Plugin API:** `BotIdentity` is a new injectable type. `MarvVersion`
+  is removed. `CtcpVersionResponse` config property is removed.
+- **Breaking changes:** `MarvVersion.Current` and
+  `CtcpVersionResponse` are removed. Acceptable pre-1.0.
+- **Risk:** Low. The breaking changes affect a narrow surface area
+  (one class, one config property) and the replacements are
+  straightforward.
+</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-06-27T11-49-39-836Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-06-27T11-49-39-836Z" class="timestamp-link"><time datetime="2026-06-27T11:49:39.836Z" data-timestamp="2026-06-27T11:49:39.836Z">2026-06-27T11:49:39.836Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/docs/change_specs/036-bot-identity.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-06-27T11-49-47-378Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-06-27T11-49-47-378Z" class="timestamp-link"><time datetime="2026-06-27T11:49:47.378Z" data-timestamp="2026-06-27T11:49:47.378Z">2026-06-27T11:49:47.378Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01SQtYs8zvryVMP16cT5BKKy">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit the updated spec</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git add docs/change_specs/036-bot-identity.md &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Update CS-036: drop CtcpVersionResponse, remove MarvVersion, use &#34;public name&#34;
+
+Revised based on review feedback:
+- Remove CtcpVersionResponse config property (stopgap from CS-023,
+  redundant with BotIdentity; [OnEvent]+CtcpEvent covers advanced cases)
+- Remove MarvVersion class, inline version detection into BotIdentity
+  construction
+- Rename &#34;product name/version&#34; to &#34;public name/version&#34; throughout
+- Mark breaking changes (acceptable pre-1.0)
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-002.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<span class="current">3</span>
+<span class="disabled">Next &rarr;</span>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

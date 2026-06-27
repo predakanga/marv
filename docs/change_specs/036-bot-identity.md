@@ -3,7 +3,7 @@
 **Source:** GitHub issue #12
 **Scope:** Core / Host
 **Complexity:** Medium
-**Breaking changes:** None
+**Breaking changes:** Yes — removes `CtcpVersionResponse` config property and `MarvVersion` class
 **Status:** Pending
 
 ---
@@ -36,7 +36,9 @@ A simple, immutable identity model:
 
 ```csharp
 /// <summary>
-/// Identifies the bot product for display, telemetry, and protocol responses.
+/// The bot's public identity — name, version, and optional source URL.
+/// Used in CTCP VERSION responses, the !version command, Sentry reports,
+/// and anywhere else the bot identifies itself.
 /// </summary>
 public record BotIdentity(string Name, string Version, string? SourceUrl = null)
 {
@@ -51,23 +53,47 @@ public record BotIdentity(string Name, string Version, string? SourceUrl = null)
 
 ```csharp
 /// <summary>
-/// The bot's product name, used in CTCP VERSION, the !version command,
+/// The bot's public name, used in CTCP VERSION, the !version command,
 /// Sentry reports, and anywhere else the bot identifies itself.
 /// Defaults to "Marv IRC Bot".
 /// </summary>
-[Description("Bot product name for identification.")]
+[Description("Bot public name for identification.")]
 public string BotName { get; init; } = "Marv IRC Bot";
 
 /// <summary>
-/// The bot's product version. When null, auto-detected from the entry
+/// The bot's public version. When null, auto-detected from the entry
 /// assembly's informational version. Set this when running a downstream
 /// distribution that packages Marv as a dependency.
 /// </summary>
-[Description("Bot product version (null = auto-detect from entry assembly).")]
+[Description("Bot public version (null = auto-detect from entry assembly).")]
 public string? BotVersion { get; init; }
 ```
 
-### 3. Register `BotIdentity` in DI
+### 3. Remove `CtcpVersionResponse` from `MarvConfiguration`
+
+Delete the `CtcpVersionResponse` property. With `BotIdentity` providing
+a unified name + version, a separate CTCP-specific override is
+redundant. Operators who need to completely suppress or customise the
+CTCP VERSION response beyond what `BotName`/`BotVersion` provide can
+use the existing `[OnEvent]` + `CtcpEvent` handler pattern — set the
+handler to intercept the VERSION event and send (or not send) whatever
+response they want.
+
+This is a breaking change for anyone using `CtcpVersionResponse` in
+their config file (the property will be silently ignored) or
+referencing it in code (compile error). Acceptable pre-1.0.
+
+### 4. Remove `MarvVersion` class
+
+Delete `src/Marv.Core/MarvVersion.cs`. Its version-detection logic is
+inlined into the `BotIdentity` construction (see below). With
+`BotIdentity` as the canonical source of version information, a
+separate `MarvVersion` class is unnecessary.
+
+This is a breaking change for any code referencing
+`MarvVersion.Current`. Acceptable pre-1.0.
+
+### 5. Register `BotIdentity` in DI
 
 In `MarvServiceExtensions.AddMarv()`, construct and register a
 singleton `BotIdentity` from configuration:
@@ -75,8 +101,7 @@ singleton `BotIdentity` from configuration:
 ```csharp
 var identity = new BotIdentity(
     config.BotName,
-    config.BotVersion ?? EntryAssemblyVersion() ?? MarvVersion.Current,
-    config.SourceUrl);
+    config.BotVersion ?? ResolveVersion());
 services.AddSingleton(identity);
 ```
 
@@ -84,39 +109,47 @@ The version resolution order is:
 1. Explicit `BotVersion` config value (highest priority).
 2. Entry assembly's informational version (catches downstream hosts
    that set their own version in their `.csproj`).
-3. `MarvVersion.Current` (fallback — the Marv.Core assembly version).
-
-Add a private helper to read the entry assembly version:
+3. `Marv.Core` assembly's informational version (fallback for test
+   hosts or environments with no entry assembly).
 
 ```csharp
-private static string? EntryAssemblyVersion()
+private static string ResolveVersion()
 {
-    var asm = Assembly.GetEntryAssembly();
-    if (asm is null) return null;
-    var info = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+    // Try the entry assembly first — downstream hosts set their
+    // own version in their .csproj
+    var entry = Assembly.GetEntryAssembly();
+    var info = (entry ?? typeof(MarvServiceExtensions).Assembly)
+        .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
         ?.InformationalVersion;
-    if (info is null) return null;
-    var plus = info.IndexOf('+');
-    return plus >= 0 ? info[..plus] : info;
+
+    if (info is not null)
+    {
+        // Strip build metadata suffix (e.g. "+abc123def")
+        var plus = info.IndexOf('+');
+        return plus >= 0 ? info[..plus] : info;
+    }
+
+    return entry?.GetName().Version?.ToString(3)
+        ?? typeof(MarvServiceExtensions).Assembly.GetName().Version?.ToString(3)
+        ?? "0.0.0";
 }
 ```
 
-### 4. Update CTCP VERSION handling in `IrcBot`
+### 6. Update CTCP VERSION handling in `IrcBot`
 
-Replace the hardcoded fallback with `BotIdentity`:
+Replace the current logic (which references `CtcpVersionResponse` and
+`MarvVersion`) with `BotIdentity`:
 
 ```csharp
 case "VERSION":
-    var versionResponse = _config.CtcpVersionResponse
-        ?? _identity.FullIdentity;
-    // ...
+    await SendRawAsync(new IrcMessage("NOTICE", [sender.Nick,
+        $"\x01VERSION {_identity.FullIdentity}\x01"]), ct);
+    break;
 ```
 
-`CtcpVersionResponse` remains as a point override for operators who
-want a completely custom string or want to suppress the response.
-Its existing behaviour is unchanged.
+Inject `BotIdentity` into `IrcBot`'s constructor.
 
-### 5. Update `InfoHandlers` in CannedResponses
+### 7. Update `InfoHandlers` in CannedResponses
 
 Inject `BotIdentity` and use it instead of the hardcoded string:
 
@@ -134,39 +167,33 @@ public async Task HandleVersion(CommandContext ctx, CancellationToken ct)
 }
 ```
 
-### 6. Wire `BotIdentity` into Sentry in `Program.cs`
+### 8. Wire `BotIdentity` into Sentry in `Program.cs`
 
-After building the host, resolve `BotIdentity` and set the Sentry
-release. Since Sentry is configured during host building (before
-services are available), use the same config-reading approach:
+Read `MarvConfiguration` from the config sources (already registered
+at that point) and use the identity fields for the Sentry release:
 
 ```csharp
 builder.Logging.AddSentry(o =>
 {
     o.Dsn = sentryDsn;
-    o.Release = $"{config.BotName}@{config.BotVersion ?? MarvVersion.Current}";
+    o.Release = $"{config.BotName}@{config.BotVersion ?? ResolveVersion()}";
     o.MinimumEventLevel = LogLevel.Error;
     o.MinimumBreadcrumbLevel = LogLevel.Warning;
     o.TracesSampleRate = 0;
 });
 ```
 
-This requires reading `MarvConfiguration` earlier in `Program.cs`,
-which is straightforward since the configuration sources are already
-registered at that point.
+The `ResolveVersion()` helper can be extracted to a shared location or
+duplicated in `Program.cs` since it's a small static method. The
+implementation can decide the cleanest approach.
 
-### 7. Update `MarvVersion` documentation
-
-Add an XML doc note to `MarvVersion.Current` clarifying that it
-returns the `Marv.Core` assembly version specifically, and that
-`BotIdentity` should be preferred for display purposes.
-
-### 8. Update `docs/PLUGIN_API.md`
+### 9. Update `docs/PLUGIN_API.md`
 
 Document:
 - The `BotIdentity` record and how to inject it.
 - The `BotName` and `BotVersion` configuration properties.
-- That `CtcpVersionResponse` still works as a CTCP-specific override.
+- Removal of `CtcpVersionResponse` and the `[OnEvent]` + `CtcpEvent`
+  alternative for advanced CTCP VERSION customisation.
 - How downstream distributions should set their identity (config or
   entry assembly version).
 
@@ -178,11 +205,18 @@ coupling to `MarvConfiguration`. It also provides `FullIdentity` as a
 canonical formatted string, preventing each consumer from assembling
 name + version differently.
 
-**Why keep `CtcpVersionResponse`?** It serves a different purpose —
-it's a protocol-level override that can suppress the response entirely
-(empty string) or provide a string unrelated to the bot's actual
-identity. `BotIdentity` is the product identity; `CtcpVersionResponse`
-is what you want the IRC network to see, which may differ.
+**Why remove `CtcpVersionResponse`?** It was a stopgap from CS-023 that
+addressed one touchpoint. With `BotIdentity` providing the unified
+name + version, the config override is redundant — changing `BotName`
+and `BotVersion` covers the common case. The suppress/fully-custom case
+is already handled by the `[OnEvent]` + `CtcpEvent` handler pattern,
+which is more powerful and doesn't require a special config property.
+
+**Why remove `MarvVersion`?** Its sole purpose was reading the version
+from the `Marv.Core` assembly. That logic is now inlined into the
+`BotIdentity` construction, and `BotIdentity` is the canonical source
+for all version display. Keeping `MarvVersion` around would be a
+confusing alternative path to the same information.
 
 **Why auto-detect from the entry assembly?** Downstream projects that
 create their own host application (referencing Marv.Core as a NuGet
@@ -199,22 +233,26 @@ downstream projects to subclass anything.
 ## Testing
 
 - **Unit test:** Default identity — `BotIdentity` uses "Marv IRC Bot"
-  and `MarvVersion.Current` when no config overrides are set.
+  and the resolved assembly version when no config overrides are set.
 - **Unit test:** Config override — setting `BotName` and `BotVersion`
   in config produces a `BotIdentity` with those values.
-- **Unit test:** CTCP VERSION uses `BotIdentity.FullIdentity` as
-  default, but `CtcpVersionResponse` still takes precedence when set.
+- **Unit test:** CTCP VERSION uses `BotIdentity.FullIdentity`.
 - **Unit test:** `InfoHandlers.HandleVersion` uses injected
   `BotIdentity` values.
-- **Unit test:** Entry assembly version detection fallback.
+- **Unit test:** Version resolution falls back from entry assembly to
+  `Marv.Core` assembly.
 
 ## Impact
 
 - **Configuration:** Two new optional properties (`BotName`,
-  `BotVersion`) in `MarvConfiguration`. No breaking changes — defaults
-  match current behaviour.
+  `BotVersion`). One removed property (`CtcpVersionResponse`).
+  Defaults match current behaviour for users who haven't set
+  `CtcpVersionResponse`.
 - **DI:** One new singleton registration (`BotIdentity`).
-- **Plugin API:** `BotIdentity` is a new injectable type. Existing
-  plugins are unaffected. `CtcpVersionResponse` continues to work.
-- **Risk:** Low. All changes are additive. Existing behaviour is
-  preserved when no new config properties are set.
+- **Plugin API:** `BotIdentity` is a new injectable type. `MarvVersion`
+  is removed. `CtcpVersionResponse` config property is removed.
+- **Breaking changes:** `MarvVersion.Current` and
+  `CtcpVersionResponse` are removed. Acceptable pre-1.0.
+- **Risk:** Low. The breaking changes affect a narrow surface area
+  (one class, one config property) and the replacements are
+  straightforward.

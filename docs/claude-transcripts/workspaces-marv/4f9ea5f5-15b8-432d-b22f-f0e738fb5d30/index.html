@@ -161,10 +161,11 @@ details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom
 <span class="disabled">&larr; Prev</span>
 <a href="page-001.html">1</a>
 <a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
 <a href="page-001.html">Next &rarr;</a>
 </div>
 
-        <p style="color: var(--text-muted); margin-bottom: 24px;">7 prompts · 78 messages · 27 tool calls · 1 commits · 2 pages</p>
+        <p style="color: var(--text-muted); margin-bottom: 24px;">11 prompts · 95 messages · 32 tool calls · 2 commits · 3 pages</p>
         
 <div class="index-item"><a href="page-001.html#msg-2026-06-27T09-38-33-346Z"><div class="index-item-header"><span class="index-item-number">#1</span><time datetime="2026-06-27T09:38:33.346Z" data-timestamp="2026-06-27T09:38:33.346Z">2026-06-27T09:38:33.346Z</time></div><div class="index-item-content"><p>In a separate repo, I've developed the triage-issues skill a bit further. I'd like you to backport those changes into this project's skill - it'll require some adaptation, as the provided version was used with GitLab instead of GitHub.</p>
 <pre><code class="language-yaml">---
@@ -888,7 +889,34 @@ stop. If stopping, follow the mandatory instructions from CLAUDE.md
 <li><strong>Skip</strong> — done with this issue</li>
 </ol></div></div><button class="expand-btn">Show more</button></div></div>
 </div></div>
-<div class="index-item"><a href="page-002.html#msg-2026-06-27T09-43-20-238Z"><div class="index-item-header"><span class="index-item-number">#7</span><time datetime="2026-06-27T09:43:20.238Z" data-timestamp="2026-06-27T09:43:20.238Z">2026-06-27T09:43:20.238Z</time></div><div class="index-item-content"><p>1</p></div></a><div class="index-item-stats"><span>1 read · 1 write · 1 edit · 1 bash</span>
+<div class="index-item"><a href="page-002.html#msg-2026-06-27T09-43-20-238Z"><div class="index-item-header"><span class="index-item-number">#7</span><time datetime="2026-06-27T09:43:20.238Z" data-timestamp="2026-06-27T09:43:20.238Z">2026-06-27T09:43:20.238Z</time></div><div class="index-item-content"><p>1</p></div></a><div class="index-item-stats"><span>3 bash · 1 read · 1 write · 1 edit</span>
+</div></div><div class="index-commit"><div class="index-commit-header"><span class="index-commit-hash">e7f84d7</span><time datetime="2026-06-27T09:44:35.808Z" data-timestamp="2026-06-27T09:44:35.808Z">2026-06-27T09:44:35.808Z</time></div><div class="index-commit-msg">Add CS-036: Bot Identity change specification</div></div>
+<div class="index-item"><a href="page-002.html#msg-2026-06-27T11-37-33-354Z"><div class="index-item-header"><span class="index-item-number">#8</span><time datetime="2026-06-27T11:37:33.354Z" data-timestamp="2026-06-27T11:37:33.354Z">2026-06-27T11:37:33.354Z</time></div><div class="index-item-content"><p>I'm not sure about keeping the CTCP VERSION override, it feels like it should be one or the other.
+Also don't like "product name" - public name, maybe? Same for version.</p></div></a></div>
+<div class="index-item"><a href="page-002.html#msg-2026-06-27T11-37-35-327Z"><div class="index-item-header"><span class="index-item-number">#9</span><time datetime="2026-06-27T11:37:35.327Z" data-timestamp="2026-06-27T11:37:35.327Z">2026-06-27T11:37:35.327Z</time></div><div class="index-item-content"><p>[Request interrupted by user]</p></div></a></div>
+<div class="index-item"><a href="page-002.html#msg-2026-06-27T11-38-18-717Z"><div class="index-item-header"><span class="index-item-number">#10</span><time datetime="2026-06-27T11:38:18.717Z" data-timestamp="2026-06-27T11:38:18.717Z">2026-06-27T11:38:18.717Z</time></div><div class="index-item-content"><p>I'm not sure about keeping the CTCP VERSION override, it feels like it should be one or the other.
+Also don't like "product name" - public name, maybe? Same for version.
+At that point, do we still need MarvVersion?</p></div></a><div class="index-item-stats">
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>Good points. Let me think through these:</p>
+<ol>
+<li>
+<p><strong>CTCP VERSION override</strong> — You're right, with <code>BotIdentity</code> providing name + version, <code>CtcpVersionResponse</code> becomes redundant for the common case. The only thing it does that <code>BotIdentity</code> can't is suppress the response entirely (empty string). We could move that to a boolean like <code>CtcpVersionSuppressed</code> or just document the <code>[OnEvent]</code> + <code>CtcpEvent</code> escape hatch and drop the config property entirely. I'd lean toward dropping it — it was a stopgap, and the event handler pattern already covers the suppress/custom case.</p>
+</li>
+<li>
+<p><strong>"Product name" → "public name"</strong> — Agreed, "public" reads better. <code>BotName</code>/<code>BotVersion</code> in config, described as the bot's "public name" and "public version" in docs.</p>
+</li>
+<li>
+<p><strong>MarvVersion</strong> — If <code>BotIdentity</code> is the canonical source and its version auto-detects from the entry assembly, then <code>MarvVersion.Current</code> only serves one purpose: the final fallback when there's no entry assembly (e.g. test hosts). That's a pretty thin reason to keep a whole class. We could inline that fallback into the <code>BotIdentity</code> construction logic and delete <code>MarvVersion</code>. The two existing consumers (<code>IrcBot</code> CTCP and <code>InfoHandlers</code>) would both switch to <code>BotIdentity</code> anyway. Worth noting this is a breaking change for any downstream code that references <code>MarvVersion.Current</code> directly, but since it's a public type that would be replaced by a better alternative, that seems acceptable.</p>
+</li>
+</ol>
+<p>Want me to update CS-036 with these changes? Summary: drop <code>CtcpVersionResponse</code>, rename to "public name/version", remove <code>MarvVersion</code>, and flag the breaking change.</p></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div>
+<div class="index-item"><a href="page-003.html#msg-2026-06-27T11-48-45-260Z"><div class="index-item-header"><span class="index-item-number">#11</span><time datetime="2026-06-27T11:48:45.260Z" data-timestamp="2026-06-27T11:48:45.260Z">2026-06-27T11:48:45.260Z</time></div><div class="index-item-content"><p>Please update CS-036 with those changes.</p>
+<ol>
+<li>Drop the override</li>
+<li>Sounds good</li>
+<li>Yep, inlining it is what I was thinking. We're still pre-1.0, so the breaking change isn't a killer.</li>
+</ol></div></a><div class="index-item-stats"><span>1 read · 1 write · 1 bash</span>
 </div></div>
         
 
@@ -897,6 +925,7 @@ stop. If stopping, follow the mandatory instructions from CLAUDE.md
 <span class="disabled">&larr; Prev</span>
 <a href="page-001.html">1</a>
 <a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
 <a href="page-001.html">Next &rarr;</a>
 </div>
 
@@ -916,7 +945,7 @@ stop. If stopping, follow the mandatory instructions from CLAUDE.md
         </dialog>
         <script>
 (function() {
-    var totalPages = 2;
+    var totalPages = 3;
     var searchBox = document.getElementById('search-box');
     var searchInput = document.getElementById('search-input');
     var searchBtn = document.getElementById('search-btn');
