@@ -1,3 +1,4 @@
+using System.Reflection;
 using Marv.Core.Irc;
 using Marv.Core.Platform;
 using Marv.Core.Plugin;
@@ -47,6 +48,12 @@ public static class MarvServiceExtensions
 
         // Discover, resolve, and register plugins
         var config = configuration.Get<MarvConfiguration>() ?? new MarvConfiguration();
+
+        // Register bot identity
+        var identity = new BotIdentity(
+            config.BotName,
+            config.BotVersion ?? ResolveVersion());
+        services.AddSingleton(identity);
         var configuredLogLevel = configuration.GetValue<LogLevel?>("LogLevel");
         using var bootstrapLoggerFactory = LoggerFactory.Create(b =>
         {
@@ -62,5 +69,28 @@ public static class MarvServiceExtensions
         services.AddSingleton(sortedPlugins);
 
         return services;
+    }
+
+    /// <summary>
+    /// Resolves the bot version from assembly metadata. Checks the entry assembly
+    /// first (so downstream hosts get their own version), then falls back to the
+    /// Marv.Core assembly.
+    /// </summary>
+    public static string ResolveVersion()
+    {
+        var entry = Assembly.GetEntryAssembly();
+        var info = (entry ?? typeof(MarvServiceExtensions).Assembly)
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            ?.InformationalVersion;
+
+        if (info is not null)
+        {
+            var plus = info.IndexOf('+');
+            return plus >= 0 ? info[..plus] : info;
+        }
+
+        return entry?.GetName().Version?.ToString(3)
+            ?? typeof(MarvServiceExtensions).Assembly.GetName().Version?.ToString(3)
+            ?? "0.0.0";
     }
 }

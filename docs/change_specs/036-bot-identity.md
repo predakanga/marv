@@ -1,10 +1,10 @@
-# CS-036: Bot Identity
+# CS-036: Bot Identity — COMPLETED
 
 **Source:** GitHub issue #12
 **Scope:** Core / Host
 **Complexity:** Medium
 **Breaking changes:** Yes — removes `CtcpVersionResponse` config property and `MarvVersion` class
-**Status:** Pending
+**Status:** Completed
 
 ---
 

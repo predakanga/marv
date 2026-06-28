@@ -41,9 +41,12 @@ rootCommand.SetAction(async (result, ct) =>
     var sentryDsn = builder.Configuration.GetValue<string?>("SentryDsn");
     if (!string.IsNullOrEmpty(sentryDsn))
     {
+        var marvConfig = builder.Configuration.Get<MarvConfiguration>() ?? new MarvConfiguration();
+        var botVersion = marvConfig.BotVersion ?? MarvServiceExtensions.ResolveVersion();
         builder.Logging.AddSentry(o =>
         {
             o.Dsn = sentryDsn;
+            o.Release = $"{marvConfig.BotName}@{botVersion}";
             o.MinimumEventLevel = LogLevel.Error;
             o.MinimumBreadcrumbLevel = LogLevel.Warning;
             o.TracesSampleRate = 0;

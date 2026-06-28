@@ -165,7 +165,7 @@ details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom
 <a href="page-001.html">Next &rarr;</a>
 </div>
 
-        <p style="color: var(--text-muted); margin-bottom: 24px;">11 prompts · 95 messages · 32 tool calls · 2 commits · 3 pages</p>
+        <p style="color: var(--text-muted); margin-bottom: 24px;">12 prompts · 98 messages · 32 tool calls · 3 commits · 3 pages</p>
         
 <div class="index-item"><a href="page-001.html#msg-2026-06-27T09-38-33-346Z"><div class="index-item-header"><span class="index-item-number">#1</span><time datetime="2026-06-27T09:38:33.346Z" data-timestamp="2026-06-27T09:38:33.346Z">2026-06-27T09:38:33.346Z</time></div><div class="index-item-content"><p>In a separate repo, I've developed the triage-issues skill a bit further. I'd like you to backport those changes into this project's skill - it'll require some adaptation, as the provided version was used with GitLab instead of GitHub.</p>
 <pre><code class="language-yaml">---
@@ -917,7 +917,196 @@ At that point, do we still need MarvVersion?</p></div></a><div class="index-item
 <li>Sounds good</li>
 <li>Yep, inlining it is what I was thinking. We're still pre-1.0, so the breaking change isn't a killer.</li>
 </ol></div></a><div class="index-item-stats"><span>1 read · 1 write · 1 bash</span>
-</div></div>
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>CS-036 updated and committed. Key changes from the revision:</p>
+<ul>
+<li><strong>Dropped <code>CtcpVersionResponse</code></strong> — <code>BotIdentity</code> replaces it; <code>[OnEvent]</code> + <code>CtcpEvent</code> covers the suppress/custom case</li>
+<li><strong>Removed <code>MarvVersion</code></strong> — version detection inlined into <code>BotIdentity</code> construction in <code>MarvServiceExtensions</code></li>
+<li><strong>"Public name/version"</strong> terminology throughout</li>
+<li><strong>Breaking changes flagged</strong> but noted as acceptable pre-1.0</li>
+</ul>
+<p>No more open issues to process. Want to proceed to implementing CS-036, or anything else?</p></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div><div class="index-commit"><div class="index-commit-header"><span class="index-commit-hash">05b31b7</span><time datetime="2026-06-27T11:49:50.976Z" data-timestamp="2026-06-27T11:49:50.976Z">2026-06-27T11:49:50.976Z</time></div><div class="index-commit-msg">Update CS-036: drop CtcpVersionResponse, remove MarvVersion, use &#34;public name&#34;</div></div>
+<div class="index-item"><a href="page-003.html#msg-2026-06-28T13-04-48-448Z"><div class="index-item-header"><span class="index-item-number">#12</span><time datetime="2026-06-28T13:04:48.448Z" data-timestamp="2026-06-28T13:04:48.448Z">2026-06-28T13:04:48.448Z</time></div><div class="index-item-content"><h2>Context Usage</h2>
+<p><strong>Model:</strong> claude-opus-4-6<br />
+<strong>Tokens:</strong> 66.1k / 200k (33%)</p>
+<h3>Estimated usage by category</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Tokens</th>
+<th>Percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>System prompt</td>
+<td>6.4k</td>
+<td>3.2%</td>
+</tr>
+<tr>
+<td>System tools</td>
+<td>9k</td>
+<td>4.5%</td>
+</tr>
+<tr>
+<td>MCP tools (deferred)</td>
+<td>290</td>
+<td>0.1%</td>
+</tr>
+<tr>
+<td>System tools (deferred)</td>
+<td>15.2k</td>
+<td>7.6%</td>
+</tr>
+<tr>
+<td>Memory files</td>
+<td>2k</td>
+<td>1.0%</td>
+</tr>
+<tr>
+<td>Skills</td>
+<td>1.1k</td>
+<td>0.5%</td>
+</tr>
+<tr>
+<td>Messages</td>
+<td>47.7k</td>
+<td>23.9%</td>
+</tr>
+<tr>
+<td>Free space</td>
+<td>100.9k</td>
+<td>50.4%</td>
+</tr>
+<tr>
+<td>Autocompact buffer</td>
+<td>33k</td>
+<td>16.5%</td>
+</tr>
+</tbody>
+</table>
+<h3>MCP Tools</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Server</th>
+<th>Tokens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mcp__ide__executeCode</td>
+<td>ide</td>
+<td>189</td>
+</tr>
+<tr>
+<td>mcp__ide__getDiagnostics</td>
+<td>ide</td>
+<td>101</td>
+</tr>
+</tbody>
+</table>
+<h3>Memory Files</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Path</th>
+<th>Tokens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Project</td>
+<td>/workspaces/marv/CLAUDE.md</td>
+<td>1.8k</td>
+</tr>
+<tr>
+<td>AutoMem</td>
+<td>/home/vscode/.claude/projects/-workspaces-marv/memory/MEMORY.md</td>
+<td>139</td>
+</tr>
+</tbody>
+</table>
+<h3>Skills</h3>
+<table>
+<thead>
+<tr>
+<th>Skill</th>
+<th>Source</th>
+<th>Tokens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>update-config</td>
+<td>Built-in</td>
+<td>~180</td>
+</tr>
+<tr>
+<td>keybindings-help</td>
+<td>Built-in</td>
+<td>~60</td>
+</tr>
+<tr>
+<td>verify</td>
+<td>Built-in</td>
+<td>~60</td>
+</tr>
+<tr>
+<td>code-review</td>
+<td>Built-in</td>
+<td>~100</td>
+</tr>
+<tr>
+<td>simplify</td>
+<td>Built-in</td>
+<td>~50</td>
+</tr>
+<tr>
+<td>fewer-permission-prompts</td>
+<td>Built-in</td>
+<td>~50</td>
+</tr>
+<tr>
+<td>loop</td>
+<td>Built-in</td>
+<td>~90</td>
+</tr>
+<tr>
+<td>schedule</td>
+<td>Built-in</td>
+<td>~90</td>
+</tr>
+<tr>
+<td>claude-api</td>
+<td>Built-in</td>
+<td>~270</td>
+</tr>
+<tr>
+<td>run</td>
+<td>Built-in</td>
+<td>~90</td>
+</tr>
+<tr>
+<td>init</td>
+<td>Built-in</td>
+<td>&lt; 20</td>
+</tr>
+<tr>
+<td>review</td>
+<td>Built-in</td>
+<td>&lt; 20</td>
+</tr>
+<tr>
+<td>security-review</td>
+<td>Built-in</td>
+<td>~20</td>
+</tr>
+</tbody>
+</table></div></a></div>
         
 
 <div class="pagination">

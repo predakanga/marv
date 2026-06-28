@@ -12,21 +12,23 @@ namespace Marv.Plugins.CannedResponses;
 public class InfoHandlers
 {
     private readonly IBot _bot;
+    private readonly BotIdentity _identity;
 
     /// <summary>
-    /// Creates a new <see cref="InfoHandlers"/> with the specified bot.
+    /// Creates a new <see cref="InfoHandlers"/> with the specified bot and identity.
     /// Constructor parameters are resolved from DI via <see cref="IPluginActivator"/>.
     /// </summary>
-    public InfoHandlers(IBot bot)
+    public InfoHandlers(IBot bot, BotIdentity identity)
     {
         _bot = bot;
+        _identity = identity;
     }
 
     /// <summary>Responds with version information.</summary>
     [OnCommand("version")]
     public async Task HandleVersion(CommandContext ctx, CancellationToken ct)
     {
-        await ctx.ReplyAsync($"Marv IRC Bot v{MarvVersion.Current}", ct);
+        await ctx.ReplyAsync($"{_identity.Name} v{_identity.Version}", ct);
     }
 
     /// <summary>Responds with help text.</summary>

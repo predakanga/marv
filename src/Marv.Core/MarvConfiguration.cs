@@ -148,19 +148,27 @@ public record MarvConfiguration
     public int AuthTimeoutSeconds { get; init; } = 15;
 
     /// <summary>
+    /// The bot's public name, used in CTCP VERSION, the !version command,
+    /// Sentry reports, and anywhere else the bot identifies itself.
+    /// Defaults to "Marv IRC Bot".
+    /// </summary>
+    [Description("Bot public name for identification.")]
+    public string BotName { get; init; } = "Marv IRC Bot";
+
+    /// <summary>
+    /// The bot's public version. When null, auto-detected from the entry
+    /// assembly's informational version. Set this when running a downstream
+    /// distribution that packages Marv as a dependency.
+    /// </summary>
+    [Description("Bot public version (null = auto-detect from entry assembly).")]
+    public string? BotVersion { get; init; }
+
+    /// <summary>
     /// Sentry DSN for error reporting. When empty or null, Sentry is disabled.
     /// </summary>
     [Description("Sentry DSN for error reporting (empty = disabled).")]
     public string? SentryDsn { get => _sentryDsn; init => _sentryDsn = NullIfEmpty(value); }
     private readonly string? _sentryDsn;
-
-    /// <summary>
-    /// Custom response to CTCP VERSION queries. If null, uses the default
-    /// "Marv IRC Bot {version}" string. Set to empty string to suppress
-    /// VERSION responses entirely.
-    /// </summary>
-    [Description("Custom CTCP VERSION response (empty = suppress).")]
-    public string? CtcpVersionResponse { get; init; }
 
     /// <summary>
     /// Whether the bot should automatically reconnect after a connection failure.

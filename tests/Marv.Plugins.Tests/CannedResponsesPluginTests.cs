@@ -4,6 +4,7 @@ using Marv.Core;
 using Marv.Core.Events;
 using Marv.Plugins.CannedResponses;
 using Marv.Testing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Marv.Plugins.Tests;
 
@@ -13,8 +14,11 @@ namespace Marv.Plugins.Tests;
 /// </summary>
 public class CannedResponsesPluginTests
 {
+    private static readonly BotIdentity TestIdentity = new("Marv IRC Bot", "1.0.0-test");
+
     private static PluginTestHarness<CannedResponsesPlugin> CreateHarness() =>
-        PluginTestHarness<CannedResponsesPlugin>.Create();
+        PluginTestHarness<CannedResponsesPlugin>.Create(
+            configureServices: s => s.AddSingleton(TestIdentity));
 
     [Fact]
     public async Task PingCommand_FromHandlerGroup_Responds()
@@ -45,7 +49,7 @@ public class CannedResponsesPluginTests
         }).Build();
 
         await harness.HandleEventAsync(evt);
-        await harness.Bot.Received(1).SendMessageAsync("#test", $"Marv IRC Bot v{MarvVersion.Current}", Arg.Any<CancellationToken>());
+        await harness.Bot.Received(1).SendMessageAsync("#test", $"{TestIdentity.Name} v{TestIdentity.Version}", Arg.Any<CancellationToken>());
     }
 
     [Fact]

@@ -170,15 +170,43 @@ All `Send*Async` methods are thread-safe.
 | `Statistics` | `IBotStatistics` | Connection statistics (uptime, bytes, lines, handlers) |
 | `OutboundQueueCount` | `int` | Messages waiting in the outbound send queue |
 
-### CTCP VERSION override
+### Bot Identity
 
-The bot's CTCP VERSION response can be customized via the `CtcpVersionResponse`
-configuration property. Set it to a custom string to change the response, or to
-an empty string to suppress the response entirely.
+The bot's public identity is represented by the `BotIdentity` record, registered
+as a singleton in DI. It provides `Name`, `Version`, `SourceUrl?`, and a
+`FullIdentity` string combining name and version.
 
-For dynamic VERSION responses (e.g. including loaded plugins or uptime), set
-`CtcpVersionResponse` to `""` in config to suppress the built-in response, then
-handle `CtcpEvent` via `[OnEvent]` to send your own NOTICE:
+Inject `BotIdentity` into plugins or handler groups:
+
+```csharp
+public InfoHandlers(IBot bot, BotIdentity identity)
+{
+    _bot = bot;
+    _identity = identity;
+}
+
+[OnCommand("version")]
+public async Task HandleVersion(CommandContext ctx, CancellationToken ct)
+{
+    await ctx.ReplyAsync($"{_identity.Name} v{_identity.Version}", ct);
+}
+```
+
+Identity is configured via two properties in `MarvConfiguration`:
+
+| Property | Default | Description |
+|---|---|---|
+| `BotName` | `"Marv IRC Bot"` | Public name used in CTCP VERSION, `!version`, and Sentry |
+| `BotVersion` | `null` (auto-detect) | Public version; when null, resolved from the entry assembly |
+
+Downstream distributions that package Marv as a NuGet dependency get automatic
+version detection from their own entry assembly. Set `BotVersion` explicitly only
+when the auto-detected version is wrong.
+
+### CTCP VERSION customisation
+
+The built-in CTCP VERSION response uses `BotIdentity.FullIdentity`. To fully
+customise or suppress it, handle `CtcpEvent` via `[OnEvent]`:
 
 ```csharp
 [OnEvent]
@@ -500,6 +528,7 @@ mocks. Pass `bot:` to provide a custom `IBot` mock.
 
 | Service | Lifetime | Description |
 |---|---|---|
+| `BotIdentity` | Singleton | Bot name, version, and optional source URL |
 | `IBot` | Scoped | Bot instance (fresh per connection) |
 | `IPluginActivator` | Scoped | Creates instances with DI resolution |
 | `IBotStatistics` | Scoped | Connection statistics (also via `IBot.Statistics`) |

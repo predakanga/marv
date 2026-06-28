@@ -18,6 +18,7 @@ internal sealed class IrcBot : IBot
     private readonly ILogger<IrcBot> _logger;
     private readonly ServerInfo _serverInfo;
     private readonly CapabilityManager _capabilityManager;
+    private readonly BotIdentity _identity;
     private readonly BotStatistics _statistics = new();
     private IrcConnection? _connection;
 
@@ -90,11 +91,12 @@ internal sealed class IrcBot : IBot
         Platform.Capabilities.StandardReplies
     ];
 
-    public IrcBot(ILogger<IrcBot> logger, ServerInfo serverInfo, CapabilityManager capabilityManager)
+    public IrcBot(ILogger<IrcBot> logger, ServerInfo serverInfo, CapabilityManager capabilityManager, BotIdentity identity)
     {
         _logger = logger;
         _serverInfo = serverInfo;
         _capabilityManager = capabilityManager;
+        _identity = identity;
         _currentNick = "Marv";
 
         var comparer = CaseMapping.GetComparer(_serverInfo.CaseMapping);
@@ -973,14 +975,8 @@ internal sealed class IrcBot : IBot
                     break;
                 }
             case "VERSION":
-                var versionResponse = _config.CtcpVersionResponse
-                    ?? $"Marv IRC Bot {MarvVersion.Current}";
-
-                if (!string.IsNullOrEmpty(versionResponse))
-                {
-                    await SendRawAsync(new IrcMessage("NOTICE", [sender.Nick,
-                        $"\x01VERSION {versionResponse}\x01"]), ct);
-                }
+                await SendRawAsync(new IrcMessage("NOTICE", [sender.Nick,
+                    $"\x01VERSION {_identity.FullIdentity}\x01"]), ct);
                 break;
             case "PING":
                 await SendRawAsync(new IrcMessage("NOTICE", [sender.Nick,

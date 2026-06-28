@@ -1,5 +1,6 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
+using Marv.Core;
 using Marv.Core.Irc;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
@@ -54,7 +55,8 @@ public class IrcServerFixture : IAsyncLifetime
         var serverInfo = new ServerInfo();
         var capManager = new CapabilityManager();
         var logger = NullLogger<IrcBot>.Instance;
-        return new IrcBot(logger, serverInfo, capManager);
+        var identity = new BotIdentity("Marv IRC Bot", "0.0.0-test");
+        return new IrcBot(logger, serverInfo, capManager, identity);
     }
 
     /// <summary>

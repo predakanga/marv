@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `BotIdentity` record — a unified identity model (name, version, optional
+  source URL) injected via DI, used in CTCP VERSION responses, the `!version`
+  command, and Sentry error reports.
+- `BotName` and `BotVersion` configuration properties for downstream
+  distributions to customise the bot's public identity.
+
+### Changed
+
+- CTCP VERSION response and `!version` command now use `BotIdentity` instead
+  of hardcoded strings.
+- Sentry error reports now include the bot's configured identity in the release
+  tag.
+
+### Removed
+
+- **Breaking:** Removed `CtcpVersionResponse` configuration property. Use
+  `BotName`/`BotVersion` for simple customisation or an `[OnEvent]` handler
+  for full control.
+- **Breaking:** Removed `MarvVersion` class. Use `BotIdentity` (via DI) instead.
+
 ### Removed
 
 - Removed `Json5.Configuration` dependency. The built-in .NET JSON configuration
