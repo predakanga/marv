@@ -28,9 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `BotName`/`BotVersion` for simple customisation or an `[OnEvent]` handler
   for full control.
 - **Breaking:** Removed `MarvVersion` class. Use `BotIdentity` (via DI) instead.
-
-### Removed
-
 - Removed `Json5.Configuration` dependency. The built-in .NET JSON configuration
   provider natively supports comments and trailing commas, making the third-party
   JSON5 parser unnecessary. JSON config files (including `marv.json`) continue to
