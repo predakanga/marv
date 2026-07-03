@@ -1,4 +1,5 @@
 using Marv.Core;
+using Marv.Core.Irc;
 using Xunit;
 
 namespace Marv.Core.Tests.Irc;
@@ -163,5 +164,42 @@ public class IrcBotBulkJoinTests
     public void ParseMaxTargets_ExtractsCorrectLimit(string? maxtargets, int? expected)
     {
         Assert.Equal(expected, IrcUtils.ParseMaxTargets(maxtargets));
+    }
+
+    [Fact]
+    public void GetMaxTargets_PrefersTargMax()
+    {
+        var info = new ServerInfo();
+        info.SetToken("TARGMAX", "JOIN:4,PRIVMSG:1");
+        info.SetToken("MAXTARGETS", "8");
+
+        Assert.Equal(4, IrcUtils.GetMaxTargets(info, "JOIN"));
+    }
+
+    [Fact]
+    public void GetMaxTargets_FallsBackToMaxTargets()
+    {
+        var info = new ServerInfo();
+        info.SetToken("MAXTARGETS", "6");
+
+        Assert.Equal(6, IrcUtils.GetMaxTargets(info, "JOIN"));
+    }
+
+    [Fact]
+    public void GetMaxTargets_ReturnsNull_WhenNeitherSet()
+    {
+        var info = new ServerInfo();
+
+        Assert.Null(IrcUtils.GetMaxTargets(info, "JOIN"));
+    }
+
+    [Fact]
+    public void GetMaxTargets_FallsBackToMaxTargets_WhenCommandNotInTargMax()
+    {
+        var info = new ServerInfo();
+        info.SetToken("TARGMAX", "PRIVMSG:1,KICK:4");
+        info.SetToken("MAXTARGETS", "3");
+
+        Assert.Equal(3, IrcUtils.GetMaxTargets(info, "JOIN"));
     }
 }

@@ -188,9 +188,7 @@ internal sealed class IrcBot : IBot
         if (channels.Count == 0) return;
 
         // "JOIN " = 5 bytes, "\r\n" = 2 bytes → 505 bytes for the channel list
-        // TARGMAX is per-command and takes precedence; MAXTARGETS is a global fallback.
-        var maxTargets = IrcUtils.ParseTargMax(_serverInfo.GetValue("TARGMAX"), "JOIN")
-            ?? IrcUtils.ParseMaxTargets(_serverInfo.GetValue("MAXTARGETS"));
+        var maxTargets = IrcUtils.GetMaxTargets(_serverInfo, "JOIN");
         foreach (var batch in IrcUtils.BatchChannels(channels, maxPayloadLength: 505, maxTargets))
         {
             var joined = string.Join(',', batch);

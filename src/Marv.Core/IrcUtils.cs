@@ -1,3 +1,5 @@
+using Marv.Core.Platform;
+
 namespace Marv.Core;
 
 /// <summary>
@@ -5,6 +7,16 @@ namespace Marv.Core;
 /// </summary>
 public static class IrcUtils
 {
+    /// <summary>
+    /// Returns the maximum number of targets allowed for the specified command,
+    /// consulting TARGMAX first (per-command) and falling back to MAXTARGETS
+    /// (global). Returns null if neither token constrains the command.
+    /// </summary>
+    /// <param name="serverInfo">The server info containing ISUPPORT tokens.</param>
+    /// <param name="command">The command to look up (e.g. "JOIN").</param>
+    public static int? GetMaxTargets(IServerInfo serverInfo, string command) =>
+        ParseTargMax(serverInfo.GetValue("TARGMAX"), command)
+        ?? ParseMaxTargets(serverInfo.GetValue("MAXTARGETS"));
     /// <summary>
     /// Splits a list of channel names into batches where each batch's
     /// comma-separated representation fits within
@@ -59,7 +71,7 @@ public static class IrcUtils
     /// <param name="targmax">The raw TARGMAX value from ISUPPORT.</param>
     /// <param name="command">The command to look up (e.g. "JOIN").</param>
     /// <returns>The target limit, or null if the command is not listed or has no limit.</returns>
-    public static int? ParseTargMax(string? targmax, string command)
+    internal static int? ParseTargMax(string? targmax, string command)
     {
         if (string.IsNullOrEmpty(targmax)) return null;
 
@@ -87,7 +99,7 @@ public static class IrcUtils
     /// </summary>
     /// <param name="maxtargets">The raw MAXTARGETS value from ISUPPORT.</param>
     /// <returns>The target limit, or null if the value is absent or not a valid integer.</returns>
-    public static int? ParseMaxTargets(string? maxtargets)
+    internal static int? ParseMaxTargets(string? maxtargets)
     {
         if (maxtargets is not null && int.TryParse(maxtargets, out var limit))
             return limit;
