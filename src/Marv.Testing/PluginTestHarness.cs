@@ -1,3 +1,4 @@
+using Marv.Core;
 using Marv.Core.Platform;
 using Marv.Core.Plugin;
 using Microsoft.Extensions.DependencyInjection;
@@ -73,6 +74,7 @@ public sealed class PluginTestHarness<TPlugin> : IDisposable where TPlugin : Mar
         var services = new ServiceCollection();
         services.AddScoped<IBot>(_ => bot);
         services.AddSingleton<ILoggerFactory>(NullLoggerFactory.Instance);
+        services.AddSingleton(new BotIdentity("TestBot", "0.0.0-test"));
         services.AddScoped<IPluginActivator, TestPluginActivator>();
 
         configureServices?.Invoke(services);

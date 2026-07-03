@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 2</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 2/2</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-001.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<span class="current">2</span>
+<span class="disabled">Next &rarr;</span>
+</div>
+
+        
+<div class="message user" id="msg-2026-07-03T06-24-24-835Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-07-03T06-24-24-835Z" class="timestamp-link"><time datetime="2026-07-03T06:24:24.835Z" data-timestamp="2026-07-03T06:24:24.835Z">2026-07-03T06:24:24.835Z</time></a></div><div class="message-content">
+<div class="user-content"><p><command-message>triage-issues</command-message>
+<command-name>/triage-issues</command-name></p></div></div></div>
+<div class="message user" id="msg-2026-07-03T06-24-24-835Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-07-03T06-24-24-835Z" class="timestamp-link"><time datetime="2026-07-03T06:24:24.835Z" data-timestamp="2026-07-03T06:24:24.835Z">2026-07-03T06:24:24.835Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Base directory for this skill: /workspaces/marv/.claude/skills/triage-issues</p>
+<h1>Triage GitHub Issues</h1>
+<p>Fetch open GitHub issues, analyse them against the codebase, and present
+them to the user in the TUI for interactive routing. Discussion happens
+here in the conversation — GitHub receives only a terse record of
+decisions made.</p>
+<h2>When to use</h2>
+<p>Invoke with <code>/triage-issues</code> when you want to process open GitHub issues.</p>
+<h2>Workflow</h2>
+<h3>1. Fetch and filter open issues</h3>
+<p>Run:</p>
+<pre><code>gh issue list --repo predakanga/marv --state open --json number,title,body,labels,comments --limit 50
+</code></pre>
+<p>Filter out issues that already have a label <code>triaged</code>, <code>rejected</code>, or
+<code>wontfix</code>.</p>
+<h3>2. Analyse and present</h3>
+<p>For each remaining issue:</p>
+<ol>
+<li>Fetch details with <code>gh issue view &lt;NUMBER&gt; --repo predakanga/marv --json number,title,body,labels,comments</code>.</li>
+<li>Read the issue description and any comments.</li>
+<li>Read relevant source files mentioned or implied by the issue.</li>
+<li>Check <code>docs/change_specs/README.md</code> for overlapping or existing
+   pending specs.</li>
+<li>Assess the issue type (bug, feature, trivial fix) and complexity.</li>
+</ol>
+<p>Present a summary table to the user:</p>
+<pre><code>## Open Issues
+
+| # | Title | Type | Complexity | Notes |
+|---|-------|------|------------|-------|
+| #7 | UserMod enable no response | Bug | Small | No existing spec |
+| #12 | Add !weather command | Feature | Medium | — |
+| #15 | Typo in help text | Trivial | Trivial | — |
+</code></pre>
+<p>Then ask: <strong>"Which issue would you like to work on?"</strong></p>
+<h3>3. Present issue detail and routing options</h3>
+<p>When the user selects an issue, present the full analysis:</p>
+<ul>
+<li>Issue description (summarised)</li>
+<li>Affected files / areas of the codebase</li>
+<li>Whether an existing change spec covers this issue</li>
+<li>Your assessment of type and complexity</li>
+</ul>
+<p>Then present the routing options:</p>
+<ol>
+<li><strong>Investigate</strong> — dig into the code, run tests, identify root cause,
+   report findings. Best for bugs or issues where the scope is unclear.</li>
+<li><strong>Spec</strong> — create a change specification. Best for features or
+   complex changes that need design work.</li>
+<li><strong>Implement</strong> — fix it directly, no spec needed. Best for trivial or
+   obvious changes.</li>
+<li><strong>Reject</strong> — decline with a reason.</li>
+<li><strong>Skip</strong> — move to the next issue.</li>
+</ol>
+<p>Include a recommendation based on your analysis (e.g. "This looks like
+a bug — I'd recommend investigating first"), but let the user decide.</p>
+<p>Wait for the user to choose before proceeding.</p>
+<h3>4. Path: Investigate</h3>
+<ol>
+<li>Read all source files relevant to the issue.</li>
+<li>Run targeted tests if applicable (e.g. <code>dotnet test --filter</code>).</li>
+<li>Trace the code path to identify the root cause or confirm the
+   reported behaviour.</li>
+<li>Present findings concisely:</li>
+<li>Root cause (or best hypothesis)</li>
+<li>Affected files and line ranges</li>
+<li>Whether the fix is obvious or needs design work</li>
+<li>Whether existing tests cover the area</li>
+<li>Re-offer routing: "Based on this, I'd suggest [Implement / Spec].
+   What would you like to do?"</li>
+</ol>
+<p>The user may choose Implement, Spec, Reject, or Skip at this point.</p>
+<h3>5. Path: Create change specification</h3>
+<ol>
+<li>Determine the next CS number from <code>docs/change_specs/README.md</code>.</li>
+<li>Write the spec file following the template in the CLAUDE.md change
+   specification section. Include a <code>**Source:** GitHub issue #N</code>
+   metadata line.</li>
+<li>Update <code>docs/change_specs/README.md</code> with the new entry (status:
+   <strong>Pending</strong>).</li>
+<li>Present the spec to the user in the TUI for review.</li>
+<li>If the user requests changes, edit the spec and re-present. Iterate
+   until the user is satisfied.</li>
+<li>Commit per CLAUDE.md mandatory instructions.</li>
+</ol>
+<p>Do NOT write any implementation code in this path — specs only.</p>
+<h3>6. Path: Implement directly</h3>
+<ol>
+<li>State what the fix will be and get confirmation from the user.</li>
+<li>Implement the change.</li>
+<li>Run <code>dotnet build</code> and <code>dotnet test</code> to verify.</li>
+<li>Present the diff to the user.</li>
+<li>Commit per CLAUDE.md mandatory instructions.</li>
+</ol>
+<h3>7. Path: Reject</h3>
+<ol>
+<li>Ask the user for a brief reason (or accept the reason if they
+   already provided one).</li>
+<li>Post a comment on the issue: <code>Declined: &lt;reason&gt;</code></li>
+<li>Add the <code>rejected</code> label:
+   <code>gh issue edit &lt;NUMBER&gt; --repo predakanga/marv --add-label rejected</code></li>
+</ol>
+<h3>8. Post GitHub summary</h3>
+<p>After each issue is processed (not skipped), post a terse record to
+GitHub. This is a decision record, not a discussion — keep it short.</p>
+<table>
+<thead>
+<tr>
+<th>Outcome</th>
+<th>Label</th>
+<th>GitHub comment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Investigated (not yet resolved)</td>
+<td><code>investigated</code></td>
+<td>Short summary of findings (see template below)</td>
+</tr>
+<tr>
+<td>Spec created</td>
+<td><code>triaged</code></td>
+<td><code>Change specification CS-NNN created from this issue. See docs/change_specs/NNN-slug.md.</code></td>
+</tr>
+<tr>
+<td>Implemented directly</td>
+<td><code>triaged</code></td>
+<td>None needed — the commit with <code>Closes #N</code> handles it</td>
+</tr>
+<tr>
+<td>Rejected</td>
+<td><code>rejected</code></td>
+<td><code>Declined: &lt;reason&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>Investigation summary template:</p>
+<pre><code>## Investigation Summary
+
+**Root cause:** &lt;one-line description&gt;
+**Affected:** &lt;file list&gt;
+**Fix complexity:** &lt;Trivial / Small / Medium&gt;
+
+&lt;2-3 sentence summary of findings&gt;
+
+*Investigated via Claude Code.*
+</code></pre>
+<p>Apply labels with:</p>
+<pre><code>gh issue edit &lt;NUMBER&gt; --repo predakanga/marv --add-label &lt;label&gt;
+</code></pre>
+<h3>9. Continue or finish</h3>
+<p>Ask the user if they want to process another issue from the list, or
+stop. If stopping, follow the mandatory instructions from CLAUDE.md
+(commit).</p>
+<h2>Important notes</h2>
+<ul>
+<li>This skill presents analysis and recommendations, but the <strong>user
+  makes all routing decisions</strong>. Never proceed to a path without the
+  user choosing it.</li>
+<li>All discussion happens in the TUI. GitHub comments are terse records
+  of decisions, not part of the conversation.</li>
+<li>Paths are fluid — Investigate can lead to Implement or Spec, and Spec
+  can lead to Implement. Handle transitions naturally without forcing
+  the user to re-invoke the skill.</li>
+<li>If an issue already has a pending change spec, mention this in the
+  analysis and suggest implementing the existing spec rather than
+  creating a duplicate.</li>
+<li>When analysing feasibility, read relevant source files — don't guess.</li>
+<li>The Implement path requires <code>dotnet build</code> and <code>dotnet test</code> to pass
+  before presenting results.</li>
+<li>When committing work that resolves a GitHub issue (whether via the
+  Implement path or a later spec implementation), include <code>Closes #N</code>
+  in the commit message body.</li>
+<li>If <code>gh</code> commands fail with auth errors, ask the user to run
+  <code>! gh auth login</code> in their terminal.</li>
+</ul></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-24-32-076Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-24-32-076Z" class="timestamp-link"><time datetime="2026-07-03T06:24:32.076Z" data-timestamp="2026-07-03T06:24:32.076Z">2026-07-03T06:24:32.076Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Fetching open GitHub issues and checking for existing change specs.</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-24-32-568Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-24-32-568Z" class="timestamp-link"><time datetime="2026-07-03T06:24:32.568Z" data-timestamp="2026-07-03T06:24:32.568Z">2026-07-03T06:24:32.568Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01FS38SDHHYMySEC8ow9WYjD">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Fetch open GitHub issues</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">gh issue list --repo predakanga/marv --state open --json number,title,body,labels,comments --limit 50</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-24-32-877Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-24-32-877Z" class="timestamp-link"><time datetime="2026-07-03T06:24:32.877Z" data-timestamp="2026-07-03T06:24:32.877Z">2026-07-03T06:24:32.877Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01Fv1eGaqsp8vq8eY1SryNKi"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/docs/change_specs/README.md&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-03T06-24-33-237Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-03T06-24-33-237Z" class="timestamp-link"><time datetime="2026-07-03T06:24:33.237Z" data-timestamp="2026-07-03T06:24:33.237Z">2026-07-03T06:24:33.237Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>[{&quot;body&quot;:&quot;When joining a large number of channels, the bot currently only uses the max payload length as a hint for where to split commands.\n\nISUPPORT contains a maxtargets parameter that must be considered as well, or JoinMultipleAsync will silently fail for the latter channels.&quot;,&quot;comments&quot;:[],&quot;labels&quot;:[],&quot;number&quot;:14,&quot;title&quot;:&quot;IrcUtils.BatchChannels should respect ISUPPORT maxtargets&quot;},{&quot;body&quot;:&quot;BotIdentity is a service provided by Marv, so it should be included in the test harness for downstream projects to consume.&quot;,&quot;comments&quot;:[],&quot;labels&quot;:[],&quot;number&quot;:13,&quot;title&quot;:&quot;PluginTestHarness should provide BotIdentity&quot;}]</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-03T06-24-33-260Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-03T06-24-33-260Z" class="timestamp-link"><time datetime="2026-07-03T06:24:33.260Z" data-timestamp="2026-07-03T06:24:33.260Z">2026-07-03T06:24:33.260Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# Change Specifications
+2	
+3	Actionable change specifications derived from downstream plugin project
+4	feedback (`docs/downstream_suggestions/`). Each spec is a self-contained
+5	document describing a single change or closely related group of changes.
+6	
+7	Specs are numbered in recommended implementation order.
+8	
+9	## Index
+10	
+11	| # | Spec | Scope | Complexity | Dependencies | Status |
+12	|---|---|---|---|---|---|
+13	| 1 | [Command Prefix Configuration](001-command-prefix-config.md) | Core | Small | None | **Done** |
+14	| 2 | [IHttpClientFactory Registration](002-httpclient-registration.md) | Host | Trivial | None | **Done** |
+15	| 3 | [Handler Dispatch Filters](003-handler-dispatch-filters.md) | Core | Small | None | **Done** |
+16	| 4 | [Bulk Channel Join](004-bulk-channel-join.md) | Core | Small-Medium | None | **Done** |
+17	| 5 | [Handler Filter Pipeline](005-handler-filter-pipeline.md) | Core | Medium | #3 | **Done** |
+18	| 6 | [Test Infrastructure](006-test-infrastructure.md) | New package | Medium | None | **Done** |
+19	| 7 | [Plugin API Documentation](007-plugin-api-documentation.md) | Docs | Medium | None | **Done** |
+20	| 8 | [Example Plugin](008-example-plugin.md) | Examples | Medium | #3, #5 | **Done** |
+21	| 9 | [Bot Action Methods](009-bot-action-methods.md) | Core | Small-Medium | None | **Done** |
+22	| 10 | [Case Mapping for Plugins](010-casemapping-for-plugins.md) | Core | Small | None | **Done** |
+23	| 11 | [Plugin Loading Robustness](011-plugin-loading-robustness.md) | Core | Medium-Large | None | **Done** |
+24	
+25	| 12 | [Dockerfile Sample Plugin Inclusion](012-dockerfile-sample-plugins.md) | Dockerfile | Small | None | **Done** |
+26	| 13 | [Docker Action Build Caching](013-docker-action-caching.md) | CI/CD | Small | None | **Done** |
+27	| 14 | [Release Notes from CHANGELOG.md](014-release-notes-from-changelog.md) | CI/CD | Small | None | **Done** |
+28	| 15 | [Regex Options for OnRegex](015-onregex-options.md) | Core | Small | None | **Done** |
+29	| 16 | [Extract BatchChannels to Utility](016-batch-channels-utility.md) | Core | Trivial | None | **Done** |
+30	| 17 | [Common HandlerContext Base Class](017-common-handler-context.md) | Core | Small-Medium | None | **Done** |
+31	| 18 | [Remove PluginType from HandlerGroup](018-remove-handlergroup-plugintype.md) | Core | Small | None | **Done** |
+32	| 19 | [JSON5 Configuration Parser](019-json5-config-parser.md) | Host | Small-Medium | None | **Reverted** |
+33	
+34	| 20 | [Bot Statistics Property](020-bot-statistics.md) | Core | Medium | None | **Done** |
+35	| 21 | [Message Queue Management](021-message-queue-management.md) | Core | Small | None | **Done** |
+36	| 22 | [Live Config Reload &amp; IOptions Docs](022-plugin-api-ioptions-docs.md) | Host + Docs | Small | None | **Done** |
+37	| 23 | [CTCP VERSION Response Override](023-ctcp-version-override.md) | Core | Small | None | **Done** |
+38	| 24 | [SendAndAwaitAsync ENDOF* Fallback](024-sendandawait-endof-fallback.md) | Core | Medium | None | **Done** |
+39	| 25 | [Testcontainers Integration](025-testcontainers-integration.md) | Tests | Small-Medium | None | **Done** |
+40	
+41	| 26 | [Connection-Scoped DI Services](026-connection-scoped-services.md) | Core | Medium-Large | None | **Done** |
+42	| 27 | [Idiomatic Configuration Loading](027-idiomatic-config-loading.md) | Host | Small-Medium | None | **Done** |
+43	| 28 | [Plugin Loading Integration Tests](028-plugin-loading-integration-tests.md) | Tests | Medium | None | **Done** |
+44	| 29 | [NuGet Packages](029-nuget-packages.md) | CI/CD + Core | Small-Medium | None | **Done** |
+45	| 30 | [Update GitHub Actions](030-update-github-actions.md) | CI/CD | Small | None | **Done** |
+46	| 31 | [NuGet Gallery Migration](031-nuget-gallery-migration.md) | CI/CD | Small | #29 | **Done** |
+47	| 32 | [Disable Auto-Reconnect Option](032-disable-auto-reconnect.md) | Core / Host | Small | None | **Done** |
+48	| 33 | [NuGet Package Improvements](033-nuget-package-improvements.md) | CI/CD + Core | Small-Medium | #29, #31 | **Done** |
+49	| 34 | [Always Use Colon on Trailing Parameters](034-trailing-colon-consistency.md) | Core | Small | None | **Reverted** |
+50	| 35 | [Wildcard Plugin Loading](035-wildcard-plugin-loading.md) | Core / Host | Medium | None | **Done** |
+51	| 36 | [Bot Identity](036-bot-identity.md) | Core / Host | Medium | None | **Done** |
+52	
+53	Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
+54	Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
+55	Specs 12-14 are CI/CD and infrastructure changes. Specs 15-19 are code changes.
+56	Specs 20-25 are downstream feature requests (code, docs, and tests).
+57	Spec 26 is a GitHub issue-driven architectural change.
+58	Specs 27-28 are GitHub issue-driven changes (host config and test infrastructure).
+59	Specs 29-31 are GitHub issue-driven CI/CD changes (NuGet packaging, Actions audit, gallery migration).
+60	Spec 32 is a GitHub issue-driven configuration change (auto-reconnect opt-out).
+61	Spec 33 is a GitHub issue-driven CI/CD change (NuGet package improvements).
+62	Spec 34 is a GitHub issue-driven protocol change (trailing parameter colon consistency).
+63	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-24-42-682Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-24-42-682Z" class="timestamp-link"><time datetime="2026-07-03T06:24:42.682Z" data-timestamp="2026-07-03T06:24:42.682Z">2026-07-03T06:24:42.682Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-24-43-181Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-24-43-181Z" class="timestamp-link"><time datetime="2026-07-03T06:24:43.181Z" data-timestamp="2026-07-03T06:24:43.181Z">2026-07-03T06:24:43.181Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Two open issues found, neither previously triaged. Let me check the relevant source files.</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-24-44-184Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-24-44-184Z" class="timestamp-link"><time datetime="2026-07-03T06:24:44.184Z" data-timestamp="2026-07-03T06:24:44.184Z">2026-07-03T06:24:44.184Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_0168dQWoUfzXVcgt1YLaAjz4">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Find files related to BatchChannels and maxtargets</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;BatchChannels\|maxtargets\|MAXTARGETS&#34; /workspaces/marv/src/ --include=&#34;*.cs&#34; -l</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-03T06-24-44-337Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-03T06-24-44-337Z" class="timestamp-link"><time datetime="2026-07-03T06:24:44.337Z" data-timestamp="2026-07-03T06:24:44.337Z">2026-07-03T06:24:44.337Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/Marv.Core/IrcUtils.cs
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-24-44-918Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-24-44-918Z" class="timestamp-link"><time datetime="2026-07-03T06:24:44.918Z" data-timestamp="2026-07-03T06:24:44.918Z">2026-07-03T06:24:44.918Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01BkwqG3qZym1RemhCwFom35">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Find files related to BotIdentity and PluginTestHarness</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -rn &#34;BotIdentity\|PluginTestHarness&#34; /workspaces/marv/src/ /workspaces/marv/tests/ --include=&#34;*.cs&#34; -l</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-03T06-24-45-162Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-03T06-24-45-162Z" class="timestamp-link"><time datetime="2026-07-03T06:24:45.162Z" data-timestamp="2026-07-03T06:24:45.162Z">2026-07-03T06:24:45.162Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>/workspaces/marv/src/plugins/Marv.Plugins.CannedResponses/InfoHandlers.cs
+/workspaces/marv/src/Marv.Testing/PluginTestHarness.cs
+/workspaces/marv/src/Marv.Core/BotIdentity.cs
+/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs
+/workspaces/marv/src/Marv.Core/Irc/IrcBot.cs
+/workspaces/marv/tests/Marv.Core.Tests/BotIdentityTests.cs
+/workspaces/marv/tests/Marv.Core.Tests/Integration/IrcServerFixture.cs
+/workspaces/marv/tests/Marv.Plugins.Tests/CannedResponsesPluginTests.cs
+/workspaces/marv/tests/Marv.Plugins.Tests/GreetPluginTests.cs
+/workspaces/marv/tests/Marv.Plugins.Tests/AuthConsumerPluginTests.cs
+/workspaces/marv/tests/Marv.Plugins.Tests/ModerationPluginTests.cs
+/workspaces/marv/tests/Marv.Testing.Tests/PluginTestHarnessTests.cs</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-24-49-655Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-24-49-655Z" class="timestamp-link"><time datetime="2026-07-03T06:24:49.655Z" data-timestamp="2026-07-03T06:24:49.655Z">2026-07-03T06:24:49.655Z</time></a></div><div class="message-content">
+<div class="assistant-text"><h2>Open Issues</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Title</th>
+<th>Type</th>
+<th>Complexity</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>#14</td>
+<td>IrcUtils.BatchChannels should respect ISUPPORT maxtargets</td>
+<td>Bug</td>
+<td>Small</td>
+<td>Related to completed CS-004, CS-016</td>
+</tr>
+<tr>
+<td>#13</td>
+<td>PluginTestHarness should provide BotIdentity</td>
+<td>Enhancement</td>
+<td>Trivial</td>
+<td>Follow-up to completed CS-036 (Bot Identity)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Which issue would you like to work on?</strong></p></div></div></div>
+<div class="message user" id="msg-2026-07-03T06-24-59-524Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-07-03T06-24-59-524Z" class="timestamp-link"><time datetime="2026-07-03T06:24:59.524Z" data-timestamp="2026-07-03T06:24:59.524Z">2026-07-03T06:24:59.524Z</time></a></div><div class="message-content">
+<div class="user-content"><p>13</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-25-03-335Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-25-03-335Z" class="timestamp-link"><time datetime="2026-07-03T06:25:03.335Z" data-timestamp="2026-07-03T06:25:03.335Z">2026-07-03T06:25:03.335Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-25-04-203Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-25-04-203Z" class="timestamp-link"><time datetime="2026-07-03T06:25:04.203Z" data-timestamp="2026-07-03T06:25:04.203Z">2026-07-03T06:25:04.203Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Let me pull up the details for #13 and the relevant source files.</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-25-04-676Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-25-04-676Z" class="timestamp-link"><time datetime="2026-07-03T06:25:04.676Z" data-timestamp="2026-07-03T06:25:04.676Z">2026-07-03T06:25:04.676Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01GfxAjPJmDAqb1Eb2ziL6zU"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Testing/PluginTestHarness.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-25-04-683Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-25-04-683Z" class="timestamp-link"><time datetime="2026-07-03T06:25:04.683Z" data-timestamp="2026-07-03T06:25:04.683Z">2026-07-03T06:25:04.683Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01F3GyvB3MUbcRxTQavZaczt"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/BotIdentity.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-03T06-25-04-697Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-03T06-25-04-697Z" class="timestamp-link"><time datetime="2026-07-03T06:25:04.697Z" data-timestamp="2026-07-03T06:25:04.697Z">2026-07-03T06:25:04.697Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	namespace Marv.Core;
+2	
+3	/// &lt;summary&gt;
+4	/// The bot&#x27;s public identity — name, version, and optional source URL.
+5	/// Used in CTCP VERSION responses, the !version command, Sentry reports,
+6	/// and anywhere else the bot identifies itself.
+7	/// &lt;/summary&gt;
+8	public record BotIdentity(string Name, string Version, string? SourceUrl = null)
+9	{
+10	    /// &lt;summary&gt;
+11	    /// Combined name and version string (e.g. &quot;Marv IRC Bot 0.8.0&quot;).
+12	    /// &lt;/summary&gt;
+13	    public string FullIdentity =&gt; $&quot;{Name} {Version}&quot;;
+14	}
+15	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-03T06-25-04-699Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-03T06-25-04-699Z" class="timestamp-link"><time datetime="2026-07-03T06:25:04.699Z" data-timestamp="2026-07-03T06:25:04.699Z">2026-07-03T06:25:04.699Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using Marv.Core.Platform;
+2	using Marv.Core.Plugin;
+3	using Microsoft.Extensions.DependencyInjection;
+4	using Microsoft.Extensions.Logging;
+5	using Microsoft.Extensions.Logging.Abstractions;
+6	
+7	namespace Marv.Testing;
+8	
+9	/// &lt;summary&gt;
+10	/// Creates a plugin instance with a mocked &lt;see cref=&quot;IBot&quot;/&gt;, a real
+11	/// &lt;see cref=&quot;IPluginActivator&quot;/&gt; backed by a connection-scoped
+12	/// &lt;see cref=&quot;IServiceProvider&quot;/&gt;, and a &lt;see cref=&quot;NullLoggerFactory&quot;/&gt;.
+13	/// Reduces plugin test setup to a single call.
+14	/// &lt;/summary&gt;
+15	/// &lt;remarks&gt;
+16	/// &lt;para&gt;
+17	/// Services are registered as scoped to match the production lifetime semantics,
+18	/// where core services are scoped to each IRC connection.
+19	/// &lt;/para&gt;
+20	/// &lt;para&gt;
+21	/// &lt;see cref=&quot;MarvPlugin.OnLoadAsync&quot;/&gt; is NOT called automatically — tests may need
+22	/// to set up additional state before loading. Call &lt;see cref=&quot;LoadAsync&quot;/&gt; explicitly.
+23	/// &lt;/para&gt;
+24	/// &lt;/remarks&gt;
+25	/// &lt;example&gt;
+26	/// &lt;code&gt;
+27	/// using var harness = PluginTestHarness&amp;lt;GreetPlugin&amp;gt;.Create();
+28	/// await harness.LoadAsync();
+29	/// // exercise the plugin...
+30	/// &lt;/code&gt;
+31	/// &lt;/example&gt;
+32	/// &lt;typeparam name=&quot;TPlugin&quot;&gt;The concrete plugin type to test.&lt;/typeparam&gt;
+33	public sealed class PluginTestHarness&lt;TPlugin&gt; : IDisposable where TPlugin : MarvPlugin
+34	{
+35	    private readonly ServiceProvider _rootProvider;
+36	    private readonly IServiceScope _scope;
+37	
+38	    /// &lt;summary&gt;The plugin instance under test.&lt;/summary&gt;
+39	    public TPlugin Plugin { get; }
+40	
+41	    /// &lt;summary&gt;The mocked &lt;see cref=&quot;IBot&quot;/&gt; injected into the plugin.&lt;/summary&gt;
+42	    public IBot Bot { get; }
+43	
+44	    /// &lt;summary&gt;The scoped service provider backing the plugin activator.&lt;/summary&gt;
+45	    public IServiceProvider Services { get; }
+46	
+47	    private PluginTestHarness(TPlugin plugin, IBot bot, ServiceProvider rootProvider, IServiceScope scope)
+48	    {
+49	        Plugin = plugin;
+50	        Bot = bot;
+51	        _rootProvider = rootProvider;
+52	        _scope = scope;
+53	        Services = scope.ServiceProvider;
+54	    }
+55	
+56	    /// &lt;summary&gt;
+57	    /// Creates a new test harness for the specified plugin type.
+58	    /// &lt;/summary&gt;
+59	    /// &lt;param name=&quot;configureServices&quot;&gt;
+60	    /// Optional callback to register additional services (e.g. configuration objects,
+61	    /// inter-plugin service mocks) before the plugin is constructed.
+62	    /// &lt;/param&gt;
+63	    /// &lt;param name=&quot;bot&quot;&gt;
+64	    /// Optional custom &lt;see cref=&quot;IBot&quot;/&gt; mock. If null, &lt;see cref=&quot;MockBot.Create()&quot;/&gt;
+65	    /// is used.
+66	    /// &lt;/param&gt;
+67	    public static PluginTestHarness&lt;TPlugin&gt; Create(
+68	        Action&lt;IServiceCollection&gt;? configureServices = null,
+69	        IBot? bot = null)
+70	    {
+71	        bot ??= MockBot.Create();
+72	
+73	        var services = new ServiceCollection();
+74	        services.AddScoped&lt;IBot&gt;(_ =&gt; bot);
+75	        services.AddSingleton&lt;ILoggerFactory&gt;(NullLoggerFactory.Instance);
+76	        services.AddScoped&lt;IPluginActivator, TestPluginActivator&gt;();
+77	
+78	        configureServices?.Invoke(services);
+79	
+80	        var rootProvider = services.BuildServiceProvider();
+81	        var scope = rootProvider.CreateScope();
+82	        var scopedProvider = scope.ServiceProvider;
+83	
+84	        var activator = scopedProvider.GetRequiredService&lt;IPluginActivator&gt;();
+85	        var plugin = activator.CreateInstance&lt;TPlugin&gt;();
+86	        return new PluginTestHarness&lt;TPlugin&gt;(plugin, bot, rootProvider, scope);
+87	    }
+88	
+89	    /// &lt;summary&gt;
+90	    /// Calls &lt;see cref=&quot;MarvPlugin.OnLoadAsync&quot;/&gt; on the plugin.
+91	    /// Call this explicitly after any additional setup.
+92	    /// &lt;/summary&gt;
+93	    public Task LoadAsync(CancellationToken ct = default) =&gt;
+94	        Plugin.OnLoadAsync(ct);
+95	
+96	    /// &lt;summary&gt;
+97	    /// Calls &lt;see cref=&quot;MarvPlugin.OnConnectedAsync&quot;/&gt; on the plugin.
+98	    /// &lt;/summary&gt;
+99	    public Task ConnectedAsync(CancellationToken ct = default) =&gt;
+100	        Plugin.OnConnectedAsync(ct);
+101	
+102	    /// &lt;summary&gt;
+103	    /// Dispatches an event to the plugin&#x27;s handler pipeline.
+104	    /// &lt;/summary&gt;
+105	    public Task HandleEventAsync(Core.Events.MarvEvent evt, CancellationToken ct = default) =&gt;
+106	        Plugin.HandleEventAsync(evt, ct);
+107	
+108	    /// &lt;inheritdoc /&gt;
+109	    public void Dispose()
+110	    {
+111	        _scope.Dispose();
+112	        _rootProvider.Dispose();
+113	    }
+114	
+115	    /// &lt;summary&gt;
+116	    /// Activator implementation that uses the test service provider.
+117	    /// Uses &lt;see cref=&quot;ActivatorUtilities&quot;/&gt; for constructor injection,
+118	    /// matching the production &lt;c&gt;PluginActivator&lt;/c&gt; behavior.
+119	    /// &lt;/summary&gt;
+120	    private sealed class TestPluginActivator(IServiceProvider serviceProvider) : IPluginActivator
+121	    {
+122	        public T CreateInstance&lt;T&gt;(params object[] parameters) =&gt;
+123	            ActivatorUtilities.CreateInstance&lt;T&gt;(serviceProvider, parameters);
+124	    }
+125	}
+126	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-25-10-302Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-25-10-302Z" class="timestamp-link"><time datetime="2026-07-03T06:25:10.302Z" data-timestamp="2026-07-03T06:25:10.302Z">2026-07-03T06:25:10.302Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01VftkYGNZFhN7gQjp7anbrt">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check how BotIdentity is registered in production</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -n &#34;BotIdentity&#34; /workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-03T06-25-10-397Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-03T06-25-10-397Z" class="timestamp-link"><time datetime="2026-07-03T06:25:10.397Z" data-timestamp="2026-07-03T06:25:10.397Z">2026-07-03T06:25:10.397Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>53:        var identity = new BotIdentity(</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-25-14-602Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-25-14-602Z" class="timestamp-link"><time datetime="2026-07-03T06:25:14.602Z" data-timestamp="2026-07-03T06:25:14.602Z">2026-07-03T06:25:14.602Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01Xxxxd2PTPVbWqnPwSA16XY"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/src/Marv.Core/MarvServiceExtensions.cs&#34;,
+  &#34;offset&#34;: 45,
+  &#34;limit&#34;: 20
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-03T06-25-14-630Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-03T06-25-14-630Z" class="timestamp-link"><time datetime="2026-07-03T06:25:14.630Z" data-timestamp="2026-07-03T06:25:14.630Z">2026-07-03T06:25:14.630Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>45	
+46	        // Register the hosted service
+47	        services.AddHostedService&lt;MarvBotService&gt;();
+48	
+49	        // Discover, resolve, and register plugins
+50	        var config = configuration.Get&lt;MarvConfiguration&gt;() ?? new MarvConfiguration();
+51	
+52	        // Register bot identity
+53	        var identity = new BotIdentity(
+54	            config.BotName,
+55	            config.BotVersion ?? ResolveVersion());
+56	        services.AddSingleton(identity);
+57	        var configuredLogLevel = configuration.GetValue&lt;LogLevel?&gt;(&quot;LogLevel&quot;);
+58	        using var bootstrapLoggerFactory = LoggerFactory.Create(b =&gt;
+59	        {
+60	            b.AddConsole();
+61	            if (configuredLogLevel.HasValue)
+62	                b.SetMinimumLevel(configuredLogLevel.Value);
+63	        });
+64	        var bootstrapLogger = bootstrapLoggerFactory.CreateLogger(&quot;Marv.Bootstrap&quot;);</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-25-27-610Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-25-27-610Z" class="timestamp-link"><time datetime="2026-07-03T06:25:27.610Z" data-timestamp="2026-07-03T06:25:27.610Z">2026-07-03T06:25:27.610Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Here's the full analysis for <strong>#13: PluginTestHarness should provide BotIdentity</strong>:</p>
+<ul>
+<li><strong>Summary:</strong> <code>BotIdentity</code> is registered as a singleton in production (<code>MarvServiceExtensions.cs:56</code>), but the <code>PluginTestHarness</code> doesn't register it. Any plugin that takes <code>BotIdentity</code> as a constructor dependency will fail to resolve in tests.</li>
+<li><strong>Affected files:</strong> <code>src/Marv.Testing/PluginTestHarness.cs</code> (line 73-78, service registration block)</li>
+<li><strong>Existing spec:</strong> CS-036 (Bot Identity) is completed — this is a gap in test support left over from that work.</li>
+<li><strong>Type:</strong> Enhancement / Trivial fix</li>
+<li><strong>Complexity:</strong> Trivial — add one line to register a default <code>BotIdentity</code> in the test service collection.</li>
+</ul>
+<p><strong>Routing options:</strong>
+1. <strong>Investigate</strong> — dig deeper into the code
+2. <strong>Spec</strong> — create a change specification
+3. <strong>Implement</strong> — fix it directly
+4. <strong>Reject</strong> — decline with a reason
+5. <strong>Skip</strong> — move to the next issue</p>
+<p>This is a one-line fix — I'd recommend <strong>Implement</strong> directly. What would you like to do?</p></div></div></div>
+<div class="message user" id="msg-2026-07-03T06-25-34-227Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-07-03T06-25-34-227Z" class="timestamp-link"><time datetime="2026-07-03T06:25:34.227Z" data-timestamp="2026-07-03T06:25:34.227Z">2026-07-03T06:25:34.227Z</time></a></div><div class="message-content">
+<div class="user-content"><p>3</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-25-43-538Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-25-43-538Z" class="timestamp-link"><time datetime="2026-07-03T06:25:43.538Z" data-timestamp="2026-07-03T06:25:43.538Z">2026-07-03T06:25:43.538Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>The fix is to register a default <code>BotIdentity</code> in the test harness service collection, right after the existing service registrations (line 76). The default will use <code>"TestBot"</code> / <code>"0.0.0-test"</code> to make it obvious it's a test instance, and users can override it via <code>configureServices</code>.</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-25-46-305Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-25-46-305Z" class="timestamp-link"><time datetime="2026-07-03T06:25:46.305Z" data-timestamp="2026-07-03T06:25:46.305Z">2026-07-03T06:25:46.305Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_014rEyTmLP2GcGMxpKH5UbwC">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">PluginTestHarness.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Testing/PluginTestHarness.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">        var services = new ServiceCollection();
+        services.AddScoped&lt;IBot&gt;(_ =&gt; bot);
+        services.AddSingleton&lt;ILoggerFactory&gt;(NullLoggerFactory.Instance);
+        services.AddScoped&lt;IPluginActivator, TestPluginActivator&gt;();
+
+        configureServices?.Invoke(services);</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">        var services = new ServiceCollection();
+        services.AddScoped&lt;IBot&gt;(_ =&gt; bot);
+        services.AddSingleton&lt;ILoggerFactory&gt;(NullLoggerFactory.Instance);
+        services.AddSingleton(new BotIdentity(&#34;TestBot&#34;, &#34;0.0.0-test&#34;));
+        services.AddScoped&lt;IPluginActivator, TestPluginActivator&gt;();
+
+        configureServices?.Invoke(services);</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-03T06-25-46-469Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-03T06-25-46-469Z" class="timestamp-link"><time datetime="2026-07-03T06:25:46.469Z" data-timestamp="2026-07-03T06:25:46.469Z">2026-07-03T06:25:46.469Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Testing/PluginTestHarness.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-25-51-960Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-25-51-960Z" class="timestamp-link"><time datetime="2026-07-03T06:25:51.960Z" data-timestamp="2026-07-03T06:25:51.960Z">2026-07-03T06:25:51.960Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now let me add a test and update the changelog, then build and test.</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-25-52-433Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-25-52-433Z" class="timestamp-link"><time datetime="2026-07-03T06:25:52.433Z" data-timestamp="2026-07-03T06:25:52.433Z">2026-07-03T06:25:52.433Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01YYoMNNmUkkz3HQXbLQe6We"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/tests/Marv.Testing.Tests/PluginTestHarnessTests.cs&#34;
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-03T06-25-52-455Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-03T06-25-52-455Z" class="timestamp-link"><time datetime="2026-07-03T06:25:52.455Z" data-timestamp="2026-07-03T06:25:52.455Z">2026-07-03T06:25:52.455Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	using Marv.Core.Events;
+2	using Marv.Core.Platform;
+3	using Marv.Core.Plugin;
+4	using Microsoft.Extensions.DependencyInjection;
+5	using Microsoft.Extensions.Logging;
+6	using NSubstitute;
+7	using Xunit;
+8	
+9	namespace Marv.Testing.Tests;
+10	
+11	public class PluginTestHarnessTests
+12	{
+13	    [Fact]
+14	    public void Create_InstantiatesPlugin()
+15	    {
+16	        var harness = PluginTestHarness&lt;SimpleTestPlugin&gt;.Create();
+17	
+18	        Assert.NotNull(harness.Plugin);
+19	        Assert.NotNull(harness.Bot);
+20	        Assert.NotNull(harness.Services);
+21	    }
+22	
+23	    [Fact]
+24	    public void Create_PluginHasWorkingBot()
+25	    {
+26	        var harness = PluginTestHarness&lt;SimpleTestPlugin&gt;.Create();
+27	
+28	        Assert.Equal(&quot;Marv&quot;, harness.Bot.Self.Nick);
+29	        Assert.Equal(&quot;!&quot;, harness.Bot.CommandPrefix);
+30	    }
+31	
+32	    [Fact]
+33	    public void Create_WithCustomBot_UsesProvidedBot()
+34	    {
+35	        var bot = MockBot.Create(&quot;TestBot&quot;, &quot;.&quot;);
+36	
+37	        var harness = PluginTestHarness&lt;SimpleTestPlugin&gt;.Create(bot: bot);
+38	
+39	        Assert.Same(bot, harness.Bot);
+40	        Assert.Equal(&quot;TestBot&quot;, harness.Bot.Self.Nick);
+41	    }
+42	
+43	    [Fact]
+44	    public async Task LoadAsync_CallsOnLoad()
+45	    {
+46	        var harness = PluginTestHarness&lt;SimpleTestPlugin&gt;.Create();
+47	
+48	        await harness.LoadAsync();
+49	
+50	        Assert.True(harness.Plugin.WasLoaded);
+51	    }
+52	
+53	    [Fact]
+54	    public async Task ConnectedAsync_CallsOnConnected()
+55	    {
+56	        var harness = PluginTestHarness&lt;SimpleTestPlugin&gt;.Create();
+57	
+58	        await harness.ConnectedAsync();
+59	
+60	        Assert.True(harness.Plugin.WasConnected);
+61	    }
+62	
+63	    [Fact]
+64	    public async Task HandleEventAsync_DispatchesEvents()
+65	    {
+66	        var harness = PluginTestHarness&lt;SimpleTestPlugin&gt;.Create();
+67	        var evt = EventBuilder&lt;ConnectedEvent&gt;.Create(raw =&gt; new ConnectedEvent
+68	        {
+69	            RawMessage = raw
+70	        }).Build();
+71	
+72	        await harness.HandleEventAsync(evt);
+73	
+74	        Assert.True(harness.Plugin.ReceivedConnectedEvent);
+75	    }
+76	
+77	    [Fact]
+78	    public void Create_WithCustomServices_RegistersServices()
+79	    {
+80	        var harness = PluginTestHarness&lt;PluginWithDependency&gt;.Create(services =&gt;
+81	        {
+82	            services.AddSingleton&lt;ITestService, TestService&gt;();
+83	        });
+84	
+85	        Assert.NotNull(harness.Plugin);
+86	        Assert.NotNull(harness.Plugin.TestService);
+87	    }
+88	}
+89	
+90	#region Test fixtures
+91	
+92	/// &lt;summary&gt;Minimal plugin for testing the harness.&lt;/summary&gt;
+93	public class SimpleTestPlugin(IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory)
+94	    : MarvPlugin(bot, activator, loggerFactory)
+95	{
+96	    public bool WasLoaded { get; private set; }
+97	    public bool WasConnected { get; private set; }
+98	    public bool ReceivedConnectedEvent { get; private set; }
+99	
+100	    public override Task OnLoadAsync(CancellationToken ct)
+101	    {
+102	        WasLoaded = true;
+103	        return Task.CompletedTask;
+104	    }
+105	
+106	    public override Task OnConnectedAsync(CancellationToken ct)
+107	    {
+108	        WasConnected = true;
+109	        return Task.CompletedTask;
+110	    }
+111	
+112	    [OnEvent]
+113	    private Task HandleConnected(ConnectedEvent e, CancellationToken ct)
+114	    {
+115	        ReceivedConnectedEvent = true;
+116	        return Task.CompletedTask;
+117	    }
+118	}
+119	
+120	public interface ITestService
+121	{
+122	    string Value { get; }
+123	}
+124	
+125	public class TestService : ITestService
+126	{
+127	    public string Value =&gt; &quot;test&quot;;
+128	}
+129	
+130	/// &lt;summary&gt;Plugin that requires an additional DI service.&lt;/summary&gt;
+131	public class PluginWithDependency(
+132	    IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory,
+133	    ITestService testService)
+134	    : MarvPlugin(bot, activator, loggerFactory)
+135	{
+136	    public ITestService TestService { get; } = testService;
+137	}
+138	
+139	#endregion
+140	</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-25-52-770Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-25-52-770Z" class="timestamp-link"><time datetime="2026-07-03T06:25:52.770Z" data-timestamp="2026-07-03T06:25:52.770Z">2026-07-03T06:25:52.770Z</time></a></div><div class="message-content">
+<div class="tool-use" data-tool-id="toolu_01F3yppMuC9Dy8JBmpdVTwSf"><div class="tool-header"><span class="tool-icon">⚙</span> Read</div><div class="truncatable"><div class="truncatable-content"><pre class="json">{
+  &#34;file_path&#34;: &#34;/workspaces/marv/CHANGELOG.md&#34;,
+  &#34;limit&#34;: 25
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message tool-reply" id="msg-2026-07-03T06-25-52-782Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-03T06-25-52-782Z" class="timestamp-link"><time datetime="2026-07-03T06:25:52.782Z" data-timestamp="2026-07-03T06:25:52.782Z">2026-07-03T06:25:52.782Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>1	# Changelog
+2	
+3	All notable changes to this project will be documented in this file.
+4	
+5	The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+6	and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+7	
+8	## [Unreleased]
+9	
+10	## [0.9.0] - 2026-06-28
+11	
+12	### Added
+13	
+14	- `BotIdentity` record — a unified identity model (name, version, optional
+15	  source URL) injected via DI, used in CTCP VERSION responses, the `!version`
+16	  command, and Sentry error reports.
+17	- `BotName` and `BotVersion` configuration properties for downstream
+18	  distributions to customise the bot&#x27;s public identity.
+19	
+20	### Changed
+21	
+22	- CTCP VERSION response and `!version` command now use `BotIdentity` instead
+23	  of hardcoded strings.
+24	- Sentry error reports now include the bot&#x27;s configured identity in the release
+25	  tag.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-26-02-486Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-26-02-486Z" class="timestamp-link"><time datetime="2026-07-03T06:26:02.486Z" data-timestamp="2026-07-03T06:26:02.486Z">2026-07-03T06:26:02.486Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01A1wWeAy4XGGZXFFSuKtfJm">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">PluginTestHarnessTests.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/tests/Marv.Testing.Tests/PluginTestHarnessTests.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">    [Fact]
+    public void Create_WithCustomServices_RegistersServices()
+    {
+        var harness = PluginTestHarness&lt;PluginWithDependency&gt;.Create(services =&gt;
+        {
+            services.AddSingleton&lt;ITestService, TestService&gt;();
+        });
+
+        Assert.NotNull(harness.Plugin);
+        Assert.NotNull(harness.Plugin.TestService);
+    }
+}</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">    [Fact]
+    public void Create_WithCustomServices_RegistersServices()
+    {
+        var harness = PluginTestHarness&lt;PluginWithDependency&gt;.Create(services =&gt;
+        {
+            services.AddSingleton&lt;ITestService, TestService&gt;();
+        });
+
+        Assert.NotNull(harness.Plugin);
+        Assert.NotNull(harness.Plugin.TestService);
+    }
+
+    [Fact]
+    public void Create_ProvidesBotIdentity()
+    {
+        var harness = PluginTestHarness&lt;PluginWithIdentity&gt;.Create();
+
+        Assert.NotNull(harness.Plugin.Identity);
+        Assert.Equal(&#34;TestBot&#34;, harness.Plugin.Identity.Name);
+        Assert.Equal(&#34;0.0.0-test&#34;, harness.Plugin.Identity.Version);
+    }
+
+    [Fact]
+    public void Create_WithCustomBotIdentity_OverridesDefault()
+    {
+        var harness = PluginTestHarness&lt;PluginWithIdentity&gt;.Create(services =&gt;
+        {
+            services.AddSingleton(new Core.BotIdentity(&#34;CustomBot&#34;, &#34;1.0.0&#34;, &#34;https://example.com&#34;));
+        });
+
+        Assert.Equal(&#34;CustomBot&#34;, harness.Plugin.Identity.Name);
+        Assert.Equal(&#34;1.0.0&#34;, harness.Plugin.Identity.Version);
+        Assert.Equal(&#34;https://example.com&#34;, harness.Plugin.Identity.SourceUrl);
+    }
+}</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-03T06-26-02-579Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-03T06-26-02-579Z" class="timestamp-link"><time datetime="2026-07-03T06:26:02.579Z" data-timestamp="2026-07-03T06:26:02.579Z">2026-07-03T06:26:02.579Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/tests/Marv.Testing.Tests/PluginTestHarnessTests.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-26-09-384Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-26-09-384Z" class="timestamp-link"><time datetime="2026-07-03T06:26:09.384Z" data-timestamp="2026-07-03T06:26:09.384Z">2026-07-03T06:26:09.384Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Need to add the <code>using Marv.Core</code> directive to the harness file, and add the test fixture class.</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-26-11-164Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-26-11-164Z" class="timestamp-link"><time datetime="2026-07-03T06:26:11.164Z" data-timestamp="2026-07-03T06:26:11.164Z">2026-07-03T06:26:11.164Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_01FGodjB6UAAnWC8aYr85NQn">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">PluginTestHarness.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/src/Marv.Testing/PluginTestHarness.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">using Marv.Core.Platform;
+using Marv.Core.Plugin;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">using Marv.Core;
+using Marv.Core.Platform;
+using Marv.Core.Plugin;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-03T06-26-11-224Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-03T06-26-11-224Z" class="timestamp-link"><time datetime="2026-07-03T06:26:11.224Z" data-timestamp="2026-07-03T06:26:11.224Z">2026-07-03T06:26:11.224Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/src/Marv.Testing/PluginTestHarness.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-26-16-987Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-26-16-987Z" class="timestamp-link"><time datetime="2026-07-03T06:26:16.987Z" data-timestamp="2026-07-03T06:26:16.987Z">2026-07-03T06:26:16.987Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now add the test fixture and update the changelog.</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-26-21-159Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-26-21-159Z" class="timestamp-link"><time datetime="2026-07-03T06:26:21.159Z" data-timestamp="2026-07-03T06:26:21.159Z">2026-07-03T06:26:21.159Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_015qrQfXcXoV2SKSAxu4wKTC">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">PluginTestHarnessTests.cs</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/tests/Marv.Testing.Tests/PluginTestHarnessTests.cs</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">/// &lt;summary&gt;Plugin that requires an additional DI service.&lt;/summary&gt;
+public class PluginWithDependency(
+    IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory,
+    ITestService testService)
+    : MarvPlugin(bot, activator, loggerFactory)
+{
+    public ITestService TestService { get; } = testService;
+}
+
+#endregion</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">/// &lt;summary&gt;Plugin that requires an additional DI service.&lt;/summary&gt;
+public class PluginWithDependency(
+    IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory,
+    ITestService testService)
+    : MarvPlugin(bot, activator, loggerFactory)
+{
+    public ITestService TestService { get; } = testService;
+}
+
+/// &lt;summary&gt;Plugin that requires BotIdentity via DI.&lt;/summary&gt;
+public class PluginWithIdentity(
+    IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory,
+    Core.BotIdentity identity)
+    : MarvPlugin(bot, activator, loggerFactory)
+{
+    public Core.BotIdentity Identity { get; } = identity;
+}
+
+#endregion</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-03T06-26-21-225Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-03T06-26-21-225Z" class="timestamp-link"><time datetime="2026-07-03T06:26:21.225Z" data-timestamp="2026-07-03T06:26:21.225Z">2026-07-03T06:26:21.225Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/tests/Marv.Testing.Tests/PluginTestHarnessTests.cs has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-26-30-004Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-26-30-004Z" class="timestamp-link"><time datetime="2026-07-03T06:26:30.004Z" data-timestamp="2026-07-03T06:26:30.004Z">2026-07-03T06:26:30.004Z</time></a></div><div class="message-content"><div class="file-tool edit-tool" data-tool-id="toolu_011ZQMBvqH6h7kY4cXvCkTRq">
+<div class="file-tool-header edit-header"><span class="file-tool-icon">✏️</span> Edit <span class="file-tool-path">CHANGELOG.md</span></div>
+<div class="file-tool-fullpath">/workspaces/marv/CHANGELOG.md</div>
+<div class="truncatable"><div class="truncatable-content">
+<div class="edit-section edit-old"><div class="edit-label">−</div><pre class="edit-content">## [Unreleased]
+
+## [0.9.0] - 2026-06-28</pre></div>
+<div class="edit-section edit-new"><div class="edit-label">+</div><pre class="edit-content">## [Unreleased]
+
+### Added
+
+- `PluginTestHarness` now registers a default `BotIdentity` so plugins that
+  depend on it can be tested without manual service registration.
+
+## [0.9.0] - 2026-06-28</pre></div>
+</div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-03T06-26-30-087Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-03T06-26-30-087Z" class="timestamp-link"><time datetime="2026-07-03T06:26:30.087Z" data-timestamp="2026-07-03T06:26:30.087Z">2026-07-03T06:26:30.087Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>The file /workspaces/marv/CHANGELOG.md has been updated successfully. (file state is current in your context — no need to Read it back)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-26-36-785Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-26-36-785Z" class="timestamp-link"><time datetime="2026-07-03T06:26:36.785Z" data-timestamp="2026-07-03T06:26:36.785Z">2026-07-03T06:26:36.785Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01J91TwSzoFgMLWZ8G5NAYXA">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Build the solution</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">dotnet build -c Release 2&gt;&amp;1 | tail -5</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-03T06-26-50-668Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-03T06-26-50-668Z" class="timestamp-link"><time datetime="2026-07-03T06:26:50.668Z" data-timestamp="2026-07-03T06:26:50.668Z">2026-07-03T06:26:50.668Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:13.55</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-26-58-123Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-26-58-123Z" class="timestamp-link"><time datetime="2026-07-03T06:26:58.123Z" data-timestamp="2026-07-03T06:26:58.123Z">2026-07-03T06:26:58.123Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_012fMzfodKi4pQNcH48PdVLb">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Run all tests</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">dotnet test -c Release 2&gt;&amp;1 | tail -15</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-03T06-28-00-984Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-03T06-28-00-984Z" class="timestamp-link"><time datetime="2026-07-03T06:28:00.984Z" data-timestamp="2026-07-03T06:28:00.984Z">2026-07-03T06:28:00.984Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  Marv.Plugins.AuthConsumer -&gt; /workspaces/marv/src/plugins/Marv.Plugins.AuthConsumer/bin/Release/net10.0/Marv.Plugins.AuthConsumer.dll
+  Marv.Plugins.Moderation -&gt; /workspaces/marv/src/plugins/Marv.Plugins.Moderation/bin/Release/net10.0/Marv.Plugins.Moderation.dll
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    37, Skipped:     0, Total:    37, Duration: 150 ms - Marv.Testing.Tests.dll (net10.0)
+  Marv.Core.Tests -&gt; /workspaces/marv/tests/Marv.Core.Tests/bin/Release/net10.0/Marv.Core.Tests.dll
+Test run for /workspaces/marv/tests/Marv.Core.Tests/bin/Release/net10.0/Marv.Core.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:   312, Skipped:     0, Total:   312, Duration: 55 s - Marv.Core.Tests.dll (net10.0)
+  Marv.Plugins.Tests -&gt; /workspaces/marv/tests/Marv.Plugins.Tests/bin/Release/net10.0/Marv.Plugins.Tests.dll
+Test run for /workspaces/marv/tests/Marv.Plugins.Tests/bin/Release/net10.0/Marv.Plugins.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    24, Skipped:     0, Total:    24, Duration: 186 ms - Marv.Plugins.Tests.dll (net10.0)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-28-07-105Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-28-07-105Z" class="timestamp-link"><time datetime="2026-07-03T06:28:07.105Z" data-timestamp="2026-07-03T06:28:07.105Z">2026-07-03T06:28:07.105Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>All 373 tests pass. Let me check for the pre-commit hook, then commit.</p></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-28-08-263Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-28-08-263Z" class="timestamp-link"><time datetime="2026-07-03T06:28:08.263Z" data-timestamp="2026-07-03T06:28:08.263Z">2026-07-03T06:28:08.263Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01BXX1Qj79wz63t53dWdBUQm">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Ensure pre-commit hook exists</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">test -x /workspaces/marv/.git/hooks/pre-commit &amp;&amp; echo &#34;exists&#34; || (cp /workspaces/marv/.githooks/pre-commit /workspaces/marv/.git/hooks/pre-commit &amp;&amp; chmod +x /workspaces/marv/.git/hooks/pre-commit &amp;&amp; echo &#34;copied&#34;)</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-07-03T06-28-14-804Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-07-03T06-28-14-804Z" class="timestamp-link"><time datetime="2026-07-03T06:28:14.804Z" data-timestamp="2026-07-03T06:28:14.804Z">2026-07-03T06:28:14.804Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>exists</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-07-03T06-28-23-062Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-07-03T06-28-23-062Z" class="timestamp-link"><time datetime="2026-07-03T06:28:23.062Z" data-timestamp="2026-07-03T06:28:23.062Z">2026-07-03T06:28:23.062Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01VB2Kcjaoa5hfGvTQotSJAU">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Commit the changes</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git -C /workspaces/marv add src/Marv.Testing/PluginTestHarness.cs tests/Marv.Testing.Tests/PluginTestHarnessTests.cs CHANGELOG.md &amp;&amp; git -C /workspaces/marv commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+Register default BotIdentity in PluginTestHarness
+
+Plugins that depend on BotIdentity via DI can now be tested without
+manual service registration. The harness provides a default instance
+(&#34;TestBot&#34; / &#34;0.0.0-test&#34;) that can be overridden via configureServices.
+
+Closes #13
+
+Co-Authored-By: Claude Opus 4.6 &lt;noreply@anthropic.com&gt;
+EOF
+)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-001.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<span class="current">2</span>
+<span class="disabled">Next &rarr;</span>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

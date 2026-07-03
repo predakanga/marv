@@ -85,6 +85,29 @@ public class PluginTestHarnessTests
         Assert.NotNull(harness.Plugin);
         Assert.NotNull(harness.Plugin.TestService);
     }
+
+    [Fact]
+    public void Create_ProvidesBotIdentity()
+    {
+        var harness = PluginTestHarness<PluginWithIdentity>.Create();
+
+        Assert.NotNull(harness.Plugin.Identity);
+        Assert.Equal("TestBot", harness.Plugin.Identity.Name);
+        Assert.Equal("0.0.0-test", harness.Plugin.Identity.Version);
+    }
+
+    [Fact]
+    public void Create_WithCustomBotIdentity_OverridesDefault()
+    {
+        var harness = PluginTestHarness<PluginWithIdentity>.Create(services =>
+        {
+            services.AddSingleton(new Core.BotIdentity("CustomBot", "1.0.0", "https://example.com"));
+        });
+
+        Assert.Equal("CustomBot", harness.Plugin.Identity.Name);
+        Assert.Equal("1.0.0", harness.Plugin.Identity.Version);
+        Assert.Equal("https://example.com", harness.Plugin.Identity.SourceUrl);
+    }
 }
 
 #region Test fixtures
@@ -134,6 +157,15 @@ public class PluginWithDependency(
     : MarvPlugin(bot, activator, loggerFactory)
 {
     public ITestService TestService { get; } = testService;
+}
+
+/// <summary>Plugin that requires BotIdentity via DI.</summary>
+public class PluginWithIdentity(
+    IBot bot, IPluginActivator activator, ILoggerFactory loggerFactory,
+    Core.BotIdentity identity)
+    : MarvPlugin(bot, activator, loggerFactory)
+{
+    public Core.BotIdentity Identity { get; } = identity;
 }
 
 #endregion
