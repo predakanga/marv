@@ -161,10 +161,11 @@ details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom
 <span class="disabled">&larr; Prev</span>
 <a href="page-001.html">1</a>
 <a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
 <a href="page-001.html">Next &rarr;</a>
 </div>
 
-        <p style="color: var(--text-muted); margin-bottom: 24px;">9 prompts · 59 messages · 19 tool calls · 0 commits · 2 pages</p>
+        <p style="color: var(--text-muted); margin-bottom: 24px;">11 prompts · 106 messages · 37 tool calls · 1 commits · 3 pages</p>
         
 <div class="index-item"><a href="page-001.html#msg-2026-07-03T06-24-02-428Z"><div class="index-item-header"><span class="index-item-number">#1</span><time datetime="2026-07-03T06:24:02.428Z" data-timestamp="2026-07-03T06:24:02.428Z">2026-07-03T06:24:02.428Z</time></div><div class="index-item-content"><p><command-message>triage-issues</command-message>
 <command-name>/triage-issues</command-name></p></div></a></div>
@@ -927,7 +928,35 @@ stop. If stopping, follow the mandatory instructions from CLAUDE.md
 5. <strong>Skip</strong> — move to the next issue</p>
 <p>This is a one-line fix — I'd recommend <strong>Implement</strong> directly. What would you like to do?</p></div></div><button class="expand-btn">Show more</button></div></div>
 </div></div>
-<div class="index-item"><a href="page-002.html#msg-2026-07-03T06-25-34-227Z"><div class="index-item-header"><span class="index-item-number">#9</span><time datetime="2026-07-03T06:25:34.227Z" data-timestamp="2026-07-03T06:25:34.227Z">2026-07-03T06:25:34.227Z</time></div><div class="index-item-content"><p>3</p></div></a><div class="index-item-stats"><span>5 edit · 4 bash · 2 read</span>
+<div class="index-item"><a href="page-002.html#msg-2026-07-03T06-25-34-227Z"><div class="index-item-header"><span class="index-item-number">#9</span><time datetime="2026-07-03T06:25:34.227Z" data-timestamp="2026-07-03T06:25:34.227Z">2026-07-03T06:25:34.227Z</time></div><div class="index-item-content"><p>3</p></div></a><div class="index-item-stats"><span>5 edit · 5 bash · 2 read</span>
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>Done. Issue #13 is implemented and committed (<code>3496a74</code>). The commit includes <code>Closes #13</code> so it will auto-close when pushed.</p>
+<p><strong>Changes made:</strong>
+- <code>src/Marv.Testing/PluginTestHarness.cs</code> — registers a default <code>BotIdentity("TestBot", "0.0.0-test")</code> in the test service collection, overridable via <code>configureServices</code>
+- <code>tests/Marv.Testing.Tests/PluginTestHarnessTests.cs</code> — two new tests: default identity is provided, and custom identity overrides it
+- <code>CHANGELOG.md</code> — added entry under <code>[Unreleased]</code></p>
+<p><strong>Would you like to work on the other open issue (#14: BatchChannels should respect ISUPPORT maxtargets), or stop here?</strong></p></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div><div class="index-commit"><div class="index-commit-header"><span class="index-commit-hash">3496a74</span><time datetime="2026-07-03T06:28:28.585Z" data-timestamp="2026-07-03T06:28:28.585Z">2026-07-03T06:28:28.585Z</time></div><div class="index-commit-msg">Register default BotIdentity in PluginTestHarness</div></div>
+<div class="index-item"><a href="page-002.html#msg-2026-07-03T06-28-58-388Z"><div class="index-item-header"><span class="index-item-number">#10</span><time datetime="2026-07-03T06:28:58.388Z" data-timestamp="2026-07-03T06:28:58.388Z">2026-07-03T06:28:58.388Z</time></div><div class="index-item-content"><p>Let's handle #14</p></div></a><div class="index-item-stats"><span>5 bash · 5 read</span>
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>Now I have the full picture. Here's the analysis for <strong>#14: IrcUtils.BatchChannels should respect ISUPPORT maxtargets</strong>:</p>
+<ul>
+<li><strong>Summary:</strong> <code>BatchChannels</code> only splits by payload byte length. IRC servers also advertise <code>MAXTARGETS</code> (or <code>TARGMAX</code>) via ISUPPORT, which limits how many comma-separated targets a single command can have. If the bot joins e.g. 30 channels but the server only allows 4 targets per JOIN, only the first 4 actually get joined.</li>
+<li><strong>Affected files:</strong></li>
+<li><code>src/Marv.Core/IrcUtils.cs</code> — <code>BatchChannels</code> needs a <code>maxTargets</code> parameter</li>
+<li><code>src/Marv.Core/Irc/IrcBot.cs:186-196</code> — <code>JoinMultipleAsync</code> needs to read TARGMAX/MAXTARGETS from <code>_serverInfo</code> and pass it to <code>BatchChannels</code></li>
+<li><code>tests/Marv.Core.Tests/Irc/IrcBotBulkJoinTests.cs</code> — needs new tests for target-count batching</li>
+<li><strong>Existing spec:</strong> CS-004 (Bulk Channel Join) and CS-016 (Extract BatchChannels) are both completed — this is a gap in the original implementation.</li>
+<li><strong>Type:</strong> Bug</li>
+<li><strong>Complexity:</strong> Small</li>
+</ul>
+<p><strong>Routing options:</strong>
+1. <strong>Investigate</strong> — dig deeper
+2. <strong>Spec</strong> — create a change spec
+3. <strong>Implement</strong> — fix directly
+4. <strong>Reject</strong> — decline
+5. <strong>Skip</strong> — move on</p>
+<p>The fix is straightforward — add a <code>maxTargets</code> parameter to <code>BatchChannels</code> and read <code>TARGMAX</code>/<code>MAXTARGETS</code> in <code>JoinMultipleAsync</code>. I'd recommend <strong>Implement</strong> directly. What would you like to do?</p></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div>
+<div class="index-item"><a href="page-003.html#msg-2026-07-03T06-30-23-348Z"><div class="index-item-header"><span class="index-item-number">#11</span><time datetime="2026-07-03T06:30:23.348Z" data-timestamp="2026-07-03T06:30:23.348Z">2026-07-03T06:30:23.348Z</time></div><div class="index-item-content"><p>3</p></div></a><div class="index-item-stats"><span>4 edit · 3 bash</span>
 </div></div>
         
 
@@ -936,6 +965,7 @@ stop. If stopping, follow the mandatory instructions from CLAUDE.md
 <span class="disabled">&larr; Prev</span>
 <a href="page-001.html">1</a>
 <a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
 <a href="page-001.html">Next &rarr;</a>
 </div>
 
@@ -955,7 +985,7 @@ stop. If stopping, follow the mandatory instructions from CLAUDE.md
         </dialog>
         <script>
 (function() {
-    var totalPages = 2;
+    var totalPages = 3;
     var searchBox = document.getElementById('search-box');
     var searchInput = document.getElementById('search-input');
     var searchBtn = document.getElementById('search-btn');

@@ -188,7 +188,9 @@ internal sealed class IrcBot : IBot
         if (channels.Count == 0) return;
 
         // "JOIN " = 5 bytes, "\r\n" = 2 bytes → 505 bytes for the channel list
-        foreach (var batch in IrcUtils.BatchChannels(channels, maxPayloadLength: 505))
+        var targmax = _serverInfo.GetValue("TARGMAX");
+        var maxTargets = IrcUtils.ParseTargMax(targmax, "JOIN");
+        foreach (var batch in IrcUtils.BatchChannels(channels, maxPayloadLength: 505, maxTargets))
         {
             var joined = string.Join(',', batch);
             await SendRawAsync(new IrcMessage("JOIN", [joined]), ct);

@@ -94,4 +94,63 @@ public class IrcBotBulkJoinTests
         Assert.Equal([longName], batches[1]);
         Assert.Equal(["#other"], batches[2]);
     }
+
+    [Fact]
+    public void BatchChannels_MaxTargets_SplitsByCount()
+    {
+        var channels = new[] { "#a", "#b", "#c", "#d", "#e" };
+
+        var batches = IrcUtils.BatchChannels(channels, 505, maxTargets: 2).ToList();
+
+        Assert.Equal(3, batches.Count);
+        Assert.Equal(["#a", "#b"], batches[0]);
+        Assert.Equal(["#c", "#d"], batches[1]);
+        Assert.Equal(["#e"], batches[2]);
+    }
+
+    [Fact]
+    public void BatchChannels_MaxTargets_PayloadLimitStillApplies()
+    {
+        var channels = new[] { "#aaa", "#bbb", "#ccc", "#ddd" };
+        // Payload limit of 9 forces splits at 2 channels, even though maxTargets allows 10
+        var batches = IrcUtils.BatchChannels(channels, maxPayloadLength: 9, maxTargets: 10).ToList();
+
+        Assert.Equal(2, batches.Count);
+        Assert.Equal(["#aaa", "#bbb"], batches[0]);
+        Assert.Equal(["#ccc", "#ddd"], batches[1]);
+    }
+
+    [Fact]
+    public void BatchChannels_MaxTargetsNull_NoCountLimit()
+    {
+        var channels = Enumerable.Range(1, 20).Select(i => $"#{i}").ToList();
+
+        var batches = IrcUtils.BatchChannels(channels, 505, maxTargets: null).ToList();
+
+        Assert.Single(batches);
+        Assert.Equal(channels, batches[0]);
+    }
+
+    [Fact]
+    public void BatchChannels_MaxTargetsZero_NoCountLimit()
+    {
+        var channels = Enumerable.Range(1, 20).Select(i => $"#{i}").ToList();
+
+        var batches = IrcUtils.BatchChannels(channels, 505, maxTargets: 0).ToList();
+
+        Assert.Single(batches);
+        Assert.Equal(channels, batches[0]);
+    }
+
+    [Theory]
+    [InlineData("JOIN:4,PRIVMSG:1,KICK:4", "JOIN", 4)]
+    [InlineData("PRIVMSG:1,JOIN:8,KICK:4", "JOIN", 8)]
+    [InlineData("JOIN:,PRIVMSG:1", "JOIN", null)]
+    [InlineData("PRIVMSG:1,KICK:4", "JOIN", null)]
+    [InlineData("", "JOIN", null)]
+    [InlineData(null, "JOIN", null)]
+    public void ParseTargMax_ExtractsCorrectLimit(string? targmax, string command, int? expected)
+    {
+        Assert.Equal(expected, IrcUtils.ParseTargMax(targmax, command));
+    }
 }

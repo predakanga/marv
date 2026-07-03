@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PluginTestHarness` now registers a default `BotIdentity` so plugins that
   depend on it can be tested without manual service registration.
 
+### Fixed
+
+- `JoinMultipleAsync` now respects the TARGMAX ISUPPORT token, preventing
+  silent failures when joining more channels than the server allows per command.
+
 ## [0.9.0] - 2026-06-28
 
 ### Added
