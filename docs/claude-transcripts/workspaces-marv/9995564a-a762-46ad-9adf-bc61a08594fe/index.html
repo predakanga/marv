@@ -165,7 +165,7 @@ details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom
 <a href="page-001.html">Next &rarr;</a>
 </div>
 
-        <p style="color: var(--text-muted); margin-bottom: 24px;">11 prompts · 106 messages · 37 tool calls · 1 commits · 3 pages</p>
+        <p style="color: var(--text-muted); margin-bottom: 24px;">12 prompts · 129 messages · 45 tool calls · 2 commits · 3 pages</p>
         
 <div class="index-item"><a href="page-001.html#msg-2026-07-03T06-24-02-428Z"><div class="index-item-header"><span class="index-item-number">#1</span><time datetime="2026-07-03T06:24:02.428Z" data-timestamp="2026-07-03T06:24:02.428Z">2026-07-03T06:24:02.428Z</time></div><div class="index-item-content"><p><command-message>triage-issues</command-message>
 <command-name>/triage-issues</command-name></p></div></a></div>
@@ -956,7 +956,15 @@ stop. If stopping, follow the mandatory instructions from CLAUDE.md
 5. <strong>Skip</strong> — move on</p>
 <p>The fix is straightforward — add a <code>maxTargets</code> parameter to <code>BatchChannels</code> and read <code>TARGMAX</code>/<code>MAXTARGETS</code> in <code>JoinMultipleAsync</code>. I'd recommend <strong>Implement</strong> directly. What would you like to do?</p></div></div><button class="expand-btn">Show more</button></div></div>
 </div></div>
-<div class="index-item"><a href="page-003.html#msg-2026-07-03T06-30-23-348Z"><div class="index-item-header"><span class="index-item-number">#11</span><time datetime="2026-07-03T06:30:23.348Z" data-timestamp="2026-07-03T06:30:23.348Z">2026-07-03T06:30:23.348Z</time></div><div class="index-item-content"><p>3</p></div></a><div class="index-item-stats"><span>4 edit · 3 bash</span>
+<div class="index-item"><a href="page-003.html#msg-2026-07-03T06-30-23-348Z"><div class="index-item-header"><span class="index-item-number">#11</span><time datetime="2026-07-03T06:30:23.348Z" data-timestamp="2026-07-03T06:30:23.348Z">2026-07-03T06:30:23.348Z</time></div><div class="index-item-content"><p>3</p></div></a><div class="index-item-stats"><span>4 edit · 4 bash</span>
+<div class="index-item-long-text"><div class="truncatable"><div class="truncatable-content"><div class="index-item-long-text-content"><p>Done. Issue #14 is implemented and committed (<code>695c5a3</code>). The commit includes <code>Closes #14</code>.</p>
+<p><strong>Changes made:</strong>
+- <code>src/Marv.Core/IrcUtils.cs</code> — added optional <code>maxTargets</code> parameter to <code>BatchChannels</code> and a new <code>ParseTargMax</code> helper to extract per-command limits from the TARGMAX ISUPPORT value
+- <code>src/Marv.Core/Irc/IrcBot.cs</code> — <code>JoinMultipleAsync</code> now reads TARGMAX and passes the JOIN limit to <code>BatchChannels</code>
+- <code>tests/Marv.Core.Tests/Irc/IrcBotBulkJoinTests.cs</code> — 5 new tests for target-count batching and 6 theory cases for <code>ParseTargMax</code></p>
+<p>That was the last open issue — both #13 and #14 are now resolved. Would you like anything else?</p></div></div><button class="expand-btn">Show more</button></div></div>
+</div></div><div class="index-commit"><div class="index-commit-header"><span class="index-commit-hash">695c5a3</span><time datetime="2026-07-03T06:32:58.023Z" data-timestamp="2026-07-03T06:32:58.023Z">2026-07-03T06:32:58.023Z</time></div><div class="index-commit-msg">Respect TARGMAX ISUPPORT token in bulk channel joins</div></div>
+<div class="index-item"><a href="page-003.html#msg-2026-07-03T06-33-34-874Z"><div class="index-item-header"><span class="index-item-number">#12</span><time datetime="2026-07-03T06:33:34.874Z" data-timestamp="2026-07-03T06:33:34.874Z">2026-07-03T06:33:34.874Z</time></div><div class="index-item-content"><p>The TARGMAX code is a good start, but the issue specifically mentions MAXTARGETS. We need to handle both.</p></div></a><div class="index-item-stats"><span>3 edit · 2 read · 2 bash</span>
 </div></div>
         
 

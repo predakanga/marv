@@ -153,4 +153,15 @@ public class IrcBotBulkJoinTests
     {
         Assert.Equal(expected, IrcUtils.ParseTargMax(targmax, command));
     }
+
+    [Theory]
+    [InlineData("4", 4)]
+    [InlineData("1", 1)]
+    [InlineData("", null)]
+    [InlineData(null, null)]
+    [InlineData("abc", null)]
+    public void ParseMaxTargets_ExtractsCorrectLimit(string? maxtargets, int? expected)
+    {
+        Assert.Equal(expected, IrcUtils.ParseMaxTargets(maxtargets));
+    }
 }

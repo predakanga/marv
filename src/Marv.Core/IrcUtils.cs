@@ -80,4 +80,17 @@ public static class IrcUtils
 
         return null;
     }
+
+    /// <summary>
+    /// Parses the MAXTARGETS ISUPPORT value — a single integer that applies
+    /// to all commands.
+    /// </summary>
+    /// <param name="maxtargets">The raw MAXTARGETS value from ISUPPORT.</param>
+    /// <returns>The target limit, or null if the value is absent or not a valid integer.</returns>
+    public static int? ParseMaxTargets(string? maxtargets)
+    {
+        if (maxtargets is not null && int.TryParse(maxtargets, out var limit))
+            return limit;
+        return null;
+    }
 }
