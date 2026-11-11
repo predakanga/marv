@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.1] - 2026-11-11
+
 ### Fixed
 
 - Container image CycloneDX SBOMs now include Marv's NuGet dependencies.
@@ -381,6 +383,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI/CD with GitHub Actions (build, test, lint, static analysis, security, integration tests, Docker)
 - Release workflow producing cross-platform binaries and multi-arch Docker images
 
+[0.10.1]: https://github.com/predakanga/marv/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/predakanga/marv/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/predakanga/marv/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/predakanga/marv/compare/v0.8.0...v0.9.0
