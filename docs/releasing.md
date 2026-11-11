@@ -89,17 +89,25 @@ Every release publishes CycloneDX SBOMs (see
 
 | Artifact | CycloneDX SBOM | Also |
 |---|---|---|
-| NuGet packages | Release asset `TDW.Marv.*.cdx.json`; inside the `.nupkg` at `sbom/bom.cdx.json`; GitHub attestation | SPDX inside the `.nupkg` at `_manifest/spdx_2.2/manifest.spdx.json` |
+| NuGet packages | Release asset `TDW.Marv.*.cdx.json`; inside the `.nupkg` at `sbom/bom.cdx.json`; GitHub attestation on the `.nupkg` (also a release asset) | SPDX inside the `.nupkg` at `_manifest/spdx_2.2/manifest.spdx.json` |
 | Binaries | Release asset `marv-<rid>.cdx.json`; GitHub attestation | |
 | Container image | Release assets `marv-image-linux-<arch>.cdx.json`; signed attestation in GHCR on the index and each platform digest | BuildKit SPDX SBOM and SLSA provenance |
 
 Spot-check them:
 
 ```bash
-# NuGet package: attestation matches the published bytes
-nuget_url=https://www.nuget.org/api/v2/package/TDW.Marv.Core/X.Y.Z
-curl -sL -o TDW.Marv.Core.X.Y.Z.nupkg "$nuget_url"
+# NuGet package: the copy attached to the GitHub Release
+gh release download vX.Y.Z -R predakanga/marv -p 'TDW.Marv.Core.*.nupkg'
 gh attestation verify TDW.Marv.Core.X.Y.Z.nupkg -R predakanga/marv \
+  --predicate-type https://cyclonedx.org/bom
+
+# NuGet package: the copy on nuget.org. nuget.org adds a repository
+# signature (.signature.p7s) to every package, which changes its digest;
+# removing that entry restores the exact bytes that were attested.
+nuget_url=https://www.nuget.org/api/v2/package/TDW.Marv.Core/X.Y.Z
+curl -sL -o nuget.nupkg "$nuget_url"
+zip -q -d nuget.nupkg .signature.p7s
+gh attestation verify nuget.nupkg -R predakanga/marv \
   --predicate-type https://cyclonedx.org/bom
 
 # Container image: CycloneDX attestation on the multi-arch index

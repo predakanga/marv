@@ -176,11 +176,16 @@ jobs:
           subject-path: packages/TDW.Marv.Testing.${{ needs.version.outputs.version }}.nupkg
           sbom-path: sbom/TDW.Marv.Testing.cdx.json
 
-      - name: Upload SBOMs
+      # The packages go on the GitHub Release too: nuget.org adds a
+      # repository signature (.signature.p7s) to every package, so its copy
+      # no longer matches the attested digest. The release copy does.
+      - name: Upload packages and SBOMs
         uses: actions/upload-artifact@v7
         with:
-          name: marv-sbom-nuget
-          path: sbom/*.cdx.json
+          name: marv-nuget
+          path: |
+            packages/*.nupkg
+            sbom/*.cdx.json
 
       - name: NuGet login (OIDC)
         uses: NuGet/login@v1
@@ -354,7 +359,8 @@ jobs:
         with:
           body_path: release-notes.md
           # marv-* covers the binaries and the binary/image SBOMs; the NuGet
-          # SBOMs are named after their packages.
+          # packages and SBOMs are named after their package IDs.
           files: |
             artifacts/**/marv-*
-            artifacts/marv-sbom-nuget/*.cdx.json
+            artifacts/marv-nuget/**/*.nupkg
+            artifacts/marv-nuget/**/*.cdx.json

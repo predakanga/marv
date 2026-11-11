@@ -123,6 +123,15 @@ breakage then shows up on PRs instead of at release time.
 - **No file listings in the image SBOM.** `SYFT_FILE_METADATA_SELECTION=none`
   cuts the SBOM from ~1.4 MB to ~0.4 MB. Dependency tracking only needs
   packages, and BuildKit's SPDX SBOM still lists files.
+- **NuGet attestations cover the pre-signing package.** nuget.org adds a
+  repository signature (`.signature.p7s`) to every package it accepts,
+  changing the digest, so the attestation never matches the nuget.org
+  download directly. The attested `.nupkg` files are attached to the GitHub
+  Release. Deleting `.signature.p7s` from the nuget.org copy restores the
+  attested bytes exactly (verified against 0.10.0), so that copy can be
+  checked too; `docs/releasing.md` has both recipes. Attesting after
+  nuget.org signs the package was rejected: it would mean waiting on
+  nuget.org validation, which can take minutes to hours.
 - **CycloneDX tool as a local tool.** Pinned in `dotnet-tools.json`, so CI
   and developers use the same version and `dotnet tool restore` installs it.
   It needs no global install.

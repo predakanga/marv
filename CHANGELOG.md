@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- GitHub Releases now include the `.nupkg` files exactly as attested. The
+  nuget.org copies differ only by nuget.org's repository signature;
+  `docs/releasing.md` shows how to verify either copy.
+
 ## [0.10.1] - 2026-11-11
 
 ### Fixed
