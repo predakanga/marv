@@ -21,6 +21,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sbom-operator and cosign.
 - `make sbom` generates CycloneDX SBOMs locally into `build/sbom/`.
 
+### Security
+
+- Updated the host's `Microsoft.Extensions.*` packages to 10.0.15, pulling
+  in patched `System.Security.Cryptography.Xml` and
+  `System.Security.Cryptography.Pkcs` (multiple high-severity advisories).
+- Container image now uses the .NET 10.0.15 runtime (was 10.0.8, affected by
+  GHSA-cvvh-rhrc-wg4q).
+- Updated SourceLink to 10.x, replacing the vulnerable
+  `Microsoft.Build.Tasks.Git` 8.0.0 (build-time only).
+
 ## [0.9.1] - 2026-07-03
 
 ### Added

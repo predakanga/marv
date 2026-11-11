@@ -10,7 +10,7 @@
 
   <ItemGroup Condition="'$(IsPackable)' == 'true'">
     <PackageReference Include="DotNet.ReproducibleBuilds" Version="1.*" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.*" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.*" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Sbom.Targets" Version="4.*" PrivateAssets="All" />
   </ItemGroup>
 

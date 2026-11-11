@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0.300 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0.404 AS build
 ARG VERSION=0.3.0
 WORKDIR /src
 
@@ -13,7 +13,7 @@ COPY src/Marv.Core/ src/Marv.Core/
 RUN --mount=type=cache,target=/root/.nuget/packages \
     dotnet publish src/Marv/Marv.csproj -c Release -o /app -p:Version="$VERSION" --no-restore
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0.8 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.15 AS runtime
 WORKDIR /app
 
 COPY --from=build /app .

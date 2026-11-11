@@ -117,7 +117,16 @@ jobs:
         run: dotnet restore
 
       - name: Check for vulnerable packages
-        run: dotnet list package --vulnerable --include-transitive 2>&1 | tee /dev/stderr | grep -q "no vulnerable packages" || (echo "::error::Vulnerable packages detected" && exit 1)
+        # Fail if *any* project reports vulnerable packages. (Matching the
+        # "has no vulnerable packages" line instead would pass as soon as
+        # one project was clean.)
+        run: |
+          set -o pipefail
+          dotnet list package --vulnerable --include-transitive 2>&1 | tee vulnerable.txt
+          if grep -q "has the following vulnerable packages" vulnerable.txt; then
+            echo "::error::Vulnerable packages detected"
+            exit 1
+          fi
 
   integration-test:
     runs-on: ubuntu-latest
