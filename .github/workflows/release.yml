@@ -238,9 +238,14 @@ jobs:
       # CycloneDX SBOMs, attached to the image as signed in-toto attestations
       # (OCI referrers). Tools like sbom-operator (fetch-oci-attestations)
       # and cosign read these; BuildKit's own SBOM above is SPDX-only.
+      # Pinned: Syft only catalogues NuGet packages inside .NET single-file
+      # bundles (how Marv is published) in recent versions. The action's
+      # default (1.42.3 as of sbom-action v0.24.3) misses them entirely.
       - name: Install Syft
         id: syft
         uses: anchore/sbom-action/download-syft@v0
+        with:
+          syft-version: v1.55.0
 
       - name: Generate image SBOMs
         id: sbom
@@ -264,6 +269,13 @@ jobs:
                 "$SYFT" scan "registry:$IMAGE@$DIGEST" \
                   --source-name "$IMAGE" --source-version "$VERSION" \
                   -o "cyclonedx-json@1.6=sbom/marv-image-$PLATFORM.cdx.json"
+                # Guard against Syft missing the single-file bundle: the
+                # app's own NuGet dependencies must be in the SBOM.
+                if ! jq -e '[.components[].name] | index("Marv.Core") and index("Sentry")' \
+                    "sbom/marv-image-$PLATFORM.cdx.json" >/dev/null; then
+                  echo "::error::Image SBOM for $PLATFORM is missing Marv's NuGet dependencies"
+                  exit 1
+                fi
                 echo "$PLATFORM=$DIGEST" >> "$GITHUB_OUTPUT"
               done
 

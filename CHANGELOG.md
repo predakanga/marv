@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Container image CycloneDX SBOMs now include Marv's NuGet dependencies.
+  The v0.10.0 image SBOMs only listed OS packages and the .NET runtime,
+  because the Syft version used in the release workflow could not read
+  .NET single-file bundles.
+
 ## [0.10.0] - 2026-11-11
 
 ### Added
