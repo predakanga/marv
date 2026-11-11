@@ -49,6 +49,7 @@ Specs are numbered in recommended implementation order.
 | 34 | [Always Use Colon on Trailing Parameters](034-trailing-colon-consistency.md) | Core | Small | None | **Reverted** |
 | 35 | [Wildcard Plugin Loading](035-wildcard-plugin-loading.md) | Core / Host | Medium | None | **Done** |
 | 36 | [Bot Identity](036-bot-identity.md) | Core / Host | Medium | None | **Done** |
+| 37 | [Software Bills of Materials (SBOMs)](037-sboms.md) | CI/CD | Medium | #29, #33 | **Done** |
 
 Specs 1-5, 9-10 are code changes. Specs 6-8 are documentation/DX changes.
 Spec 11 is a robustness/DX improvement to the plugin loading pipeline.
@@ -60,3 +61,4 @@ Specs 29-31 are GitHub issue-driven CI/CD changes (NuGet packaging, Actions audi
 Spec 32 is a GitHub issue-driven configuration change (auto-reconnect opt-out).
 Spec 33 is a GitHub issue-driven CI/CD change (NuGet package improvements).
 Spec 34 is a GitHub issue-driven protocol change (trailing parameter colon consistency).
+Spec 37 is a CI/CD change (SBOMs for NuGet packages, binaries and the container image).

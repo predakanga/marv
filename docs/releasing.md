@@ -59,7 +59,8 @@ The `Release` workflow triggers automatically on version tags. It will:
 1. Run the full test suite
 2. Build platform-specific binaries (linux-x64, linux-arm64, osx-x64, osx-arm64, win-x64)
 3. Build and push a multi-arch Docker image to `ghcr.io`
-4. Create a GitHub Release with auto-generated release notes and attached binaries
+4. Generate SBOMs for the packages, binaries and image, and sign them as attestations
+5. Create a GitHub Release with auto-generated release notes, attached binaries and SBOMs
 
 Monitor the workflow at **Actions > Release** in the GitHub UI.
 
@@ -80,6 +81,38 @@ docker run --rm ghcr.io/predakanga/marv:X.Y.Z --help
 
 
 Replace `X.Y.Z` with the release version.
+
+### 8. Verify the SBOMs
+
+Every release publishes CycloneDX SBOMs (see
+[CS-037](change_specs/037-sboms.md)):
+
+| Artifact | CycloneDX SBOM | Also |
+|---|---|---|
+| NuGet packages | Release asset `TDW.Marv.*.cdx.json`; inside the `.nupkg` at `sbom/bom.cdx.json`; GitHub attestation | SPDX inside the `.nupkg` at `_manifest/spdx_2.2/manifest.spdx.json` |
+| Binaries | Release asset `marv-<rid>.cdx.json`; GitHub attestation | |
+| Container image | Release assets `marv-image-linux-<arch>.cdx.json`; signed attestation in GHCR on the index and each platform digest | BuildKit SPDX SBOM and SLSA provenance |
+
+Spot-check them:
+
+```bash
+# NuGet package: attestation matches the published bytes
+nuget_url=https://www.nuget.org/api/v2/package/TDW.Marv.Core/X.Y.Z
+curl -sL -o TDW.Marv.Core.X.Y.Z.nupkg "$nuget_url"
+gh attestation verify TDW.Marv.Core.X.Y.Z.nupkg -R predakanga/marv \
+  --predicate-type https://cyclonedx.org/bom
+
+# Container image: CycloneDX attestation on the multi-arch index
+gh attestation verify oci://ghcr.io/predakanga/marv:X.Y.Z -R predakanga/marv \
+  --predicate-type https://cyclonedx.org/bom
+
+# Container image: BuildKit's SPDX SBOM
+docker buildx imagetools inspect ghcr.io/predakanga/marv:X.Y.Z \
+  --format '{{ json .SBOM }}' | head -c 500
+```
+
+To generate the same CycloneDX SBOMs locally (into `build/sbom/`), run
+`make sbom`.
 
 ## Rolling back a release
 

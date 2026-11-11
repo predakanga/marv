@@ -1,7 +1,8 @@
 OUTPUT_DIR := build/output
+SBOM_DIR := build/sbom
 PLUGIN_DIR := $(OUTPUT_DIR)/plugins
 CONFIGURATION := Release
-.PHONY: all build test test-integration publish clean
+.PHONY: all build test test-integration publish sbom clean
 
 all: build test
 
@@ -24,6 +25,13 @@ publish: build
 	@echo ""
 	@echo "Build complete. Output in $(OUTPUT_DIR)/"
 	@echo "Run with: $(OUTPUT_DIR)/Marv"
+
+# CycloneDX SBOMs for the host app and the NuGet packages. The release
+# workflow generates the same files; see docs/releasing.md.
+sbom:
+	./scripts/generate-sbom.sh src/Marv/Marv.csproj $(SBOM_DIR)/Marv.cdx.json
+	./scripts/generate-sbom.sh src/Marv.Core/Marv.Core.csproj $(SBOM_DIR)/TDW.Marv.Core.cdx.json
+	./scripts/generate-sbom.sh src/Marv.Testing/Marv.Testing.csproj $(SBOM_DIR)/TDW.Marv.Testing.cdx.json
 
 clean:
 	dotnet clean -c $(CONFIGURATION)

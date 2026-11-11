@@ -37,6 +37,16 @@ jobs:
       - name: Test
         run: dotnet test -c Release --no-build --filter "Category!=Integration"
 
+      # Catch SBOM tooling breakage before it fails a release.
+      - name: Check SBOM generation
+        run: |
+          make sbom
+          dotnet pack src/Marv.Core/Marv.Core.csproj -c Release --no-build \
+            -p:SbomDirectory="$PWD/build/sbom" -o build/packages
+          CONTENTS=$(unzip -l build/packages/TDW.Marv.Core.*.nupkg)
+          grep -q 'sbom/bom.cdx.json' <<< "$CONTENTS"
+          grep -q '_manifest/spdx_2.2/manifest.spdx.json' <<< "$CONTENTS"
+
   lint:
     runs-on: ubuntu-latest
     steps:

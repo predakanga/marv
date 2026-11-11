@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Releases now ship CycloneDX SBOMs for the NuGet packages, the standalone
+  binaries and the container image, attached to the GitHub Release and
+  signed as GitHub artifact attestations.
+- NuGet packages embed their SBOMs: SPDX at
+  `_manifest/spdx_2.2/manifest.spdx.json` and CycloneDX at
+  `sbom/bom.cdx.json`.
+- The container image carries BuildKit SPDX SBOM and provenance
+  attestations, plus signed CycloneDX SBOM attestations (OCI referrers) on
+  the multi-arch index and each platform image, readable by tools such as
+  sbom-operator and cosign.
+- `make sbom` generates CycloneDX SBOMs locally into `build/sbom/`.
+
 ## [0.9.1] - 2026-07-03
 
 ### Added

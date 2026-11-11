@@ -59,6 +59,10 @@ jobs:
   publish-binaries:
     runs-on: ubuntu-latest
     needs: [wait-for-ci, version]
+    permissions:
+      contents: read
+      id-token: write      # Sigstore signing for the SBOM attestation
+      attestations: write  # Store the attestation on GitHub
     strategy:
       matrix:
         include:
@@ -90,14 +94,31 @@ jobs:
             nuget-${{ runner.os }}-
 
       - name: Publish
+        id: publish
         run: |
           VERSION=${{ needs.version.outputs.version }}
           dotnet publish src/Marv/Marv.csproj -c Release -r ${{ matrix.rid }} -o publish/ -p:Version="$VERSION"
           if [ -f publish/Marv.exe ]; then
-            mv publish/Marv.exe publish/${{ matrix.artifact }}.exe
+            BINARY=publish/${{ matrix.artifact }}.exe
+            mv publish/Marv.exe "$BINARY"
           else
-            mv publish/Marv publish/${{ matrix.artifact }}
+            BINARY=publish/${{ matrix.artifact }}
+            mv publish/Marv "$BINARY"
           fi
+          echo "binary=$BINARY" >> "$GITHUB_OUTPUT"
+
+      - name: Generate SBOM
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          ./scripts/generate-sbom.sh src/Marv/Marv.csproj \
+            publish/${{ matrix.artifact }}.cdx.json ${{ matrix.rid }}
+
+      - name: Attest SBOM
+        uses: actions/attest@v4
+        with:
+          subject-path: ${{ steps.publish.outputs.binary }}
+          sbom-path: publish/${{ matrix.artifact }}.cdx.json
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
@@ -109,7 +130,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [wait-for-ci, version]
     permissions:
-      id-token: write
+      contents: read
+      id-token: write      # NuGet OIDC login and Sigstore signing
+      attestations: write  # Store the SBOM attestations on GitHub
     steps:
       - uses: actions/checkout@v6
 
@@ -126,11 +149,38 @@ jobs:
           restore-keys: |
             nuget-${{ runner.os }}-
 
+      # CycloneDX SBOMs, embedded in each package by Directory.Build.targets
+      # (SbomDirectory below). The SPDX SBOM is generated during pack.
+      - name: Generate SBOMs
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          ./scripts/generate-sbom.sh src/Marv.Core/Marv.Core.csproj sbom/TDW.Marv.Core.cdx.json
+          ./scripts/generate-sbom.sh src/Marv.Testing/Marv.Testing.csproj sbom/TDW.Marv.Testing.cdx.json
+
       - name: Pack
         run: |
           VERSION=${{ needs.version.outputs.version }}
-          dotnet pack src/Marv.Core/Marv.Core.csproj -c Release -p:Version="$VERSION" -o packages/
-          dotnet pack src/Marv.Testing/Marv.Testing.csproj -c Release -p:Version="$VERSION" -o packages/
+          dotnet pack src/Marv.Core/Marv.Core.csproj -c Release -p:Version="$VERSION" -p:SbomDirectory="$PWD/sbom" -o packages/
+          dotnet pack src/Marv.Testing/Marv.Testing.csproj -c Release -p:Version="$VERSION" -p:SbomDirectory="$PWD/sbom" -o packages/
+
+      - name: Attest TDW.Marv.Core SBOM
+        uses: actions/attest@v4
+        with:
+          subject-path: packages/TDW.Marv.Core.${{ needs.version.outputs.version }}.nupkg
+          sbom-path: sbom/TDW.Marv.Core.cdx.json
+
+      - name: Attest TDW.Marv.Testing SBOM
+        uses: actions/attest@v4
+        with:
+          subject-path: packages/TDW.Marv.Testing.${{ needs.version.outputs.version }}.nupkg
+          sbom-path: sbom/TDW.Marv.Testing.cdx.json
+
+      - name: Upload SBOMs
+        uses: actions/upload-artifact@v7
+        with:
+          name: marv-sbom-nuget
+          path: sbom/*.cdx.json
 
       - name: NuGet login (OIDC)
         uses: NuGet/login@v1
@@ -147,6 +197,11 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     needs: [wait-for-ci, version]
+    permissions:
+      contents: read
+      packages: write      # Push the image and its attestations to GHCR
+      id-token: write      # Sigstore signing for the SBOM attestations
+      attestations: write  # Store the attestations on GitHub
     steps:
       - uses: actions/checkout@v6
 
@@ -160,12 +215,18 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
+      # sbom/provenance: BuildKit attaches an SPDX SBOM and SLSA provenance
+      # to each platform image (visible via `docker buildx imagetools
+      # inspect`, Docker Scout, etc.).
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@v7
         with:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
+          sbom: true
+          provenance: mode=max
           build-args: |
             VERSION=${{ needs.version.outputs.version }}
           tags: |
@@ -173,6 +234,76 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # CycloneDX SBOMs, attached to the image as signed in-toto attestations
+      # (OCI referrers). Tools like sbom-operator (fetch-oci-attestations)
+      # and cosign read these; BuildKit's own SBOM above is SPDX-only.
+      - name: Install Syft
+        id: syft
+        uses: anchore/sbom-action/download-syft@v0
+
+      - name: Generate image SBOMs
+        id: sbom
+        env:
+          SYFT: ${{ steps.syft.outputs.cmd }}
+          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          INDEX_DIGEST: ${{ steps.build.outputs.digest }}
+          VERSION: ${{ needs.version.outputs.version }}
+          # Per-file listings add ~1 MB of noise; packages are what matter.
+          SYFT_FILE_METADATA_SELECTION: none
+        run: |
+          set -euo pipefail
+          mkdir -p sbom
+          # Platform manifests in the index, skipping BuildKit's attestation
+          # manifests (platform unknown/unknown).
+          docker buildx imagetools inspect "$IMAGE@$INDEX_DIGEST" --raw \
+            | jq -r '.manifests[] | select(.platform.os != "unknown")
+                     | "\(.digest) \(.platform.os)-\(.platform.architecture)"' \
+            | while read -r DIGEST PLATFORM; do
+                # CycloneDX 1.6 for compatibility with Dependency-Track.
+                "$SYFT" scan "registry:$IMAGE@$DIGEST" \
+                  --source-name "$IMAGE" --source-version "$VERSION" \
+                  -o "cyclonedx-json@1.6=sbom/marv-image-$PLATFORM.cdx.json"
+                echo "$PLATFORM=$DIGEST" >> "$GITHUB_OUTPUT"
+              done
+
+      # Kubernetes (containerd) reports the multi-arch index digest as a
+      # pod's imageID, so the index needs an SBOM too. Both platforms are
+      # built from the same base image tag and NuGet restore, so they contain the
+      # same package versions; the linux/amd64 SBOM stands in for the index.
+      - name: Attest image SBOM (index)
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          sbom-path: sbom/marv-image-linux-amd64.cdx.json
+          push-to-registry: true
+          create-storage-record: false
+
+      # Keep these in sync with `platforms` above.
+      - name: Attest image SBOM (linux/amd64)
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.sbom.outputs.linux-amd64 }}
+          sbom-path: sbom/marv-image-linux-amd64.cdx.json
+          push-to-registry: true
+          create-storage-record: false
+
+      - name: Attest image SBOM (linux/arm64)
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.sbom.outputs.linux-arm64 }}
+          sbom-path: sbom/marv-image-linux-arm64.cdx.json
+          push-to-registry: true
+          create-storage-record: false
+
+      - name: Upload SBOMs
+        uses: actions/upload-artifact@v7
+        with:
+          name: marv-sbom-image
+          path: sbom/*.cdx.json
 
   github-release:
     runs-on: ubuntu-latest
@@ -210,4 +341,8 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           body_path: release-notes.md
-          files: artifacts/**/marv-*
+          # marv-* covers the binaries and the binary/image SBOMs; the NuGet
+          # SBOMs are named after their packages.
+          files: |
+            artifacts/**/marv-*
+            artifacts/marv-sbom-nuget/*.cdx.json
